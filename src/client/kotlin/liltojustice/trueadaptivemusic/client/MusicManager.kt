@@ -32,8 +32,12 @@ class MusicManager(
         predicateTester = MusicPredicateTree.fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()))
     }
 
+    private fun getNextMusic(): String {
+        return predicateTester?.getMusicToPlay(client)?.ifEmpty { listOf("") }?.random() ?: ""
+    }
+
     fun tick() {
-        val musicPath: String = predicateTester?.getMusicToPlay(client) ?: ""
+        val musicPath: String = getNextMusic()
         if (!shouldPlay(musicPath))
         {
             return
