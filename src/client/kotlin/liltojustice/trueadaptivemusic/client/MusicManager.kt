@@ -6,6 +6,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.registry.Registries
+import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
@@ -20,6 +21,15 @@ class MusicManager(
     private var predicateTester: MusicPredicateTree? = null
     private var soundInstance: SoundInstance? = null
     private var currentMusic: String = ""
+    private var toStop: SoundInstance? = null
+
+    init {
+        client.soundManager.registerListener { instance, _ ->
+            if (instance.category == SoundCategory.MUSIC && instance != soundInstance) {
+                toStop = instance
+            }
+        }
+    }
 
     fun loadSoundPack(packPath: Path) {
         val predicateFile = packPath.toFile().listFiles()?.find { file -> file.name == Constants.RULES_FILENAME }
@@ -38,6 +48,10 @@ class MusicManager(
     }
 
     fun tick() {
+        if (toStop != null) {
+            client.soundManager.stop(toStop)
+        }
+
         val musicPath: String = getNextMusic()
         if (!shouldPlay(musicPath))
         {
@@ -76,7 +90,7 @@ class MusicManager(
         catch (_: Exception) {}
 
         soundInstance = if (asSoundEvent != null) {
-            PositionedSoundInstance.master(asSoundEvent, 1F)
+            PositionedSoundInstance.music(asSoundEvent)
         } else if (asPath != null && asPath.exists()) {
             AdaptiveMusicSoundInstance(asPath)
         } else {
