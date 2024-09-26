@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
+import liltojustice.trueadaptivemusic.Constants
 import net.minecraft.client.sound.AbstractSoundInstance
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.OggAudioStream
@@ -11,8 +12,12 @@ import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
-class AdaptiveMusicSoundInstance(private val musicPath: Path): AbstractSoundInstance(Identifier("trueadaptivemusic", "trueadaptivemusicstream"), SoundCategory.MASTER, SoundInstance.createRandom()) {
-    override fun getAudioStream (loader: SoundLoader, id: Identifier, repeatInstantly: Boolean): CompletableFuture<AudioStream> {
+class AdaptiveMusicSoundInstance(private val musicPath: Path): AbstractSoundInstance(
+    Constants.TRUEADAPTIVEMUSIC_ID,
+    SoundCategory.MUSIC,
+    SoundInstance.createRandom()) {
+    override fun getAudioStream (loader: SoundLoader, id: Identifier, repeatInstantly: Boolean):
+            CompletableFuture<AudioStream> {
         return CompletableFuture.completedFuture(OggAudioStream(File(musicPath.toUri()).inputStream()))
     }
 }
