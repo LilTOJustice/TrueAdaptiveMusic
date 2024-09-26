@@ -38,14 +38,14 @@ class MusicPredicateTree private constructor(json: JsonObject) {
                     else listOf()
                 )
             }
+
         }
     }
 
     private val root = Node.fromJson(json)
 
     fun getMusicToPlay(client: MinecraftClient): String {
-        val str: String =  root.getBottomSatisfied(client).first
-        return str
+        return root.getBottomSatisfied(client).first
     }
 
     companion object {
