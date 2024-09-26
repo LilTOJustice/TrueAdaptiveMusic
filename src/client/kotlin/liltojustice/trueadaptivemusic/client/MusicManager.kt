@@ -12,6 +12,7 @@ import net.minecraft.util.JsonHelper
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 
 class MusicManager(
     private val client: MinecraftClient) {
@@ -33,7 +34,7 @@ class MusicManager(
     }
 
     private fun getNextMusic(): String {
-        return predicateTester?.getMusicToPlay(client)?.ifEmpty { listOf("") }?.random() ?: ""
+        return predicateTester?.getMusicToPlay(client) ?: ""
     }
 
     fun tick() {
@@ -44,7 +45,6 @@ class MusicManager(
         }
 
         currentMusic = musicPath
-
         stop()
 
         if (musicPath == "")
@@ -56,6 +56,15 @@ class MusicManager(
         try
         {
             asPath = Path("${Constants.MUSIC_PACK_DIR}/$currentSoundPack/$musicPath")
+            if (asPath.isDirectory())
+            {
+                val music = asPath.toFile().listFiles()
+                if (music!!.isEmpty()) {
+                    throw Exception("No music found in directory $asPath.")
+                }
+
+                asPath = music.random().toPath()
+            }
         }
         catch (_: Exception) {}
 
