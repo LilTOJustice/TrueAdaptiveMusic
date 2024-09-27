@@ -1,0 +1,3 @@
+accessWidener v2 named
+accessible field net/minecraft/client/sound/SoundManager soundSystem Lnet/minecraft/client/sound/SoundSystem;
+accessible field net/minecraft/client/sound/SoundSystem sources Ljava/util/Map;
