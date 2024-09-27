@@ -3,8 +3,11 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.option.SimpleOption
+import net.minecraft.client.sound.Channel.SourceManager
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
+import net.minecraft.client.sound.Source
 import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
@@ -19,14 +22,18 @@ class MusicManager(
     private val client: MinecraftClient) {
     private var currentSoundPack: String = ""
     private var predicateTester: MusicPredicateTree? = null
-    private var soundInstance: SoundInstance? = null
     private var currentMusic: String = ""
+    private var soundInstance: SoundInstance? = null
+    private var oldSoundInstance: SoundInstance? = null
     private var toStop: SoundInstance? = null
+    private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
+    private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
 
     init {
         client.soundManager.registerListener { instance, _ ->
-            if (instance.category == SoundCategory.MUSIC && instance != soundInstance) {
+            if (instance.category == SoundCategory.MUSIC && instance != soundInstance && instance != oldSoundInstance) {
                 toStop = instance
+                setInstanceVolume(toStop!!, 0F)
             }
         }
     }
@@ -43,14 +50,12 @@ class MusicManager(
         predicateTester = MusicPredicateTree.fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()))
     }
 
-    private fun getNextMusic(): String {
-        return predicateTester?.getMusicToPlay(client) ?: ""
-    }
-
     fun tick() {
         if (toStop != null) {
             client.soundManager.stop(toStop)
         }
+
+        processFades()
 
         val musicPath: String = getNextMusic()
         if (!shouldPlay(musicPath))
@@ -58,11 +63,30 @@ class MusicManager(
             return
         }
 
-        currentMusic = musicPath
-        stop()
+        println("starting new music from $musicPath")
 
+        currentMusic = musicPath
+        startNewMusic(musicPath)
+    }
+
+    private fun processFades() {
+        val toDelete: MutableList<Int> = mutableListOf()
+        fadeInstances.forEach { fadeInstance ->
+            val volume: Float = fadeInstance.tick()
+            setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption.value.toFloat() * volume)
+        }
+
+        fadeInstances.removeIf { fadeinstance -> fadeinstance.done() }
+    }
+
+    private fun startNewMusic(musicPath: String) {
         if (musicPath == "")
         {
+            println("Fading out: $soundInstance")
+            if (client.soundManager.isPlaying(soundInstance)) {
+                fadeInstances.add(FadeInstance(soundInstance!!, false))
+            }
+
             return
         }
 
@@ -89,15 +113,17 @@ class MusicManager(
         }
         catch (_: Exception) {}
 
-        soundInstance = if (asSoundEvent != null) {
-            PositionedSoundInstance.music(asSoundEvent)
+        if (asSoundEvent != null) {
+            playNewSoundEvent(asSoundEvent)
         } else if (asPath != null && asPath.exists()) {
-            AdaptiveMusicSoundInstance(asPath)
+            playNewSoundFile(asPath)
         } else {
             throw Exception("Path $musicPath is neither a valid SoundEvent nor sound file.")
         }
+    }
 
-        client.soundManager.play(soundInstance)
+    private fun getNextMusic(): String {
+        return predicateTester?.getMusicToPlay(client) ?: ""
     }
 
     private fun shouldPlay(musicPath: String): Boolean {
@@ -109,6 +135,42 @@ class MusicManager(
         {
             client.soundManager.stop(soundInstance)
             soundInstance = null
+        }
+    }
+
+    private fun playNewSoundEvent(soundEvent: SoundEvent) {
+        if (soundInstance == null) {
+            soundInstance = PositionedSoundInstance.music(soundEvent)
+            client.soundManager.play(soundInstance)
+            return
+        }
+
+        beginCrossfade(PositionedSoundInstance.music(soundEvent))
+    }
+
+    private fun playNewSoundFile(soundFile: Path) {
+        if (soundInstance == null) {
+            soundInstance = AdaptiveMusicSoundInstance(soundFile)
+            client.soundManager.play(soundInstance)
+            return
+        }
+
+        beginCrossfade(AdaptiveMusicSoundInstance(soundFile))
+    }
+
+    private fun beginCrossfade(newSoundInstance: SoundInstance) {
+        println("Beginning cross fade: $soundInstance -> $newSoundInstance")
+        oldSoundInstance = soundInstance
+        soundInstance = newSoundInstance
+        client.soundManager.play(soundInstance)
+
+        fadeInstances.add(FadeInstance(soundInstance!!, true))
+        fadeInstances.add(FadeInstance(oldSoundInstance!!, false))
+    }
+
+    private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
+        client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
+            source.setVolume(volume)
         }
     }
 }
