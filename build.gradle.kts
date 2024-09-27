@@ -32,6 +32,8 @@ loom {
             sourceSet("client")
         }
     }
+
+    accessWidenerPath = file("src/main/resources/trueadaptivemusic.accesswidener")
 }
 
 repositories {
