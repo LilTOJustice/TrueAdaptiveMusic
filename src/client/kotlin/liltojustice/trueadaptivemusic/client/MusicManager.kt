@@ -4,10 +4,8 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
-import net.minecraft.client.sound.Channel.SourceManager
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.client.sound.Source
 import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
@@ -70,7 +68,6 @@ class MusicManager(
     }
 
     private fun processFades() {
-        val toDelete: MutableList<Int> = mutableListOf()
         fadeInstances.forEach { fadeInstance ->
             val volume: Float = fadeInstance.tick()
             setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption.value.toFloat() * volume)
@@ -82,7 +79,6 @@ class MusicManager(
     private fun startNewMusic(musicPath: String) {
         if (musicPath == "")
         {
-            println("Fading out: $soundInstance")
             if (client.soundManager.isPlaying(soundInstance)) {
                 fadeInstances.add(FadeInstance(soundInstance!!, false))
             }
