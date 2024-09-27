@@ -61,8 +61,6 @@ class MusicManager(
             return
         }
 
-        println("starting new music from $musicPath")
-
         currentMusic = musicPath
         startNewMusic(musicPath)
     }
@@ -123,7 +121,7 @@ class MusicManager(
     }
 
     private fun shouldPlay(musicPath: String): Boolean {
-        return musicPath != currentMusic || !client.soundManager.isPlaying(soundInstance)
+        return (musicPath != currentMusic || !isPlaying(soundInstance)) && musicVolumeOption.value > 0
     }
 
     private fun stop() {
@@ -155,7 +153,6 @@ class MusicManager(
     }
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
-        println("Beginning cross fade: $soundInstance -> $newSoundInstance")
         oldSoundInstance = soundInstance
         soundInstance = newSoundInstance
         client.soundManager.play(soundInstance)
@@ -164,8 +161,13 @@ class MusicManager(
         fadeInstances.add(FadeInstance(oldSoundInstance!!, false))
     }
 
+    private fun isPlaying(soundInstance: SoundInstance?): Boolean {
+        return client.soundManager.isPlaying(soundInstance) && !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
+    }
+
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
         client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
+            source.isPlaying
             source.setVolume(volume)
         }
     }
