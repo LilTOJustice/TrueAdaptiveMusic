@@ -1,9 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate.custompredicates
 
 import com.google.gson.JsonObject
-import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
@@ -16,7 +14,7 @@ class CombatPredicate internal constructor(partialPath:String, private val mob: 
 
     override fun getIDs(): List<String> { return listOf(mob.toString()) }
 
-    companion object: MusicPredicate.MusicPredicateCompanion<CombatPredicate> {
+    companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun getTypeName(): String { return "combat" }
 
         override fun fromJson(json: JsonObject, partialPath: String): CombatPredicate {

@@ -1,9 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate.custompredicates
 
 import com.google.gson.JsonObject
-import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
@@ -14,7 +12,6 @@ import net.minecraft.util.math.BlockBox
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkSectionPos
 import net.minecraft.world.gen.structure.Structure
-import java.nio.file.Path
 import kotlin.math.max
 import kotlin.math.min
 

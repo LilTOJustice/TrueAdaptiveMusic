@@ -18,7 +18,7 @@ abstract class MusicPredicate(private val partialPath: String) {
         val companion = javaClass.kotlin.companionObjectInstance
         if (companion is MusicPredicateCompanion<*>)
         {
-            return "$partialPath/${(companion as MusicPredicateCompanion<*>).getTypeName()}{${getIDs().joinToString(",")}}"
+            return "$partialPath/${companion.getTypeName()}{${getIDs().joinToString(",")}}"
         } else throw MusicPredicateException("Failed to find valid companion object for $javaClass")
     }
 
