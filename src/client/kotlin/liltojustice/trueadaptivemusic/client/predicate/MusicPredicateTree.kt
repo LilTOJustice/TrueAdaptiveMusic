@@ -50,7 +50,11 @@ class MusicPredicateTree private constructor(json: JsonObject) {
 
     companion object {
         fun fromJson(json: JsonObject): MusicPredicateTree {
-            return MusicPredicateTree(json)
+            try {
+                return MusicPredicateTree(json)
+            } catch (e: Exception) {
+                throw RulesParserException("Failed to parse rules. Inner exception:\n${e.message}")
+            }
         }
     }
 
