@@ -46,11 +46,15 @@ class TrueAdaptiveMusicClient : ClientModInitializer {
 
                     ChangeMusicPackCallback.EVENT.invoker().loadPack(toLoad)
                 } catch (e: FileNotFoundException) {
-                    Logger.log("Couldn't find selected music pack: ${e.message}.", LogLevel.ERROR)
+                    Logger.log("Couldn't find selected music pack. Error:\n${e.message}.", LogLevel.ERROR)
                 }
             }
 
-            musicManager!!.tick()
+            try {
+                musicManager!!.tick()
+            } catch (e: MusicLoadException) {
+                Logger.log("Failed to load music. Error:\n${e.message}.", LogLevel.ERROR)
+            }
         }
     }
 }
