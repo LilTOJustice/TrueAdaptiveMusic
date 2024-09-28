@@ -1,34 +1,39 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.predicate.custompredicates.StructurePredicate
+import liltojustice.trueadaptivemusic.client.predicate.custompredicates.*
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
+import kotlin.reflect.full.companionObjectInstance
 
-interface MusicPredicate {
+abstract class MusicPredicate(private val partialPath: String) {
     interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
         fun getTypeName(): String
-        fun fromJson(json: JsonObject): TSelf
+        fun fromJson(json: JsonObject, partialPath: String): TSelf
     }
 
-    class RootPredicate: MusicPredicate {
-        override fun test(client: MinecraftClient): Boolean { return true }
-
-        companion object: MusicPredicateCompanion<RootPredicate> {
-            override fun getTypeName(): String { return "root" }
-            override fun fromJson(json: JsonObject): RootPredicate { return RootPredicate() }
-        }
+    abstract fun test(client: MinecraftClient): Boolean
+    abstract fun getIDs(): List<String>
+    fun getPredicatePath(): String {
+        val companion = javaClass.kotlin.companionObjectInstance
+        if (companion is MusicPredicateCompanion<*>)
+        {
+            return "$partialPath/${(companion as MusicPredicateCompanion<*>).getTypeName()}{${getIDs().joinToString(",")}}"
+        } else throw MusicPredicateException("Failed to find valid companion object for $javaClass")
     }
-
-    fun test(client: MinecraftClient): Boolean
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
-        override fun getTypeName(): String { return "" }
+        override fun getTypeName(): String {
+            throw MusicPredicateException("Attempt to get type name from abstract predicate type.")
+        }
 
-        override fun fromJson(json: JsonObject): MusicPredicate {
+        override fun fromJson(json: JsonObject, partialPath: String): MusicPredicate {
             return when (val type: String = JsonHelper.getString(json, "type")) {
-                RootPredicate.getTypeName() -> RootPredicate.fromJson(json)
-                StructurePredicate.getTypeName() -> StructurePredicate.fromJson(json)
+                RootPredicate.getTypeName() -> RootPredicate.fromJson(json, partialPath)
+                DimensionPredicate.getTypeName() -> DimensionPredicate.fromJson(json, partialPath)
+                BiomePredicate.getTypeName() -> BiomePredicate.fromJson(json, partialPath)
+                StructurePredicate.getTypeName() -> StructurePredicate.fromJson(json, partialPath)
+                CombatPredicate.getTypeName() -> StructurePredicate.fromJson(json, partialPath)
                 else -> throw MusicPredicateException("Invalid music predicate type: $type")
             }
         }
