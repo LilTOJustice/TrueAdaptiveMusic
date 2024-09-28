@@ -29,7 +29,7 @@ interface MusicPredicate {
             return when (val type: String = JsonHelper.getString(json, "type")) {
                 RootPredicate.getTypeName() -> RootPredicate.fromJson(json)
                 StructurePredicate.getTypeName() -> StructurePredicate.fromJson(json)
-                else -> throw Exception("Invalid music predicate type: $type")
+                else -> throw MusicPredicateException("Invalid music predicate type: $type")
             }
         }
     }

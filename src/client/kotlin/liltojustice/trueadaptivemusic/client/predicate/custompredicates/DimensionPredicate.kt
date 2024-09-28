@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.predicate.custompredicates
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
@@ -19,7 +20,7 @@ class DimensionPredicate internal constructor(private val dimension: Identifier)
             val type = JsonHelper.getString(json, "type")
             if (type != getTypeName())
             {
-                throw Exception("Unexpected type. $type")
+                throw MusicPredicateException("Unexpected type. $type")
             }
 
             val id: String = JsonHelper.getString(json, "id")

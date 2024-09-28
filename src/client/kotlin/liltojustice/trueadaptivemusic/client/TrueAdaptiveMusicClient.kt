@@ -7,8 +7,6 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.loader.impl.util.log.Log
-import net.fabricmc.loader.impl.util.log.LogCategory
 import net.minecraft.util.ActionResult
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -29,7 +27,7 @@ class TrueAdaptiveMusicClient : ClientModInitializer {
         }
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
-            // Music manager needs to be declared here otherwise the client soundManager won't be initialized yet
+            // Music manager needs to be initialized here otherwise the client soundManager won't be initialized yet
             if (musicManager == null)
             {
                 musicManager = MusicManager(client)
@@ -43,7 +41,7 @@ class TrueAdaptiveMusicClient : ClientModInitializer {
                         Logger.log("Found selected pack $selectedPackPath.")
                     } else if (firstPackPath?.exists() == true) {
                         toLoad = firstPackPath
-                        Logger.log("No selected pack found. Defaulting to $firstPackPath.")
+                        Logger.log("No selected pack found. Defaulting to $firstPackPath.", LogLevel.WARNING)
                     }
 
                     ChangeMusicPackCallback.EVENT.invoker().loadPack(toLoad)
