@@ -33,7 +33,7 @@ class StructurePredicate internal constructor(private val feature: Identifier) :
         val structureStarts = structureAccessor.getStructureStarts(ChunkSectionPos.from(blockPos), structure)
         if (structureStarts.isEmpty())
         {
-            return false;
+            return false
         }
 
         for (structureStart: StructureStart in structureStarts) {
