@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.predicate.custompredicates
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
@@ -32,7 +33,7 @@ class StructurePredicate internal constructor(private val feature: Identifier) :
         val structureStarts = structureAccessor.getStructureStarts(ChunkSectionPos.from(blockPos), structure)
         if (structureStarts.isEmpty())
         {
-            return false;
+            return false
         }
 
         for (structureStart: StructureStart in structureStarts) {
@@ -64,7 +65,7 @@ class StructurePredicate internal constructor(private val feature: Identifier) :
             val type = JsonHelper.getString(json, "type")
             if (type != getTypeName())
             {
-                throw Exception("Unexpected type. $type")
+                throw MusicPredicateException("Unexpected type. $type")
             }
 
             val id: String = JsonHelper.getString(json, "id")

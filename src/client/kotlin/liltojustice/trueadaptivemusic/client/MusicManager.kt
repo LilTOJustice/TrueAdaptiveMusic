@@ -1,7 +1,10 @@
 package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.LogLevel
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.predicate.RulesParserException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
@@ -45,7 +48,12 @@ class MusicManager(
 
         stop()
         currentSoundPack = packPath.toFile().name
-        predicateTester = MusicPredicateTree.fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()))
+        try {
+            predicateTester = MusicPredicateTree.fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()))
+        } catch (e: RulesParserException) {
+            Logger.log("Failed to initialize predicate tester for music pack $packPath! " +
+                    "No music will be played. Error:\n${e.message}", LogLevel.ERROR)
+        }
     }
 
     fun tick() {
@@ -128,7 +136,11 @@ class MusicManager(
         if (soundInstance != null)
         {
             client.soundManager.stop(soundInstance)
+            client.soundManager.stop(oldSoundInstance)
+            fadeInstances.forEach { fadeInstance -> client.soundManager.stop(fadeInstance.soundInstance) }
+            fadeInstances.clear()
             soundInstance = null
+            oldSoundInstance = null
         }
     }
 
