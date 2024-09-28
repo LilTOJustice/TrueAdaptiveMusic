@@ -19,7 +19,8 @@ abstract class MusicPredicate(private val partialPath: String) {
         if (companion is MusicPredicateCompanion<*>)
         {
             return "$partialPath/${companion.getTypeName()}{${getIDs().joinToString(",")}}"
-        } else throw MusicPredicateException("Failed to find valid companion object for $javaClass")
+        } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
+                " create one that inherits from MusicPredicateCompanion")
     }
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
