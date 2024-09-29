@@ -83,8 +83,9 @@ class MusicManager(
     private fun startNewMusic(newMusic: PlayableSound?) {
         if (newMusic == null)
         {
-            if (client.soundManager.isPlaying(soundInstance)) {
+            if (isPlaying(soundInstance)) {
                 fadeInstances.add(FadeInstance(soundInstance!!, false))
+                soundInstance = null
             }
 
             return
@@ -100,7 +101,7 @@ class MusicManager(
     }
 
     private fun getNextMusic(): PlayableSound? {
-        return (predicateTester?.getMusicToPlay(client) ?: listOf(null)).random()
+        return (predicateTester?.getMusicToPlay(client) ?: listOf(null)).ifEmpty { listOf(null) }.random()
     }
 
     private fun stop() {
@@ -125,7 +126,8 @@ class MusicManager(
     }
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
-        return client.soundManager.isPlaying(soundInstance) && !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
+        return client.soundManager.isPlaying(soundInstance) &&
+                !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
     }
 
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {

@@ -2,13 +2,17 @@ package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.LogLevel
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.PlayableSound
 import liltojustice.trueadaptivemusic.client.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
+import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -59,9 +63,13 @@ class MusicPredicateTree private constructor(json: JsonObject, packName: String)
                 val expanded: MutableList<PlayableSound> = mutableListOf()
                 paths.forEach { pathName ->
                     var fullPath: Path? = null
+                    var identifier: Identifier? = null
                     try {
                         fullPath = Path("${Constants.MUSIC_PACK_DIR}/$packName/$pathName")
-                    } catch (_: Exception) {}
+                    } catch (_: InvalidPathException) {}
+                    try {
+                        identifier = Identifier(pathName)
+                    } catch (_: InvalidIdentifierException) {}
 
                     if (fullPath?.isDirectory() == true) {
                         expanded.addAll(fullPath.toFile().listFiles()
@@ -69,8 +77,10 @@ class MusicPredicateTree private constructor(json: JsonObject, packName: String)
                             ?: listOf())
                     } else if (fullPath?.exists() == true){
                         expanded.add(PlayableSoundFile(fullPath, predicatePath))
-                    } else if (Registries.SOUND_EVENT.containsId(Identifier(pathName))) {
+                    } else if (Registries.SOUND_EVENT.containsId(identifier)) {
                         expanded.add(PlayableSoundEvent(Registries.SOUND_EVENT[Identifier(pathName)]!!, predicatePath))
+                    } else {
+                        Logger.log("Could not find proper path for $fullPath, skipping...", LogLevel.WARNING)
                     }
                 }
 
