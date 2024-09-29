@@ -5,7 +5,7 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
-class TrueAdaptiveMusic : ModInitializer {
+class TrueAdaptiveMusic: ModInitializer {
     override fun onInitialize() {
         Files.createDirectories(Path(Constants.MUSIC_PACK_DIR))
         Files.createDirectories(Path(Constants.MISC_DIR))

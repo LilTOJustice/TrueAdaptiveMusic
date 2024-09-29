@@ -7,23 +7,15 @@ import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.RulesParserException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
-import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundCategory
-import net.minecraft.sound.SoundEvent
-import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
 
 class MusicManager(
     private val client: MinecraftClient) {
-    private var currentSoundPack: String = ""
     private var predicateTester: MusicPredicateTree? = null
-    private var currentMusic: String = ""
+    private var currentMusicPredId: String = ""
     private var soundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
     private var toStop: SoundInstance? = null
@@ -47,9 +39,9 @@ class MusicManager(
         }
 
         stop()
-        currentSoundPack = packPath.toFile().name
         try {
-            predicateTester = MusicPredicateTree.fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()))
+            predicateTester = MusicPredicateTree
+                .fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()), packPath.toFile().name)
         } catch (e: RulesParserException) {
             Logger.log("Failed to initialize predicate tester for music pack $packPath! " +
                     "No music will be played. Error:\n${e.message}", LogLevel.ERROR)
@@ -63,14 +55,14 @@ class MusicManager(
 
         processFades()
 
-        val musicPath: String = getNextMusic()
-        if (!shouldPlay(musicPath))
+        val nextMusic: PlayableSound? = getNextMusic()
+        if (!shouldPlay(nextMusic))
         {
             return
         }
 
-        currentMusic = musicPath
-        startNewMusic(musicPath)
+        currentMusicPredId = nextMusic?.getPredicateIdentifier() ?: ""
+        startNewMusic(nextMusic)
     }
 
     private fun processFades() {
@@ -82,54 +74,34 @@ class MusicManager(
         fadeInstances.removeIf { fadeinstance -> fadeinstance.done() }
     }
 
-    private fun startNewMusic(musicPath: String) {
-        if (musicPath == "")
+    private fun shouldPlay(music: PlayableSound?): Boolean {
+        return (music == null ||
+                music.getPredicateIdentifier() != currentMusicPredId || !isPlaying(soundInstance)) &&
+                musicVolumeOption.value > 0
+    }
+
+    private fun startNewMusic(newMusic: PlayableSound?) {
+        if (newMusic == null)
         {
-            if (client.soundManager.isPlaying(soundInstance)) {
+            if (isPlaying(soundInstance)) {
                 fadeInstances.add(FadeInstance(soundInstance!!, false))
+                soundInstance = null
             }
 
             return
         }
 
-        var asPath: Path? = null
-        try
-        {
-            asPath = Path("${Constants.MUSIC_PACK_DIR}/$currentSoundPack/$musicPath")
-            if (asPath.isDirectory())
-            {
-                val music = asPath.toFile().listFiles()
-                if (music!!.isEmpty()) {
-                    throw Exception("No music found in directory $asPath.")
-                }
-
-                asPath = music.random().toPath()
-            }
+        if (soundInstance == null) {
+            soundInstance = newMusic.makeSoundInstance()
+            client.soundManager.play(soundInstance)
+            return
         }
-        catch (_: Exception) {}
 
-        var asSoundEvent: SoundEvent? = null
-        try
-        {
-            asSoundEvent = Registries.SOUND_EVENT.get(Identifier(musicPath))
-        }
-        catch (_: Exception) {}
-
-        if (asSoundEvent != null) {
-            playNewSoundEvent(asSoundEvent)
-        } else if (asPath != null && asPath.exists()) {
-            playNewSoundFile(asPath)
-        } else {
-            throw Exception("Path $musicPath is neither a valid SoundEvent nor sound file.")
-        }
+        beginCrossfade(newMusic.makeSoundInstance())
     }
 
-    private fun getNextMusic(): String {
-        return predicateTester?.getMusicToPlay(client) ?: ""
-    }
-
-    private fun shouldPlay(musicPath: String): Boolean {
-        return (musicPath != currentMusic || !isPlaying(soundInstance)) && musicVolumeOption.value > 0
+    private fun getNextMusic(): PlayableSound? {
+        return (predicateTester?.getMusicToPlay(client) ?: listOf(null)).ifEmpty { listOf(null) }.random()
     }
 
     private fun stop() {
@@ -144,26 +116,6 @@ class MusicManager(
         }
     }
 
-    private fun playNewSoundEvent(soundEvent: SoundEvent) {
-        if (soundInstance == null) {
-            soundInstance = PositionedSoundInstance.music(soundEvent)
-            client.soundManager.play(soundInstance)
-            return
-        }
-
-        beginCrossfade(PositionedSoundInstance.music(soundEvent))
-    }
-
-    private fun playNewSoundFile(soundFile: Path) {
-        if (soundInstance == null) {
-            soundInstance = AdaptiveMusicSoundInstance(soundFile)
-            client.soundManager.play(soundInstance)
-            return
-        }
-
-        beginCrossfade(AdaptiveMusicSoundInstance(soundFile))
-    }
-
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
         oldSoundInstance = soundInstance
         soundInstance = newSoundInstance
@@ -174,7 +126,8 @@ class MusicManager(
     }
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
-        return client.soundManager.isPlaying(soundInstance) && !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
+        return client.soundManager.isPlaying(soundInstance) &&
+                !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
     }
 
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {

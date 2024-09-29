@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.predicate.custompredicates
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
@@ -16,7 +15,8 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(private val feature: Identifier) : MusicPredicate {
+class StructurePredicate internal constructor(partialPath: String, private val feature: Identifier)
+    : MusicPredicate(partialPath) {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
@@ -58,19 +58,13 @@ class StructurePredicate internal constructor(private val feature: Identifier) :
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
-    companion object: MusicPredicate.MusicPredicateCompanion<StructurePredicate> {
+    override fun getIDs(): List<String> { return listOf(feature.toString()) }
+
+    companion object: MusicPredicateCompanion<StructurePredicate> {
         override fun getTypeName(): String { return "structure" }
 
-        override fun fromJson(json: JsonObject): StructurePredicate {
-            val type = JsonHelper.getString(json, "type")
-            if (type != getTypeName())
-            {
-                throw MusicPredicateException("Unexpected type. $type")
-            }
-
-            val id: String = JsonHelper.getString(json, "id")
-
-            return StructurePredicate(Identifier(id))
+        override fun fromJson(json: JsonObject, partialPath: String): StructurePredicate {
+            return StructurePredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
         }
     }
 }
