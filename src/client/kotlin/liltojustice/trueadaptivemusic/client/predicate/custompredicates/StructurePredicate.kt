@@ -15,7 +15,8 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(partialPath: String, private val feature: Identifier) : MusicPredicate(partialPath) {
+class StructurePredicate internal constructor(partialPath: String, private val feature: Identifier)
+    : MusicPredicate(partialPath) {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor

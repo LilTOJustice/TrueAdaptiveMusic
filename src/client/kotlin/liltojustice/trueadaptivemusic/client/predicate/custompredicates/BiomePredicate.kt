@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 
-class BiomePredicate internal constructor(partialPath: String, private val biome: Identifier) : MusicPredicate(partialPath) {
+class BiomePredicate internal constructor(partialPath: String, private val biome: Identifier)
+    : MusicPredicate(partialPath) {
     override fun test(client: MinecraftClient): Boolean {
         // TODO: Implement this
         return false

@@ -56,10 +56,15 @@ class MusicPredicateTree private constructor(json: JsonObject, packName: String)
                 return expandDirectories((if (JsonHelper.hasString(json, "musicPath"))
                     listOf(JsonHelper.getString(json, "musicPath"))
                 else
-                    JsonHelper.getArray(json, "musicPath").map { element -> element.asString }), packName, predicatePath)
+                    JsonHelper.getArray(
+                        json,
+                        "musicPath").map { element -> element.asString }),
+                    packName,
+                    predicatePath)
             }
 
-            private fun expandDirectories(paths: List<String>, packName: String, predicatePath: String): List<PlayableSound> {
+            private fun expandDirectories(paths: List<String>, packName: String, predicatePath: String)
+            : List<PlayableSound> {
                 val expanded: MutableList<PlayableSound> = mutableListOf()
                 paths.forEach { pathName ->
                     var fullPath: Path? = null

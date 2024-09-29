@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 
-class DimensionPredicate internal constructor(partialPath: String, private val dimension: Identifier) : MusicPredicate(partialPath) {
+class DimensionPredicate internal constructor(partialPath: String, private val dimension: Identifier)
+    : MusicPredicate(partialPath) {
     override fun test(client: MinecraftClient): Boolean {
         // TODO: Implement this
         return false

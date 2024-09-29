@@ -12,7 +12,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
-class TrueAdaptiveMusicClient : ClientModInitializer {
+class TrueAdaptiveMusicClient: ClientModInitializer {
     override fun onInitializeClient() {
         var musicManager: MusicManager? = null
 
