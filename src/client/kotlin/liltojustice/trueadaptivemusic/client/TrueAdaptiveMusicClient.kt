@@ -35,7 +35,7 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                     var toLoad: Path? = null
                     val selectedPackFileText = Path(Constants.SELECTED_PACK).toFile().readText()
                     val selectedPackPath = Path("${Constants.MUSIC_PACK_DIR}/${selectedPackFileText}")
-                    val firstPackPath = Path(Constants.MUSIC_PACK_DIR).toFile().listFiles()?.first()?.toPath()
+                    val firstPackPath = Path(Constants.MUSIC_PACK_DIR).toFile().listFiles()?.firstOrNull()?.toPath()
                     if (selectedPackFileText.isNotEmpty()) {
                         toLoad = selectedPackPath
                         Logger.log("Found selected pack $selectedPackPath.")
@@ -44,7 +44,10 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                         Logger.log("No selected pack found. Defaulting to $firstPackPath.", LogLevel.WARNING)
                     }
 
-                    ChangeMusicPackCallback.EVENT.invoker().loadPack(toLoad)
+                    if (toLoad != null)
+                    {
+                        ChangeMusicPackCallback.EVENT.invoker().loadPack(toLoad)
+                    }
                 } catch (e: FileNotFoundException) {
                     Logger.log("Couldn't find selected music pack. Error:\n${e.message}.", LogLevel.ERROR)
                 }

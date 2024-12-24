@@ -24,7 +24,7 @@ class MusicManager(
 
     init {
         client.soundManager.registerListener { instance, _ ->
-            if (instance.category == SoundCategory.MUSIC && instance != soundInstance && instance != oldSoundInstance) {
+            if (predicateTester != null && instance.category == SoundCategory.MUSIC && instance != soundInstance && instance != oldSoundInstance) {
                 toStop = instance
                 setInstanceVolume(toStop!!, 0F)
             }
