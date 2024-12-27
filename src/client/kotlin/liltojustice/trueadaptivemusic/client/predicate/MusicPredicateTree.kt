@@ -34,7 +34,7 @@ class MusicPredicateTree private constructor(json: JsonObject, packName: String)
                 i -> children[i].getBottomSatisfied(client, depth + 1)
             }
 
-            if (bottoms.none { bottom -> bottom.second != 0 })
+            if (bottoms.all { bottom -> bottom.second == 0 })
             {
                 return Pair(playableSounds, depth)
             }

@@ -1,7 +1,6 @@
-package liltojustice.trueadaptivemusic.client.predicate.custompredicates
+package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld

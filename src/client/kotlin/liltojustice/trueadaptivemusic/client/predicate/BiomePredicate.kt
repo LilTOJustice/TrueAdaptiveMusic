@@ -1,16 +1,14 @@
-package liltojustice.trueadaptivemusic.client.predicate.custompredicates
+package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 
-class BiomePredicate internal constructor(partialPath: String, private val biome: Identifier)
+class BiomePredicate(partialPath: String, private val biome: Identifier)
     : MusicPredicate(partialPath) {
     override fun test(client: MinecraftClient): Boolean {
-        // TODO: Implement this
-        return false
+        return if (client.player != null) client.world?.getBiome(client.player!!.blockPos)?.matchesId(biome) ?: false else false
     }
 
     override fun getIDs(): List<String> { return listOf(biome.toString()) }

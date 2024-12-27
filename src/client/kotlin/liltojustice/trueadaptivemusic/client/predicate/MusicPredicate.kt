@@ -1,12 +1,13 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.predicate.custompredicates.*
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
+import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
+import kotlin.reflect.full.functions
 
-abstract class MusicPredicate(private val partialPath: String) {
+sealed class MusicPredicate(private val partialPath: String) {
     interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
         fun getTypeName(): String
         fun fromJson(json: JsonObject, partialPath: String): TSelf
@@ -29,14 +30,22 @@ abstract class MusicPredicate(private val partialPath: String) {
         }
 
         override fun fromJson(json: JsonObject, partialPath: String): MusicPredicate {
-            return when (val type: String = JsonHelper.getString(json, "type")) {
-                RootPredicate.getTypeName() -> RootPredicate.fromJson(json, partialPath)
-                DimensionPredicate.getTypeName() -> DimensionPredicate.fromJson(json, partialPath)
-                BiomePredicate.getTypeName() -> BiomePredicate.fromJson(json, partialPath)
-                StructurePredicate.getTypeName() -> StructurePredicate.fromJson(json, partialPath)
-                CombatPredicate.getTypeName() -> StructurePredicate.fromJson(json, partialPath)
-                else -> throw MusicPredicateException("Invalid music predicate type: $type")
+            val type = JsonHelper.getString(json, "type")
+            for (subclass in MusicPredicate::class.sealedSubclasses)
+            {
+                if ((subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "getTypeName" }
+                    ?: throw MusicPredicateException("Invalid music predicate type: $type"))
+                        .call(subclass.companionObjectInstance) == type)
+                {
+                    return (subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
+                        ?: throw MusicPredicateException("fromJson method missing."))
+                        .call(subclass.companionObjectInstance, json, partialPath)
+                            as? MusicPredicate
+                        ?: throw MusicPredicateException("Could not instantiate music predicate from json");
+                }
             }
+
+            throw MusicPredicateException("Invalid music predicate type: $type")
         }
     }
 }
