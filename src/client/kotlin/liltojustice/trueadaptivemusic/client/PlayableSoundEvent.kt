@@ -9,4 +9,8 @@ class PlayableSoundEvent(private val soundEvent: SoundEvent, predicateIdentifier
     override fun makeSoundInstance(): SoundInstance {
         return PositionedSoundInstance.music(soundEvent)
     }
+
+    override fun getSoundName(): String {
+        return soundEvent.id.path
+    }
 }
