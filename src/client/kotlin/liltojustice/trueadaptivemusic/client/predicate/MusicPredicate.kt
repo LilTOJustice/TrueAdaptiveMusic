@@ -41,7 +41,7 @@ sealed class MusicPredicate(private val partialPath: String) {
                         ?: throw MusicPredicateException("fromJson method missing."))
                         .call(subclass.companionObjectInstance, json, partialPath)
                             as? MusicPredicate
-                        ?: throw MusicPredicateException("Could not instantiate music predicate from json");
+                        ?: throw MusicPredicateException("Could not instantiate music predicate from json")
                 }
             }
 

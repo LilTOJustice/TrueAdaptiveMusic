@@ -10,15 +10,22 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
 import java.util.*
+import kotlin.concurrent.schedule
 import kotlin.math.abs
 import kotlin.math.cbrt
 
-class CombatPredicate internal constructor(partialPath: String, private val mob: Identifier)
+class CombatPredicate internal constructor(partialPath: String)
     : MusicPredicate(partialPath) {
-    private var targetMobEntity: MobEntity? = null
-    private var aggroTimer: Timer? = null
+    private val aggroTimer: Timer = Timer()
+    private var aggroTimerTask: TimerTask? = null
+    private var isAggro: Boolean = false
 
     override fun test(client: MinecraftClient): Boolean {
+        if (isAggro)
+        {
+            return true
+        }
+
         val playerEntity = client.player ?: return false
         val playerBlockPos = playerEntity.blockPos ?: return false
         val world = client.world ?: return false
@@ -26,36 +33,32 @@ class CombatPredicate internal constructor(partialPath: String, private val mob:
         for (entity: Entity? in world.entities)
         {
             val mobEntity: MobEntity = entity as? MobEntity ?: continue
-            if (mobEntity.id == targetMobEntity?.id || (mobEntity.type.translationKey == mob.toTranslationKey("entity")
-                        && (mobEntity.attacking?.id == playerEntity.id
-                        || (mobEntity.isAttacking
+            if (mobEntity.attacking?.id == playerEntity.id || (mobEntity.isAttacking
                         && closeEnough(playerBlockPos, mobEntity.blockPos,
                     Vec3d(mobEntity.boundingBox.xLength,
                         mobEntity.boundingBox.yLength,
-                        mobEntity.boundingBox.zLength))))))
+                        mobEntity.boundingBox.zLength))))
             {
-                targetMobEntity = mobEntity
+                isAggro = true
+                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS, { isAggro = false })
                 return true
-            }
-            else if (mobEntity.id == targetMobEntity?.id)
-            {
-
             }
         }
 
         return false
     }
 
-    override fun getIDs(): List<String> { return listOf(mob.toString()) }
+    override fun getIDs(): List<String> { return listOf() }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun getTypeName(): String { return "combat" }
 
         override fun fromJson(json: JsonObject, partialPath: String): CombatPredicate {
-            return CombatPredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
+            return CombatPredicate(partialPath)
         }
 
         private val baseAxialDistance = Vec3d(10.0, 10.0, 10.0)
+        private const val AGGRO_TIMER_SECONDS = 10L
 
         fun closeEnough(playerPos: BlockPos, attackerPos: BlockPos, attackerSize: Vec3d): Boolean
         {
