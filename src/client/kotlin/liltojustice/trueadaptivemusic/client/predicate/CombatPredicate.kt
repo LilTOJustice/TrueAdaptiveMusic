@@ -4,8 +4,6 @@ import com.google.gson.JsonObject
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.Entity
 import net.minecraft.entity.mob.MobEntity
-import net.minecraft.util.Identifier
-import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
