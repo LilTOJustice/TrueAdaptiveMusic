@@ -38,7 +38,7 @@ class CombatPredicate internal constructor(partialPath: String)
                         mobEntity.boundingBox.zLength))))
             {
                 isAggro = true
-                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS, { isAggro = false })
+                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) { isAggro = false }
                 return true
             }
         }
