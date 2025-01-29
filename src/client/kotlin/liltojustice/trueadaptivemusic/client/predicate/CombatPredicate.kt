@@ -19,11 +19,6 @@ class CombatPredicate internal constructor(partialPath: String)
     private var isAggro: Boolean = false
 
     override fun test(client: MinecraftClient): Boolean {
-        if (isAggro)
-        {
-            return true
-        }
-
         val playerEntity = client.player ?: return false
         val playerBlockPos = playerEntity.blockPos ?: return false
         val world = client.world ?: return false
@@ -38,12 +33,17 @@ class CombatPredicate internal constructor(partialPath: String)
                         mobEntity.boundingBox.zLength))))
             {
                 isAggro = true
-                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) { isAggro = false }
+                aggroTimerTask?.cancel()
+                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
+                    isAggro = false
+                    aggroTimerTask = null
+                }
+
                 return true
             }
         }
 
-        return false
+        return isAggro
     }
 
     override fun getIDs(): List<String> { return listOf() }
