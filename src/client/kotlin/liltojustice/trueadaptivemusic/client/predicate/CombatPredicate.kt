@@ -22,15 +22,17 @@ class CombatPredicate internal constructor(partialPath: String)
         val playerEntity = client.player ?: return false
         val playerBlockPos = playerEntity.blockPos ?: return false
         val world = client.world ?: return false
+        var oneCloseEnough = false
 
         for (entity: Entity? in world.entities)
         {
             val mobEntity: MobEntity = entity as? MobEntity ?: continue
-            if (mobEntity.attacking?.id == playerEntity.id || (mobEntity.isAttacking
-                        && closeEnough(playerBlockPos, mobEntity.blockPos,
-                    Vec3d(mobEntity.boundingBox.xLength,
-                        mobEntity.boundingBox.yLength,
-                        mobEntity.boundingBox.zLength))))
+            val mobCloseEnough = closeEnough(playerBlockPos, mobEntity.blockPos,
+                Vec3d(mobEntity.boundingBox.xLength,
+                mobEntity.boundingBox.yLength,
+                mobEntity.boundingBox.zLength))
+            oneCloseEnough = if (mobCloseEnough && mobEntity.isAttacking) true else oneCloseEnough
+            if (mobEntity.attacking?.id == playerEntity.id || (mobEntity.isAttacking && mobCloseEnough))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
@@ -43,7 +45,13 @@ class CombatPredicate internal constructor(partialPath: String)
             }
         }
 
-        return isAggro
+        if (!oneCloseEnough)
+        {
+            aggroTimerTask?.cancel()
+            aggroTimerTask?.run()
+        }
+
+        return false
     }
 
     override fun getIDs(): List<String> { return listOf() }
@@ -55,7 +63,7 @@ class CombatPredicate internal constructor(partialPath: String)
             return CombatPredicate(partialPath)
         }
 
-        private val baseAxialDistance = Vec3d(10.0, 10.0, 10.0)
+        private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 10L
 
         fun closeEnough(playerPos: BlockPos, attackerPos: BlockPos, attackerSize: Vec3d): Boolean
