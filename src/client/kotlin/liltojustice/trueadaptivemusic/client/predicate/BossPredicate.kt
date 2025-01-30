@@ -1,0 +1,32 @@
+package liltojustice.trueadaptivemusic.client.predicate
+
+import com.google.gson.JsonObject
+import net.minecraft.client.MinecraftClient
+import net.minecraft.text.TranslatableTextContent
+import net.minecraft.util.Identifier
+import net.minecraft.util.JsonHelper
+
+class BossPredicate internal constructor(partialPath: String, private val boss: Identifier)
+    : MusicPredicate(partialPath) {
+    override fun test(client: MinecraftClient): Boolean {
+        return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
+            toTranslationKey(
+                (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false) ==
+                    boss.toTranslationKey()
+        }
+    }
+
+    override fun getIDs(): List<String> { return listOf(boss.toString()) }
+
+    companion object: MusicPredicateCompanion<BossPredicate> {
+        override fun getTypeName(): String { return "boss" }
+
+        override fun fromJson(json: JsonObject, partialPath: String): BossPredicate {
+            return BossPredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
+        }
+
+        fun toTranslationKey(textKey: String): String {
+            return textKey.split(".").drop(1).joinToString(".")
+        }
+    }
+}
