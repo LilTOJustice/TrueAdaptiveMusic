@@ -9,7 +9,7 @@ class NightTimePredicate(partialPath: String)
         val world = client.world ?: return false
 
         val time = world.timeOfDay % 24000
-        return time in 13000..24000
+        return time in 13000..23999
     }
 
     override fun getIDs(): List<String> { return emptyList() }  // return immutable list, won't be using this
