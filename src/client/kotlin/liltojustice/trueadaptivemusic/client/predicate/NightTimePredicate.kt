@@ -7,8 +7,8 @@ class NightTimePredicate(partialPath: String)
     : MusicPredicate(partialPath) {
     override fun test(client: MinecraftClient): Boolean {
         val world = client.world ?: return false
-
         val time = world.timeOfDay % 24000
+
         return time in 13000..23999
     }
 
