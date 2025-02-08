@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui
 
-import liltojustice.trueadaptivemusic.Logger
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
