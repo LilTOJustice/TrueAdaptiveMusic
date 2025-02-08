@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
 class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create or edit a music pack")) {
-    private lateinit var saveButtonWidget: IconButtonWidget;
+    private lateinit var saveButtonWidget: IconButtonWidget
 
     override fun init() {
         saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)
