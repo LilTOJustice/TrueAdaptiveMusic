@@ -1,5 +1,6 @@
-package liltojustice.trueadaptivemusic.client
+package liltojustice.trueadaptivemusic.client.sound
 
+import liltojustice.trueadaptivemusic.client.instance.AdaptiveMusicSoundInstance
 import net.minecraft.client.sound.SoundInstance
 import java.nio.file.Path
 import kotlin.io.path.name

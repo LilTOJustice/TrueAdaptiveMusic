@@ -4,9 +4,9 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.client.PlayableSound
-import liltojustice.trueadaptivemusic.client.PlayableSoundEvent
-import liltojustice.trueadaptivemusic.client.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
+import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier

@@ -3,8 +3,10 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.RulesParserException
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
