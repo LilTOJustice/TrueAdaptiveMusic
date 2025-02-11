@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.client.gui.MainScreen;
+import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.SoundOptionsScreen;

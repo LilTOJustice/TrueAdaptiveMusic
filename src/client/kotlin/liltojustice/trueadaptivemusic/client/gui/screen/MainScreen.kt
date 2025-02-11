@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui
+package liltojustice.trueadaptivemusic.client.gui.screen
 
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
