@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.client.MainScreen;
+import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.screen.option.SoundOptionsScreen;
@@ -16,7 +16,7 @@ public class SoundOptionsScreenMixin extends GameOptionsScreen {
     @Inject(method = "init()V", at = @At("TAIL"))
     protected void init(CallbackInfo ci) {
         SoundOptionsScreen thisObject = (SoundOptionsScreen)(Object)this;
-        thisObject.addDrawableChild(MainScreen.Companion.GetTrueAdaptiveMusicButton(thisObject.client, thisObject));
+        thisObject.addDrawableChild(MainScreen.Companion.getTrueAdaptiveMusicButton(thisObject.client, thisObject));
     }
 
     public SoundOptionsScreenMixin(Screen parent, GameOptions gameOptions, Text title) {
