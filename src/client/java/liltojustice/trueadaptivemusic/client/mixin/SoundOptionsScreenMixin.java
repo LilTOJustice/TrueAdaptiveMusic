@@ -16,7 +16,7 @@ public class SoundOptionsScreenMixin extends GameOptionsScreen {
     @Inject(method = "init()V", at = @At("TAIL"))
     protected void init(CallbackInfo ci) {
         SoundOptionsScreen thisObject = (SoundOptionsScreen)(Object)this;
-        thisObject.addDrawableChild(MainScreen.Companion.GetTrueAdaptiveMusicButton(thisObject.client, thisObject));
+        thisObject.addDrawableChild(MainScreen.Companion.getTrueAdaptiveMusicButton(thisObject.client, thisObject));
     }
 
     public SoundOptionsScreenMixin(Screen parent, GameOptions gameOptions, Text title) {

@@ -30,7 +30,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
     }
 
     companion object {
-        fun GetTrueAdaptiveMusicButton(client: MinecraftClient?, parent: Screen): ButtonWidget {
+        fun getTrueAdaptiveMusicButton(client: MinecraftClient?, parent: Screen): ButtonWidget {
             return ButtonWidget.Builder(Text.literal("True Adaptive Music"))
             {
                 client?.setScreen(MainScreen(parent))
