@@ -35,12 +35,14 @@ class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create/Ed
         adder?.add(
             PackStructureWidget(
                 width = (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-                height = (height - TOP_MARGIN - BOTTOM_MARGIN)),
+                height = (height - TOP_MARGIN - BOTTOM_MARGIN),
+                true),
             2)
         adder?.add(
             PredicateViewWidget(
                 width = (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-                height = (height - TOP_MARGIN - BOTTOM_MARGIN)),
+                height = (height - TOP_MARGIN - BOTTOM_MARGIN),
+                true),
             1)
         gridWidget.refreshPositions()
         SimplePositioningWidget.setPos(
