@@ -16,10 +16,8 @@ import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
 class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create/Edit a music pack")) {
-    private lateinit var saveButtonWidget: IconButtonWidget
-
     override fun init() {
-        saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)
+        val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)
         { Logger.log("Save pack clicked") }
             .iconSize(9, 8)
             .textureSize(9, 8)
@@ -32,18 +30,18 @@ class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create/Ed
             .marginLeft(LEFT_MARGIN / 2)
             .marginRight(RIGHT_MARGIN / 2)
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
-        adder?.add(
-            PackStructureWidget(
-                width = (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-                height = (height - TOP_MARGIN - BOTTOM_MARGIN),
-                true),
-            2)
-        adder?.add(
-            PredicateViewWidget(
-                width = (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-                height = (height - TOP_MARGIN - BOTTOM_MARGIN),
-                true),
-            1)
+        val packStructureWidget = PackStructureWidget(
+            width = (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            height = (height - TOP_MARGIN - BOTTOM_MARGIN),
+            true)
+        val predicateViewWidget = PredicateViewWidget(
+            width = (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            height = (height - TOP_MARGIN - BOTTOM_MARGIN),
+            true)
+        packStructureWidget.onSelectPredicate { predicate -> predicateViewWidget.setPredicate(predicate) }
+        adder?.add(packStructureWidget, 2)
+        adder?.add(predicateViewWidget, 1)
+
         gridWidget.refreshPositions()
         SimplePositioningWidget.setPos(
             gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)

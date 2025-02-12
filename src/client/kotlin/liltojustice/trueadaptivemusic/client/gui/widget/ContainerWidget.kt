@@ -5,17 +5,20 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.gui.widget.Widget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
 abstract class ContainerWidget(
     width: Int,
     height: Int,
-    message: String,
+    message: String = "",
     private var showHeader: Boolean = false,
     x: Int = 0,
     y: Int = 0)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
+    private val children = mutableListOf<Widget>()
+
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         render(context, mouseX, mouseY, delta)
     }
@@ -65,7 +68,7 @@ abstract class ContainerWidget(
         return clicked(mouseX, mouseY)
     }
 
-    fun drawText(
+    protected fun drawText(
         drawContext: DrawContext?,
         textRenderer: TextRenderer,
         text: String,
@@ -82,7 +85,7 @@ abstract class ContainerWidget(
             shadow)
     }
 
-    open fun drawCenteredText(
+    protected fun drawCenteredText(
         drawContext: DrawContext?,
         textRenderer: TextRenderer,
         text: String,
@@ -97,6 +100,10 @@ abstract class ContainerWidget(
             ((row + row * 0.3) * textRenderer.fontHeight).toInt() + getHeaderOffset() + y,
             color,
             shadow)
+    }
+
+    open fun addChild(child: Widget) {
+        children.add(child)
     }
 
     companion object {
