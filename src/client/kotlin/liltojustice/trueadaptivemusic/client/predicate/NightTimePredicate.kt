@@ -3,8 +3,7 @@ package liltojustice.trueadaptivemusic.client.predicate
 import com.google.gson.JsonObject
 import net.minecraft.client.MinecraftClient
 
-class NightTimePredicate(partialPath: String)
-    : MusicPredicate(partialPath) {
+class NightTimePredicate: MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         val world = client.world ?: return false
         val time = world.timeOfDay % 24000
@@ -18,9 +17,9 @@ class NightTimePredicate(partialPath: String)
     {
         override fun getTypeName(): String { return "night" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): NightTimePredicate
+        override fun fromJson(json: JsonObject): NightTimePredicate
         {
-            return NightTimePredicate(partialPath)
+            return NightTimePredicate()
         }
     }
 }

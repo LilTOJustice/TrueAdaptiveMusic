@@ -1,24 +1,20 @@
 package liltojustice.trueadaptivemusic.client
 
 import kotlinx.io.files.FileNotFoundException
-import liltojustice.trueadaptivemusic.ChangeMusicPackCallback
-import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.*
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.util.ActionResult
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 
 class TrueAdaptiveMusicClient: ClientModInitializer {
     override fun onInitializeClient() {
         var musicManager: MusicManager? = null
 
-        ChangeMusicPackCallback.EVENT.register { packPath ->
+        ChangeMusicPackCallback.EVENT.register { musicPack ->
             try {
-                musicManager?.loadSoundPack(packPath)
+                musicManager?.selectMusicPack(musicPack)
             } catch (_: FileNotFoundException) {
                 return@register ActionResult.FAIL
             }
@@ -35,29 +31,31 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                     var toLoad: Path? = null
                     val selectedPackFileText = Path(Constants.SELECTED_PACK).toFile().readText()
                     val selectedPackPath = Path("${Constants.MUSIC_PACK_DIR}/${selectedPackFileText}")
-                    val firstPackPath = Path(Constants.MUSIC_PACK_DIR).toFile().listFiles()?.firstOrNull()?.toPath()
                     if (selectedPackFileText.isNotEmpty()) {
                         toLoad = selectedPackPath
                         Logger.log("Found selected pack $selectedPackPath.")
-                    } else if (firstPackPath?.exists() == true) {
-                        toLoad = firstPackPath
-                        Logger.log("No selected pack found. Defaulting to $firstPackPath.", LogLevel.WARNING)
                     }
 
                     if (toLoad != null)
                     {
-                        ChangeMusicPackCallback.EVENT.invoker().loadPack(toLoad)
+                        try {
+                            ChangeMusicPackCallback.EVENT.invoker().selectPack(MusicPack.fromFile(toLoad))
+                        }
+                        catch (e: MusicLoadException) {
+                            Logger.log(
+                                "Selected pack \"$selectedPackPath\" failed to load. Error:\n${e}")
+                        }
                     }
-                } catch (e: FileNotFoundException) {
+                    else {
+                        Logger.log("Selected pack \"$selectedPackPath\" is missing.", LogLevel.WARNING)
+                    }
+                }
+                catch (e: FileNotFoundException) {
                     Logger.log("Couldn't find selected music pack. Error:\n${e.message}.", LogLevel.ERROR)
                 }
             }
 
-            try {
-                musicManager!!.tick()
-            } catch (e: MusicLoadException) {
-                Logger.log("Failed to load music. Error:\n${e.message}.", LogLevel.ERROR)
-            }
+            musicManager!!.tick()
         }
     }
 }

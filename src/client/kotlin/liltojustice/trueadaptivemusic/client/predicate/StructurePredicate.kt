@@ -14,8 +14,7 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(partialPath: String, private val feature: Identifier)
-    : MusicPredicate(partialPath) {
+class StructurePredicate internal constructor(private val feature: Identifier): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
@@ -62,8 +61,8 @@ class StructurePredicate internal constructor(partialPath: String, private val f
     companion object: MusicPredicateCompanion<StructurePredicate> {
         override fun getTypeName(): String { return "structure" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): StructurePredicate {
-            return StructurePredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
+        override fun fromJson(json: JsonObject): StructurePredicate {
+            return StructurePredicate(Identifier(JsonHelper.getString(json, "id")))
         }
     }
 }

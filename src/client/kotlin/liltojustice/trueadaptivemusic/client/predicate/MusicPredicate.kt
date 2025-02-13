@@ -7,19 +7,19 @@ import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.functions
 
-sealed class MusicPredicate(private val partialPath: String) {
+sealed class MusicPredicate {
     interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
         fun getTypeName(): String
-        fun fromJson(json: JsonObject, partialPath: String): TSelf
+        fun fromJson(json: JsonObject): TSelf
     }
 
     abstract fun test(client: MinecraftClient): Boolean
     abstract fun getIDs(): List<String>
-    fun getPredicatePath(): String {
+    fun getPredicateId(): String {
         val companion = javaClass.kotlin.companionObjectInstance
         if (companion is MusicPredicateCompanion<*>)
         {
-            return "$partialPath/${companion.getTypeName()}{${getIDs().joinToString(",")}}"
+            return "${companion.getTypeName()}{${getIDs().joinToString(",")}}"
         } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
                 " create one that inherits from MusicPredicateCompanion")
     }
@@ -29,7 +29,7 @@ sealed class MusicPredicate(private val partialPath: String) {
             throw MusicPredicateException("Attempt to get type name from abstract predicate type.")
         }
 
-        override fun fromJson(json: JsonObject, partialPath: String): MusicPredicate {
+        override fun fromJson(json: JsonObject): MusicPredicate {
             val type = JsonHelper.getString(json, "type")
             for (subclass in MusicPredicate::class.sealedSubclasses)
             {
@@ -39,7 +39,7 @@ sealed class MusicPredicate(private val partialPath: String) {
                 {
                     return (subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
                         ?: throw MusicPredicateException("fromJson method missing."))
-                        .call(subclass.companionObjectInstance, json, partialPath)
+                        .call(subclass.companionObjectInstance, json)
                             as? MusicPredicate
                         ?: throw MusicPredicateException("Could not instantiate music predicate from json")
                 }

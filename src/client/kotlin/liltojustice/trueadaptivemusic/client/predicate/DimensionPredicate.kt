@@ -5,8 +5,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 
-class DimensionPredicate internal constructor(partialPath: String, private val dimension: Identifier)
-    : MusicPredicate(partialPath) {
+class DimensionPredicate(private val dimension: Identifier): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         return client.player?.world?.dimensionEntry?.matchesId(dimension) ?: false
     }
@@ -16,8 +15,8 @@ class DimensionPredicate internal constructor(partialPath: String, private val d
     companion object: MusicPredicateCompanion<DimensionPredicate> {
         override fun getTypeName(): String { return "dimension" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): DimensionPredicate {
-            return DimensionPredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
+        override fun fromJson(json: JsonObject): DimensionPredicate {
+            return DimensionPredicate(Identifier(JsonHelper.getString(json, "id")))
         }
     }
 }

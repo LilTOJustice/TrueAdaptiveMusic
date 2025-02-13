@@ -1,22 +1,16 @@
 package liltojustice.trueadaptivemusic.client
 
-import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
-import liltojustice.trueadaptivemusic.client.predicate.RulesParserException
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
-import net.minecraft.util.JsonHelper
-import java.nio.file.Path
 
 class MusicManager(
     private val client: MinecraftClient) {
-    private var predicateTester: MusicPredicateTree? = null
+    private var musicPack: MusicPack? = null
     private var currentMusicPredId: String = ""
     private var soundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
@@ -26,7 +20,7 @@ class MusicManager(
 
     init {
         client.soundManager.registerListener { instance, _ ->
-            if (predicateTester != null
+            if (musicPack != null
                 && instance.category == SoundCategory.MUSIC
                 && instance != soundInstance
                 && instance != oldSoundInstance) {
@@ -36,21 +30,9 @@ class MusicManager(
         }
     }
 
-    fun loadSoundPack(packPath: Path) {
-        val predicateFile = packPath.toFile().listFiles()?.find { file -> file.name == Constants.RULES_FILENAME }
-        if (predicateFile == null)
-        {
-            throw Exception("Expected file ${Constants.RULES_FILENAME} not found in pack path $packPath.")
-        }
-
+    fun selectMusicPack(musicPack: MusicPack) {
         stop()
-        try {
-            predicateTester = MusicPredicateTree
-                .fromJson(JsonHelper.deserialize(predicateFile.inputStream().reader()), packPath.toFile().name)
-        } catch (e: RulesParserException) {
-            Logger.log("Failed to initialize predicate tester for music pack $packPath! " +
-                    "No music will be played. Error:\n${e.message}", LogLevel.ERROR)
-        }
+        this.musicPack = musicPack
     }
 
     fun tick() {
@@ -60,13 +42,15 @@ class MusicManager(
 
         processFades()
 
-        val nextMusic: PlayableSound? = getNextMusic()
-        if (!shouldPlay(nextMusic))
+        val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
+        val nextMusic = predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
+        val identifier = predicateResult?.path ?: ""
+        if (!shouldPlay(nextMusic, identifier))
         {
             return
         }
 
-        currentMusicPredId = nextMusic?.getPredicateIdentifier() ?: ""
+        currentMusicPredId = identifier
         startNewMusic(nextMusic)
     }
 
@@ -79,10 +63,9 @@ class MusicManager(
         fadeInstances.removeIf { fadeinstance -> fadeinstance.done() }
     }
 
-    private fun shouldPlay(music: PlayableSound?): Boolean {
-        return (music == null ||
-                music.getPredicateIdentifier() != currentMusicPredId || !isPlaying(soundInstance)) &&
-                musicVolumeOption.value > 0
+    private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
+        return(music == null || identifier != currentMusicPredId || !isPlaying(soundInstance))
+                && musicVolumeOption.value > 0
     }
 
     private fun startNewMusic(newMusic: PlayableSound?) {
@@ -103,10 +86,6 @@ class MusicManager(
         }
 
         beginCrossfade(newMusic.makeSoundInstance())
-    }
-
-    private fun getNextMusic(): PlayableSound? {
-        return (predicateTester?.getMusicToPlay(client) ?: listOf(null)).ifEmpty { listOf(null) }.random()
     }
 
     private fun stop() {

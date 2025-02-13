@@ -6,8 +6,7 @@ import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 
-class BossPredicate internal constructor(partialPath: String, private val boss: Identifier)
-    : MusicPredicate(partialPath) {
+class BossPredicate(private val boss: Identifier): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
             toTranslationKey(
@@ -21,8 +20,8 @@ class BossPredicate internal constructor(partialPath: String, private val boss: 
     companion object: MusicPredicateCompanion<BossPredicate> {
         override fun getTypeName(): String { return "boss" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): BossPredicate {
-            return BossPredicate(partialPath, Identifier(JsonHelper.getString(json, "id")))
+        override fun fromJson(json: JsonObject): BossPredicate {
+            return BossPredicate(Identifier(JsonHelper.getString(json, "id")))
         }
 
         fun toTranslationKey(textKey: String): String {

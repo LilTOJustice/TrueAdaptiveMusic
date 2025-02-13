@@ -12,8 +12,7 @@ import kotlin.concurrent.schedule
 import kotlin.math.abs
 import kotlin.math.cbrt
 
-class CombatPredicate internal constructor(partialPath: String)
-    : MusicPredicate(partialPath) {
+class CombatPredicate: MusicPredicate() {
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
@@ -59,8 +58,8 @@ class CombatPredicate internal constructor(partialPath: String)
     companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun getTypeName(): String { return "combat" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): CombatPredicate {
-            return CombatPredicate(partialPath)
+        override fun fromJson(json: JsonObject): CombatPredicate {
+            return CombatPredicate()
         }
 
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
