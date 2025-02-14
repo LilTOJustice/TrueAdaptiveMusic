@@ -64,7 +64,7 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
             val zipFile = ZipFile(filePath.toFile())
             val files = zipFile.entries().toList().filter { file -> !file.isDirectory }
             var metadata = Metadata(filePath.name, "")
-            val playableSoundFiles = files.filter { file -> Path(file.name).extension === "ogg" }
+            val playableSoundFiles = files.filter { file -> Path(file.name).extension == "ogg" }
                 .map { file -> PlayableSoundFile(ZipSoundFile(zipFile, file))}
                 .associateBy { file -> file.getSoundName() }
             val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }

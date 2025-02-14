@@ -10,6 +10,6 @@ class ZipSoundFile(private val zipFile: ZipFile, private val zipEntry: ZipEntry)
     }
 
     override fun getName(): String {
-        return zipFile.name
+        return zipEntry.name
     }
 }
