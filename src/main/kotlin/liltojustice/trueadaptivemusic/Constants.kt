@@ -9,6 +9,7 @@ class Constants {
         const val SELECTED_PACK = "$MISC_DIR/selectedpack"
         const val RULES_FILENAME = "rules.json"
         const val META_FILENAME = "meta.json"
+        const val ASSETS_DIRNAME = "assets"
         val TRUEADAPTIVEMUSIC_ID = Identifier("trueadaptivemusic:trueadaptivemusicstream")
     }
 }

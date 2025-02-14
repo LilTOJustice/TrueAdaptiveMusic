@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.RegularSoundFile
@@ -27,17 +28,19 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
             }
         }
 
-        private fun getLeafFiles(files: List<Path>): List<Path> {
-            return files.flatMap { path ->
-                if (path.isDirectory()) getLeafFiles(path.listDirectoryEntries()) else listOf(path) }
-        }
-
         private fun fromDirectory(filePath: Path): MusicPack {
-            val files = getLeafFiles(filePath.listDirectoryEntries())
+            val files = filePath.listDirectoryEntries()
             var metadata = Metadata(filePath.name, "")
-            val playableSoundFiles = files.filter { file -> file.extension === "ogg" }
-                .map { file -> PlayableSoundFile(RegularSoundFile(file))}
-                .associateBy { file -> file.getSoundName() }
+            val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
+            if (assetsDir == null)
+            {
+                Logger.log(
+                    "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
+            }
+            val playableSoundFiles = assetsDir?.listDirectoryEntries()
+                ?.filter { file -> file.extension == "ogg" }
+                ?.map { file -> PlayableSoundFile(RegularSoundFile(file)) }
+                ?.associateBy { file -> file.getSoundName() } ?: mapOf()
             val rulesFile = files.find { file -> file.fileName.name == Constants.RULES_FILENAME }
             val metaFile = files.find { file -> file.fileName.name == Constants.META_FILENAME }
 
@@ -62,10 +65,15 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
 
         private fun fromZipFile(filePath: Path): MusicPack {
             val zipFile = ZipFile(filePath.toFile())
-            val files = zipFile.entries().toList().filter { file -> !file.isDirectory }
+            val files = zipFile.entries().toList()
             var metadata = Metadata(filePath.name, "")
-            val playableSoundFiles = files.filter { file -> Path(file.name).extension == "ogg" }
-                .map { file -> PlayableSoundFile(ZipSoundFile(zipFile, file))}
+            val playableSoundFiles = files
+                .filter { file ->
+                    val path = Path(file.name)
+                    return@filter path.extension == "ogg" && file.name.contains(
+                        Constants.ASSETS_DIRNAME + '/')
+                }
+                .map { file -> PlayableSoundFile(ZipSoundFile(zipFile, file)) }
                 .associateBy { file -> file.getSoundName() }
             val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
             val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
