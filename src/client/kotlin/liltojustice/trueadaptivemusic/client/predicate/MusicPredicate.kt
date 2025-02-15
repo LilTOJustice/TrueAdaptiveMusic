@@ -24,6 +24,14 @@ sealed class MusicPredicate {
                 " create one that inherits from MusicPredicateCompanion")
     }
 
+    fun getTypeName(): String {
+        val companion = javaClass.kotlin.companionObjectInstance
+        if (companion is MusicPredicateCompanion<*>) {
+            return companion.getTypeName()
+        } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
+            " create one that inherits from MusicPredicateCompanion")
+    }
+
     companion object: MusicPredicateCompanion<MusicPredicate> {
         override fun getTypeName(): String {
             throw MusicPredicateException("Attempt to get type name from abstract predicate type.")

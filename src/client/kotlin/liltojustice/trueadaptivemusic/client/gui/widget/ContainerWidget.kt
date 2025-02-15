@@ -1,13 +1,12 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.gui.widget.Widget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import java.util.function.Consumer
 
 abstract class ContainerWidget(
     width: Int,
@@ -17,7 +16,8 @@ abstract class ContainerWidget(
     x: Int = 0,
     y: Int = 0)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
-    private val children = mutableListOf<Widget>()
+    private val children = mutableListOf<ChildWidget>()
+    private val textRenderer = MinecraftClient.getInstance().textRenderer
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         render(context, mouseX, mouseY, delta)
@@ -26,15 +26,7 @@ abstract class ContainerWidget(
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         context?.setShaderColor(0.125f, 0.125f, 0.125f, 1.0f)
         context?.drawTexture(
-            OPTIONS_BACKGROUND_TEXTURE,
-            x,
-            y,
-            0F,
-            0F,
-            width,
-            height,
-            32,
-            32
+            OPTIONS_BACKGROUND_TEXTURE, x, y, 0F, 0F, width, height, 32, 32
         )
         context?.setShaderColor(1f, 1f, 1f, 1f)
 
@@ -42,68 +34,68 @@ abstract class ContainerWidget(
         {
             context?.setShaderColor(0.05f, 0.05f, 0.05f, 1.0f)
             context?.drawTexture(
-                OPTIONS_BACKGROUND_TEXTURE,
-                x,
-                y,
-                0F,
-                0F,
-                width,
-                TOP_MARGIN,
-                32,
-                32
-            )
+                OPTIONS_BACKGROUND_TEXTURE, x, y, 0F, 0F, width, TOP_MARGIN, 32, 32)
             context?.setShaderColor(1f, 1f, 1f, 1f)
-            val textRenderer = MinecraftClient.getInstance().textRenderer
-            drawCenteredText(
-                context,
-                textRenderer,
-                message.string,
-                -1,
-                width / 2,
-                shadow = true)
+            drawCenteredText(context, message.string, -1, width / 2, shadow = true)
         }
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        children.forEach { child ->
+            if (child.widget.isMouseOver(mouseX, mouseY)) {
+                child.widget.mouseClicked(mouseX, mouseY, button)
+            }
+        }
         return clicked(mouseX, mouseY)
     }
 
     protected fun drawText(
         drawContext: DrawContext?,
-        textRenderer: TextRenderer,
         text: String,
         row: Int,
         xOffset: Int = 0,
         color: Int = Colors.WHITE,
-        shadow: Boolean = false) {
+        shadow: Boolean = true) {
         drawContext?.drawText(
             textRenderer,
             text,
             X_MARGIN + xOffset + x,
-            ((row + row * 0.3) * textRenderer.fontHeight).toInt() + getHeaderOffset() + y,
+            getTranslatedY(row),
             color,
             shadow)
     }
 
     protected fun drawCenteredText(
         drawContext: DrawContext?,
-        textRenderer: TextRenderer,
         text: String,
         row: Int,
         xOffset: Int = 0,
         color: Int = Colors.WHITE,
-        shadow: Boolean = false) {
+        shadow: Boolean = true) {
         drawContext?.drawText(
             textRenderer,
             text,
             xOffset + x - textRenderer.getWidth(text) / 2,
-            ((row + row * 0.3) * textRenderer.fontHeight).toInt() + getHeaderOffset() + y,
+            getTranslatedY(row),
             color,
             shadow)
     }
 
-    open fun addChild(child: Widget) {
-        children.add(child)
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int) {
+        child.x = x + xOffset
+        child.y = getTranslatedY(row)
+        children.add(ChildWidget(child, row, xOffset))
+    }
+
+    fun refreshPositions() {
+        val oldChildren = children.toList()
+        children.clear()
+        oldChildren.forEach { child -> addWidget(child.widget, child.row, child.xOffset) }
+    }
+
+    override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
+        super.forEachChild(consumer)
+        children.forEach { child -> consumer?.accept(child.widget) }
     }
 
     companion object {
@@ -114,4 +106,10 @@ abstract class ContainerWidget(
     private fun getHeaderOffset(): Int {
         return (if (showHeader) TOP_MARGIN else 0) + 2
     }
+
+    private fun getTranslatedY(row: Int): Int {
+        return ((row + row * 0.3) * textRenderer.fontHeight).toInt() + getHeaderOffset() + y
+    }
+
+    class ChildWidget(val widget: ClickableWidget, val row: Int, val xOffset: Int) {}
 }

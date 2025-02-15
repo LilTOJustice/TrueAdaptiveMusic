@@ -35,6 +35,10 @@ class MusicManager(
         this.musicPack = musicPack
     }
 
+    fun getMusicPack(): MusicPack? {
+        return musicPack
+    }
+
     fun tick() {
         if (toStop != null) {
             client.soundManager.stop(toStop)

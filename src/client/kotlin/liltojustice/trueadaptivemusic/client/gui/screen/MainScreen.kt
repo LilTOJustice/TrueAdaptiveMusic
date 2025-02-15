@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
+import liltojustice.trueadaptivemusic.client.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
@@ -13,8 +15,10 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
     private lateinit var createNewPackButton: ButtonWidget
 
     override fun init() {
+        val packResult = Array<MusicPack?>(1) { null }
+        GetMusicPackCallback.EVENT.invoker().getPack(packResult)
         createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
-        { client?.setScreen(EditPackScreen(this)) }
+        { client?.setScreen(EditPackScreen(this, packResult[0])) }
             .build()
 
         addDrawableChild(createNewPackButton)

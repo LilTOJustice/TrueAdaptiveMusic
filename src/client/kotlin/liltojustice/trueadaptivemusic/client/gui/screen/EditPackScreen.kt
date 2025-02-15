@@ -1,21 +1,21 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.client.gui.widget.PackStructureWidget
+import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
+import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.gui.widget.GridWidget
-import net.minecraft.client.gui.widget.IconButtonWidget
-import net.minecraft.client.gui.widget.SimplePositioningWidget
+import net.minecraft.client.gui.widget.*
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create/Edit a music pack")) {
+class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack? = null)
+    : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)
         { Logger.log("Save pack clicked") }
@@ -30,21 +30,23 @@ class EditPackScreen(private val parent: Screen): Screen(Text.literal("Create/Ed
             .marginLeft(LEFT_MARGIN / 2)
             .marginRight(RIGHT_MARGIN / 2)
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
-        val packStructureWidget = PackStructureWidget(
-            width = (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-            height = (height - TOP_MARGIN - BOTTOM_MARGIN),
-            true)
+
         val predicateViewWidget = PredicateViewWidget(
-            width = (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-            height = (height - TOP_MARGIN - BOTTOM_MARGIN),
-            true)
-        packStructureWidget.onSelectPredicate { predicate -> predicateViewWidget.setPredicate(predicate) }
-        adder?.add(packStructureWidget, 2)
+            (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            (height - TOP_MARGIN - BOTTOM_MARGIN))
+        val predicateTreeWidget = PredicateTreeWidget(
+            (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            (height - TOP_MARGIN - BOTTOM_MARGIN),
+            { predicate: MusicPredicate -> predicateViewWidget.setPredicate(predicate) },
+            musicPack?.rules)
+        adder?.add(predicateTreeWidget, 2)
         adder?.add(predicateViewWidget, 1)
 
         gridWidget.refreshPositions()
         SimplePositioningWidget.setPos(
             gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
+        predicateTreeWidget.refreshPositions()
+        predicateViewWidget.refreshPositions()
         addDrawableChild(saveButtonWidget)
         gridWidget.forEachChild { drawableElement: ClickableWidget? ->
             this.addDrawableChild(

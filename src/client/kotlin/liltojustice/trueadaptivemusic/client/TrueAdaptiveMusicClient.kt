@@ -22,6 +22,11 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
             return@register ActionResult.PASS
         }
 
+        GetMusicPackCallback.EVENT.register { packResult ->
+            packResult[0] = musicManager?.getMusicPack()
+            return@register ActionResult.PASS
+        }
+
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             // Music manager needs to be initialized here otherwise the client soundManager won't be initialized yet
             if (musicManager == null)

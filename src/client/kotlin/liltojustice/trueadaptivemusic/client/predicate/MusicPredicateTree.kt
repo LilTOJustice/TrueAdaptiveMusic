@@ -12,11 +12,13 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 
+typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
+
 class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>) {
-    private class Node private constructor(
-        private val predicate: MusicPredicate,
-        private val playableSounds: List<PlayableSound>,
-        private val children: List<Node> = listOf()) {
+    class Node private constructor(
+        val predicate: MusicPredicate,
+        val playableSounds: List<PlayableSound>,
+        val children: List<Node> = listOf()) {
 
         fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<List<PlayableSound>, List<String>> {
             if (!predicate.test(client))
@@ -83,6 +85,15 @@ class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map
     fun getMusicToPlay(client: MinecraftClient): Result {
         val bottomSatisfied = root.getBottomSatisfied(client)
         return Result(bottomSatisfied.first, bottomSatisfied.second.joinToString("/"))
+    }
+
+    fun preorderTraverse(visitor: NodeVisitor) {
+        fun preorderTraverseRecursive(root: Node, visitor: NodeVisitor, depth: Int = 0) {
+            visitor(root, depth)
+            root.children.forEach { node -> preorderTraverseRecursive(node, visitor, depth + 1)}
+        }
+
+        preorderTraverseRecursive(root, visitor)
     }
 
     companion object {
