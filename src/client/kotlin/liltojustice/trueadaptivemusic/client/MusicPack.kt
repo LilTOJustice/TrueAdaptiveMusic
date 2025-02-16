@@ -17,9 +17,9 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
-class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val isZip: Boolean) {
+class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree) {
     fun copy(): MusicPack {
-        return MusicPack(metadata.copy(), rules.copy(), isZip)
+        return MusicPack(metadata.copy(), rules.copy())
     }
 
     fun initEdit(packName: String?) {
@@ -70,7 +70,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     companion object {
         fun makeEmpty(): MusicPack {
-            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), false)
+            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty())
         }
 
         fun fromFile(filePath: Path): MusicPack {
@@ -121,8 +121,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles),
-                false
+                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
             )
         }
 
@@ -159,8 +158,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
-                true
+                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
             )
         }
     }
