@@ -29,20 +29,24 @@ class PredicateTreeWidget(
                             onSelectPredicate(node.predicate) },
                         isSelected = { widget -> widget === selectedWidget}),
                     row++,
-                    depth * 5)
+                    depth * INDENT)
             },
             { node, depth ->
                 addWidget(
                     ClickableTextWidget("+ Add", onClick = {
                         node.newChild("dimension", Identifier("minecraft:overworld"))
-                        reinitializeScreen()}),
+                        reinitializeScreen()
+                    }),
                     row++,
-                    (depth + 1) * 5)
+                    (depth + 1) * INDENT)
             })
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
+    companion object {
+        const val INDENT = 10
+    }
 
 }

@@ -19,7 +19,8 @@ abstract class ContainerWidget(
     y: Int = 0)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
     private val children = mutableListOf<ChildWidget>()
-    private val textRenderer = MinecraftClient.getInstance().textRenderer
+    private val client = MinecraftClient.getInstance()
+    private val textRenderer = client.textRenderer
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         render(context, mouseX, mouseY, delta)
@@ -83,10 +84,14 @@ abstract class ContainerWidget(
             shadow)
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int) {
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int, shouldReinit: Boolean = false) {
         child.x = x + xOffset
         child.y = getTranslatedY(row)
         children.add(ChildWidget(child, row, xOffset))
+
+        if (shouldReinit) {
+            reinitializeScreen()
+        }
     }
 
     fun refreshPositions() {
@@ -101,7 +106,7 @@ abstract class ContainerWidget(
     }
 
     fun reinitializeScreen() {
-        parentScreen.resize(MinecraftClient.getInstance(), parentScreen.width, parentScreen.height)
+        client.currentScreen?.resize(client, parentScreen.width, parentScreen.height)
     }
 
     companion object {
