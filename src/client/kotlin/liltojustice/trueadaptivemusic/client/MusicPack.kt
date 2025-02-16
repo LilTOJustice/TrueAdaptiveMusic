@@ -22,8 +22,9 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         return MusicPack(metadata.copy(), rules.copy(), packName)
     }
 
-    fun initEdit() {
-        val packDir = Path(Constants.MUSIC_PACK_DIR, "$packName.bkp")
+    fun initEdit(isBkp: Boolean = false) {
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        val packDir = Path(Constants.MUSIC_PACK_DIR, packName + if (isBkp) "" else ".bkp")
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -37,11 +38,13 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         if (!rulesFile.exists()) {
             rulesFile.createFile()
         }
+        rulesFile.writeText(gson.toJson(rules.toJson()))
 
         val metaFile = Path(packDir.pathString, Constants.META_FILENAME)
         if (!metaFile.exists()) {
             metaFile.createFile()
         }
+        metaFile.writeText(gson.toJson(metadata.toJson()))
     }
 
     @OptIn(ExperimentalPathApi::class)

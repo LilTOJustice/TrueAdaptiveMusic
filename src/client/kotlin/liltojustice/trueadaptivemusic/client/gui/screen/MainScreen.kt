@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
 import liltojustice.trueadaptivemusic.client.MusicPack
 import net.fabricmc.api.EnvType
@@ -9,6 +10,10 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.text.Text
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.extension
+import kotlin.io.path.listDirectoryEntries
 
 @Environment(EnvType.CLIENT)
 class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive music")) {
@@ -16,7 +21,15 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         val packResult = Array<MusicPack?>(1) { null }
         GetMusicPackCallback.EVENT.invoker().getPack(packResult)
         val createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
-        { client?.setScreen(PackNameScreen(this)) }
+        {
+            val backup = getBackup()
+            if (backup != null) {
+                client?.setScreen(ConfirmBackupScreen(this, backup))
+                return@Builder
+            }
+
+            client?.setScreen(PackNameScreen(this))
+        }
             .build()
         val editCurrentPackButton = ButtonWidget.Builder(Text.literal("Edit current pack"))
         { client?.setScreen(EditPackScreen(this, packResult[0]?.copy() ?: return@Builder)) }
@@ -41,6 +54,11 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
                 client?.setScreen(MainScreen(parent))
             }
                 .build()
+        }
+
+        fun getBackup(): Path? {
+            return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries()
+                .firstOrNull() { file -> file.extension == "bkp"}
         }
     }
 }
