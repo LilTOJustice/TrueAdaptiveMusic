@@ -17,9 +17,9 @@ typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
 class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>) {
     class Node private constructor(
         val predicate: MusicPredicate,
-        val playableSounds: List<PlayableSound>,
-        val children: List<Node> = listOf()) {
-
+        private val playableSounds: List<PlayableSound>,
+        val children: MutableList<Node> = mutableListOf()
+    ) {
         fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<List<PlayableSound>, List<String>> {
             if (!predicate.test(client))
             {
@@ -39,6 +39,10 @@ class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map
             }
 
             return bottoms.maxBy { bottom -> bottom.second.size }
+        }
+
+        fun newChild(predicateType: String, vararg args: Any) {
+            children.add(Node(MusicPredicate.initializeFromArgs(predicateType, *args), listOf()))
         }
 
         companion object {
@@ -69,11 +73,11 @@ class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map
                  }.filterNotNull()
             }
 
-            private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): List<Node> {
+            private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")
-                        .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toList()
-                else listOf()
+                        .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()
+                else mutableListOf()
             }
         }
     }
@@ -87,13 +91,23 @@ class MusicPredicateTree private constructor(json: JsonObject, soundLibrary: Map
         return Result(bottomSatisfied.first, bottomSatisfied.second.joinToString("/"))
     }
 
-    fun preorderTraverse(visitor: NodeVisitor) {
-        fun preorderTraverseRecursive(root: Node, visitor: NodeVisitor, depth: Int = 0) {
-            visitor(root, depth)
-            root.children.forEach { node -> preorderTraverseRecursive(node, visitor, depth + 1)}
-        }
+    private fun traverseRecursive(
+        root: Node, preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null, depth: Int = 0) {
+        preorderVisitor?.invoke(root, depth)
+        root.children.forEach { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, depth + 1)}
+        postorderVisitor?.invoke(root, depth)
+    }
 
-        preorderTraverseRecursive(root, visitor)
+    fun traverse(preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null) {
+        traverseRecursive(root, preorderVisitor, postorderVisitor)
+    }
+
+    fun preorderTraverse(preorderVisitor: NodeVisitor) {
+        traverseRecursive(root, preorderVisitor = preorderVisitor)
+    }
+
+    fun postorderTraverse(postorderVisitor: NodeVisitor) {
+        traverseRecursive(root, postorderVisitor = postorderVisitor)
     }
 
     companion object {

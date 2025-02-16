@@ -31,14 +31,14 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             .marginRight(RIGHT_MARGIN / 2)
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
 
-        val predicateViewWidget = PredicateViewWidget(
+        val predicateViewWidget = PredicateViewWidget(this,
             (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN))
-        val predicateTreeWidget = PredicateTreeWidget(
+        val predicateTreeWidget = PredicateTreeWidget(this,
             (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
             { predicate: MusicPredicate -> predicateViewWidget.setPredicate(predicate) },
-            musicPack?.rules)
+            musicPack)
         adder?.add(predicateTreeWidget, 2)
         adder?.add(predicateViewWidget, 1)
 

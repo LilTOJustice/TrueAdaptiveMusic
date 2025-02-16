@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
@@ -9,6 +10,7 @@ import net.minecraft.util.Colors
 import java.util.function.Consumer
 
 abstract class ContainerWidget(
+    private val parentScreen: Screen,
     width: Int,
     height: Int,
     message: String = "",
@@ -96,6 +98,10 @@ abstract class ContainerWidget(
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
         super.forEachChild(consumer)
         children.forEach { child -> consumer?.accept(child.widget) }
+    }
+
+    fun reinitializeScreen() {
+        parentScreen.resize(MinecraftClient.getInstance(), parentScreen.width, parentScreen.height)
     }
 
     companion object {

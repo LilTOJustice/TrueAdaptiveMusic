@@ -6,6 +6,7 @@ import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.functions
+import kotlin.reflect.full.primaryConstructor
 
 sealed class MusicPredicate {
     interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
@@ -54,6 +55,22 @@ sealed class MusicPredicate {
             }
 
             throw MusicPredicateException("Invalid music predicate type: $type")
+        }
+
+        fun getTypeNames(): List<String> {
+            return MusicPredicate::class.sealedSubclasses.mapNotNull { subclass ->
+                subclass.companionObject?.functions?.firstOrNull { f ->
+                    f.name == "getTypeName"
+                }?.call(subclass.companionObjectInstance) as? String
+            }
+        }
+
+        fun initializeFromArgs(type: String, vararg args: Any): MusicPredicate {
+            return MusicPredicate::class.sealedSubclasses.firstOrNull { subclass ->
+                subclass.companionObject?.functions?.firstOrNull { f ->
+                    f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == type }
+                ?.primaryConstructor?.call(*args)
+                ?: throw MusicPredicateException("Initialization of MusicPredicate type $type failed.")
         }
     }
 }
