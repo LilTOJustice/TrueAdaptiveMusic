@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
@@ -14,11 +13,17 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack? = MusicPack.makeEmpty())
+class EditPackScreen(
+    private val parent: Screen,
+    private val musicPack: MusicPack? = MusicPack.makeEmpty(),
+    private val packName: String? = null)
     : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
-        val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)
-        { Logger.log("Save pack clicked") }
+        musicPack?.initEdit(packName)
+        val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
+            musicPack?.save()
+            this.close()
+        }
             .iconSize(9, 8)
             .textureSize(9, 8)
             .xyOffset(13, 6)

@@ -16,13 +16,13 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         val packResult = Array<MusicPack?>(1) { null }
         GetMusicPackCallback.EVENT.invoker().getPack(packResult)
         val createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
-        { client?.setScreen(EditPackScreen(this)) }
+        { client?.setScreen(PackNameScreen(this)) }
             .build()
         val editCurrentPackButton = ButtonWidget.Builder(Text.literal("Edit current pack"))
         { client?.setScreen(EditPackScreen(this, packResult[0]?.copy())) }
             .build()
 
-        addDrawableChild(editCurrentPackButton)
+        addDrawableChild(createNewPackButton)
     }
 
     override fun close() {

@@ -1,6 +1,8 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
@@ -8,18 +10,67 @@ import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.ZipSoundFile
 import net.minecraft.util.JsonHelper
+import java.io.FileOutputStream
 import java.nio.file.Path
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
-class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree) {
+class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val isZip: Boolean) {
     fun copy(): MusicPack {
-        return MusicPack(metadata.copy(), rules.copy())
+        return MusicPack(metadata.copy(), rules.copy(), isZip)
+    }
+
+    fun initEdit(packName: String?) {
+        metadata.name = packName ?: metadata.name
+        val packDir = Path(Constants.MUSIC_PACK_DIR, metadata.name + ".bkp")
+        if (!packDir.exists()) {
+            packDir.createDirectory()
+        }
+
+        val assetsDir = Path(packDir.pathString, Constants.ASSETS_DIRNAME)
+        if (!assetsDir.exists()) {
+            assetsDir.createDirectory()
+        }
+
+        val rulesFile = Path(packDir.pathString, Constants.RULES_FILENAME)
+        if (!rulesFile.exists()) {
+            rulesFile.createFile()
+        }
+
+        val metaFile = Path(packDir.pathString, Constants.META_FILENAME)
+        if (!metaFile.exists()) {
+            metaFile.createFile()
+        }
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    fun save() {
+        val packBkpDir = Path(Constants.MUSIC_PACK_DIR, metadata.name + ".bkp")
+        val packDir = Path(Constants.MUSIC_PACK_DIR, metadata.name)
+        val assetsDir = Path(packBkpDir.pathString, Constants.ASSETS_DIRNAME)
+        val rulesFile = Path(packBkpDir.pathString, Constants.RULES_FILENAME)
+        val metaFile = Path(packBkpDir.pathString, Constants.META_FILENAME)
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
+        metaFile.toFile().writeText(gson.toJson(metadata.toJson()))
+        ZipOutputStream(FileOutputStream(Path(packDir.pathString + ".zip").createFile().pathString)).use { out ->
+            out.putNextEntry(ZipEntry(rulesFile.name))
+            rulesFile.inputStream().copyTo(out)
+            out.putNextEntry(ZipEntry(metaFile.name))
+            metaFile.inputStream().copyTo(out)
+            assetsDir.listDirectoryEntries().forEach { entry ->
+                out.putNextEntry(ZipEntry(entry.name))
+                entry.inputStream().copyTo(out)
+            }
+        }
+        packBkpDir.deleteRecursively()
     }
 
     companion object {
         fun makeEmpty(): MusicPack {
-            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty())
+            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), false)
         }
 
         fun fromFile(filePath: Path): MusicPack {
@@ -70,7 +121,8 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
+                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles),
+                false
             )
         }
 
@@ -107,12 +159,21 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
+                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
+                true
             )
         }
     }
 
-    data class Metadata(val name: String = "", val description: String = "") {
+    data class Metadata(var name: String = "temp", var description: String = "") {
+        fun toJson(): JsonObject {
+            val result = JsonObject()
+            result.add("name", JsonPrimitive(name))
+            result.add("description", JsonPrimitive(name))
+
+            return result
+        }
+
         companion object {
             fun fromJson(json: JsonObject): Metadata {
                 return Metadata(
