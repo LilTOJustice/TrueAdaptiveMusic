@@ -15,13 +15,12 @@ import net.minecraft.util.Identifier
 @Environment(EnvType.CLIENT)
 class EditPackScreen(
     private val parent: Screen,
-    private val musicPack: MusicPack? = MusicPack.makeEmpty(),
-    private val packName: String? = null)
+    private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
-        musicPack?.initEdit(packName)
+        musicPack.initEdit()
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
-            musicPack?.save()
+            musicPack.save()
             this.close()
         }
             .iconSize(9, 8)

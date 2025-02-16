@@ -17,14 +17,13 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
-class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree) {
+class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
     fun copy(): MusicPack {
-        return MusicPack(metadata.copy(), rules.copy())
+        return MusicPack(metadata.copy(), rules.copy(), packName)
     }
 
-    fun initEdit(packName: String?) {
-        metadata.name = packName ?: metadata.name
-        val packDir = Path(Constants.MUSIC_PACK_DIR, metadata.name + ".bkp")
+    fun initEdit() {
+        val packDir = Path(Constants.MUSIC_PACK_DIR, "$packName.bkp")
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -47,8 +46,8 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     @OptIn(ExperimentalPathApi::class)
     fun save() {
-        val packBkpDir = Path(Constants.MUSIC_PACK_DIR, metadata.name + ".bkp")
-        val packDir = Path(Constants.MUSIC_PACK_DIR, metadata.name)
+        val packBkpDir = Path(Constants.MUSIC_PACK_DIR, "${packName}.bkp")
+        val packDir = Path(Constants.MUSIC_PACK_DIR, packName)
         val assetsDir = Path(packBkpDir.pathString, Constants.ASSETS_DIRNAME)
         val rulesFile = Path(packBkpDir.pathString, Constants.RULES_FILENAME)
         val metaFile = Path(packBkpDir.pathString, Constants.META_FILENAME)
@@ -69,8 +68,8 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     companion object {
-        fun makeEmpty(): MusicPack {
-            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty())
+        fun makeEmpty(packName: String): MusicPack {
+            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), packName)
         }
 
         fun fromFile(filePath: Path): MusicPack {
@@ -114,14 +113,11 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
             }
 
-            if (metadata.name.isEmpty()) {
-                metadata = metadata.copy(name = filePath.name)
-            }
-
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
+                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles),
+                filePath.name
             )
         }
 
@@ -151,23 +147,19 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
             }
 
-            if (metadata.name.isEmpty()) {
-                metadata = metadata.copy(name = filePath.name)
-            }
-
             return MusicPack(
                 metadata,
                 MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
+                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
+                filePath.name
             )
         }
     }
 
-    data class Metadata(var name: String = "temp", var description: String = "") {
+    data class Metadata(var description: String = "") {
         fun toJson(): JsonObject {
             val result = JsonObject()
-            result.add("name", JsonPrimitive(name))
-            result.add("description", JsonPrimitive(name))
+            result.add("description", JsonPrimitive(description))
 
             return result
         }
@@ -175,7 +167,6 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         companion object {
             fun fromJson(json: JsonObject): Metadata {
                 return Metadata(
-                    json.getAsJsonPrimitive("name")?.asString ?: "",
                     json.getAsJsonPrimitive("description")?.asString ?: "")
             }
         }

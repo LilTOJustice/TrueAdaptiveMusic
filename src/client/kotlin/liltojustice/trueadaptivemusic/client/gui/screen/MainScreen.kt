@@ -19,7 +19,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         { client?.setScreen(PackNameScreen(this)) }
             .build()
         val editCurrentPackButton = ButtonWidget.Builder(Text.literal("Edit current pack"))
-        { client?.setScreen(EditPackScreen(this, packResult[0]?.copy())) }
+        { client?.setScreen(EditPackScreen(this, packResult[0]?.copy() ?: return@Builder)) }
             .build()
 
         addDrawableChild(createNewPackButton)
