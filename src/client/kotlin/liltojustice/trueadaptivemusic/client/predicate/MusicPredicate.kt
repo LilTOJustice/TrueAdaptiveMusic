@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.companionObject
@@ -9,13 +10,18 @@ import kotlin.reflect.full.functions
 import kotlin.reflect.full.primaryConstructor
 
 sealed class MusicPredicate {
-    interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
-        fun getTypeName(): String
-        fun fromJson(json: JsonObject): TSelf
-    }
 
     abstract fun test(client: MinecraftClient): Boolean
     abstract fun getIDs(): List<String>
+
+    fun toJson(): JsonObject {
+        val result = JsonObject()
+        result.add("type", JsonPrimitive(getTypeName()))
+        result.add("id", JsonPrimitive(getIDs().firstOrNull() ?: ""))
+
+        return result
+    }
+
     fun getPredicateId(): String {
         val companion = javaClass.kotlin.companionObjectInstance
         if (companion is MusicPredicateCompanion<*>)
@@ -72,5 +78,10 @@ sealed class MusicPredicate {
                 ?.primaryConstructor?.call(*args)
                 ?: throw MusicPredicateException("Initialization of MusicPredicate type $type failed.")
         }
+    }
+
+    interface MusicPredicateCompanion<TSelf> where TSelf: MusicPredicate {
+        fun getTypeName(): String
+        fun fromJson(json: JsonObject): TSelf
     }
 }

@@ -12,8 +12,16 @@ import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.*
 
-class MusicPack private constructor(val path: Path, val metadata: Metadata, val rules: MusicPredicateTree) {
+class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree) {
+    fun copy(): MusicPack {
+        return MusicPack(metadata.copy(), rules.copy())
+    }
+
     companion object {
+        fun makeEmpty(): MusicPack {
+            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty())
+        }
+
         fun fromFile(filePath: Path): MusicPack {
             val zip = filePath.extension == "zip"
             if (!zip && !filePath.isDirectory()) {
@@ -30,7 +38,7 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
 
         private fun fromDirectory(filePath: Path): MusicPack {
             val files = filePath.listDirectoryEntries()
-            var metadata = Metadata(filePath.name, "")
+            var metadata = Metadata()
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
             if (assetsDir == null)
             {
@@ -55,8 +63,11 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
             }
 
+            if (metadata.name.isEmpty()) {
+                metadata = metadata.copy(name = filePath.name)
+            }
+
             return MusicPack(
-                filePath,
                 metadata,
                 MusicPredicateTree.fromJson(
                     JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
@@ -66,7 +77,7 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
         private fun fromZipFile(filePath: Path): MusicPack {
             val zipFile = ZipFile(filePath.toFile())
             val files = zipFile.entries().toList()
-            var metadata = Metadata(filePath.name, "")
+            var metadata = Metadata()
             val playableSoundFiles = files
                 .filter { file ->
                     val path = Path(file.name)
@@ -89,8 +100,11 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
             }
 
+            if (metadata.name.isEmpty()) {
+                metadata = metadata.copy(name = filePath.name)
+            }
+
             return MusicPack(
-                filePath,
                 metadata,
                 MusicPredicateTree.fromJson(
                     JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
@@ -98,7 +112,7 @@ class MusicPack private constructor(val path: Path, val metadata: Metadata, val 
         }
     }
 
-    data class Metadata(val name: String, val description: String) {
+    data class Metadata(val name: String = "", val description: String = "") {
         companion object {
             fun fromJson(json: JsonObject): Metadata {
                 return Metadata(

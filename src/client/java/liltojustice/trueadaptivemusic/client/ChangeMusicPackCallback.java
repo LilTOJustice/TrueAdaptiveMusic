@@ -18,10 +18,10 @@ public interface ChangeMusicPackCallback {
                     ActionResult result = listener.selectPack(pack);
                     try (FileOutputStream outputStream = new FileOutputStream(
                             Paths.get(Constants.SELECTED_PACK).toFile(), false)) {
-                        outputStream.write(pack.getPath().getFileName().toString().getBytes());
+                        outputStream.write(pack.getMetadata().getName().getBytes());
                     } catch (IOException ignored) {
                         Logger.Companion.log(
-                                "Failed to save selected pack " + pack.getPath().getFileName(), LogLevel.ERROR);
+                                "Failed to save selected pack \"" + pack.getMetadata().getName() + '\"', LogLevel.ERROR);
                     }
 
                     if (result != ActionResult.PASS) {

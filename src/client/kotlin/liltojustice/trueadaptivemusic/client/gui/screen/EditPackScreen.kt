@@ -14,7 +14,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack? = null)
+class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack? = MusicPack.makeEmpty())
     : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK)

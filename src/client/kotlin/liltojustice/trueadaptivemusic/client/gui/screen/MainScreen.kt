@@ -12,16 +12,17 @@ import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
 class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive music")) {
-    private lateinit var createNewPackButton: ButtonWidget
-
     override fun init() {
         val packResult = Array<MusicPack?>(1) { null }
         GetMusicPackCallback.EVENT.invoker().getPack(packResult)
-        createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
-        { client?.setScreen(EditPackScreen(this, packResult[0])) }
+        val createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
+        { client?.setScreen(EditPackScreen(this)) }
+            .build()
+        val editCurrentPackButton = ButtonWidget.Builder(Text.literal("Edit current pack"))
+        { client?.setScreen(EditPackScreen(this, packResult[0]?.copy())) }
             .build()
 
-        addDrawableChild(createNewPackButton)
+        addDrawableChild(editCurrentPackButton)
     }
 
     override fun close() {
