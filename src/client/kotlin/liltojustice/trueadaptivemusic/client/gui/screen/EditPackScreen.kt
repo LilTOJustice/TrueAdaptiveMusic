@@ -37,10 +37,10 @@ class EditPackScreen(
             .marginRight(RIGHT_MARGIN / 2)
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
 
-        val predicateViewWidget = PredicateViewWidget(this,
+        val predicateViewWidget = PredicateViewWidget(
             (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN))
-        val predicateTreeWidget = PredicateTreeWidget(this,
+        val predicateTreeWidget = PredicateTreeWidget(
             (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
             { predicate: MusicPredicate -> predicateViewWidget.setPredicate(predicate) },

@@ -2,12 +2,10 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.util.Identifier
 
 class PredicateTreeWidget(
-    parentScreen: Screen,
     width: Int,
     height: Int,
     private val onSelectPredicate: (predicate: MusicPredicate) -> Unit = {},
