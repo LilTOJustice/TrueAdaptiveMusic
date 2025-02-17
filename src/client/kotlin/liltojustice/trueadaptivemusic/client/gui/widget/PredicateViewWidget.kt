@@ -2,10 +2,9 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 
-class PredicateViewWidget(parentScreen: Screen, width: Int, height: Int, x: Int = 0, y: Int = 0)
+class PredicateViewWidget(width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "Predicate View", true, x, y) {
     private var selectedPredicate: MusicPredicate? = null
 
