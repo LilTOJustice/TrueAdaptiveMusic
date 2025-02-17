@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 
 class PredicateViewWidget(parentScreen: Screen, width: Int, height: Int, x: Int = 0, y: Int = 0)
-    : ContainerWidget(parentScreen, width, height, "Predicate View", true, x, y) {
+    : ContainerWidget(width, height, "Predicate View", true, x, y) {
     private var selectedPredicate: MusicPredicate? = null
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
