@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
@@ -23,10 +24,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     fun initEdit(packWithAssets: MusicPack? = null) {
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val packDir = Path(
-            Constants.MUSIC_PACK_DIR,
-            "${Path(packName).nameWithoutExtension}.new")
+        val packDir = getPackDir()
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -51,17 +49,26 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
         }
 
-        val rulesFile = Path(packDir.pathString, Constants.RULES_FILENAME)
+        initRules()
+        initMeta()
+    }
+
+    fun initRules() {
+        val rulesFile = Path(getPackDir().pathString, Constants.RULES_FILENAME)
+
         if (!rulesFile.exists()) {
             rulesFile.createFile()
         }
-        rulesFile.writeText(gson.toJson(rules.toJson()))
 
-        val metaFile = Path(packDir.pathString, Constants.META_FILENAME)
+        rulesFile.writeText(getGson().toJson(rules.toJson()))
+    }
+
+    fun initMeta() {
+        val metaFile = Path(getPackDir().pathString, Constants.META_FILENAME)
         if (!metaFile.exists()) {
             metaFile.createFile()
         }
-        metaFile.writeText(gson.toJson(metadata.toJson()))
+        metaFile.writeText(getGson().toJson(metadata.toJson()))
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -87,6 +94,14 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
         }
         packOngoingDir.deleteRecursively()
+    }
+
+    private fun getGson(): Gson {
+        return GsonBuilder().setPrettyPrinting().create()
+    }
+
+    private fun getPackDir(): Path {
+        return Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
     }
 
     private fun isZipped(): Boolean {
