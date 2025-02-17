@@ -38,7 +38,7 @@ class PredicateTreeWidget(
                 addWidget(
                     ClickableTextWidget("+ Add", onClick = {
                         node.newChild("dimension", Identifier("minecraft:overworld"))
-                        musicPack.initEdit(true)
+                        musicPack.initEdit()
                         initPredicateWidgets()
                     }),
                     row++,

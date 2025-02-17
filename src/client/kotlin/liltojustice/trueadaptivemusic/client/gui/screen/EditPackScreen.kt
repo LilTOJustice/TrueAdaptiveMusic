@@ -19,7 +19,7 @@ class EditPackScreen(
     private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
-        musicPack.initEdit(true)
+        musicPack.initEdit(musicPack)
 
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
             musicPack.save()

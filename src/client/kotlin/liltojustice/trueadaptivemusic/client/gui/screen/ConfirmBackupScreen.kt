@@ -14,7 +14,8 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 @Environment(EnvType.CLIENT)
-class ConfirmBackupScreen(private val parent: Screen, private val backupPath: Path)
+class ConfirmBackupScreen(
+    private val parent: Screen, private val backupPath: Path, private val deleteDestination: Screen)
     : Screen(Text.literal("Backup Exists")) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
@@ -27,7 +28,7 @@ class ConfirmBackupScreen(private val parent: Screen, private val backupPath: Pa
             .build()
         val deleteButtonWidget = ButtonWidget.Builder(Text.literal("Delete")) {
             backupPath.deleteRecursively()
-            client?.setScreen(PackNameScreen(parent))
+            client?.setScreen(deleteDestination)
         }
             .build()
         acceptButtonWidget.width = 60
@@ -49,13 +50,13 @@ class ConfirmBackupScreen(private val parent: Screen, private val backupPath: Pa
         renderBackground(context)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
-            "Existing backup pack $backupPath already exists.",
+            "Unsaved pack edit $backupPath already exists.",
             width / 2,
             height / 2,
             Colors.WHITE)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
-            "Do you want to keep and continue editing it, or delete it and make a new pack?",
+            "Do you want to keep and continue editing it, or delete it and continue?",
             width / 2,
             height / 2 + textRenderer.fontHeight + 5,
             Colors.WHITE)

@@ -24,7 +24,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         {
             val ongoingEdit = getOngoingEdit()
             if (ongoingEdit != null) {
-                client?.setScreen(ConfirmBackupScreen(this, ongoingEdit))
+                client?.setScreen(ConfirmBackupScreen(this, ongoingEdit, PackNameScreen(this)))
                 return@Builder
             }
 
@@ -32,7 +32,20 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         }
             .build()
         val editCurrentPackButton = ButtonWidget.Builder(Text.literal("Edit current pack"))
-        { client?.setScreen(EditPackScreen(this, packResult[0]?.copy() ?: return@Builder)) }
+        {
+            val ongoingEdit = getOngoingEdit()
+            val editScreen = EditPackScreen(this, packResult[0]?.copy() ?: return@Builder)
+            if (ongoingEdit != null) {
+                client?.setScreen(
+                    ConfirmBackupScreen(
+                        this,
+                        ongoingEdit,
+                        editScreen))
+                return@Builder
+            }
+
+            client?.setScreen(editScreen)
+        }
             .build()
 
         addDrawableChild(createNewPackButton)

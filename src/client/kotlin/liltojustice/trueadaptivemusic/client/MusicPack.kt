@@ -22,11 +22,11 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         return MusicPack(metadata.copy(), rules.copy(), packName)
     }
 
-    fun initEdit(forNew: Boolean = false) {
+    fun initEdit(packWithAssets: MusicPack? = null) {
         val gson = GsonBuilder().setPrettyPrinting().create()
         val packDir = Path(
             Constants.MUSIC_PACK_DIR,
-            Path(packName).nameWithoutExtension + if (forNew) ".new" else "")
+            "${Path(packName).nameWithoutExtension}.new")
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -34,6 +34,21 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         val assetsDir = Path(packDir.pathString, Constants.ASSETS_DIRNAME)
         if (!assetsDir.exists()) {
             assetsDir.createDirectory()
+            if (packWithAssets?.isZipped() == true) {
+                val zip = ZipFile(Path(Constants.MUSIC_PACK_DIR, packWithAssets.packName).pathString)
+                zip.entries().toList().filter { entry -> Path(entry.name).extension == "ogg" }.forEach { entry ->
+                    FileOutputStream(Path(assetsDir.pathString, Path(entry.name).name).pathString).use { out ->
+                        zip.getInputStream(entry).use { stream -> stream.copyTo(out) }
+                    }
+                }
+            }
+            else if (packWithAssets != null) {
+                val existingAssets = Path(Constants.MUSIC_PACK_DIR, packWithAssets.packName, Constants.ASSETS_DIRNAME)
+
+                if (existingAssets.exists()) {
+                    existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
+                }
+            }
         }
 
         val rulesFile = Path(packDir.pathString, Constants.RULES_FILENAME)
@@ -59,7 +74,9 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
         metaFile.toFile().writeText(gson.toJson(metadata.toJson()))
-        ZipOutputStream(FileOutputStream(Path(packDir.pathString + ".zip").createFile().pathString)).use { out ->
+        val outputPath = Path(packDir.pathString + ".zip")
+        outputPath.deleteIfExists()
+        ZipOutputStream(FileOutputStream(outputPath.createFile().pathString)).use { out ->
             out.putNextEntry(ZipEntry(rulesFile.name))
             rulesFile.inputStream().copyTo(out)
             out.putNextEntry(ZipEntry(metaFile.name))
@@ -70,6 +87,10 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
         }
         packOngoingDir.deleteRecursively()
+    }
+
+    private fun isZipped(): Boolean {
+        return Path(packName).extension == "zip"
     }
 
     companion object {
@@ -127,37 +148,38 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         }
 
         private fun fromZipFile(filePath: Path): MusicPack {
-            val zipFile = ZipFile(filePath.toFile())
-            val files = zipFile.entries().toList()
-            var metadata = Metadata()
-            val playableSoundFiles = files
-                .filter { file ->
-                    val path = Path(file.name)
-                    return@filter path.extension == "ogg" && file.name.contains(
-                        Constants.ASSETS_DIRNAME + '/')
+            ZipFile(filePath.toFile()).use { zipFile ->
+                val files = zipFile.entries().toList()
+                var metadata = Metadata()
+                val playableSoundFiles = files
+                    .filter { file ->
+                        val path = Path(file.name)
+                        return@filter path.extension == "ogg" && file.name.contains(
+                            Constants.ASSETS_DIRNAME + '/')
+                    }
+                    .map { file -> PlayableSoundFile(ZipSoundFile(zipFile, file)) }
+                    .associateBy { file -> file.getSoundName() }
+                val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
+                val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
+
+                if (metaFile != null)
+                {
+                    metadata = Metadata.fromJson(JsonHelper.deserialize(zipFile.getInputStream(metaFile).reader()))
                 }
-                .map { file -> PlayableSoundFile(ZipSoundFile(zipFile, file)) }
-                .associateBy { file -> file.getSoundName() }
-            val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
-            val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
 
-            if (metaFile != null)
-            {
-                metadata = Metadata.fromJson(JsonHelper.deserialize(zipFile.getInputStream(metaFile).reader()))
+                if (rulesFile == null)
+                {
+                    throw MusicLoadException(
+                        "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
+                }
+
+                return MusicPack(
+                    metadata,
+                    MusicPredicateTree.fromJson(
+                        JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
+                    filePath.name
+                )
             }
-
-            if (rulesFile == null)
-            {
-                throw MusicLoadException(
-                    "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
-            }
-
-            return MusicPack(
-                metadata,
-                MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
-                filePath.name
-            )
         }
     }
 
