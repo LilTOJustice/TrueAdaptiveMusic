@@ -22,9 +22,9 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         GetMusicPackCallback.EVENT.invoker().getPack(packResult)
         val createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
         {
-            val backup = getBackup()
-            if (backup != null) {
-                client?.setScreen(ConfirmBackupScreen(this, backup))
+            val ongoingEdit = getOngoingEdit()
+            if (ongoingEdit != null) {
+                client?.setScreen(ConfirmBackupScreen(this, ongoingEdit))
                 return@Builder
             }
 
@@ -56,9 +56,9 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
                 .build()
         }
 
-        fun getBackup(): Path? {
+        fun getOngoingEdit(): Path? {
             return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries()
-                .firstOrNull() { file -> file.extension == "bkp"}
+                .firstOrNull() { file -> file.extension == "new"}
         }
     }
 }

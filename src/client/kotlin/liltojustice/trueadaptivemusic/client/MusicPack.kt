@@ -22,9 +22,11 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         return MusicPack(metadata.copy(), rules.copy(), packName)
     }
 
-    fun initEdit(isBkp: Boolean = false) {
+    fun initEdit(forNew: Boolean = false) {
         val gson = GsonBuilder().setPrettyPrinting().create()
-        val packDir = Path(Constants.MUSIC_PACK_DIR, packName + if (isBkp) "" else ".bkp")
+        val packDir = Path(
+            Constants.MUSIC_PACK_DIR,
+            Path(packName).nameWithoutExtension + if (forNew) ".new" else "")
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -49,11 +51,11 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     @OptIn(ExperimentalPathApi::class)
     fun save() {
-        val packBkpDir = Path(Constants.MUSIC_PACK_DIR, "${packName}.bkp")
-        val packDir = Path(Constants.MUSIC_PACK_DIR, packName)
-        val assetsDir = Path(packBkpDir.pathString, Constants.ASSETS_DIRNAME)
-        val rulesFile = Path(packBkpDir.pathString, Constants.RULES_FILENAME)
-        val metaFile = Path(packBkpDir.pathString, Constants.META_FILENAME)
+        val packOngoingDir = Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
+        val packDir = Path(Constants.MUSIC_PACK_DIR, Path(packName).nameWithoutExtension)
+        val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
+        val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
+        val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
         metaFile.toFile().writeText(gson.toJson(metadata.toJson()))
@@ -67,7 +69,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                 entry.inputStream().copyTo(out)
             }
         }
-        packBkpDir.deleteRecursively()
+        packOngoingDir.deleteRecursively()
     }
 
     companion object {

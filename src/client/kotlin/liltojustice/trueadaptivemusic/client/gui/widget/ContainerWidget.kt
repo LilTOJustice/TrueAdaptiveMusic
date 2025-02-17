@@ -2,15 +2,14 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
-import java.util.function.Consumer
+import kotlin.math.max
+import kotlin.math.min
 
 abstract class ContainerWidget(
-    private val parentScreen: Screen,
     width: Int,
     height: Int,
     message: String = "",
@@ -21,6 +20,7 @@ abstract class ContainerWidget(
     private val children = mutableListOf<ChildWidget>()
     private val client = MinecraftClient.getInstance()
     private val textRenderer = client.textRenderer
+    private var scrollPosition = 0
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         render(context, mouseX, mouseY, delta)
@@ -41,15 +41,39 @@ abstract class ContainerWidget(
             context?.setShaderColor(1f, 1f, 1f, 1f)
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
         }
+
+        children.forEach { child ->
+            val translated = child.translated(scrollPosition)
+            translated.widget.x = x + translated.xOffset
+            translated.widget.y = getTranslatedY(translated.row)
+            if (translated.row >= 0 && translated.row < totalRows() - 1)
+            {
+                translated.widget.render(context, mouseX, mouseY, delta)
+            }
+        }
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        children.forEach { child ->
+        // Copy to avoid concurrent modification
+        val children = children.toList()
+        children.forEachIndexed { index, child ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseClicked(mouseX, mouseY, button)
             }
         }
+
         return clicked(mouseX, mouseY)
+    }
+
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
+        if (!isMouseOver(mouseX, mouseY)) {
+            return false
+        }
+
+        scrollPosition -= amount.toInt()
+        scrollPosition = max(0, scrollPosition)
+        scrollPosition = min(scrollPosition, maxUsedRow())
+        return super.mouseScrolled(mouseX, mouseY, amount)
     }
 
     protected fun drawText(
@@ -84,34 +108,12 @@ abstract class ContainerWidget(
             shadow)
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int, shouldReinit: Boolean = false) {
-        child.x = x + xOffset
-        child.y = getTranslatedY(row)
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int) {
         children.add(ChildWidget(child, row, xOffset))
-
-        if (shouldReinit) {
-            reinitializeScreen()
-        }
     }
 
-    fun refreshPositions() {
-        val oldChildren = children.toList()
+    fun clearWidgets() {
         children.clear()
-        oldChildren.forEach { child -> addWidget(child.widget, child.row, child.xOffset) }
-    }
-
-    override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
-        super.forEachChild(consumer)
-        children.forEach { child -> consumer?.accept(child.widget) }
-    }
-
-    fun reinitializeScreen() {
-        client.currentScreen?.resize(client, parentScreen.width, parentScreen.height)
-    }
-
-    companion object {
-        private const val TOP_MARGIN = 12
-        private const val X_MARGIN = 5
     }
 
     private fun getHeaderOffset(): Int {
@@ -119,8 +121,28 @@ abstract class ContainerWidget(
     }
 
     private fun getTranslatedY(row: Int): Int {
-        return ((row + row * 0.3) * textRenderer.fontHeight).toInt() + getHeaderOffset() + y
+        return (row * getRowHeight(textRenderer.fontHeight)).toInt() + getHeaderOffset() + y
     }
 
-    class ChildWidget(val widget: ClickableWidget, val row: Int, val xOffset: Int) {}
+    private fun totalRows(): Int {
+        return (height / getRowHeight(textRenderer.fontHeight)).toInt()
+    }
+
+    private fun maxUsedRow(): Int {
+        return children.maxByOrNull { child -> child.row }?.row ?: 0
+    }
+
+    companion object {
+        private const val TOP_MARGIN = 12
+        private const val X_MARGIN = 5
+        private fun getRowHeight(fontHeight: Int): Double {
+            return (1.3 * fontHeight)
+        }
+    }
+
+    data class ChildWidget(val widget: ClickableWidget, val row: Int, val xOffset: Int) {
+        fun translated(row: Int, xOffset: Int = 0): ChildWidget {
+            return copy(row = this.row - row, xOffset = this.xOffset + xOffset)
+        }
+    }
 }

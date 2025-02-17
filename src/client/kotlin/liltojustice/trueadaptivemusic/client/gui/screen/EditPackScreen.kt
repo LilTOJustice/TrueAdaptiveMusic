@@ -10,16 +10,16 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.*
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
 class EditPackScreen(
     private val parent: Screen,
-    private val musicPack: MusicPack,
-    private val isBkp: Boolean = false)
+    private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     override fun init() {
-        musicPack.initEdit(isBkp)
+        musicPack.initEdit(true)
 
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
             musicPack.save()
@@ -51,8 +51,6 @@ class EditPackScreen(
         gridWidget.refreshPositions()
         SimplePositioningWidget.setPos(
             gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
-        predicateTreeWidget.refreshPositions()
-        predicateViewWidget.refreshPositions()
         addDrawableChild(saveButtonWidget)
         gridWidget.forEachChild { drawableElement: ClickableWidget? ->
             this.addDrawableChild(
@@ -67,7 +65,7 @@ class EditPackScreen(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         renderBackground(context)
-        context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 12, 16777215)
+        context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 12, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
     }
 

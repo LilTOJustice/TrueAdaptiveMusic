@@ -11,13 +11,18 @@ class PredicateTreeWidget(
     width: Int,
     height: Int,
     private val onSelectPredicate: (predicate: MusicPredicate) -> Unit = {},
-    musicPack: MusicPack? = null,
+    private val musicPack: MusicPack? = null,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(parentScreen, width, height, "Pack Structure", true, x, y) {
+    : ContainerWidget(width, height, "Pack Structure", true, x, y) {
      private var selectedWidget: ClickableTextWidget? = null
 
     init {
+        initPredicateWidgets()
+    }
+
+    private fun initPredicateWidgets() {
+        clearWidgets()
         var row = 0
         musicPack?.rules?.traverse(
             { node, depth ->
@@ -35,8 +40,8 @@ class PredicateTreeWidget(
                 addWidget(
                     ClickableTextWidget("+ Add", onClick = {
                         node.newChild("dimension", Identifier("minecraft:overworld"))
-                        reinitializeScreen()
-                        musicPack.initEdit()
+                        musicPack.initEdit(true)
+                        initPredicateWidgets()
                     }),
                     row++,
                     (depth + 1) * INDENT)
@@ -49,5 +54,4 @@ class PredicateTreeWidget(
     companion object {
         const val INDENT = 10
     }
-
 }

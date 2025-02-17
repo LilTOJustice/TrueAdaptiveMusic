@@ -19,7 +19,7 @@ class ConfirmBackupScreen(private val parent: Screen, private val backupPath: Pa
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
         val acceptButtonWidget = IconButtonWidget.Builder(Text.literal("Keep"), CHECKMARK) {
-            client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath), true))
+            client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath)))
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
