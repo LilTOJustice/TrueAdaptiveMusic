@@ -6,18 +6,20 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import kotlin.math.min
 
 class ClickableTextWidget(
     private val text: String,
     x: Int = 0,
     y: Int = 0,
+    minWidth: Int = 0,
     private val onClick: (ClickableTextWidget) -> Unit = {},
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
     : ClickableWidget(x, y, 0, 0, Text.literal(text)) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
-        width = textRenderer.getWidth(text)
+        width = if (minWidth > 0) min(textRenderer.getWidth(text), minWidth) else textRenderer.getWidth(text)
         height = textRenderer.fontHeight
     }
 
