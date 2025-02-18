@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client.gui.screen
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
@@ -43,7 +42,8 @@ class EditPackScreen(
         val predicateTreeWidget = PredicateTreeWidget(
             (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
-            { predicate: MusicPredicate -> predicateViewWidget.setPredicate(predicate) },
+            { predicate -> predicateViewWidget.setEditPredicate(predicate) },
+            { parent -> predicateViewWidget.setCreateNewPredicate(parent) },
             musicPack)
         adder?.add(predicateTreeWidget, 2)
         adder?.add(predicateViewWidget, 1)

@@ -12,12 +12,15 @@ import kotlin.math.min
 abstract class ContainerWidget(
     width: Int,
     height: Int,
-    message: String = "",
-    private var showHeader: Boolean = false,
+    message: String,
+    private var showHeader: Boolean,
+    private var bordered: Boolean,
     x: Int = 0,
     y: Int = 0)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
-    private val children = mutableListOf<ChildWidget>()
+    protected var enabled = true
+    private var wasDisabled = false
+    private val children = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
     private val textRenderer = client.textRenderer
     private var scrollPosition = 0
@@ -27,10 +30,40 @@ abstract class ContainerWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        context?.setShaderColor(0.125f, 0.125f, 0.125f, 1.0f)
-        context?.drawTexture(
-            OPTIONS_BACKGROUND_TEXTURE, x, y, 0F, 0F, width, height, 32, 32
-        )
+        if (!enabled && !wasDisabled) {
+            wasDisabled = true
+            active = false
+            children.forEach { (_, child) ->
+                child.widget.active = false
+                (child.widget as? ContainerWidget)?.enabled = false
+            }
+
+            return
+        }
+        else if (enabled) {
+            wasDisabled = false
+            active = true
+            children.forEach { (_, child) ->
+                child.widget.active = true
+                (child.widget as? ContainerWidget)?.enabled = true
+            }
+        }
+        else {
+            return
+        }
+
+        if (bordered) {
+            context?.setShaderColor(0f, 0f, 0f, 1f)
+            context?.drawTexture(
+                OPTIONS_BACKGROUND_TEXTURE, x, y, 0f, 0f, width, height, 32, 32
+            )
+        }
+        else {
+            context?.setShaderColor(0.125f, 0.125f, 0.125f, 1.0f)
+            context?.drawTexture(
+                OPTIONS_BACKGROUND_TEXTURE, x, y, 0f, 0f, width, height, 32, 32
+            )
+        }
         context?.setShaderColor(1f, 1f, 1f, 1f)
 
         if (showHeader)
@@ -42,9 +75,13 @@ abstract class ContainerWidget(
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
         }
 
-        children.forEach { child ->
+        if (bordered) {
+            context?.drawBorder(x, y, width, height, Colors.WHITE)
+        }
+
+        children.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
-            translated.widget.x = x + translated.xOffset
+            translated.widget.x = x + translated.xOffset + X_MARGIN
             translated.widget.y = getTranslatedY(translated.row)
             if (translated.row >= 0 && translated.row < totalRows() - 1)
             {
@@ -56,7 +93,7 @@ abstract class ContainerWidget(
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         // Copy to avoid concurrent modification
         val children = children.toList()
-        children.forEachIndexed { index, child ->
+        children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseClicked(mouseX, mouseY, button)
             }
@@ -108,8 +145,11 @@ abstract class ContainerWidget(
             shadow)
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int) {
-        children.add(ChildWidget(child, row, xOffset))
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0, widgetId: String = "") {
+        val hash = widgetId.ifEmpty { child.hashCode().toString() }
+        if (!children.containsKey(hash)) {
+            children[hash] = ChildWidget(child, row, xOffset)
+        }
     }
 
     fun clearWidgets() {
@@ -129,7 +169,7 @@ abstract class ContainerWidget(
     }
 
     private fun maxUsedRow(): Int {
-        return children.maxByOrNull { child -> child.row }?.row ?: 0
+        return children.maxByOrNull { (_, child) -> child.row }?.value?.row ?: 0
     }
 
     companion object {
