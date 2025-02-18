@@ -23,7 +23,8 @@ class ClickableTextWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        if (isSelected(this)) {
+        val selected = isSelected(this)
+        if (selected) {
             context?.drawBorder(
                 x - BORDER_BUFFER / 2,
                 y - BORDER_BUFFER / 2,
@@ -32,7 +33,7 @@ class ClickableTextWidget(
                 Colors.WHITE)
         }
 
-        if (showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+        if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
@@ -53,6 +54,6 @@ class ClickableTextWidget(
     }
 
     companion object {
-        const val BORDER_BUFFER = 2
+        const val BORDER_BUFFER = 4
     }
 }
