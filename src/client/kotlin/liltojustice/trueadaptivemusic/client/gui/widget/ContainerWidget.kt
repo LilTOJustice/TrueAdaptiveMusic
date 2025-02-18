@@ -8,6 +8,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 abstract class ContainerWidget(
     width: Int,
@@ -16,7 +17,8 @@ abstract class ContainerWidget(
     private var showHeader: Boolean,
     private var bordered: Boolean,
     x: Int = 0,
-    y: Int = 0)
+    y: Int = 0,
+    private val translucentInteract: Boolean = true)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
     protected var enabled = true
     private var wasDisabled = false
@@ -79,11 +81,13 @@ abstract class ContainerWidget(
             context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
+        drawScrollBar(context)
+
         children.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
             translated.widget.x = x + translated.xOffset + X_MARGIN
             translated.widget.y = getTranslatedY(translated.row)
-            if (translated.row >= 0 && translated.row <= totalRows())
+            if (translated.row >= 0 && translated.row < totalRows())
             {
                 translated.widget.render(context, mouseX, mouseY, delta)
             }
@@ -108,6 +112,12 @@ abstract class ContainerWidget(
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseScrolled(mouseX, mouseY, amount)
+                if (translucentInteract)
+                {
+                    return@forEach
+                }
+
+                return@mouseScrolled true
             }
         }
 
@@ -116,9 +126,10 @@ abstract class ContainerWidget(
         }
 
         scrollPosition -= amount.toInt()
-        scrollPosition = min(scrollPosition, maxUsedRow() - totalRows())
+        scrollPosition = min(scrollPosition, (maxUsedRow() + 1) - totalRows())
         scrollPosition = max(0, scrollPosition)
-        return super.mouseScrolled(mouseX, mouseY, amount)
+
+        return true
     }
 
     protected fun drawText(
@@ -196,18 +207,34 @@ abstract class ContainerWidget(
     }
 
     private fun totalRows(): Int {
-        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).toInt()
+        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).roundToInt()
     }
 
     private fun maxUsedRow(): Int {
         return children.maxByOrNull { (_, child) -> child.row }?.value?.row ?: 0
     }
 
+    private fun drawScrollBar(context: DrawContext?) {
+        val usedRows = maxUsedRow() + 1
+        val totalRows = totalRows()
+        if (usedRows > totalRows) {
+            val rowHeight = getRowHeight(textRenderer.fontHeight)
+            val ratio = totalRows.toDouble() / usedRows
+            val start = scrollPosition * ratio
+            val end = start + ratio * totalRows
+            context?.drawVerticalLine(
+                x + width - 3,
+                (y + start * rowHeight + getHeaderOffset()).toInt(),
+                (y + end * rowHeight + getHeaderOffset()).toInt(),
+                Colors.WHITE)
+        }
+    }
+
     companion object {
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
         private fun getRowHeight(fontHeight: Int): Double {
-            return (1.35 * fontHeight)
+            return (1.4 * fontHeight)
         }
     }
 
