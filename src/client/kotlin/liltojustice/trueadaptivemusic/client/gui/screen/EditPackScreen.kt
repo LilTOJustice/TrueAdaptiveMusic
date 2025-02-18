@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
@@ -21,7 +22,8 @@ class EditPackScreen(
         musicPack.initEdit(musicPack)
 
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
-            musicPack.save()
+            val path = musicPack.save()
+            ChangeMusicPackCallback.EVENT.invoker().selectPack(MusicPack.fromFile(path))
             this.close()
         }
             .iconSize(9, 8)

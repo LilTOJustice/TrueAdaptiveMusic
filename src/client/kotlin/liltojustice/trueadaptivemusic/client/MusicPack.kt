@@ -72,7 +72,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun save() {
+    fun save(): Path {
         val packOngoingDir = Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
         val packDir = Path(Constants.MUSIC_PACK_DIR, Path(packName).nameWithoutExtension)
         val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
@@ -94,6 +94,8 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
         }
         packOngoingDir.deleteRecursively()
+
+        return outputPath
     }
 
     private fun getGson(): Gson {
