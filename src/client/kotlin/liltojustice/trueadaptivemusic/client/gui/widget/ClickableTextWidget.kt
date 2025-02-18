@@ -11,6 +11,7 @@ class ClickableTextWidget(
     private val text: String,
     x: Int = 0,
     y: Int = 0,
+    private val showHighlight: Boolean = true,
     private val onClick: (ClickableTextWidget) -> Unit = {},
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
     : ClickableWidget(x, y, 0, 0, Text.literal(text)) {
@@ -31,7 +32,7 @@ class ClickableTextWidget(
                 Colors.WHITE)
         }
 
-        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+        if (showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 

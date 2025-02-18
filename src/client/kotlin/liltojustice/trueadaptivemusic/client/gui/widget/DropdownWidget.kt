@@ -43,7 +43,9 @@ class DropdownWidget(
         }
         else {
             addWidgetFromRender(
-                { ClickableTextWidget(selectedOption, onClick = { open() }) }, selectedOption, 0)
+                { ClickableTextWidget(selectedOption, showHighlight = false, onClick = { open() }) },
+                selectedOption,
+                0)
         }
         fitToUsedRows(MAX_DISPLAYED_OPTIONS)
     }
