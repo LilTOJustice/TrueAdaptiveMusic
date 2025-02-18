@@ -103,6 +103,14 @@ abstract class ContainerWidget(
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
+        // Copy to avoid concurrent modification
+        val children = children.toList()
+        children.forEach { (_, child) ->
+            if (child.widget.isMouseOver(mouseX, mouseY)) {
+                child.widget.mouseScrolled(mouseX, mouseY, amount)
+            }
+        }
+
         if (!isMouseOver(mouseX, mouseY)) {
             return false
         }
@@ -174,7 +182,7 @@ abstract class ContainerWidget(
     }
 
     fun fitToUsedRows(maxRows: Int = 0) {
-        height = (((if (maxRows > 0) maxRows else maxUsedRow()) + 1)
+        height = (((if (maxRows > 0) min(maxRows - 1, maxUsedRow()) else maxUsedRow()) + 1)
                 * getRowHeight(textRenderer.fontHeight)
                 + getHeaderOffset()).toInt()
     }
@@ -199,7 +207,7 @@ abstract class ContainerWidget(
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
         private fun getRowHeight(fontHeight: Int): Double {
-            return (1.3 * fontHeight)
+            return (1.35 * fontHeight)
         }
     }
 

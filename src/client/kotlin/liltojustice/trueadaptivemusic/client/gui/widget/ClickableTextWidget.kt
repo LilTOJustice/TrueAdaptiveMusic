@@ -6,28 +6,35 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
-import kotlin.math.min
 
 class ClickableTextWidget(
     private val text: String,
     x: Int = 0,
     y: Int = 0,
-    minWidth: Int = 0,
     private val onClick: (ClickableTextWidget) -> Unit = {},
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
     : ClickableWidget(x, y, 0, 0, Text.literal(text)) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
-        width = if (minWidth > 0) min(textRenderer.getWidth(text), minWidth) else textRenderer.getWidth(text)
+        width = textRenderer.getWidth(text)
         height = textRenderer.fontHeight
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        if (isSelected(this))
-        {
-            context?.drawBorder(x - BORDER_BUFFER / 2, y - BORDER_BUFFER / 2, width + BORDER_BUFFER, height + BORDER_BUFFER, -12303292)
+        if (isSelected(this)) {
+            context?.drawBorder(
+                x - BORDER_BUFFER / 2,
+                y - BORDER_BUFFER / 2,
+                width + BORDER_BUFFER,
+                height + BORDER_BUFFER,
+                Colors.WHITE)
         }
+
+        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+            context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
+        }
+
         val textRenderer = MinecraftClient.getInstance().textRenderer
         context?.drawText(textRenderer, text, x, y, Colors.WHITE, true)
     }
