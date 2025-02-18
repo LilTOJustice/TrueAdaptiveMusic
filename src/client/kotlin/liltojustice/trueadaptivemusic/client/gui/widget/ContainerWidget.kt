@@ -22,7 +22,7 @@ abstract class ContainerWidget(
     private var wasDisabled = false
     private val children = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
-    private val textRenderer = client.textRenderer
+    protected val textRenderer = client.textRenderer
     private var scrollPosition = 0
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -83,7 +83,7 @@ abstract class ContainerWidget(
             val translated = child.translated(scrollPosition)
             translated.widget.x = x + translated.xOffset + X_MARGIN
             translated.widget.y = getTranslatedY(translated.row)
-            if (translated.row >= 0 && translated.row < totalRows() - 1)
+            if (translated.row >= 0 && translated.row <= totalRows())
             {
                 translated.widget.render(context, mouseX, mouseY, delta)
             }
@@ -108,8 +108,8 @@ abstract class ContainerWidget(
         }
 
         scrollPosition -= amount.toInt()
+        scrollPosition = min(scrollPosition, maxUsedRow() - totalRows())
         scrollPosition = max(0, scrollPosition)
-        scrollPosition = min(scrollPosition, maxUsedRow())
         return super.mouseScrolled(mouseX, mouseY, amount)
     }
 
@@ -145,15 +145,38 @@ abstract class ContainerWidget(
             shadow)
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0, widgetId: String = "") {
-        val hash = widgetId.ifEmpty { child.hashCode().toString() }
+    // Use if the widget is created on render
+    fun addWidgetFromRender(
+        widgetMaker: () -> ClickableWidget,
+        widgetId: String,
+        row: Int,
+        xOffset: Int = 0,
+        shouldReplace: () -> Boolean = { false }) {
+        if (!children.containsKey(widgetId) || shouldReplace()) {
+            children[widgetId] = ChildWidget(widgetMaker(), row, xOffset, true)
+        }
+    }
+
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0) {
+        val hash = child.hashCode().toString()
         if (!children.containsKey(hash)) {
             children[hash] = ChildWidget(child, row, xOffset)
         }
     }
 
+    // Use to only clear widgets created from addWidgetToRender
+    fun clearWidgetsFromRender() {
+        children.filterValues { child -> child.fromRender }.forEach { (key, _) -> children.remove(key) }
+    }
+
     fun clearWidgets() {
         children.clear()
+    }
+
+    fun fitToUsedRows(maxRows: Int = 0) {
+        height = (((if (maxRows > 0) maxRows else maxUsedRow()) + 1)
+                * getRowHeight(textRenderer.fontHeight)
+                + getHeaderOffset()).toInt()
     }
 
     private fun getHeaderOffset(): Int {
@@ -165,7 +188,7 @@ abstract class ContainerWidget(
     }
 
     private fun totalRows(): Int {
-        return (height / getRowHeight(textRenderer.fontHeight)).toInt()
+        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).toInt()
     }
 
     private fun maxUsedRow(): Int {
@@ -180,7 +203,8 @@ abstract class ContainerWidget(
         }
     }
 
-    data class ChildWidget(val widget: ClickableWidget, val row: Int, val xOffset: Int) {
+    data class ChildWidget(
+        val widget: ClickableWidget, val row: Int, val xOffset: Int, val fromRender: Boolean = false) {
         fun translated(row: Int, xOffset: Int = 0): ChildWidget {
             return copy(row = this.row - row, xOffset = this.xOffset + xOffset)
         }
