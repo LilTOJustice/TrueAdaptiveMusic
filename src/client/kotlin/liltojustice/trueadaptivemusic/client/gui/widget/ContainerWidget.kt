@@ -193,7 +193,7 @@ abstract class ContainerWidget(
     }
 
     fun fitToUsedRows(maxRows: Int = 0) {
-        height = (((if (maxRows > 0) min(maxRows - 1, maxUsedRow()) else maxUsedRow()) + 1)
+        height = ((if (maxRows > 0) min(maxRows, maxUsedRow() + 1) else maxUsedRow() + 1)
                 * getRowHeight(textRenderer.fontHeight)
                 + getHeaderOffset()).toInt()
     }
@@ -218,14 +218,15 @@ abstract class ContainerWidget(
         val usedRows = maxUsedRow() + 1
         val totalRows = totalRows()
         if (usedRows > totalRows) {
-            val rowHeight = getRowHeight(textRenderer.fontHeight)
+            val adjustedHeight = height - getHeaderOffset() - 2
             val ratio = totalRows.toDouble() / usedRows
-            val start = scrollPosition * ratio
-            val end = start + ratio * totalRows
+            val barSize = ratio * adjustedHeight
+            val start = (scrollPosition.toDouble() / (usedRows - totalRows)) * adjustedHeight * (1 - ratio)
+            val end = start + barSize
             context?.drawVerticalLine(
                 x + width - 3,
-                (y + start * rowHeight + getHeaderOffset()).toInt(),
-                (y + end * rowHeight + getHeaderOffset()).toInt(),
+                (y + start + getHeaderOffset()).toInt(),
+                (y + end + getHeaderOffset()).toInt(),
                 Colors.WHITE)
         }
     }
@@ -234,7 +235,7 @@ abstract class ContainerWidget(
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
         private fun getRowHeight(fontHeight: Int): Double {
-            return (1.4 * fontHeight)
+            return (1.35 * fontHeight)
         }
     }
 
