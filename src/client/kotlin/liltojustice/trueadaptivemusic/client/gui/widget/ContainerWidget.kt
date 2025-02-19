@@ -20,11 +20,10 @@ abstract class ContainerWidget(
     y: Int = 0,
     private val translucentInteract: Boolean = true)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
-    protected var enabled = true
-    private var wasDisabled = false
     private val children = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
     protected val textRenderer = client.textRenderer
+    protected val screen = client.currentScreen
     private var scrollPosition = 0
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -32,25 +31,7 @@ abstract class ContainerWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        if (!enabled && !wasDisabled) {
-            wasDisabled = true
-            active = false
-            children.forEach { (_, child) ->
-                child.widget.active = false
-                (child.widget as? ContainerWidget)?.enabled = false
-            }
-
-            return
-        }
-        else if (enabled) {
-            wasDisabled = false
-            active = true
-            children.forEach { (_, child) ->
-                child.widget.active = true
-                (child.widget as? ContainerWidget)?.enabled = true
-            }
-        }
-        else {
+        if (!visible) {
             return
         }
 
@@ -81,6 +62,7 @@ abstract class ContainerWidget(
             context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
+        clampScrollPosition()
         drawScrollBar(context)
 
         children.forEach { (_, child) ->
@@ -95,18 +77,30 @@ abstract class ContainerWidget(
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (!visible || !active) {
+            return false
+        }
+
         // Copy to avoid concurrent modification
         val children = children.toList()
+        screen?.focused = null
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
-                child.widget.mouseClicked(mouseX, mouseY, button)
+                val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
+                if (clicked) {
+                    screen?.focused = if (screen?.focused != null) screen.focused else child.widget
+                }
             }
         }
 
-        return clicked(mouseX, mouseY)
+        return false
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
+        if (!visible || !active) {
+            return false
+        }
+
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
@@ -126,8 +120,7 @@ abstract class ContainerWidget(
         }
 
         scrollPosition -= amount.toInt()
-        scrollPosition = min(scrollPosition, (maxUsedRow() + 1) - totalRows())
-        scrollPosition = max(0, scrollPosition)
+        clampScrollPosition()
 
         return true
     }
@@ -170,8 +163,8 @@ abstract class ContainerWidget(
         widgetId: String,
         row: Int,
         xOffset: Int = 0,
-        shouldReplace: () -> Boolean = { false }) {
-        if (!children.containsKey(widgetId) || shouldReplace()) {
+        shouldRecompute: () -> Boolean = { false }) {
+        if (!children.containsKey(widgetId) || shouldRecompute()) {
             children[widgetId] = ChildWidget(widgetMaker(), row, xOffset, true)
         }
     }
@@ -198,6 +191,36 @@ abstract class ContainerWidget(
                 + getHeaderOffset()).toInt()
     }
 
+    fun fitToChildrenHeight() {
+        var max = 0
+        children.forEach { (_, child) ->
+            val translated = child.translated(scrollPosition)
+            translated.widget.y = getTranslatedY(translated.row)
+            max = max(max, (translated.widget.y + translated.widget.height) - y)
+        }
+        height = (max + getRowHeight(textRenderer.fontHeight)).toInt()
+    }
+
+    fun fitToChildrenWidth() {
+        var max = 0
+        children.forEach { (_, child) ->
+            val translated = child.translated(scrollPosition)
+            translated.widget.x = x + translated.xOffset + X_MARGIN
+            max = max(max, (translated.widget.x + translated.widget.width) - x)
+        }
+        width = max
+    }
+
+    fun fitToChildren() {
+        fitToChildrenHeight()
+        fitToChildrenWidth()
+    }
+
+    private fun clampScrollPosition() {
+        scrollPosition = min(scrollPosition, (maxUsedRow() + 1) - totalRows())
+        scrollPosition = max(0, scrollPosition)
+    }
+
     private fun getHeaderOffset(): Int {
         return (if (showHeader) TOP_MARGIN else 0) + 2
     }
@@ -211,7 +234,8 @@ abstract class ContainerWidget(
     }
 
     private fun maxUsedRow(): Int {
-        return children.maxByOrNull { (_, child) -> child.row }?.value?.row ?: 0
+        return children
+            .filterValues { child -> child.widget.visible }.maxByOrNull { (_, child) -> child.row }?.value?.row ?: 0
     }
 
     private fun drawScrollBar(context: DrawContext?) {

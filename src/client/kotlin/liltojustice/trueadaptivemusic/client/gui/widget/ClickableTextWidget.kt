@@ -8,13 +8,13 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
 class ClickableTextWidget(
-    private val text: String,
+    private var text: String,
     x: Int = 0,
     y: Int = 0,
     private val showHighlight: Boolean = true,
     private val onClick: (ClickableTextWidget) -> Unit = {},
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
-    : ClickableWidget(x, y, 0, 0, Text.literal(text)) {
+    : ClickableWidget(x, y, 0, 0, Text.literal("Clickable Text Widget")) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
@@ -23,6 +23,10 @@ class ClickableTextWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        if (!visible) {
+            return
+        }
+
         val selected = isSelected(this)
         if (selected) {
             context?.drawBorder(
@@ -43,7 +47,11 @@ class ClickableTextWidget(
 
     override fun onClick(mouseX: Double, mouseY: Double) {
         super.onClick(mouseX, mouseY)
-        onClick(this)
+
+        if (visible && active)
+        {
+            onClick(this)
+        }
     }
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -51,6 +59,11 @@ class ClickableTextWidget(
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    }
+
+    fun setText(text: String) {
+        this.text = text
+        this.width = textRenderer.getWidth(text)
     }
 
     companion object {

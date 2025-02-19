@@ -17,7 +17,7 @@ class PredicateViewWidget(width: Int, height: Int, x: Int = 0, y: Int = 0)
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
-        if (!enabled) {
+        if (!visible) {
             return
         }
 
@@ -64,7 +64,8 @@ class PredicateViewWidget(width: Int, height: Int, x: Int = 0, y: Int = 0)
             {
                 DropdownWidget(
                     predicateTypeNameOptions,
-                    { typeName ->  selectedNewPredicateTypeName = typeName})
+                    { typeName ->  selectedNewPredicateTypeName = typeName},
+                    "Type")
             },
             "predicateTypeChoice",
             1)
