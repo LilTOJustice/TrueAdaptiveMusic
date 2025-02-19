@@ -12,6 +12,7 @@ import net.minecraft.client.gui.widget.*
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
+import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
 class EditPackScreen(
@@ -31,6 +32,13 @@ class EditPackScreen(
             .xyOffset(13, 6)
             .build()
         saveButtonWidget.width = 50
+
+        val openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
+            Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
+        }
+            .build()
+        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
+        openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
 
         val gridWidget = GridWidget()
         gridWidget.mainPositioner
@@ -54,6 +62,7 @@ class EditPackScreen(
         SimplePositioningWidget.setPos(
             gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
         addDrawableChild(saveButtonWidget)
+        addDrawableChild(openAssetsFolderButtonWidget)
         gridWidget.forEachChild { drawableElement: ClickableWidget? ->
             this.addDrawableChild(
                 drawableElement
@@ -77,5 +86,6 @@ class EditPackScreen(
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
         private const val LEFT_MARGIN = TOP_MARGIN / 4
         private const val RIGHT_MARGIN = LEFT_MARGIN
+        private val OPEN_ASSETS_TEXT = Text.literal("Show Assets")
     }
 }

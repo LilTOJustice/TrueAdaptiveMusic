@@ -24,7 +24,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     fun initEdit(packWithAssets: MusicPack? = null) {
-        val packDir = getPackDir()
+        val packDir = getEditPackDir()
         if (!packDir.exists()) {
             packDir.createDirectory()
         }
@@ -53,8 +53,12 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         initMeta()
     }
 
+    fun getEditPackAssetsPath(): Path {
+        return Path(getEditPackDir().pathString, Constants.ASSETS_DIRNAME)
+    }
+
     fun initRules() {
-        val rulesFile = Path(getPackDir().pathString, Constants.RULES_FILENAME)
+        val rulesFile = Path(getEditPackDir().pathString, Constants.RULES_FILENAME)
 
         if (!rulesFile.exists()) {
             rulesFile.createFile()
@@ -64,7 +68,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     fun initMeta() {
-        val metaFile = Path(getPackDir().pathString, Constants.META_FILENAME)
+        val metaFile = Path(getEditPackDir().pathString, Constants.META_FILENAME)
         if (!metaFile.exists()) {
             metaFile.createFile()
         }
@@ -102,7 +106,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         return GsonBuilder().setPrettyPrinting().create()
     }
 
-    private fun getPackDir(): Path {
+    private fun getEditPackDir(): Path {
         return Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
     }
 
