@@ -35,7 +35,6 @@ class DropdownWidget(
                 selectedOptionWidget.setText(option)
                 onSelectOption(option)
             },
-            { screen?.focused == textInputWidget },
             x,
             y)
         width = textInputWidth
@@ -52,6 +51,7 @@ class DropdownWidget(
         val showTextInput = screen?.focused == textInputWidget
         textInputWidget.visible = showTextInput
         selectedOptionWidget.visible = !showTextInput
+        dropdownResultsWidget.visible = screen?.focused == textInputWidget
         super.render(context, mouseX, mouseY, delta)
         fitToChildren()
     }
@@ -62,12 +62,11 @@ class DropdownWidget(
     class DropdownResultsWidget(
         private val options: List<String>,
         val onSelectOption: (optionText: String) -> Unit,
-        val isOpen: () -> Boolean,
         x: Int = 0,
         y: Int = 0)
-        : ContainerWidget(0, 0, "Dropdown List", false, true, x, y) {
+        : ContainerWidget(0, 0, "Dropdown List", false, true, x, y, true) {
         private var selectedOption = options.firstOrNull() ?: ""
-        private var filteredOptions = if (selectedOption.isBlank()) options else options
+        private var filteredOptions = options
 
         init {
             width = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER - 1
@@ -77,7 +76,7 @@ class DropdownWidget(
         }
 
         override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-            if (!visible || !isOpen()) {
+            if (!visible) {
                 return
             }
 
@@ -95,8 +94,8 @@ class DropdownWidget(
                     index
                 )
             }
-            super.render(context, mouseX, mouseY, delta)
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
+            super.render(context, mouseX, mouseY, delta)
         }
 
         fun setSearchText(searchText: String) {
