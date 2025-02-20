@@ -4,6 +4,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.functions
@@ -71,12 +73,22 @@ sealed class MusicPredicate {
             }
         }
 
-        fun initializeFromArgs(type: String, vararg args: Any): MusicPredicate {
+        fun getRequiredArgsFromTypeName(typeName: String): List<KParameter> {
+            return getConstructorFromTypeName(typeName)?.parameters
+                ?: throw MusicPredicateException("Failed to get type parameters for constructing $typeName.")
+        }
+
+        fun initializeFromArgs(typeName: String, vararg args: Any): MusicPredicate {
+            return getConstructorFromTypeName(typeName)?.call(*args)
+                ?: throw MusicPredicateException("Initialization of MusicPredicate type $typeName failed.")
+        }
+
+        private fun getConstructorFromTypeName(typeName: String): KFunction<MusicPredicate>? {
             return MusicPredicate::class.sealedSubclasses.firstOrNull { subclass ->
                 subclass.companionObject?.functions?.firstOrNull { f ->
-                    f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == type }
-                ?.primaryConstructor?.call(*args)
-                ?: throw MusicPredicateException("Initialization of MusicPredicate type $type failed.")
+                    f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == typeName }
+                ?.primaryConstructor
+
         }
     }
 
