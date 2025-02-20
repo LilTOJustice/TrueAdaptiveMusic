@@ -71,6 +71,9 @@ class DropdownWidget(
 
         init {
             width = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER - 1
+            if (selectedOption.isNotBlank()) {
+                onSelectOption(selectedOption)
+            }
         }
 
         override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
