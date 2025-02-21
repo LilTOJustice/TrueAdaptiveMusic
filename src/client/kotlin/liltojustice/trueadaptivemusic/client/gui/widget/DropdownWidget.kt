@@ -12,11 +12,18 @@ class DropdownWidget(
     options: List<String>,
     onSelectOption: (optionText: String) -> Unit,
     title: String = "",
+    getOptions: (() -> List<String>)? = null,
+    notSelectedPlaceholder: String? = null,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(0, 0, "Dropdown: $title", false, false) {
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
-    private val textInputWidth = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER
+    private var textInputWidth = (
+            if (notSelectedPlaceholder != null)
+                textRenderer.getWidth(notSelectedPlaceholder)
+            else
+                    (options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0)) +
+            TEXT_WIDTH_BUFFER
     private var dropdownResultsWidget: DropdownResultsWidget
     private val textInputWidget = TextFieldWidget(
         textRenderer,
@@ -26,7 +33,7 @@ class DropdownWidget(
         textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
         Text.literal("Dropdown Search"))
     private val selectedOptionWidget = ClickableTextWidget(
-        options.firstOrNull() ?: "",
+        notSelectedPlaceholder ?: options.firstOrNull() ?: "",
         onClick = { screen?.focused = textInputWidget },
         isSelected = { true })
     private val titleTextWidget = TextWidget(titleText, textRenderer)
@@ -39,6 +46,8 @@ class DropdownWidget(
                 selectedOptionWidget.setText(option)
                 onSelectOption(option)
             },
+            getOptions,
+            notSelectedPlaceholder,
             x,
             y)
         textInputWidget.setChangedListener { newText ->
@@ -66,15 +75,16 @@ class DropdownWidget(
     class DropdownResultsWidget(
         private val options: List<String>,
         val onSelectOption: (optionText: String) -> Unit,
+        private val getOptions: (() -> List<String>)? = null,
+        notSelectedPlaceholder: String? = null,
         x: Int = 0,
         y: Int = 0)
         : ContainerWidget(0, 0, "Dropdown List", false, true, x, y, true) {
-        private var selectedOption = options.firstOrNull() ?: ""
-        private var filteredOptions = options
+        private var selectedOption = notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
 
         init {
-            if (selectedOption.isNotBlank()) {
+            if (selectedOption.isNotBlank() && notSelectedPlaceholder == null) {
                 onSelectOption(selectedOption)
             }
         }
@@ -84,27 +94,28 @@ class DropdownWidget(
                 return
             }
 
-            filteredOptions.forEachIndexed { index, option ->
-                addWidgetFromRender(
-                    {
-                        ClickableTextWidget(
-                            option,
-                            onClick = {
-                                selectedOption = option
-                                onSelectOption(option)
-                            })
-                    },
-                    option,
-                    index
-                )
-            }
+            (getOptions?.invoke() ?: options)
+                .filter { option -> option.lowercase().contains(searchText.lowercase()) }
+                .forEachIndexed { index, option ->
+                    addWidgetFromRender(
+                        {
+                            ClickableTextWidget(
+                                option,
+                                onClick = {
+                                    selectedOption = option
+                                    onSelectOption(option)
+                                })
+                        },
+                        option,
+                        index
+                    )
+                }
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
             super.render(context, mouseX, mouseY, delta)
         }
 
         fun setSearchText(searchText: String) {
             this.searchText = searchText
-            filteredOptions = options.filter { option -> option.lowercase().contains(searchText.lowercase()) }
             clearWidgetsFromRender()
         }
 

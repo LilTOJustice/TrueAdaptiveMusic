@@ -103,8 +103,8 @@ class MusicPredicateTree private constructor(
             return bottoms.maxBy { bottom -> bottom.second.size }
         }
 
-        fun newChild(predicateType: String, vararg args: Any) {
-            children.add(Node(MusicPredicate.initializeFromArgs(predicateType, *args), listOf()))
+        fun newChild(predicateType: String, vararg args: Any, sounds: List<PlayableSound>) {
+            children.add(Node(MusicPredicate.initializeFromArgs(predicateType, *args), sounds))
         }
 
         companion object {

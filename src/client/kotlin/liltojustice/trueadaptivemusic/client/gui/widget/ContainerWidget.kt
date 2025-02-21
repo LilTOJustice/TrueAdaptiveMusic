@@ -197,10 +197,12 @@ abstract class ContainerWidget(
     }
 
     fun clearWidgets(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
+        // Copy to avoid concurrent modification
+        val children = children.toList()
         children
             .forEach { (key, child) ->
                 if (!keepPredicate(child))
-                    children.remove(key)
+                    this.children.remove(key)
             }
         renderChildren.clear()
     }

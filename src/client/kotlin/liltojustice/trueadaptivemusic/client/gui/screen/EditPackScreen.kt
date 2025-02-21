@@ -46,15 +46,18 @@ class EditPackScreen(
             .marginRight(RIGHT_MARGIN / 2)
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
 
+        lateinit var predicateTreeWidget: PredicateTreeWidget
         val predicateViewWidget = PredicateViewWidget(
             (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-            (height - TOP_MARGIN - BOTTOM_MARGIN))
-        val predicateTreeWidget = PredicateTreeWidget(
+            (height - TOP_MARGIN - BOTTOM_MARGIN),
+            musicPack,
+            { predicateTreeWidget.initPredicateWidgets() })
+        predicateTreeWidget = PredicateTreeWidget(
             (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
+            musicPack,
             { predicate -> predicateViewWidget.setEditPredicate(predicate) },
-            { parent -> predicateViewWidget.setCreateNewPredicate(parent) },
-            musicPack)
+            { parent -> predicateViewWidget.setCreateNewPredicate(parent) })
         adder?.add(predicateTreeWidget, 2)
         adder?.add(predicateViewWidget, 1)
 

@@ -7,9 +7,7 @@ import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
-import liltojustice.trueadaptivemusic.client.sound.RegularSoundFile
-import liltojustice.trueadaptivemusic.client.sound.ZipSoundFile
+import liltojustice.trueadaptivemusic.client.sound.*
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
 import java.nio.file.Path
@@ -55,6 +53,12 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     fun getEditPackAssetsPath(): Path {
         return Path(getEditPackDir().pathString, Constants.ASSETS_DIRNAME)
+    }
+
+    fun getEditPackAssets(): Map<String, PlayableSound> {
+        return getEditPackAssetsPath().listDirectoryEntries()
+            .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
+            .associateBy { file -> file.getSoundName() }
     }
 
     fun initRules() {

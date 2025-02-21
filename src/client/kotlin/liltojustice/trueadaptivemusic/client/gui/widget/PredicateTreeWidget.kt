@@ -8,9 +8,9 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 class PredicateTreeWidget(
     width: Int,
     height: Int,
+    private val musicPack: MusicPack,
     private val onSelectExistingPredicate: (predicate: MusicPredicate) -> Unit = {},
     private val onRequestCreateNewPredicate: (parent: MusicPredicateTree.Node) -> Unit = {},
-    private val musicPack: MusicPack? = null,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(width, height, "Pack Structure", true, false, x, y) {
@@ -20,10 +20,10 @@ class PredicateTreeWidget(
         initPredicateWidgets()
     }
 
-    private fun initPredicateWidgets() {
+    fun initPredicateWidgets() {
         clearWidgets()
         var row = 0
-        musicPack?.rules?.traverse(
+        musicPack.rules.traverse(
             { node, depth ->
                 addWidget(
                     ClickableTextWidget(
@@ -40,9 +40,6 @@ class PredicateTreeWidget(
                     ClickableTextWidget("+ Add",
                         onClick = { widget ->
                             selectedWidget = widget
-                            //node.newChild("dimension", Identifier("minecraft:overworld"))
-                            //musicPack.initRules()
-                            //initPredicateWidgets()
                             onRequestCreateNewPredicate(node) },
                         isSelected = { widget -> widget === selectedWidget }),
                     row++,
