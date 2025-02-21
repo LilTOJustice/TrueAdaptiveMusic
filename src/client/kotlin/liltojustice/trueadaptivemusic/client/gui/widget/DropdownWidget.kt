@@ -19,7 +19,12 @@ class DropdownWidget(
     private val textInputWidth = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER
     private var dropdownResultsWidget: DropdownResultsWidget
     private val textInputWidget = TextFieldWidget(
-        textRenderer, 0, 0, textInputWidth, textRenderer.fontHeight + TEXT_HEIGHT_BUFFER, Text.literal("Dropdown Search"))
+        textRenderer,
+        0,
+        0,
+        textInputWidth,
+        textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
+        Text.literal("Dropdown Search"))
     private val selectedOptionWidget = ClickableTextWidget(
         options.firstOrNull() ?: "",
         onClick = { screen?.focused = textInputWidget },
@@ -27,6 +32,7 @@ class DropdownWidget(
     private val titleTextWidget = TextWidget(titleText, textRenderer)
 
     init {
+        width = textInputWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
             { option ->
@@ -49,9 +55,9 @@ class DropdownWidget(
         textInputWidget.visible = showTextInput
         selectedOptionWidget.visible = !showTextInput
         dropdownResultsWidget.visible = screen?.focused == textInputWidget
-        textInputWidget.width = dropdownResultsWidget.width + 1
+        dropdownResultsWidget.width = width
         super.render(context, mouseX, mouseY, delta)
-        fitToChildren()
+        fitToChildrenHeight()
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -78,9 +84,6 @@ class DropdownWidget(
                 return
             }
 
-            width = (filteredOptions
-                .maxOfOrNull { option -> textRenderer.getWidth(option) }?.plus(TEXT_WIDTH_BUFFER - 1)
-                ?: (textRenderer.getWidth(searchText) + TEXT_WIDTH_BUFFER - 1))
             filteredOptions.forEachIndexed { index, option ->
                 addWidgetFromRender(
                     {
