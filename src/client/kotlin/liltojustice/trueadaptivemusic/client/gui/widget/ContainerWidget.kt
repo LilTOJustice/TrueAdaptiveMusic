@@ -167,7 +167,7 @@ abstract class ContainerWidget(
         xOffset: Int = 0,
         shouldRecompute: () -> Boolean = { false }) {
         if (!children.containsKey(widgetId) || shouldRecompute()) {
-            children[widgetId] = ChildWidget(widgetMaker(), row ?: 0, xOffset, true)
+            children[widgetId] = ChildWidget(widgetId, widgetMaker(), row ?: 0, xOffset, true)
         }
 
         if (row == null) {
@@ -180,18 +180,27 @@ abstract class ContainerWidget(
     fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0) {
         val hash = child.hashCode().toString()
         if (!children.containsKey(hash)) {
-            children[hash] = ChildWidget(child, row, xOffset)
+            children[hash] = ChildWidget(hash, child, row, xOffset)
         }
     }
 
     // Use to only clear widgets created from addWidgetToRender
-    fun clearWidgetsFromRender() {
-        children.filterValues { child -> child.fromRender }.forEach { (key, _) -> children.remove(key) }
+    fun clearWidgetsFromRender(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
+        children
+            .filterValues { child -> child.fromRender }
+            .forEach { (key, child) ->
+                if (!keepPredicate(child))
+                    children.remove(key)
+            }
         renderChildren.clear()
     }
 
-    fun clearWidgets() {
-        children.clear()
+    fun clearWidgets(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
+        children
+            .forEach { (key, child) ->
+                if (!keepPredicate(child))
+                    children.remove(key)
+            }
         renderChildren.clear()
     }
 
@@ -207,7 +216,7 @@ abstract class ContainerWidget(
 
     fun fitToChildrenHeight() {
         var max = 0
-        children.forEach { (_, child) ->
+        children.filterValues { child -> childVisible(child.translated(scrollPosition)) }.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
             max = max(max, getTranslatedY(translated.row) + translated.widget.height)
         }
@@ -287,7 +296,7 @@ abstract class ContainerWidget(
     }
 
     data class ChildWidget(
-        val widget: ClickableWidget, val row: Int, val xOffset: Int, val fromRender: Boolean = false) {
+        val id: String, val widget: ClickableWidget, val row: Int, val xOffset: Int, val fromRender: Boolean = false) {
         fun translated(row: Int, xOffset: Int = 0): ChildWidget {
             return copy(row = this.row - row, xOffset = this.xOffset + xOffset)
         }
