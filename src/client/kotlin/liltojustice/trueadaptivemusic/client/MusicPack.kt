@@ -97,7 +97,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             out.putNextEntry(ZipEntry(metaFile.name))
             metaFile.inputStream().copyTo(out)
             assetsDir.listDirectoryEntries().forEach { entry ->
-                out.putNextEntry(ZipEntry(entry.name))
+                out.putNextEntry(ZipEntry(Path(Constants.ASSETS_DIRNAME, entry.name).pathString))
                 entry.inputStream().copyTo(out)
             }
         }
