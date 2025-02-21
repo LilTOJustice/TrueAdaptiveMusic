@@ -47,10 +47,10 @@ class EditPackScreen(
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
 
         val predicateViewWidget = PredicateViewWidget(
-            (width * 0.33 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN))
         val predicateTreeWidget = PredicateTreeWidget(
-            (width * 0.66f - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
+            (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
             { predicate -> predicateViewWidget.setEditPredicate(predicate) },
             { parent -> predicateViewWidget.setCreateNewPredicate(parent) },
