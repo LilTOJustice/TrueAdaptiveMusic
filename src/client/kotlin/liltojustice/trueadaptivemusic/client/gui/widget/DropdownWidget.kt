@@ -17,14 +17,12 @@ class DropdownWidget(
     : ContainerWidget(0, 0, "Dropdown: $title", false, false) {
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
     private val textInputWidth = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER
-    private lateinit var dropdownResultsWidget: DropdownResultsWidget
+    private var dropdownResultsWidget: DropdownResultsWidget
     private val textInputWidget = TextFieldWidget(
         textRenderer, 0, 0, textInputWidth, textRenderer.fontHeight + TEXT_HEIGHT_BUFFER, Text.literal("Dropdown Search"))
     private val selectedOptionWidget = ClickableTextWidget(
         options.firstOrNull() ?: "",
-        onClick = {
-            screen?.focused = textInputWidget
-            dropdownResultsWidget.setSearchText("") },
+        onClick = { screen?.focused = textInputWidget },
         isSelected = { true })
     private val titleTextWidget = TextWidget(titleText, textRenderer)
 
@@ -37,7 +35,6 @@ class DropdownWidget(
             },
             x,
             y)
-        width = textInputWidth
         textInputWidget.setChangedListener { newText ->
             dropdownResultsWidget.setSearchText(newText)
         }
@@ -52,6 +49,7 @@ class DropdownWidget(
         textInputWidget.visible = showTextInput
         selectedOptionWidget.visible = !showTextInput
         dropdownResultsWidget.visible = screen?.focused == textInputWidget
+        textInputWidget.width = dropdownResultsWidget.width + 1
         super.render(context, mouseX, mouseY, delta)
         fitToChildren()
     }
@@ -67,9 +65,9 @@ class DropdownWidget(
         : ContainerWidget(0, 0, "Dropdown List", false, true, x, y, true) {
         private var selectedOption = options.firstOrNull() ?: ""
         private var filteredOptions = options
+        private var searchText = ""
 
         init {
-            width = options.maxOf { option -> textRenderer.getWidth(option) } + TEXT_WIDTH_BUFFER - 1
             if (selectedOption.isNotBlank()) {
                 onSelectOption(selectedOption)
             }
@@ -80,6 +78,9 @@ class DropdownWidget(
                 return
             }
 
+            width = (filteredOptions
+                .maxOfOrNull { option -> textRenderer.getWidth(option) }?.plus(TEXT_WIDTH_BUFFER - 1)
+                ?: (textRenderer.getWidth(searchText) + TEXT_WIDTH_BUFFER - 1))
             filteredOptions.forEachIndexed { index, option ->
                 addWidgetFromRender(
                     {
@@ -99,6 +100,7 @@ class DropdownWidget(
         }
 
         fun setSearchText(searchText: String) {
+            this.searchText = searchText
             filteredOptions = options.filter { option -> option.lowercase().contains(searchText.lowercase()) }
             clearWidgetsFromRender()
         }
