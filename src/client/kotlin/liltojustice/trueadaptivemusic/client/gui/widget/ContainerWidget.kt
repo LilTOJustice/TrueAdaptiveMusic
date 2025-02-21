@@ -71,6 +71,7 @@ abstract class ContainerWidget(
             val translated = child.translated(scrollPosition)
             translated.widget.x = x + translated.xOffset + X_MARGIN
             translated.widget.y = getTranslatedY(translated.row)
+            translated.widget.width = min(translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
             if (childVisible(translated))
             {
                 translated.widget.render(context, mouseX, mouseY, delta)
@@ -218,7 +219,7 @@ abstract class ContainerWidget(
         var max = 0
         children.filterValues { child -> childVisible(child.translated(scrollPosition)) }.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
-            max = max(max, getTranslatedY(translated.row) + translated.widget.height)
+            max = max(max, getTranslatedY(translated.row) - y + translated.widget.height)
         }
         height = (max + getRowHeight(textRenderer.fontHeight)).toInt()
     }
