@@ -16,7 +16,7 @@ class DropdownWidget(
     notSelectedPlaceholder: String? = null,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(0, 0, "Dropdown: $title", false, false) {
+    : ContainerWidget(0, 0, "Dropdown: $title", false, false, true, x, y) {
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
     private var textInputWidth = (
             if (notSelectedPlaceholder != null)
@@ -79,7 +79,16 @@ class DropdownWidget(
         notSelectedPlaceholder: String? = null,
         x: Int = 0,
         y: Int = 0)
-        : ContainerWidget(0, 0, "Dropdown List", false, true, x, y, true) {
+        : ContainerWidget(
+        0,
+        0,
+        "Dropdown List",
+        false,
+        true,
+        true,
+        x,
+        y,
+        true) {
         private var selectedOption = notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
 
@@ -123,7 +132,7 @@ class DropdownWidget(
         }
 
         companion object {
-            const val TEXT_WIDTH_BUFFER = 10
+            const val TEXT_WIDTH_BUFFER = 15
             const val TEXT_HEIGHT_BUFFER = 5
             const val MAX_DISPLAYED_OPTIONS = 5
         }

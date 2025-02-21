@@ -16,6 +16,7 @@ abstract class ContainerWidget(
     message: String,
     private var showHeader: Boolean,
     private var bordered: Boolean,
+    private val indentChildren: Boolean = true,
     x: Int = 0,
     y: Int = 0,
     private val translucentInteract: Boolean = false)
@@ -69,7 +70,7 @@ abstract class ContainerWidget(
 
         children.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
-            translated.widget.x = x + translated.xOffset + X_MARGIN
+            translated.widget.x = x + translated.xOffset + if (indentChildren) X_MARGIN else 0
             translated.widget.y = getTranslatedY(translated.row)
             translated.widget.width = min(translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
             if (childVisible(translated))
@@ -166,7 +167,7 @@ abstract class ContainerWidget(
         widgetId: String,
         row: Int? = null,
         xOffset: Int = 0,
-        shouldRecompute: () -> Boolean = { false }) {
+        shouldRecompute: () -> Boolean = { false }): ClickableWidget {
         if (!children.containsKey(widgetId) || shouldRecompute()) {
             children[widgetId] = ChildWidget(widgetId, widgetMaker(), row ?: 0, xOffset, true)
         }
@@ -176,13 +177,17 @@ abstract class ContainerWidget(
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
+
+        return children[widgetId]!!.widget
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0) {
+    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0): ClickableWidget {
         val hash = child.hashCode().toString()
         if (!children.containsKey(hash)) {
             children[hash] = ChildWidget(hash, child, row, xOffset)
         }
+
+        return children[hash]!!.widget
     }
 
     // Use to only clear widgets created from addWidgetToRender

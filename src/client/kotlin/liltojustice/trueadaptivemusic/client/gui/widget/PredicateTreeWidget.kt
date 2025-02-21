@@ -13,7 +13,8 @@ class PredicateTreeWidget(
     private val onRequestCreateNewPredicate: (parent: MusicPredicateTree.Node) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(width, height, "Pack Structure", true, false, x, y) {
+    : ContainerWidget(
+    width, height, "Pack Structure", true, false, true, x, y) {
     private var selectedWidget: ClickableTextWidget? = null
 
     init {

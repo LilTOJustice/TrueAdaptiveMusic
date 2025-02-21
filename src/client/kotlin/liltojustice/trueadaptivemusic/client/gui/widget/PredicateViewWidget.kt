@@ -21,7 +21,7 @@ class PredicateViewWidget(
     private val onChangesSaved: () -> Unit,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(width, height, "Predicate View", true, false, x, y) {
+    : ContainerWidget(width, height, "Predicate View", true, false, true, x, y) {
     private var selectedPredicate: MusicPredicate? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var selectedNewPredicateTypeName: String? = null
@@ -30,7 +30,6 @@ class PredicateViewWidget(
     private var newPredicateMode = false
     private var requiredArgs = listOf<KParameter>()
     private var args = mutableListOf<Any?>()
-    private var musicList = mutableListOf<String>()
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
@@ -93,17 +92,16 @@ class PredicateViewWidget(
             },
             "predicateTypeChoice",
             row = 1)
-        addWidgetFromRender(
+        val musicSelector = addWidgetFromRender(
             {
-                DropdownWidget(
+                MultiSelectDropdownWidget(
                     listOf(),
-                    { sound -> musicList.add(sound) },
                     "Music Choice",
                     { musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableList() },
                     "Select a track")
             },
             "musicChoice"
-        )
+        ) as MultiSelectDropdownWidget
         requiredArgs.forEach { arg ->
             addWidgetFromRender(
                 { widgetMaker(arg) },
@@ -118,7 +116,7 @@ class PredicateViewWidget(
                         newPredicateParent?.newChild(
                             selectedNewPredicateTypeName!!,
                             args = args.filterNotNull().toTypedArray(),
-                            musicList.mapNotNull { path -> assets[path] })
+                            musicSelector.selected.mapNotNull { path -> assets[path] })
                         musicPack.initRules()
                         onChangesSaved()
                     })
