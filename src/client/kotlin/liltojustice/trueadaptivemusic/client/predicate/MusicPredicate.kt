@@ -38,7 +38,7 @@ sealed class MusicPredicate {
         if (companion is MusicPredicateCompanion<*>) {
             return companion.getTypeName()
         } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
-            " create one that inherits from MusicPredicateCompanion")
+            " create one that inherits from ${MusicPredicateCompanion::class.simpleName}")
     }
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
