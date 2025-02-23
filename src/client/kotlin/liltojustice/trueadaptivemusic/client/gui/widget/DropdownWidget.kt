@@ -14,6 +14,7 @@ class DropdownWidget(
     title: String = "",
     getOptions: (() -> List<String>)? = null,
     notSelectedPlaceholder: String? = null,
+    startingOption: String = "",
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(0, 0, "Dropdown: $title", false, false, true, x, y) {
@@ -33,7 +34,7 @@ class DropdownWidget(
         textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
         Text.literal("Dropdown Search"))
     private val selectedOptionWidget = ClickableTextWidget(
-        notSelectedPlaceholder ?: options.firstOrNull() ?: "",
+        notSelectedPlaceholder ?: startingOption.ifEmpty { null } ?: options.firstOrNull() ?: "",
         onClick = { screen?.focused = textInputWidget },
         isSelected = { true })
     private val titleTextWidget = TextWidget(titleText, textRenderer)
@@ -48,6 +49,7 @@ class DropdownWidget(
             },
             getOptions,
             notSelectedPlaceholder,
+            startingOption,
             x,
             y)
         textInputWidget.setChangedListener { newText ->
@@ -77,6 +79,7 @@ class DropdownWidget(
         val onSelectOption: (optionText: String) -> Unit,
         private val getOptions: (() -> List<String>)? = null,
         notSelectedPlaceholder: String? = null,
+        startingOption: String = "",
         x: Int = 0,
         y: Int = 0)
         : ContainerWidget(
@@ -89,7 +92,7 @@ class DropdownWidget(
         x,
         y,
         true) {
-        private var selectedOption = notSelectedPlaceholder ?: options.firstOrNull() ?: ""
+        private var selectedOption = startingOption.ifEmpty { null } ?: notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
 
         init {
