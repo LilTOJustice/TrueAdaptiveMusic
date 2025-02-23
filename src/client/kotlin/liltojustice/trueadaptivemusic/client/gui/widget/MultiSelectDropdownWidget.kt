@@ -8,11 +8,17 @@ class MultiSelectDropdownWidget(
     private val title: String = "",
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
+    alreadySelected: List<String> = listOf(),
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
     500, 500, "Dropdown: $title", false, false, false, x, y) {
     val selected = mutableSetOf<String>()
+
+    init {
+        selected.addAll(alreadySelected)
+    }
+
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
@@ -25,6 +31,7 @@ class MultiSelectDropdownWidget(
                     title,
                     getOptions,
                     notSelectedPlaceholder,
+                    "",
                     x,
                     y)
             },
