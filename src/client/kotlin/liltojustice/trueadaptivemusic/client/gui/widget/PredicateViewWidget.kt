@@ -57,6 +57,7 @@ class PredicateViewWidget(
 
     fun setCreateNewNode(parent: MusicPredicateTree.Node) {
         clearWidgetsFromRender()
+        selectedPredicateTypeName = ""
         newPredicateParent = parent
         selectedNode = null
     }
@@ -153,7 +154,7 @@ class PredicateViewWidget(
                 widget
             }
             else ->
-                throw Exception("Couldn't create widget for expected type $type.")
+                throw Exception("Couldn't create widget for expected type ${arg.type}.")
         }
     }
 
