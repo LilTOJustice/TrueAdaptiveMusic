@@ -66,8 +66,8 @@ class MusicPredicateTree private constructor(
     }
 
     class Node private constructor(
-        val predicate: MusicPredicate,
-        private val playableSounds: List<PlayableSound>,
+        var predicate: MusicPredicate,
+        var playableSounds: List<PlayableSound>,
         val children: MutableList<Node> = mutableListOf()
     ) {
         fun toJson(): JsonObject {

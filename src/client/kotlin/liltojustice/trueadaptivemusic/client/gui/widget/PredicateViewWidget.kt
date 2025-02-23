@@ -22,14 +22,14 @@ class PredicateViewWidget(
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(width, height, "Predicate View", true, false, true, x, y) {
-    private var selectedPredicate: MusicPredicate? = null
-    private var newPredicateParent: MusicPredicateTree.Node? = null
-    private var selectedNewPredicateTypeName: String? = null
     private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
         .filter { typeName -> typeName != RootPredicate.getTypeName() }
-    private var newPredicateMode = false
     private var requiredArgs = listOf<KParameter>()
     private var args = mutableListOf<Any?>()
+
+    private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
+    private var selectedNode: MusicPredicateTree.Node? = null
+    private var newPredicateParent: MusicPredicateTree.Node? = null
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
@@ -37,11 +37,8 @@ class PredicateViewWidget(
             return
         }
 
-        if (newPredicateMode) {
-            renderNewPredicateMode(context)
-        }
-        else if (selectedPredicate != null) {
-            renderEditPredicateMode(context)
+        if (newPredicateParent != null || selectedNode != null) {
+            renderEditMode(context)
         }
         else {
             drawCenteredText(
@@ -52,53 +49,56 @@ class PredicateViewWidget(
         }
     }
 
-    fun setEditPredicate(predicate: MusicPredicate) {
+    fun setEditExistingNode(node: MusicPredicateTree.Node) {
         clearWidgetsFromRender()
-        selectedPredicate = predicate
-        newPredicateMode = false
+        selectedNode = node
+        newPredicateParent = null
     }
 
-    fun unsetEditPredicate() {
-        clearWidgetsFromRender()
-        selectedPredicate = null
-        newPredicateMode = false
-    }
-
-    fun setCreateNewPredicate(parent: MusicPredicateTree.Node) {
+    fun setCreateNewNode(parent: MusicPredicateTree.Node) {
         clearWidgetsFromRender()
         newPredicateParent = parent
-        newPredicateMode = true
+        selectedNode = null
     }
 
-    fun setNewPredicateTypeName(typeName: String) {
-        selectedNewPredicateTypeName = typeName
+    private fun setSelectedPredicateTypeName(typeName: String) {
+        selectedPredicateTypeName = typeName
         requiredArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
         args = requiredArgs.map { null }.toMutableList()
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("predicateTypeChoice", "musicChoice") }
     }
 
-    private fun renderNewPredicateMode(context: DrawContext?) {
+    private fun renderEditMode(context: DrawContext?) {
         drawCenteredText(
             context,
-            "New Predicate",
+            if (selectedNode != null) "Edit Prediate" else "New Predicate",
             0,
             width / 2)
-        addWidgetFromRender(
-            {
-                DropdownWidget(
-                    predicateTypeNameOptions.toMutableList(),
-                    { typeName ->  setNewPredicateTypeName(typeName) },
-                    "Type")
-            },
-            "predicateTypeChoice",
-            row = 1)
+
+        if (selectedNode?.predicate?.getTypeName() != RootPredicate.getTypeName()) {
+            addWidgetFromRender(
+                {
+                    DropdownWidget(
+                        predicateTypeNameOptions,
+                        { typeName ->  setSelectedPredicateTypeName(typeName) },
+                        "Type",
+                        startingOption = selectedPredicateTypeName)
+                },
+                "predicateTypeChoice",
+                row = 1)
+        }
+        else {
+            selectedPredicateTypeName = RootPredicate.getTypeName()
+        }
+
         val musicSelector = addWidgetFromRender(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
                     "Music Choice",
                     { musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableList() },
-                    "Select a track")
+                    "Select a track",
+                    selectedNode?.playableSounds?.map { sound -> sound.getSoundName() } ?: listOf())
             },
             "musicChoice"
         ) as MultiSelectDropdownWidget
@@ -110,28 +110,30 @@ class PredicateViewWidget(
         }
         addWidgetFromRender(
             {
-                ClickableTextWidget("Create",
+                ClickableTextWidget(
+                    "Save",
                     onClick = {
                         val assets = musicPack.getEditPackAssets()
-                        newPredicateParent?.newChild(
-                            selectedNewPredicateTypeName!!,
-                            args = args.filterNotNull().toTypedArray(),
-                            musicSelector.selected.mapNotNull { path -> assets[path] })
+                        if (selectedNode != null) {
+                            selectedNode!!.predicate =
+                                if (selectedNode!!.predicate.getTypeName() == RootPredicate.getTypeName())
+                                    selectedNode!!.predicate
+                                else MusicPredicate.initializeFromArgs(
+                                    selectedPredicateTypeName, args.filterNotNull().toTypedArray())
+                            selectedNode!!.playableSounds = musicSelector.selected.mapNotNull { path -> assets[path] }
+                        }
+                        else {
+                            newPredicateParent?.newChild(
+                                selectedPredicateTypeName,
+                                args = args.filterNotNull().toTypedArray(),
+                                musicSelector.selected.mapNotNull { path -> assets[path] })
+                        }
                         musicPack.initRules()
                         onChangesSaved()
                     })
             },
             "Create"
         )
-    }
-
-    private fun renderEditPredicateMode(context: DrawContext?) {
-        val selectedPredicate = selectedPredicate!!
-        drawCenteredText(
-            context,
-            selectedPredicate.getTypeName(),
-            0,
-            width / 2)
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {

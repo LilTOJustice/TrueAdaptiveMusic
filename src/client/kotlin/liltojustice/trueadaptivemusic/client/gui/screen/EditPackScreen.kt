@@ -56,8 +56,8 @@ class EditPackScreen(
             (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
             musicPack,
-            { predicate -> predicateViewWidget.setEditPredicate(predicate) },
-            { parent -> predicateViewWidget.setCreateNewPredicate(parent) })
+            { node -> predicateViewWidget.setEditExistingNode(node) },
+            { parent -> predicateViewWidget.setCreateNewNode(parent) })
         adder?.add(predicateTreeWidget, 2)
         adder?.add(predicateViewWidget, 1)
 
