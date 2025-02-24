@@ -1,17 +1,10 @@
-package liltojustice.trueadaptivemusic.identifier
+package liltojustice.trueadaptivemusic.client.identifier
 
 import net.minecraft.util.Identifier
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 
-sealed class TypedIdentifier(id: String, validIds: List<Identifier>): Identifier(id) {
-    init {
-        if (validIds.none { identifier -> identifier.toString() == id }) {
-            throw TypedIdentifierException(
-                "Unexpected identifier $id was not found in registry id list for ${this.javaClass.simpleName})")
-        }
-    }
-
+sealed class TypedIdentifier(id: String): Identifier(id) {
     companion object: TypedIdentifierCompanion<TypedIdentifier>() {
         override fun getRegistryIds(): List<Identifier> {
             throw TypedIdentifierException(
@@ -24,7 +17,7 @@ sealed class TypedIdentifier(id: String, validIds: List<Identifier>): Identifier
                 ?: throw TypedIdentifierException("Failed to find valid companion for $type. " +
                         "Ensure it has a companion object implementing the " +
                         "${TypedIdentifierCompanion::class.simpleName} interface.")
-            return (typeCompanion.functions.firstOrNull { f -> f.name == "getRegistryIds" }
+            return (typeCompanion.functions.firstOrNull { f -> f.name == ::getRegistryIds.name }
                 ?.call(typeCompanion.objectInstance) as? List<*>)?.mapNotNull { x -> x as? Identifier }
                 ?: throw TypedIdentifierException(
                     "Failed to get registry ids from identifier type ${type}. " +

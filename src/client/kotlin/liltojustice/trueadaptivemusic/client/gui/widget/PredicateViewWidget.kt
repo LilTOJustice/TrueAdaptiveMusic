@@ -4,13 +4,15 @@ import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.RootPredicate
-import liltojustice.trueadaptivemusic.identifier.TypedIdentifier
+import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.isSubtypeOf
@@ -33,6 +35,9 @@ class PredicateViewWidget(
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
 
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    }
+
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
         if (!visible) {
@@ -53,6 +58,7 @@ class PredicateViewWidget(
 
     fun setEditExistingNode(node: MusicPredicateTree.Node) {
         clearWidgetsFromRender()
+        setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
         newPredicateParent = null
     }
@@ -62,6 +68,8 @@ class PredicateViewWidget(
         selectedPredicateTypeName = ""
         newPredicateParent = parent
         selectedNode = null
+        requiredArgs = listOf()
+        args = mutableListOf()
     }
 
     private fun setSelectedPredicateTypeName(typeName: String) {
@@ -77,7 +85,6 @@ class PredicateViewWidget(
             if (selectedNode != null) "Edit Prediate" else "New Predicate",
             0,
             width / 2)
-
         if (selectedNode?.predicate?.getTypeName() != RootPredicate.getTypeName()) {
             addWidgetFromRender(
                 {
@@ -89,9 +96,6 @@ class PredicateViewWidget(
                 },
                 "predicateTypeChoice",
                 row = 1)
-        }
-        else {
-            selectedPredicateTypeName = RootPredicate.getTypeName()
         }
 
         val musicSelector = addWidgetFromRender(
@@ -111,7 +115,8 @@ class PredicateViewWidget(
                 "arg: ${arg.name ?: arg.index}"
             )
         }
-        addWidgetFromRender(
+
+        val saveWidget = addWidgetFromRender(
             {
                 ClickableTextWidget(
                     "Save",
@@ -133,13 +138,20 @@ class PredicateViewWidget(
                         }
                         musicPack.initRules()
                         onChangesSaved()
+                        unsetAll()
                     })
             },
-            "Create"
-        )
-    }
+            "Save"
+        ) as ClickableTextWidget
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+        saveWidget.active = args.filterNotNull().size == requiredArgs.size
+        saveWidget.color = if (saveWidget.active) Colors.WHITE else Colors.RED
+        saveWidget.tooltip = if (saveWidget.active)
+            null
+        else if (saveWidget.tooltip == null)
+            Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
+        else
+            saveWidget.tooltip
     }
 
     private fun widgetMaker(arg: KParameter): ClickableWidget {
@@ -150,10 +162,14 @@ class PredicateViewWidget(
                 (arg.name ?: "Unknown") + ": Identifier")
         }
         else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
-            DropdownWidget(
-                TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() },
-                { id -> args[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
-                (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}")
+            val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }
+            return if (options.isEmpty())
+                EmptyClickableWidget()
+            else
+                DropdownWidget(
+                    options,
+                    { id -> args[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
+                    (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}")
         }
         else if (arg.type == typeOf<String>()) {
             val widget = TextFieldWidget(
@@ -164,6 +180,12 @@ class PredicateViewWidget(
         else {
             throw Exception("Couldn't create widget for expected type ${arg.type}.")
         }
+    }
+
+    private fun unsetAll() {
+        clearWidgetsFromRender()
+        newPredicateParent = null
+        selectedNode = null
     }
 }
 

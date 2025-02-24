@@ -16,6 +16,7 @@ class ClickableTextWidget(
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
     : ClickableWidget(x, y, 0, 0, Text.literal("Clickable Text Widget")) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
+    var color: Int = Colors.WHITE
 
     init {
         width = textRenderer.getWidth(text)
@@ -42,7 +43,7 @@ class ClickableTextWidget(
         }
 
         val textRenderer = MinecraftClient.getInstance().textRenderer
-        context?.drawText(textRenderer, text, x, y, Colors.WHITE, true)
+        context?.drawText(textRenderer, text, x, y, color, true)
         super.render(context, mouseX, mouseY, delta)
     }
 
