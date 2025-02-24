@@ -162,7 +162,7 @@ class PredicateViewWidget(
                 (arg.name ?: "Unknown") + ": Identifier")
         }
         else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
-            val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }
+            val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
             return if (options.isEmpty())
                 EmptyClickableWidget()
             else
