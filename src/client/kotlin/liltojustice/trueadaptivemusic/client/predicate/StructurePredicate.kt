@@ -1,49 +1,28 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureStart
-import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockBox
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkSectionPos
+import net.minecraft.world.gen.StructureAccessor
 import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(private val feature: Identifier): MusicPredicate() {
+class StructurePredicate internal constructor(private val feature: StructureIdentifier): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
         val structure: Structure =
             structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(feature) ?: return false
 
-        var minX = Int.MAX_VALUE
-        var minY = Int.MAX_VALUE
-        var minZ = Int.MAX_VALUE
-        var maxX = Int.MIN_VALUE
-        var maxY = Int.MIN_VALUE
-        var maxZ = Int.MIN_VALUE
-
-        val structureStarts = structureAccessor.getStructureStarts(ChunkSectionPos.from(blockPos), structure)
-        if (structureStarts.isEmpty())
-        {
-            return false
-        }
-
-        for (structureStart: StructureStart in structureStarts) {
-            minX = min(minX, structureStart.boundingBox.minX)
-            minY = min(minY, structureStart.boundingBox.minY)
-            minZ = min(minZ, structureStart.boundingBox.minZ)
-            maxX = max(maxX, structureStart.boundingBox.maxX)
-            maxY = max(maxY, structureStart.boundingBox.maxY)
-            maxZ = max(maxZ, structureStart.boundingBox.maxZ)
-        }
-
-        return BlockBox(minX, minY, minZ, maxX, maxY, maxZ).expand(20).contains(blockPos)
+        return testStructure(structureAccessor, structure, blockPos)
     }
 
     override fun test(client: MinecraftClient): Boolean {
@@ -62,7 +41,33 @@ class StructurePredicate internal constructor(private val feature: Identifier): 
         override fun getTypeName(): String { return "structure" }
 
         override fun fromJson(json: JsonObject): StructurePredicate {
-            return StructurePredicate(Identifier(JsonHelper.getString(json, "id")))
+            return StructurePredicate(StructureIdentifier(JsonHelper.getString(json, "id")))
+        }
+
+        fun testStructure(structureAccessor: StructureAccessor, structure: Structure, blockPos: BlockPos): Boolean {
+            var minX = Int.MAX_VALUE
+            var minY = Int.MAX_VALUE
+            var minZ = Int.MAX_VALUE
+            var maxX = Int.MIN_VALUE
+            var maxY = Int.MIN_VALUE
+            var maxZ = Int.MIN_VALUE
+
+            val structureStarts = structureAccessor.getStructureStarts(ChunkSectionPos.from(blockPos), structure)
+            if (structureStarts.isEmpty())
+            {
+                return false
+            }
+
+            for (structureStart: StructureStart in structureStarts) {
+                minX = min(minX, structureStart.boundingBox.minX)
+                minY = min(minY, structureStart.boundingBox.minY)
+                minZ = min(minZ, structureStart.boundingBox.minZ)
+                maxX = max(maxX, structureStart.boundingBox.maxX)
+                maxY = max(maxY, structureStart.boundingBox.maxY)
+                maxZ = max(maxZ, structureStart.boundingBox.maxZ)
+            }
+
+            return BlockBox(minX, minY, minZ, maxX, maxY, maxZ).expand(20).contains(blockPos)
         }
     }
 }
