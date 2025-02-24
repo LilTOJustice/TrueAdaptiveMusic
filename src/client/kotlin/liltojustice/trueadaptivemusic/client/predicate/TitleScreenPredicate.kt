@@ -3,11 +3,10 @@ package liltojustice.trueadaptivemusic.client.predicate
 import com.google.gson.JsonObject
 import net.minecraft.client.MinecraftClient
 
-class TitleScreenPredicate(partialPath: String)
-    : MusicPredicate(partialPath) {
+class TitleScreenPredicate(): MusicPredicate() {
 
     override fun test(client: MinecraftClient): Boolean {
-        return client.world == null;
+        return client.world == null
     }
 
     override fun getIDs(): List<String> { return emptyList() }  // return immutable list, won't be using this
@@ -15,8 +14,8 @@ class TitleScreenPredicate(partialPath: String)
     companion object: MusicPredicateCompanion<TitleScreenPredicate> {
         override fun getTypeName(): String { return "title_screen" }
 
-        override fun fromJson(json: JsonObject, partialPath: String): TitleScreenPredicate {
-            return TitleScreenPredicate(partialPath)
+        override fun fromJson(json: JsonObject): TitleScreenPredicate {
+            return TitleScreenPredicate()
         }
     }
 }
