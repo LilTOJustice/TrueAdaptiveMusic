@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.RootPredicate
+import liltojustice.trueadaptivemusic.identifier.TypedIdentifier
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -12,6 +13,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
 
 class PredicateViewWidget(
@@ -141,22 +143,27 @@ class PredicateViewWidget(
     }
 
     private fun widgetMaker(arg: KParameter): ClickableWidget {
-        return when(arg.type) {
-            typeOf<Identifier>() -> {
-                DropdownWidget(
-                    Registries.REGISTRIES.flatMap { registry -> registry.ids.map { id -> id.path } },
-                    { id -> args[arg.index] = Identifier(id) },
-                    arg.name ?: "Identifier")
-            }
-            typeOf<String>() -> {
-                val widget = TextFieldWidget(textRenderer, 0, 0, 0, 0, Text.literal(arg.name))
-                widget.setChangedListener { value -> args[arg.index] = value }
-                widget
-            }
-            else ->
-                throw Exception("Couldn't create widget for expected type ${arg.type}.")
+        return if (arg.type == typeOf<Identifier>()) {
+            DropdownWidget(
+                Registries.REGISTRIES.flatMap { registry -> registry.ids.map { id -> id.path } },
+                { id -> args[arg.index] = Identifier(id) },
+                (arg.name ?: "Unknown") + ": Identifier")
+        }
+        else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
+            DropdownWidget(
+                TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.path },
+                { id -> args[arg.index] = TypedIdentifier.initializeFromIdPath(arg.type, id) },
+                (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}")
+        }
+        else if (arg.type == typeOf<String>()) {
+            val widget = TextFieldWidget(
+                textRenderer, 0, 0, 0, 0, Text.literal(arg.name ?: "Unknown"))
+            widget.setChangedListener { value -> args[arg.index] = value }
+            widget
+        }
+        else {
+            throw Exception("Couldn't create widget for expected type ${arg.type}.")
         }
     }
-
 }
 
