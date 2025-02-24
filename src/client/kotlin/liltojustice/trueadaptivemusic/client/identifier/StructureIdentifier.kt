@@ -9,6 +9,8 @@ class StructureIdentifier(id: String): TypedIdentifier(id) {
         override fun getRegistryIds(): List<Identifier> {
             return MinecraftClient.getInstance().server?.worlds
                 ?.flatMap { world -> world.structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).ids }
+                ?.toSet()
+                ?.toList()
                 ?: emptyList()
         }
     }
