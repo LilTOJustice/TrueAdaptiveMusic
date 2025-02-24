@@ -6,7 +6,7 @@ import kotlin.reflect.full.*
 
 sealed class TypedIdentifier(id: String, validIds: List<Identifier>): Identifier(id) {
     init {
-        if (validIds.none { identifier -> identifier.path == id }) {
+        if (validIds.none { identifier -> identifier.toString() == id }) {
             throw TypedIdentifierException(
                 "Unexpected identifier $id was not found in registry id list for ${this.javaClass.simpleName})")
         }
@@ -35,12 +35,12 @@ sealed class TypedIdentifier(id: String, validIds: List<Identifier>): Identifier
 
     sealed class TypedIdentifierCompanion<TSelf> where TSelf: TypedIdentifier {
         abstract fun getRegistryIds(): List<Identifier>
-        fun initializeFromIdPath(type: KType, path: String): TypedIdentifier {
+        fun initializeFromIdString(type: KType, id: String): TypedIdentifier {
             return TypedIdentifier::class.sealedSubclasses
                 .firstOrNull { subclass ->
                     subclass.createType(type.arguments, type.isMarkedNullable, type.annotations) == type }
-                ?.primaryConstructor?.call(path)
-                ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from path $path")
+                ?.primaryConstructor?.call(id)
+                ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from id $id")
         }
     }
 }

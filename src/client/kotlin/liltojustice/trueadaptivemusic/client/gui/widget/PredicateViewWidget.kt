@@ -151,8 +151,8 @@ class PredicateViewWidget(
         }
         else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
             DropdownWidget(
-                TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.path },
-                { id -> args[arg.index] = TypedIdentifier.initializeFromIdPath(arg.type, id) },
+                TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() },
+                { id -> args[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
                 (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}")
         }
         else if (arg.type == typeOf<String>()) {
