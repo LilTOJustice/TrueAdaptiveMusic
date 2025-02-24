@@ -134,7 +134,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                 return if (zip) fromZipFile(filePath) else fromDirectory(filePath)
             }
             catch (e: Exception) {
-                throw MusicLoadException("Failed to read music pack: ${filePath}:\nInner Exception:\n${e}")
+                throw MusicLoadException("Failed to read music pack: $filePath", e)
             }
         }
 

@@ -60,7 +60,7 @@ class MusicPredicateTree private constructor(
             try {
                 return MusicPredicateTree(json, soundLibrary)
             } catch (e: Exception) {
-                throw RulesParserException("Failed to parse rules. Inner exception:\n${e.message}")
+                throw RulesParserException("Failed to parse rules.", e)
             }
         }
     }
