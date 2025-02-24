@@ -29,7 +29,6 @@ abstract class ContainerWidget(
     private var scrollPosition = 0
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        render(context, mouseX, mouseY, delta)
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

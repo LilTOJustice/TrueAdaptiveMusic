@@ -43,6 +43,7 @@ class ClickableTextWidget(
 
         val textRenderer = MinecraftClient.getInstance().textRenderer
         context?.drawText(textRenderer, text, x, y, Colors.WHITE, true)
+        super.render(context, mouseX, mouseY, delta)
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
@@ -55,7 +56,6 @@ class ClickableTextWidget(
     }
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        render(context, mouseX, mouseY, delta)
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
