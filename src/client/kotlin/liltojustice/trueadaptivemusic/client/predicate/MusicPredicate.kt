@@ -88,7 +88,6 @@ sealed class MusicPredicate {
                 subclass.companionObject?.functions?.firstOrNull { f ->
                     f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == typeName }
                 ?.primaryConstructor
-
         }
     }
 
