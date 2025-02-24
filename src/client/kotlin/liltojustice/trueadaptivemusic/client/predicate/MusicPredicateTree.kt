@@ -70,6 +70,14 @@ class MusicPredicateTree private constructor(
         var playableSounds: List<PlayableSound>,
         val children: MutableList<Node> = mutableListOf()
     ) {
+        var parent: Node? = null
+            get() = field
+            private set
+
+        init {
+            children.forEach { child -> child.parent = this }
+        }
+
         fun toJson(): JsonObject {
             val result = predicate.toJson()
             val jsonMusicPath = JsonArray(playableSounds.size)
@@ -104,7 +112,9 @@ class MusicPredicateTree private constructor(
         }
 
         fun newChild(predicateType: String, vararg args: Any, sounds: List<PlayableSound>) {
-            children.add(Node(MusicPredicate.initializeFromArgs(predicateType, *args), sounds))
+            val child = Node(MusicPredicate.initializeFromArgs(predicateType, *args), sounds)
+            child.parent = this
+            children.add(child)
         }
 
         companion object {

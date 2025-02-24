@@ -144,6 +144,23 @@ class PredicateViewWidget(
             "Save"
         ) as ClickableTextWidget
 
+        if (selectedNode?.parent != null) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget(
+                        "Delete",
+                        onClick = {
+                            selectedNode?.parent?.children?.remove(selectedNode)
+                            musicPack.initRules()
+                            onChangesSaved()
+                            unsetAll()
+                        }
+                    )
+                },
+                "Delete"
+            )
+        }
+
         saveWidget.active = args.filterNotNull().size == requiredArgs.size
         saveWidget.color = if (saveWidget.active) Colors.WHITE else Colors.RED
         saveWidget.tooltip = if (saveWidget.active)
