@@ -1,8 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
-import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -17,7 +15,7 @@ import kotlin.io.path.extension
 import kotlin.io.path.listDirectoryEntries
 
 @Environment(EnvType.CLIENT)
-class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive music")) {
+class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")) {
     lateinit var createNewPackButton: ButtonWidget
     lateinit var packListWidget: PackListWidget
     lateinit var openMusicPacksButton: ButtonWidget
@@ -47,6 +45,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
 
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
+        addDrawableChild(openMusicPacksButton)
     }
 
     override fun close() {
@@ -55,6 +54,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         this.packListWidget.render(context, mouseX, mouseY, delta)
+        context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 8, 16777215)
         super.render(context, mouseX, mouseY, delta)
     }
 
@@ -62,12 +62,6 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("True adaptive
         fun getOngoingEdit(): Path? {
             return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries()
                 .firstOrNull() { file -> file.extension == "new"}
-        }
-
-        fun getCurrentPack(): MusicPack? {
-            val packResult = Array<MusicPack?>(1) { null }
-            GetMusicPackCallback.EVENT.invoker().getPack(packResult)
-            return packResult[0]
         }
 
         private val OPEN_MUSIC_PACKS_TEXT = Text.literal("Open Pack Folder")

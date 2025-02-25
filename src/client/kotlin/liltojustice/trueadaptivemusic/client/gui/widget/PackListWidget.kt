@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
+import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
 import liltojustice.trueadaptivemusic.client.MusicPack
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -11,7 +13,13 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
     : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
     init {
         MusicPack.loadAllPacks()
-            .forEach { musicPack -> addEntry(Entry(this, client, musicPack)) }
+            .forEach { musicPack ->
+                val newEntry = Entry(this, client, musicPack)
+                addEntry(newEntry)
+                if (musicPack.packName == getCurrentPack()?.packName) {
+                    setSelected(newEntry)
+                }
+            }
     }
 
     class Entry(
@@ -42,12 +50,25 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         }
 
         override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+            if (packListWidget.selectedOrNull == this) {
+                return true
+            }
+            
             packListWidget.setSelected(this)
+            ChangeMusicPackCallback.EVENT.invoker().selectPack(musicPack)
             return true
         }
 
         override fun getNarration(): Text {
             return Text.empty()
+        }
+    }
+
+    companion object {
+        fun getCurrentPack(): MusicPack? {
+            val packResult = Array<MusicPack?>(1) { null }
+            GetMusicPackCallback.EVENT.invoker().getPack(packResult)
+            return packResult[0]
         }
     }
 }
