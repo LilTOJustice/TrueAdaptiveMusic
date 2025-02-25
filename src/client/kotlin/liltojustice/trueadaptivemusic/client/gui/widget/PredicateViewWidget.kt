@@ -34,6 +34,7 @@ class PredicateViewWidget(
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
+    private var movingNode: MusicPredicateTree.Node? = null
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -57,17 +58,37 @@ class PredicateViewWidget(
     }
 
     fun setEditExistingNode(node: MusicPredicateTree.Node) {
+        movingNode?.let {
+            if (node == it) {
+                return@let
+            }
+
+            node.adoptChildFront(it)
+            save()
+        }
+
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
         newPredicateParent = null
+        movingNode = null
     }
 
     fun setCreateNewNode(parent: MusicPredicateTree.Node) {
+        movingNode?.let {
+            if (parent == it) {
+                return@let
+            }
+
+            parent.adoptChild(it)
+            save()
+        }
+
         clearWidgetsFromRender()
         selectedPredicateTypeName = ""
-        newPredicateParent = parent
         selectedNode = null
+        newPredicateParent = parent
+        movingNode = null
         requiredArgs = listOf()
         args = mutableListOf()
     }
@@ -136,9 +157,8 @@ class PredicateViewWidget(
                                 args = args.filterNotNull().toTypedArray(),
                                 musicSelector.selected.mapNotNull { path -> assets[path] })
                         }
-                        musicPack.initRules()
-                        onChangesSaved()
-                        unsetAll()
+
+                        save()
                     })
             },
             "Save"
@@ -150,14 +170,43 @@ class PredicateViewWidget(
                     ClickableTextWidget(
                         "Delete",
                         onClick = {
-                            selectedNode?.parent?.children?.remove(selectedNode)
-                            musicPack.initRules()
-                            onChangesSaved()
-                            unsetAll()
+                            selectedNode?.orphan()
+                            save()
                         }
                     )
                 },
                 "Delete"
+            )
+
+            if (movingNode == null) {
+                addWidgetFromRender(
+                    {
+                        ClickableTextWidget(
+                            "Move",
+                            onClick = {
+                                movingNode = selectedNode
+                                clearWidgetsFromRender { childWidget -> childWidget.id != "Move" }
+                            }
+                        )
+                    },
+                    "Move"
+                )
+            }
+        }
+
+        if (movingNode != null) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget(
+                        "Cancel Move",
+                        onClick = {
+                            movingNode = null
+                            clearWidgetsFromRender { childWidget -> childWidget.id != "Cancel Move" }
+                        },
+                        isSelected = { movingNode != null }
+                    )
+                },
+                "Cancel Move"
             )
         }
 
@@ -203,6 +252,12 @@ class PredicateViewWidget(
         clearWidgetsFromRender()
         newPredicateParent = null
         selectedNode = null
+    }
+
+    private fun save() {
+        musicPack.initRules()
+        onChangesSaved()
+        unsetAll()
     }
 }
 

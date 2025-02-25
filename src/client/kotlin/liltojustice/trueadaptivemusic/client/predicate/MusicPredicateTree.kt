@@ -35,7 +35,7 @@ class MusicPredicateTree private constructor(
     private fun traverseRecursive(
         root: Node, preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null, depth: Int = 0) {
         preorderVisitor?.invoke(root, depth)
-        root.children.forEach { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, depth + 1)}
+        root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, depth + 1)}
         postorderVisitor?.invoke(root, depth)
     }
 
@@ -68,14 +68,17 @@ class MusicPredicateTree private constructor(
     class Node private constructor(
         var predicate: MusicPredicate,
         var playableSounds: List<PlayableSound>,
-        val children: MutableList<Node> = mutableListOf()
+        private val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
-            get() = field
             private set
 
         init {
             children.forEach { child -> child.parent = this }
+        }
+
+        fun forEachChild(visitor: (child: Node) -> Unit) {
+            children.forEach(visitor)
         }
 
         fun toJson(): JsonObject {
@@ -115,6 +118,56 @@ class MusicPredicateTree private constructor(
             val child = Node(MusicPredicate.initializeFromArgs(predicateType, *args), sounds)
             child.parent = this
             children.add(child)
+        }
+
+        fun addChild(child: Node) {
+            children.add(child)
+            child.parent = this
+        }
+
+        fun addChildFront(child: Node) {
+            children.add(0, child)
+            child.parent = this
+        }
+
+        fun removeChild(child: Node) {
+            children.remove(child)
+        }
+
+        fun orphan() {
+            parent?.removeChild(this)
+            parent = null
+        }
+
+        fun adoptChild(child: Node) {
+            if (isChildOf(child)) {
+                return
+            }
+
+            child.orphan()
+            addChild(child)
+        }
+
+        fun adoptChildFront(child: Node) {
+            if (isChildOf(child)) {
+                return
+            }
+
+            child.orphan()
+            addChildFront(child)
+        }
+
+        private fun isChildOf(node: Node): Boolean {
+            var above = parent
+            while (above != null) {
+                if (above == node) {
+                    return true
+                }
+
+                above = above.parent
+            }
+
+            return false
         }
 
         companion object {
