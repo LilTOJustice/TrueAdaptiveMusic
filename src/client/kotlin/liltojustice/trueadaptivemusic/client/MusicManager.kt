@@ -30,7 +30,7 @@ class MusicManager(
         }
     }
 
-    fun selectMusicPack(musicPack: MusicPack) {
+    fun selectMusicPack(musicPack: MusicPack?) {
         stop()
         this.musicPack = musicPack
     }
