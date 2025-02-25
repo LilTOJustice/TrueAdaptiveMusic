@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.*
@@ -17,10 +18,6 @@ import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
 class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
-    fun copy(): MusicPack {
-        return MusicPack(metadata.copy(), rules.copy(), packName)
-    }
-
     fun initEdit(packWithAssets: MusicPack? = null) {
         val packDir = getEditPackDir()
         if (!packDir.exists()) {
@@ -120,6 +117,19 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     companion object {
+        fun loadAllPacks(): List<MusicPack> {
+            return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries().mapNotNull { path ->
+                try {
+                    return@mapNotNull fromFile(path)
+                }
+                catch (e: Exception) {
+                    Logger.log("Failed to load pack from path $path:\n${e}", LogLevel.ERROR)
+                }
+
+                return@mapNotNull null
+            }
+        }
+
         fun makeEmpty(packName: String): MusicPack {
             return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), packName)
         }
