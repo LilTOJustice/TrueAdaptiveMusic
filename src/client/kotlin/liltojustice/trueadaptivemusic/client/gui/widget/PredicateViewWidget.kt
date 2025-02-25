@@ -127,7 +127,7 @@ class PredicateViewWidget(
                                 if (selectedNode!!.predicate.getTypeName() == RootPredicate.getTypeName())
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
-                                    selectedPredicateTypeName, args.filterNotNull().toTypedArray())
+                                    selectedPredicateTypeName, *args.filterNotNull().toTypedArray())
                             selectedNode!!.playableSounds = musicSelector.selected.mapNotNull { path -> assets[path] }
                         }
                         else {
