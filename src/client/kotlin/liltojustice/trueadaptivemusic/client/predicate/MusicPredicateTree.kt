@@ -139,22 +139,26 @@ class MusicPredicateTree private constructor(
             parent = null
         }
 
-        fun adoptChild(child: Node) {
+        fun adoptChild(child: Node): Boolean {
             if (isChildOf(child)) {
-                return
+                return false
             }
 
             child.orphan()
             addChild(child)
+
+            return true
         }
 
-        fun adoptChildFront(child: Node) {
+        fun adoptChildFront(child: Node): Boolean {
             if (isChildOf(child)) {
-                return
+                return false
             }
 
             child.orphan()
             addChildFront(child)
+
+            return true
         }
 
         private fun isChildOf(node: Node): Boolean {

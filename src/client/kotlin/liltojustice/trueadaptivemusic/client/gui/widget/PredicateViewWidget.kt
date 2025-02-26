@@ -9,7 +9,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -80,8 +79,9 @@ class PredicateViewWidget(
                 return@let
             }
 
-            parent.adoptChild(it)
-            save()
+            if (parent.adoptChild(it)) {
+                save()
+            }
         }
 
         clearWidgetsFromRender()
@@ -96,7 +96,12 @@ class PredicateViewWidget(
     private fun setSelectedPredicateTypeName(typeName: String) {
         selectedPredicateTypeName = typeName
         requiredArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
-        args = requiredArgs.map { null }.toMutableList()
+        args = selectedNode?.let {
+            if (it.predicate.getTypeName() == selectedPredicateTypeName)
+                it.predicate.getIDs().toMutableList()
+            else null
+        } ?: requiredArgs.map { null }.toMutableList()
+
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("predicateTypeChoice", "musicChoice") }
     }
 
@@ -225,7 +230,8 @@ class PredicateViewWidget(
             DropdownWidget(
                 Registries.REGISTRIES.flatMap { registry -> registry.ids.map { id -> id.path } },
                 { id -> args[arg.index] = Identifier(id) },
-                (arg.name ?: "Unknown") + ": Identifier")
+                (arg.name ?: "Unknown") + ": Identifier",
+                startingOption = args[arg.index] as? String ?: "")
         }
         else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
             val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
@@ -235,13 +241,8 @@ class PredicateViewWidget(
                 DropdownWidget(
                     options,
                     { id -> args[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
-                    (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}")
-        }
-        else if (arg.type == typeOf<String>()) {
-            val widget = TextFieldWidget(
-                textRenderer, 0, 0, 0, 0, Text.literal(arg.name ?: "Unknown"))
-            widget.setChangedListener { value -> args[arg.index] = value }
-            widget
+                    (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}",
+                    startingOption = args[arg.index] as? String ?: "")
         }
         else {
             throw Exception("Couldn't create widget for expected type ${arg.type}.")
