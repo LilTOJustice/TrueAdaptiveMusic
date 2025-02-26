@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Util
 import java.nio.file.Path
@@ -16,9 +17,10 @@ import kotlin.io.path.listDirectoryEntries
 
 @Environment(EnvType.CLIENT)
 class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")) {
-    lateinit var createNewPackButton: ButtonWidget
-    lateinit var packListWidget: PackListWidget
-    lateinit var openMusicPacksButton: ButtonWidget
+    private lateinit var createNewPackButton: ButtonWidget
+    private lateinit var packListWidget: PackListWidget
+    private lateinit var openMusicPacksButton: ButtonWidget
+    private lateinit var doneButton: ButtonWidget
 
     override fun init() {
         createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
@@ -43,9 +45,14 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         packListWidget = PackListWidget(
             client!!, this.width, this.height, 48, this.height - 64, 36)
 
+        doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }
+            .dimensions(this.width - 72, this.height - 20, 72, 20)
+            .build()
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
+        addDrawableChild(doneButton)
     }
 
     override fun close() {
