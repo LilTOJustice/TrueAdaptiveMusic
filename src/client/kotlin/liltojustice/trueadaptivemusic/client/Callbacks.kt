@@ -11,5 +11,9 @@ class Callbacks {
         fun setCurrentMusicPack(musicPack: MusicPack?) {
             ChangeMusicPackCallback.EVENT.invoker().selectPack(musicPack)
         }
+
+        fun refreshCurrentMusicPack() {
+            setCurrentMusicPack(getCurrentMusicPack())
+        }
     }
 }

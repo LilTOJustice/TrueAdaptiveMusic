@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
-import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
+import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
@@ -19,6 +19,8 @@ class EditPackScreen(
     private val parent: Screen,
     private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
+    lateinit var predicateViewWidget: PredicateViewWidget
+
     override fun init() {
         musicPack.initEdit(musicPack)
 
@@ -47,7 +49,7 @@ class EditPackScreen(
         val adder: GridWidget.Adder? = gridWidget.createAdder(3)
 
         lateinit var predicateTreeWidget: PredicateTreeWidget
-        val predicateViewWidget = PredicateViewWidget(
+        predicateViewWidget = PredicateViewWidget(
             (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
             (height - TOP_MARGIN - BOTTOM_MARGIN),
             musicPack,
@@ -74,6 +76,11 @@ class EditPackScreen(
     }
 
     override fun close() {
+        if (parent is MainScreen) {
+            parent.reload()
+        }
+
+        Callbacks.refreshCurrentMusicPack()
         client?.setScreen(parent)
     }
 

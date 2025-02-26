@@ -11,6 +11,11 @@ import net.minecraft.util.Colors
 class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int, bottom: Int, itemHeight: Int)
     : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
     init {
+        init()
+    }
+
+    fun init() {
+        clearEntries()
         val vanillaEntry = Entry(this, client)
         addEntry(vanillaEntry)
         setSelected(vanillaEntry)

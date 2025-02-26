@@ -95,6 +95,10 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         super.render(context, mouseX, mouseY, delta)
     }
 
+    fun reload() {
+        packListWidget.init()
+    }
+
     companion object {
         fun getOngoingEdit(): Path? {
             return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries()
