@@ -94,6 +94,7 @@ class MusicManager(
 
     private fun stop() {
         client.soundManager.stopAll()
+        client.soundManager.close()
         soundInstance = null
         oldSoundInstance = null
     }

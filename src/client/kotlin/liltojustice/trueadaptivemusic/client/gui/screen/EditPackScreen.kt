@@ -19,21 +19,22 @@ class EditPackScreen(
     private val parent: Screen,
     private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
-    lateinit var predicateViewWidget: PredicateViewWidget
+    private lateinit var predicateViewWidget: PredicateViewWidget
 
     override fun init() {
         musicPack.initEdit(musicPack)
 
-        val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
+        val saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
+            Callbacks.setCurrentMusicPack(null)
             val path = musicPack.save()
             Callbacks.setCurrentMusicPack(MusicPack.fromFile(path))
             this.close()
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
-            .xyOffset(13, 6)
+            .xyOffset(32, 6)
             .build()
-        saveButtonWidget.width = 50
+        saveButtonWidget.width = 90
 
         val openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
             Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
@@ -97,5 +98,6 @@ class EditPackScreen(
         private const val LEFT_MARGIN = TOP_MARGIN / 4
         private const val RIGHT_MARGIN = LEFT_MARGIN
         private val OPEN_ASSETS_TEXT = Text.literal("Show Assets")
+        private val SAVE_BUTTON_TEXT = Text.literal("Save and Zip")
     }
 }

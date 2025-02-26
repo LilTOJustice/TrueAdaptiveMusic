@@ -1,17 +1,19 @@
 package liltojustice.trueadaptivemusic.client.sound
 
+import liltojustice.trueadaptivemusic.ZipInputStream
 import java.io.InputStream
-import java.util.zip.ZipEntry
+import java.nio.file.Path
 import java.util.zip.ZipFile
-import kotlin.io.path.Path
 import kotlin.io.path.name
+import kotlin.io.path.pathString
 
-class ZipSoundFile(private val zipFile: ZipFile, private val zipEntry: ZipEntry) : SoundFile {
+class ZipSoundFile(private val zipFilePath: Path, private val zipEntryPath: Path): SoundFile {
     override fun getInputStream(): InputStream {
-        return zipFile.getInputStream(zipEntry)
+        val zipFile = ZipFile(zipFilePath.toFile())
+        return ZipInputStream(zipFile, zipFile.getEntry(zipEntryPath.pathString))
     }
 
     override fun getName(): String {
-        return Path(zipEntry.name).name
+        return zipEntryPath.name
     }
 }
