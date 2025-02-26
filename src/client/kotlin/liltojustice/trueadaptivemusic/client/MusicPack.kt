@@ -18,6 +18,10 @@ import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
 class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
+    fun copy(): MusicPack {
+        return MusicPack(metadata.copy(), rules.copy(), packName)
+    }
+
     fun initEdit(packWithAssets: MusicPack? = null) {
         val packDir = getEditPackDir()
         if (!packDir.exists()) {
