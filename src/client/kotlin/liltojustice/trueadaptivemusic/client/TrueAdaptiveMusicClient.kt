@@ -5,7 +5,6 @@ import liltojustice.trueadaptivemusic.*
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.util.ActionResult
-import java.nio.file.Path
 import kotlin.io.path.Path
 
 class TrueAdaptiveMusicClient: ClientModInitializer {
@@ -33,26 +32,18 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
             {
                 musicManager = MusicManager(client)
                 try {
-                    var toLoad: Path? = null
-                    val selectedPackFileText = Path(Constants.SELECTED_PACK).toFile().readText()
-                    val selectedPackPath = Path("${Constants.MUSIC_PACK_DIR}/${selectedPackFileText}")
-                    if (selectedPackFileText.isNotEmpty()) {
-                        toLoad = selectedPackPath
-                        Logger.log("Found selected pack $selectedPackPath.")
-                    }
+                    val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
 
-                    if (toLoad != null)
-                    {
-                        try {
-                            ChangeMusicPackCallback.EVENT.invoker().selectPack(MusicPack.fromFile(toLoad))
-                        }
-                        catch (e: MusicLoadException) {
-                            Logger.log(
-                                "Selected pack \"$selectedPackPath\" failed to load. Error:\n${e}")
-                        }
+                    try {
+                        ChangeMusicPackCallback.EVENT.invoker().selectPack(
+                            if (selectedPackName.isBlank())
+                                null
+                            else
+                                MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, selectedPackName)))
                     }
-                    else {
-                        Logger.log("Selected pack \"$selectedPackPath\" is missing.", LogLevel.WARNING)
+                    catch (e: MusicLoadException) {
+                        Logger.log(
+                            "Selected pack \"$selectedPackName\" failed to load. Error:\n${e}")
                     }
                 }
                 catch (e: FileNotFoundException) {

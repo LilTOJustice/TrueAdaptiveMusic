@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.Logger;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.util.ActionResult;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,12 +17,13 @@ public interface ChangeMusicPackCallback {
             (listeners) -> (pack) -> {
                 for (ChangeMusicPackCallback listener : listeners) {
                     ActionResult result = listener.selectPack(pack);
-                    try (FileOutputStream outputStream = new FileOutputStream(
-                            Paths.get(Constants.SELECTED_PACK).toFile(), false)) {
-                        outputStream.write(pack.getPackName().getBytes());
+                    String packName = pack == null ? "" : pack.getPackName();
+                    try (FileOutputStream outputStream =
+                                    new FileOutputStream(Paths.get(Constants.SELECTED_PACK).toFile(), false)) {
+                        outputStream.write(packName.getBytes());
                     } catch (IOException ignored) {
                         Logger.Companion.log(
-                                "Failed to save selected pack \"" + pack.getPackName() + '\"', LogLevel.ERROR);
+                                "Failed to save selected pack \"" + packName + '\"', LogLevel.ERROR);
                     }
 
                     if (result != ActionResult.PASS) {
@@ -32,5 +34,5 @@ public interface ChangeMusicPackCallback {
                 return ActionResult.PASS;
             });
 
-    ActionResult selectPack(MusicPack musicPack);
+    ActionResult selectPack(@Nullable MusicPack musicPack);
 }

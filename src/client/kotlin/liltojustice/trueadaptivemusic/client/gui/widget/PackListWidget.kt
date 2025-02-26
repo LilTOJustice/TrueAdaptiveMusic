@@ -12,6 +12,9 @@ import net.minecraft.util.Colors
 class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int, bottom: Int, itemHeight: Int)
     : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
     init {
+        val vanillaEntry = Entry(this, client)
+        addEntry(vanillaEntry)
+        setSelected(vanillaEntry)
         MusicPack.loadAllPacks()
             .forEach { musicPack ->
                 val newEntry = Entry(this, client, musicPack)
@@ -25,7 +28,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
     class Entry(
         private val packListWidget: PackListWidget,
         private val client: MinecraftClient,
-        private val musicPack: MusicPack)
+        private val musicPack: MusicPack? = null)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
         override fun render(
             context: DrawContext?,
@@ -39,14 +42,27 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             hovered: Boolean,
             tickDelta: Float
         ) {
-            context?.drawText(
-                client.textRenderer, musicPack.packName, x + 3, y + 6, Colors.WHITE, false)
-            context?.drawText(
-                client.textRenderer,
-                musicPack.metadata.description,
-                x + 3, y + 14 + 3,
-                Colors.GRAY,
-                false)
+            musicPack?.let {
+                context?.drawText(
+                    client.textRenderer, it.packName, x + 3, y + 6, Colors.WHITE, false)
+                context?.drawText(
+                    client.textRenderer,
+                    it.metadata.description,
+                    x + 3, y + 14 + 3,
+                    Colors.GRAY,
+                    false)
+            }
+
+            if (musicPack == null) {
+                context?.drawText(
+                    client.textRenderer, "Vanilla", x + 3, y + 6, Colors.WHITE, false)
+                context?.drawText(
+                    client.textRenderer,
+                    "Disable TrueAdaptiveMusic",
+                    x + 3, y + 14 + 3,
+                    Colors.GRAY,
+                    false)
+            }
         }
 
         override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
