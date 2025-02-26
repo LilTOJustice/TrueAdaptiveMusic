@@ -35,7 +35,7 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                     val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
 
                     try {
-                        ChangeMusicPackCallback.EVENT.invoker().selectPack(
+                        Callbacks.setCurrentMusicPack(
                             if (selectedPackName.isBlank())
                                 null
                             else

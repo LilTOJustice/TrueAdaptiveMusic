@@ -24,7 +24,7 @@ class EditPackScreen(
 
         val saveButtonWidget = IconButtonWidget.Builder(Text.literal("Save"), CHECKMARK) {
             val path = musicPack.save()
-            ChangeMusicPackCallback.EVENT.invoker().selectPack(MusicPack.fromFile(path))
+            Callbacks.setCurrentMusicPack(MusicPack.fromFile(path))
             this.close()
         }
             .iconSize(9, 8)

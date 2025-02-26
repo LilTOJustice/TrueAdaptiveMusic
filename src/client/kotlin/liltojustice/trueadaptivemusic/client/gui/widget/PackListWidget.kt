@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
-import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
+import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -19,7 +18,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             .forEach { musicPack ->
                 val newEntry = Entry(this, client, musicPack)
                 addEntry(newEntry)
-                if (musicPack.packName == getCurrentPack()?.packName) {
+                if (musicPack.packName == Callbacks.getCurrentMusicPack()?.packName) {
                     setSelected(newEntry)
                 }
             }
@@ -71,20 +70,12 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             }
             
             packListWidget.setSelected(this)
-            ChangeMusicPackCallback.EVENT.invoker().selectPack(musicPack)
+            Callbacks.setCurrentMusicPack(musicPack)
             return true
         }
 
         override fun getNarration(): Text {
             return Text.empty()
-        }
-    }
-
-    companion object {
-        fun getCurrentPack(): MusicPack? {
-            val packResult = Array<MusicPack?>(1) { null }
-            GetMusicPackCallback.EVENT.invoker().getPack(packResult)
-            return packResult[0]
         }
     }
 }

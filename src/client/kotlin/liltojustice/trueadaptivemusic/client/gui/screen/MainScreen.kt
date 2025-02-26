@@ -1,9 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
-import liltojustice.trueadaptivemusic.client.GetMusicPackCallback
-import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -61,11 +60,10 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             .build()
         editButton = ButtonWidget.Builder(Text.literal("Edit Pack"))
         {
-            val packResult = Array<MusicPack?>(1) { null }
-            GetMusicPackCallback.EVENT.invoker().getPack(packResult)
+            val currentPack = Callbacks.getCurrentMusicPack()
             val ongoingEdit = getOngoingEdit()
-            val editScreen = EditPackScreen(this, packResult[0]?.copy() ?: return@Builder)
-            if (ongoingEdit != null && ongoingEdit.name != packResult[0]?.packName) {
+            val editScreen = EditPackScreen(this, currentPack ?: return@Builder)
+            if (ongoingEdit != null && ongoingEdit.name != currentPack.packName) {
                 client?.setScreen(
                     ConfirmBackupScreen(
                         this,
@@ -78,9 +76,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         }
             .dimensions(0, this.height - 20, 72, 20)
             .build()
-        val packResult = Array<MusicPack?>(1) { null }
-        GetMusicPackCallback.EVENT.invoker().getPack(packResult)
-        editButton.visible = packResult[0] != null
+        editButton.visible = Callbacks.getCurrentMusicPack() != null
 
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
