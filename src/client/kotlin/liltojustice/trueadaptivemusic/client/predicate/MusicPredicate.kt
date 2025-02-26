@@ -6,13 +6,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.*
 
 sealed class MusicPredicate {
-
     abstract fun test(client: MinecraftClient): Boolean
     abstract fun getIDs(): List<String>
 
