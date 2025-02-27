@@ -99,8 +99,7 @@ class DropdownWidget(
         true,
         true,
         x,
-        y,
-        true) {
+        y) {
         private var selectedOption = startingOption.ifEmpty { null } ?: notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
 
