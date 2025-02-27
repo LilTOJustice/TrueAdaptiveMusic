@@ -108,7 +108,7 @@ class PredicateViewWidget(
     private fun renderEditMode(context: DrawContext?) {
         drawCenteredText(
             context,
-            if (selectedNode != null) "Edit Prediate" else "New Predicate",
+            if (selectedNode != null) "Edit Predicate" else "New Predicate",
             0,
             width / 2)
         if (selectedNode?.predicate?.getTypeName() != RootPredicate.getTypeName()) {
