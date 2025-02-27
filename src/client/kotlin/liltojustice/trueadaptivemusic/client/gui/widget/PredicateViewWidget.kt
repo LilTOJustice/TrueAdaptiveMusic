@@ -5,14 +5,18 @@ import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.RootPredicate
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.registry.Registries
+import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
+import net.minecraft.util.InvalidIdentifierException
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
@@ -129,7 +133,13 @@ class PredicateViewWidget(
                 MultiSelectDropdownWidget(
                     listOf(),
                     "Music Choice",
-                    { musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableList() },
+                    {
+                        musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
+                        .union(
+                            Registries.SOUND_EVENT.ids
+                                .map { id -> id.toString() }
+                                .filter { path -> path.contains("music.") }).toList()
+                    },
                     "Select a track",
                     selectedNode?.playableSounds?.map { sound -> sound.getSoundName() } ?: listOf())
             },
@@ -154,13 +164,14 @@ class PredicateViewWidget(
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *args.filterNotNull().toTypedArray())
-                            selectedNode!!.playableSounds = musicSelector.selected.mapNotNull { path -> assets[path] }
+                            selectedNode!!.playableSounds = musicSelector.selected
+                                .mapNotNull { path -> toPlayableSound(assets, path) }
                         }
                         else {
                             newPredicateParent?.newChild(
                                 selectedPredicateTypeName,
                                 args = args.filterNotNull().toTypedArray(),
-                                musicSelector.selected.mapNotNull { path -> assets[path] })
+                                musicSelector.selected.mapNotNull { path -> toPlayableSound(assets, path) })
                         }
 
                         save()
@@ -259,6 +270,17 @@ class PredicateViewWidget(
         musicPack.initRules()
         onChangesSaved()
         unsetAll()
+    }
+
+    companion object {
+        private fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
+            return assets[id] ?: try {
+                PlayableSoundEvent(SoundEvent.of(Identifier(id)))
+            }
+            catch (e: InvalidIdentifierException) {
+                null
+            }
+        }
     }
 }
 
