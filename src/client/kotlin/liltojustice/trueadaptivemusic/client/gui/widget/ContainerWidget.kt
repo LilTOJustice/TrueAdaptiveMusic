@@ -64,6 +64,8 @@ abstract class ContainerWidget(
             context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
+        context?.drawBorder(x, y, width, height, Colors.RED)
+
         clampScrollPosition()
         drawScrollBar(context)
 
@@ -109,7 +111,7 @@ abstract class ContainerWidget(
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseScrolled(mouseX, mouseY, amount)
-                if (translucentInteract)
+                if (child.widget is ContainerWidget && child.widget.translucentInteract)
                 {
                     return@forEach
                 }
@@ -247,7 +249,7 @@ abstract class ContainerWidget(
     }
 
     private fun clampScrollPosition() {
-        scrollPosition = min(scrollPosition, (maxUsedRow(countOffscreen = true) + 1) - totalRows())
+        scrollPosition = min(scrollPosition, maxUsedRow(countOffscreen = true) + 1 - totalRows())
         scrollPosition = max(0, scrollPosition)
     }
 

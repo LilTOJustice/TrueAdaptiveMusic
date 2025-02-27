@@ -12,7 +12,15 @@ class MultiSelectDropdownWidget(
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
-    500, 500, "Dropdown: $title", false, false, false, x, y) {
+    500,
+    500,
+    "Dropdown: $title",
+    false,
+    false,
+    false,
+    x,
+    y,
+    true) {
     val selected = mutableSetOf<String>()
 
     init {

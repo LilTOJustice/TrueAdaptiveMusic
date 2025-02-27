@@ -17,7 +17,16 @@ class DropdownWidget(
     startingOption: String = "",
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(0, 0, "Dropdown: $title", false, false, true, x, y) {
+    : ContainerWidget(
+    0,
+    0,
+    "Dropdown: $title",
+    false,
+    false,
+    true,
+    x,
+    y,
+    true) {
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
     private var textInputWidth = (
             if (notSelectedPlaceholder != null)
