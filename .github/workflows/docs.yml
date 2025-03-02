@@ -25,5 +25,5 @@ jobs:
           restore-keys: |
             mkdocs-material-
       - run: pip install mkdocs-material
-      - run: cd docs/
+      - run: cd trueadaptivemusicdocs/
       - run: mkdocs gh-deploy --force
