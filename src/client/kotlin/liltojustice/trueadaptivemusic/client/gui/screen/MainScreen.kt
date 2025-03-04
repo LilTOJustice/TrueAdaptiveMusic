@@ -63,7 +63,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         doneButton.x = width - doneButton.width
         doneButton.y = height - doneButton.height
 
-        editButton = ButtonWidget.Builder(Text.literal("Edit Pack"))
+        editButton = ButtonWidget.Builder(EDIT_TEXT)
         {
             val currentPack = Callbacks.getCurrentMusicPack()
             val ongoingEdit = getOngoingEdit()
@@ -79,8 +79,9 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
 
             client?.setScreen(editScreen)
         }
-            .dimensions(0, this.height - 20, 72, 20)
             .build()
+        editButton.width = textRenderer.getWidth(EDIT_TEXT) + 10
+        editButton.y = height - editButton.height
         editButton.visible = Callbacks.getCurrentMusicPack() != null
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> reload() }
@@ -119,5 +120,6 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         private val OPEN_MUSIC_PACKS_TEXT = Text.literal("Open Pack Folder")
         private val CREATE_PACK_TEXT = Text.literal("Create a new music pack")
         private val REFRESH_TEXT = Text.literal("Refresh")
+        private val EDIT_TEXT = Text.literal("Edit Pack")
     }
 }
