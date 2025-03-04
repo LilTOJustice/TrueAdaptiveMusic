@@ -26,6 +26,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     private lateinit var openMusicPacksButton: ButtonWidget
     private lateinit var doneButton: ButtonWidget
     private lateinit var editButton: ButtonWidget
+    private lateinit var refreshButton: ButtonWidget
 
     override fun init() {
         ChangeMusicPackCallback.EVENT.register { musicPack ->
@@ -33,7 +34,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             return@register ActionResult.PASS
         }
 
-        createNewPackButton = ButtonWidget.Builder(Text.literal("Create a new music pack"))
+        createNewPackButton = ButtonWidget.Builder(CREATE_PACK_TEXT)
         {
             val ongoingEdit = getOngoingEdit()
             if (ongoingEdit != null) {
@@ -44,6 +45,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             client?.setScreen(PackNameScreen(this))
         }
             .build()
+        createNewPackButton.width = textRenderer.getWidth(CREATE_PACK_TEXT) + 10
 
         openMusicPacksButton = ButtonWidget.Builder(OPEN_MUSIC_PACKS_TEXT) {
             Util.getOperatingSystem().open(Path(Constants.MUSIC_PACK_DIR).toUri())
@@ -56,8 +58,11 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             client!!, this.width, this.height, 48, this.height - 64, 36)
 
         doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }
-            .dimensions(this.width - 72, this.height - 20, 72, 20)
             .build()
+        doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
+        doneButton.x = width - doneButton.width
+        doneButton.y = height - doneButton.height
+
         editButton = ButtonWidget.Builder(Text.literal("Edit Pack"))
         {
             val currentPack = Callbacks.getCurrentMusicPack()
@@ -78,11 +83,17 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             .build()
         editButton.visible = Callbacks.getCurrentMusicPack() != null
 
+        refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> reload() }
+            .build()
+        refreshButton.y = createNewPackButton.y + createNewPackButton.height + 5
+        refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
         addDrawableChild(doneButton)
         addDrawableChild(editButton)
+        addDrawableChild(refreshButton)
     }
 
     override fun close() {
@@ -106,5 +117,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         }
 
         private val OPEN_MUSIC_PACKS_TEXT = Text.literal("Open Pack Folder")
+        private val CREATE_PACK_TEXT = Text.literal("Create a new music pack")
+        private val REFRESH_TEXT = Text.literal("Refresh")
     }
 }
