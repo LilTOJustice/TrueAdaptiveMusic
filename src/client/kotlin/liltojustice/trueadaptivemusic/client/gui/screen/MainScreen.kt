@@ -27,6 +27,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     private lateinit var doneButton: ButtonWidget
     private lateinit var editButton: ButtonWidget
     private lateinit var refreshButton: ButtonWidget
+    private lateinit var wikiButton: ButtonWidget
 
     override fun init() {
         ChangeMusicPackCallback.EVENT.register { musicPack ->
@@ -89,12 +90,20 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         refreshButton.y = createNewPackButton.y + createNewPackButton.height + 5
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
+        wikiButton = ButtonWidget.builder(WIKI_TEXT)
+        { _: ButtonWidget? -> Util.getOperatingSystem().open(Constants.WIKI_LINK) }
+            .build()
+        wikiButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 5
+        wikiButton.width = textRenderer.getWidth(WIKI_TEXT) + 10
+        wikiButton.x = width - wikiButton.width
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
         addDrawableChild(doneButton)
         addDrawableChild(editButton)
         addDrawableChild(refreshButton)
+        addDrawableChild(wikiButton)
     }
 
     override fun close() {
@@ -114,12 +123,13 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     companion object {
         fun getOngoingEdit(): Path? {
             return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries()
-                .firstOrNull() { file -> file.extension == "new"}
+                .firstOrNull() { file -> file.extension == "new" }
         }
 
         private val OPEN_MUSIC_PACKS_TEXT = Text.literal("Open Pack Folder")
         private val CREATE_PACK_TEXT = Text.literal("Create a new music pack")
         private val REFRESH_TEXT = Text.literal("Refresh")
         private val EDIT_TEXT = Text.literal("Edit Pack")
+        private val WIKI_TEXT = Text.literal("Open Wiki")
     }
 }
