@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.*
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -35,6 +36,14 @@ class EditPackScreen(
             .xyOffset(32, 6)
             .build()
         saveButtonWidget.width = 90
+
+        val closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
+            close()
+        }
+            .build()
+        closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
+        closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        closeButtonWidget.tooltip = Tooltip.of(Text.literal("Changes will be saved"))
 
         val openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
             Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
@@ -68,6 +77,7 @@ class EditPackScreen(
         SimplePositioningWidget.setPos(
             gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
         addDrawableChild(saveButtonWidget)
+        addDrawableChild(closeButtonWidget)
         addDrawableChild(openAssetsFolderButtonWidget)
         gridWidget.forEachChild { drawableElement: ClickableWidget? ->
             this.addDrawableChild(
@@ -99,5 +109,6 @@ class EditPackScreen(
         private const val RIGHT_MARGIN = LEFT_MARGIN
         private val OPEN_ASSETS_TEXT = Text.literal("Show Assets")
         private val SAVE_BUTTON_TEXT = Text.literal("Save and Zip")
+        private val CLOSE_BUTTON_TEXT = Text.literal("Close")
     }
 }
