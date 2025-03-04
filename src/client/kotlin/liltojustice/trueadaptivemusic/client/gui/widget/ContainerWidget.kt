@@ -169,7 +169,7 @@ abstract class ContainerWidget(
         }
 
         if (row == null) {
-            children[widgetId] = children[widgetId]!!.copy(row = maxUsedRow(true) + 1)
+            children[widgetId] = children[widgetId]!!.copy(row = maxUsedRow(true, true) + 1)
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
