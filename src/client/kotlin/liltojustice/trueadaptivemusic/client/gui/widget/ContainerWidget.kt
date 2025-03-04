@@ -121,7 +121,6 @@ abstract class ContainerWidget(
         }
 
         scrollPosition -= amount.toInt()
-        clampScrollPosition()
 
         return true
     }
@@ -242,6 +241,10 @@ abstract class ContainerWidget(
     fun fitToChildren() {
         fitToChildrenHeight()
         fitToChildrenWidth()
+    }
+
+    fun resetScrolling() {
+        scrollPosition = 0
     }
 
     private fun clampScrollPosition() {

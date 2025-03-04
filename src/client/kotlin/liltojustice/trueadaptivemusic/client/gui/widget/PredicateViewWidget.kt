@@ -75,6 +75,7 @@ class PredicateViewWidget(
         selectedNode = node
         newPredicateParent = null
         movingNode = null
+        resetScrolling()
     }
 
     fun setCreateNewNode(parent: MusicPredicateTree.Node) {
@@ -95,6 +96,7 @@ class PredicateViewWidget(
         movingNode = null
         requiredArgs = listOf()
         args = mutableListOf()
+        resetScrolling()
     }
 
     private fun setSelectedPredicateTypeName(typeName: String) {
