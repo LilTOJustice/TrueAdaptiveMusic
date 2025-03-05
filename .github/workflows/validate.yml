@@ -10,5 +10,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test branch name
-        if: contains(github.head_ref, "*.*")
+        if: contains(github.head_ref, ".")
         run: exit 1
