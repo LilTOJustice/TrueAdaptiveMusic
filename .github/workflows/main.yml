@@ -44,7 +44,7 @@ jobs:
         run: ./gradlew clean build
         
       - name: Publish (CurseForge/Modrinth/GitHub)
-        uses: Kir-Antipov/mc-publish@v3.2
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: true-adaptive-music
           curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
