@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Test branch name
         if: !contains(github.head_ref, '.') # Is version branch
-        run: exit 1; echo "Cannot PR version branch into master"
+        run: echo "Cannot PR version branch into master"; exit 1
