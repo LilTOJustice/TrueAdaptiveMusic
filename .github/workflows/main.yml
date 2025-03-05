@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  MINECRAFT_VERSION: '${{ github.base_ref }}'
+  MINECRAFT_VERSION: "${{ github.base_ref }}"
   JAVA_VERSION: 17
   VERSION: '1.0'
   MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
@@ -52,11 +52,11 @@ jobs:
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
-          github-tag: "v${{env.VERSION}}+{{env.MINECRAFT_VERSION}}"
+          github-tag: "v${{env.VERSION}}+${{env.MINECRAFT_VERSION}}"
           github-token: "${{env.GITHUB_TOKEN}}"
           
           name: "TrueAdaptiveMusic ${{env.VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
-          version: "${{env.VERSION}}+{{env.MINECRAFT_VERSION}}"
+          version: "${{env.VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
           
