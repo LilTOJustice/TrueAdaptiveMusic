@@ -1,4 +1,4 @@
-name: Publish on GitHub, CurseForge & Modrinth
+name: validate
 
 on:
   pull_request:
