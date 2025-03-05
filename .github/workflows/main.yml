@@ -2,15 +2,14 @@ name: Publish on GitHub, CurseForge & Modrinth
 
 on:
   pull_request: 
-    branches-ignore:
-      - master
+    branches:
+      - '*.*'
   workflow_dispatch:
 
 env:
   MINECRAFT_VERSION: ${{ github.base_ref }}
   JAVA_VERSION: 17
   VERSION: 1.0
-  RELEASE_NAME: TrueAdaptiveMusic ${{env.VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}
   MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
   CURSEFORGE_TOKEN: ${{ secrets.PUBLISH_CURSEFORGE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
@@ -20,7 +19,7 @@ permissions:
   
 jobs:
   build:
-    if: github.ref != 'refs/heads/master'
+    if: contains(github.ref, '.') # Is version branch
     runs-on: ubuntu-latest
     steps:
       - name: Check Environment Variables
@@ -56,7 +55,7 @@ jobs:
           github-tag: "v${{env.VERSION}}+{{env.MINECRAFT_VERSION}}"
           github-token: "${{env.GITHUB_TOKEN}}"
           
-          name: "${{env.RELEASE_NAME}}"
+          name: "TrueAdaptiveMusic ${{env.VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
           version: "${{env.VERSION}}+{{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
