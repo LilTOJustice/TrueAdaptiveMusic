@@ -4,7 +4,6 @@ import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 
@@ -15,7 +14,7 @@ class MusicManager(
     private var soundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
     private var toStop: SoundInstance? = null
-    private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
+    private var musicVolumeOption: Float = client.options.getSoundVolume(SoundCategory.MUSIC)
     private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
 
     init {
@@ -61,7 +60,7 @@ class MusicManager(
     private fun processFades() {
         fadeInstances.forEach { fadeInstance ->
             val volume: Float = fadeInstance.tick()
-            setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption.value.toFloat() * volume)
+            setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption * volume)
         }
 
         fadeInstances.removeIf { fadeinstance -> fadeinstance.done() }
@@ -69,7 +68,7 @@ class MusicManager(
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
         return(music == null || identifier != currentMusicPredId || !isPlaying(soundInstance))
-                && musicVolumeOption.value > 0
+                && musicVolumeOption > 0
     }
 
     private fun startNewMusic(newMusic: PlayableSound?) {
