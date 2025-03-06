@@ -7,7 +7,7 @@ import net.minecraft.util.JsonHelper
 
 class DimensionPredicate(private val dimension: DimensionIdentifier): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        return client.player?.world?.dimensionEntry?.matchesId(dimension) ?: false
+        return client.player?.world?.method_40134()?.matchesId(dimension) ?: false
     }
 
     override fun getIDs(): List<String> { return listOf(dimension.toString()) }

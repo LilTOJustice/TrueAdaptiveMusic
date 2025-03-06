@@ -8,10 +8,10 @@ import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
+import net.minecraft.util.registry.Registry
 
 typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
 
@@ -197,7 +197,7 @@ class MusicPredicateTree private constructor(
                     .map { path ->
                         try {
                             return@map soundLibrary[path]
-                                ?: PlayableSoundEvent(Registries.SOUND_EVENT[Identifier(path)]
+                                ?: PlayableSoundEvent(Registry.SOUND_EVENT[Identifier(path)]
                                     ?: throw InvalidIdentifierException("Couldn't find sound event for $path"))
                         } catch (_: InvalidIdentifierException) {}
 

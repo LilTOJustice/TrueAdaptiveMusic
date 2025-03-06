@@ -3,24 +3,24 @@ package liltojustice.trueadaptivemusic.client.predicate
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureStart
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockBox
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkSectionPos
+import net.minecraft.util.registry.Registry
 import net.minecraft.world.gen.StructureAccessor
-import net.minecraft.world.gen.structure.Structure
+import net.minecraft.world.gen.feature.ConfiguredStructureFeature
 import kotlin.math.max
 import kotlin.math.min
 
 class StructurePredicate internal constructor(private val feature: StructureIdentifier): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
-        val blockPos = BlockPos.ofFloored(x, y, z)
+        val blockPos = BlockPos(x, y, z)
         val structureAccessor = world.structureAccessor
-        val structure: Structure =
-            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(feature) ?: return false
+        val structure: ConfiguredStructureFeature<*, *> =
+            world.registryManager.get(Registry.CONFIGURED_STRUCTURE_FEATURE_KEY).get(feature) ?: return false
 
         return testStructure(structureAccessor, structure, blockPos)
     }
@@ -32,7 +32,7 @@ class StructurePredicate internal constructor(private val feature: StructureIden
         val y: Double = client.player?.y ?: return false
         val z: Double = client.player?.z ?: return false
 
-        return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
+        return serverWorld.canSetBlock(BlockPos(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
     override fun getIDs(): List<String> { return listOf(feature.toString()) }
@@ -44,7 +44,10 @@ class StructurePredicate internal constructor(private val feature: StructureIden
             return StructurePredicate(StructureIdentifier(JsonHelper.getString(json, "id")))
         }
 
-        fun testStructure(structureAccessor: StructureAccessor, structure: Structure, blockPos: BlockPos): Boolean {
+        fun testStructure(
+            structureAccessor: StructureAccessor,
+            structure: ConfiguredStructureFeature<*, *>,
+            blockPos: BlockPos): Boolean {
             var minX = Int.MAX_VALUE
             var minY = Int.MAX_VALUE
             var minZ = Int.MAX_VALUE
