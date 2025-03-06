@@ -46,32 +46,33 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             tickDelta: Float
         ) {
             musicPack?.let {
-                drawCenteredTextWithShadow(
+                drawTextWithShadow(
                     context,
                     client.textRenderer,
-                    Text.of(it.packName).asOrderedText(),
+                    Text.of(it.packName),
                     x + 3,
                     y + 6,
                     0xffffff)
-                drawCenteredTextWithShadow(context,
+                drawTextWithShadow(context,
                     client.textRenderer,
-                    Text.of(it.metadata.description).asOrderedText(),
-                    x + 3, y + 14 + 3,
+                    Text.of(it.metadata.description),
+                    x + 3,
+                    y + 14 + 3,
                     0x888888)
             }
 
             if (musicPack == null) {
-                drawCenteredTextWithShadow(
+                drawTextWithShadow(
                     context,
                     client.textRenderer,
-                    Text.of("Vanilla").asOrderedText(),
+                    Text.of("Vanilla"),
                     x + 3,
                     y + 6,
                     0xffffff)
-                drawCenteredTextWithShadow(
+                drawTextWithShadow(
                     context,
                     client.textRenderer,
-                    Text.of("Disable TrueAdaptiveMusic").asOrderedText(),
+                    Text.of("Disable TrueAdaptiveMusic"),
                     x + 3, y + 14 + 3,
                     0x888888)
             }
