@@ -4,3 +4,8 @@ accessible field net/minecraft/client/sound/SoundSystem sources Ljava/util/Map;
 accessible field net/minecraft/client/gui/hud/BossBarHud bossBars Ljava/util/Map;
 accessible field net/minecraft/client/gui/screen/Screen client Lnet/minecraft/client/MinecraftClient;
 accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
+accessible field net/minecraft/client/sound/SoundSystem channel Lnet/minecraft/client/sound/Channel;
+accessible field net/minecraft/client/sound/SoundSystem started Z
+accessible field net/minecraft/client/sound/SoundSystem sounds Lcom/google/common/collect/Multimap;
+accessible field net/minecraft/client/sound/SoundSystem soundEndTicks Ljava/util/Map;
+accessible field net/minecraft/client/sound/SoundSystem ticks I
