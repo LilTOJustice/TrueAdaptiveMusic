@@ -3,10 +3,9 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.Text
-import net.minecraft.util.Colors
 
 class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int, bottom: Int, itemHeight: Int)
     : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
@@ -35,7 +34,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         private val musicPack: MusicPack? = null)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
         override fun render(
-            context: DrawContext?,
+            context: MatrixStack?,
             index: Int,
             y: Int,
             x: Int,
@@ -47,25 +46,34 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             tickDelta: Float
         ) {
             musicPack?.let {
-                context?.drawText(
-                    client.textRenderer, it.packName, x + 3, y + 6, Colors.WHITE, false)
-                context?.drawText(
+                drawCenteredTextWithShadow(
+                    context,
                     client.textRenderer,
-                    it.metadata.description,
+                    Text.of(it.packName).asOrderedText(),
+                    x + 3,
+                    y + 6,
+                    0xffffff)
+                drawCenteredTextWithShadow(context,
+                    client.textRenderer,
+                    Text.of(it.metadata.description).asOrderedText(),
                     x + 3, y + 14 + 3,
-                    Colors.GRAY,
-                    false)
+                    0x888888)
             }
 
             if (musicPack == null) {
-                context?.drawText(
-                    client.textRenderer, "Vanilla", x + 3, y + 6, Colors.WHITE, false)
-                context?.drawText(
+                drawCenteredTextWithShadow(
+                    context,
                     client.textRenderer,
-                    "Disable TrueAdaptiveMusic",
+                    Text.of("Vanilla").asOrderedText(),
+                    x + 3,
+                    y + 6,
+                    0xffffff)
+                drawCenteredTextWithShadow(
+                    context,
+                    client.textRenderer,
+                    Text.of("Disable TrueAdaptiveMusic").asOrderedText(),
                     x + 3, y + 14 + 3,
-                    Colors.GRAY,
-                    false)
+                    0x888888)
             }
         }
 
@@ -80,7 +88,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         }
 
         override fun getNarration(): Text {
-            return Text.empty()
+            return Text.of("")
         }
     }
 }
