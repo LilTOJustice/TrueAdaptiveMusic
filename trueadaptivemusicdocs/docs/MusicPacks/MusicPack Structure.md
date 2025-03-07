@@ -33,27 +33,22 @@ The structure of the rules is recursive, with one object called a PredicateNode.
 
 For example:
 
-<b>rules.json</b>
-```json
+```json title="rules.json"
 {
-    // The top-level node is always of type "root"
-    "type": "root",
-
-    // You can use audio files from assets/ and minecraft sound events that start with "music."
-    "musicPath": ["minecraft:music.overworld.meadow", "cool_song.ogg"],
-
-    // And now this node's children, which themselves have the same structure
-    "children": [
+    "type": "root", //(1)!
+    "musicPath": ["minecraft:music.overworld.meadow", "cool_song.ogg"], //(2)!
+    "children": [ //(3)!
         {
             "type": "dimension",
-
-            // Some predicates require an id field.
-            // This predicate will only be true when the player is in the overworld dimension
-            "id": "minecraft:overworld",
-            
-            // Since music path is empty, no music will play when this predicate is true
-            "musicPath": []
+            "id": "minecraft:overworld", //(4)!
+            "musicPath": [] //(5)!
         }
     ]
 }
 ```
+
+1. The top-level node is always of type "root"
+2. You can use audio files from assets/ and minecraft sound events that start with "music."
+3. And now this node's children, which themselves have the same structure
+4. Some predicates require extra parameters, such as an id field. This predicate will only be true when the player is in the overworld dimension
+5. Since music path is empty, no music will play when this predicate is true

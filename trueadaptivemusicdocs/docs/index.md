@@ -16,13 +16,17 @@ If you want to create a MusicPack, now you can go to [Quick Start: For MusicPack
 ## Quick Start: For MusicPack Users
 Hit "Open Pack Folder" to reveal the folder where MusicPacks are stored. This will be the <b>trueadaptivemusicpacks</b> folder, which is generated inside of your Minecraft's installation root (the same folder where you see resourcepacks) the first time you start up Minecraft with the mod.
 
-Throw your .zip or directory file into this folder, then hit "done" and come back, and voila! You'll see it show up on this page.
+Throw your .zip or directory file into this folder, then hit "Refresh", and voila! You'll see it show up on this page.
 
 ![main_menu_with_pack](main_menu_with_pack.png)
 
-Now just click on your newly loaded pack and (assuming there is custom title screen or root music), you should immediately notice the difference! Have Fun ;)
+Now just click on your newly loaded pack and (assuming there is custom title screen or root music), you should immediately notice the difference! Have Fun :wink:
 
 ## Quick Start: For MusicPack Creators
+!!! warning
+
+    MusicPack Creating/Editing is only available for versions 1.20+. All MusicPacks made in any version will still be compatible with other versions.
+
 ### Creating new a MusicPack
 So you want to create a MusicPack? First of all, thank you! If you have any creations you are proud of by the end of this I encourage you to share! Now, let's get started.
 
