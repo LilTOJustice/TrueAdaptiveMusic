@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - v*.*
 
 jobs:
   validate:
@@ -11,4 +12,4 @@ jobs:
     steps:
       - name: Test branch name
         if: contains(github.head_ref, '.') # Is version branch
-        run: echo "Cannot PR version branch into master"; exit 1
+        run: echo "Cannot PR version branch into master or any other version branch"; exit 1
