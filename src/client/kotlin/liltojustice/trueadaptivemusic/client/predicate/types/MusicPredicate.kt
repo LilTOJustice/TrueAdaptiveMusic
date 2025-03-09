@@ -1,7 +1,9 @@
-package liltojustice.trueadaptivemusic.client.predicate
+package liltojustice.trueadaptivemusic.client.predicate.types
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
+import liltojustice.trueadaptivemusic.client.predicate.PredicateParam
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KFunction
