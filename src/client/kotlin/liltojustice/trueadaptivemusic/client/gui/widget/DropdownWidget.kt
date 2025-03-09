@@ -5,7 +5,6 @@ import liltojustice.trueadaptivemusic.client.gui.widget.DropdownWidget.DropdownR
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.Text
 
 class DropdownWidget(
@@ -46,9 +45,10 @@ class DropdownWidget(
         notSelectedPlaceholder ?: startingOption.ifEmpty { null } ?: options.firstOrNull() ?: "",
         onClick = { screen?.focused = textInputWidget },
         isSelected = { true })
-    private val titleTextWidget = TextWidget(titleText, textRenderer)
+    private val titleTextWidget = ClickableTextWidget(titleText.string)
 
     init {
+        titleTextWidget.active = false
         width = textInputWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,

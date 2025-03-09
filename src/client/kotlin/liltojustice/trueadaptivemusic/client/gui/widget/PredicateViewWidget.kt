@@ -236,7 +236,10 @@ class PredicateViewWidget(
         saveWidget.tooltip =
             if (saveWidget.active)
                 null
-            else if (requiredArgs.any { arg -> isTypedIdentifierList(arg.type) })
+            else if (requiredArgs.any { arg ->
+                isTypedIdentifierList(arg.type)
+                        && TypedIdentifier.getRegistryIdsFromType(arg.type.arguments.firstOrNull()!!.type!!)
+                            .isEmpty() })
                 DYNAMIC_REGISTRY_TOOLTIP
             else
                 MISSING_ARGS_TOOLTIP
