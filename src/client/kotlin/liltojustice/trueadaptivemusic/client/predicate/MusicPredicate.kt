@@ -26,7 +26,7 @@ sealed class MusicPredicate {
         {
             return "${companion.getTypeName()}{${getIDs().joinToString(",")}}"
         } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
-                " create one that inherits from MusicPredicateCompanion")
+                " create one that inherits from ${MusicPredicateCompanion::class.simpleName}")
     }
 
     fun getTypeName(): String {
