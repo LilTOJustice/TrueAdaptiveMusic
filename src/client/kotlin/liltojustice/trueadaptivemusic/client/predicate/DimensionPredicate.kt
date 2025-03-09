@@ -11,10 +11,6 @@ class DimensionPredicate(private val dimension: DimensionIdentifier): MusicPredi
         return client.player?.world?.dimensionEntry?.matchesId(dimension) ?: false
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return listOf(PredicateParam(::dimension.name, dimension))
-    }
-
     override fun toJson(): JsonObject {
         val result = super.toJson()
         result.add("id", JsonPrimitive(dimension.toString()))

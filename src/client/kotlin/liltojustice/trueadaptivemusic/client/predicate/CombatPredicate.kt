@@ -53,10 +53,6 @@ class CombatPredicate: MusicPredicate() {
         return false
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return emptyList()
-    }
-
     companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun getTypeName(): String { return "combat" }
 

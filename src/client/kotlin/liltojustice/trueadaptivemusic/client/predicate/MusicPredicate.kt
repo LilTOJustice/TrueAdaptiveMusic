@@ -7,10 +7,32 @@ import net.minecraft.util.JsonHelper
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.isAccessible
 
 sealed class MusicPredicate {
     abstract fun test(client: MinecraftClient): Boolean
-    abstract fun getPredicateParams(): List<PredicateParam>
+
+    fun getPredicateParams(): List<PredicateParam> {
+        val constructor = this::class.primaryConstructor
+            ?: throw MusicPredicateException("No constructor found for ${this::class.simpleName}." +
+                    " It must have a constructor.")
+        val result = this::class.declaredMemberProperties
+            .filter { property -> constructor.parameters.any { param -> property.name == param.name } }
+            .map { property ->
+                val accessible = property.isAccessible
+                property.isAccessible = true
+                val value = property.getter.call(this)
+                property.isAccessible = accessible
+                PredicateParam(property.name, value)
+            }
+
+        if (result.size < constructor.parameters.size) {
+            throw MusicPredicateException("Couldn't read all expected parameters for ${this::class.simpleName}." +
+                    " Make sure all arguments to its primary constructor are declared properties.")
+        }
+
+        return result
+    }
 
     open fun toJson(): JsonObject {
         val result = JsonObject()
@@ -72,13 +94,11 @@ sealed class MusicPredicate {
         }
 
         fun getRequiredArgsFromTypeName(typeName: String): List<KParameter> {
-            return getConstructorFromTypeName(typeName)?.parameters
-                ?: throw MusicPredicateException("Failed to get type parameters for constructing $typeName.")
+            return getConstructorFromTypeName(typeName).parameters
         }
 
         fun initializeFromArgs(typeName: String, vararg args: Any): MusicPredicate {
-            return getConstructorFromTypeName(typeName)?.call(*args)
-                ?: throw MusicPredicateException("Initialization of MusicPredicate type $typeName failed.")
+            return getConstructorFromTypeName(typeName).call(*args)
         }
 
         private fun getConstructorFromTypeName(typeName: String): KFunction<MusicPredicate> {

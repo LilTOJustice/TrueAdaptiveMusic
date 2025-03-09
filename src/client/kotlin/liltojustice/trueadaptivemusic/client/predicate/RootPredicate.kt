@@ -6,10 +6,6 @@ import net.minecraft.client.MinecraftClient
 class RootPredicate(): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean { return true }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return emptyList()
-    }
-
     companion object: MusicPredicateCompanion<RootPredicate> {
         override fun getTypeName(): String { return "root" }
 

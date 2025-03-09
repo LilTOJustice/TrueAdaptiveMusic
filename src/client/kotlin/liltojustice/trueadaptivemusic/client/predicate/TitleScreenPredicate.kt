@@ -4,13 +4,8 @@ import com.google.gson.JsonObject
 import net.minecraft.client.MinecraftClient
 
 class TitleScreenPredicate(): MusicPredicate() {
-
     override fun test(client: MinecraftClient): Boolean {
         return client.world == null
-    }
-
-    override fun getPredicateParams(): List<PredicateParam> {
-        return emptyList()
     }
 
     companion object: MusicPredicateCompanion<TitleScreenPredicate> {

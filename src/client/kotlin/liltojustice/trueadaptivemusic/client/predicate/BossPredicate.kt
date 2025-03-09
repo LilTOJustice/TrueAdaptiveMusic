@@ -16,10 +16,6 @@ class BossPredicate(private val boss: EntityTypeIdentifier): MusicPredicate() {
         }
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return listOf(PredicateParam(::boss.name, boss))
-    }
-
     override fun toJson(): JsonObject {
         val result = super.toJson()
         result.add("id", JsonPrimitive(boss.toString()))

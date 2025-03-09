@@ -11,10 +11,6 @@ class BiomePredicate(private val biome: BiomeIdentifier): MusicPredicate() {
         return if (client.player != null) client.world?.getBiome(client.player!!.blockPos)?.matchesId(biome) ?: false else false
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return listOf(PredicateParam(::biome.name, biome))
-    }
-
     override fun toJson(): JsonObject {
         val result = super.toJson()
         result.add("id", JsonPrimitive(biome.toString()))

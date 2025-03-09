@@ -36,10 +36,6 @@ class StructurePredicate internal constructor(private val structure: StructureId
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return listOf(PredicateParam(::structure.name, structure))
-    }
-
     override fun toJson(): JsonObject {
         val result = super.toJson()
         result.add("id", JsonPrimitive(structure.toString()))

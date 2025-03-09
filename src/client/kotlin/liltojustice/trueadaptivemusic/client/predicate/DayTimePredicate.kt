@@ -11,10 +11,6 @@ class DayTimePredicate: MusicPredicate() {
         return time in 0..12999
     }
 
-    override fun getPredicateParams(): List<PredicateParam> {
-        return emptyList()
-    }
-
     companion object: MusicPredicateCompanion<DayTimePredicate> {
         override fun getTypeName(): String { return "day" }
 
