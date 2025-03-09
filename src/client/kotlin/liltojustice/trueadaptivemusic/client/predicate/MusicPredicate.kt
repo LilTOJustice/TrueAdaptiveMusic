@@ -81,11 +81,12 @@ sealed class MusicPredicate {
                 ?: throw MusicPredicateException("Initialization of MusicPredicate type $typeName failed.")
         }
 
-        private fun getConstructorFromTypeName(typeName: String): KFunction<MusicPredicate>? {
+        private fun getConstructorFromTypeName(typeName: String): KFunction<MusicPredicate> {
             return MusicPredicate::class.sealedSubclasses.firstOrNull { subclass ->
                 subclass.companionObject?.functions?.firstOrNull { f ->
                     f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == typeName }
                 ?.primaryConstructor
+                ?: throw MusicPredicateException("No constructor found for $typeName. It must have a constructor.")
         }
     }
 
