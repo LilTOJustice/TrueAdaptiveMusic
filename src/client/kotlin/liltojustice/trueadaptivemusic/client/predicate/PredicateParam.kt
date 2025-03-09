@@ -2,6 +2,11 @@ package liltojustice.trueadaptivemusic.client.predicate
 
 data class PredicateParam(val name: String, val value: Any?) {
     override fun toString(): String {
-        return "$name($value)"
+        val valueText: String =
+                if (value is Iterable<*>)
+                    "[${value.joinToString(",")}]"
+                else
+                    value.toString()
+        return "$name($valueText)"
     }
 }

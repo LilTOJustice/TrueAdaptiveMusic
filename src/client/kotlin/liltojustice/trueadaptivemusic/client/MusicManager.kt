@@ -64,7 +64,7 @@ class MusicManager(
             setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption.value.toFloat() * volume)
         }
 
-        fadeInstances.removeIf { fadeinstance -> fadeinstance.done() }
+        fadeInstances.removeIf { fadeInstance -> fadeInstance.done() }
     }
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {

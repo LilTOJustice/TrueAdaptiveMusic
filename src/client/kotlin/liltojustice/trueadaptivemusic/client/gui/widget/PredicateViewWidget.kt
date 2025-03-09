@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.LogLevel
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
@@ -18,6 +20,7 @@ import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
 
@@ -38,6 +41,7 @@ class PredicateViewWidget(
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var movingNode: MusicPredicateTree.Node? = null
+    private var selectedMusicPaths = mutableListOf<String>()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -73,6 +77,7 @@ class PredicateViewWidget(
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
+        selectedMusicPaths = selectedNode!!.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         newPredicateParent = null
         movingNode = null
         resetScrolling()
@@ -92,6 +97,7 @@ class PredicateViewWidget(
         clearWidgetsFromRender()
         selectedPredicateTypeName = ""
         selectedNode = null
+        selectedMusicPaths = mutableListOf()
         newPredicateParent = parent
         movingNode = null
         requiredArgs = listOf()
@@ -126,10 +132,11 @@ class PredicateViewWidget(
                 row = 1)
         }
 
-        val musicSelector = addWidgetFromRender(
+        addWidgetFromRender(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
+                    { selected -> selectedMusicPaths = selected.toMutableList() },
                     "Music Choice",
                     {
                         musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
@@ -139,7 +146,7 @@ class PredicateViewWidget(
                                 .filter { path -> path.contains("music.") }).toList()
                     },
                     "Select a track",
-                    selectedNode?.playableSounds?.map { sound -> sound.getSoundName() } ?: listOf())
+                    selectedMusicPaths)
             },
             "musicChoice"
         ) as MultiSelectDropdownWidget
@@ -162,14 +169,14 @@ class PredicateViewWidget(
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *args.filterNotNull().toTypedArray())
-                            selectedNode!!.playableSounds = musicSelector.selected
+                            selectedNode!!.playableSounds = selectedMusicPaths
                                 .mapNotNull { path -> toPlayableSound(assets, path) }
                         }
                         else {
                             newPredicateParent?.newChild(
                                 selectedPredicateTypeName,
                                 args = args.filterNotNull().toTypedArray(),
-                                musicSelector.selected.mapNotNull { path -> toPlayableSound(assets, path) })
+                                selectedMusicPaths.mapNotNull { path -> toPlayableSound(assets, path) })
                         }
 
                         save()
@@ -226,23 +233,17 @@ class PredicateViewWidget(
 
         saveWidget.active = args.filterNotNull().size == requiredArgs.size
         saveWidget.color = if (saveWidget.active) Colors.WHITE else Colors.RED
-        saveWidget.tooltip = if (saveWidget.active)
-            null
-        else if (saveWidget.tooltip == null)
-            Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
-        else
-            saveWidget.tooltip
+        saveWidget.tooltip =
+            if (saveWidget.active)
+                null
+            else if (requiredArgs.any { arg -> isTypedIdentifierList(arg.type) })
+                DYNAMIC_REGISTRY_TOOLTIP
+            else
+                MISSING_ARGS_TOOLTIP
     }
 
     private fun widgetMaker(arg: KParameter): ClickableWidget {
-        return if (arg.type == typeOf<Identifier>()) {
-            DropdownWidget(
-                Registries.REGISTRIES.flatMap { registry -> registry.ids.map { id -> id.path } },
-                { id -> args[arg.index] = Identifier(id) },
-                (arg.name ?: "Unknown") + ": Identifier",
-                startingOption = args[arg.index] as? String ?: "")
-        }
-        else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
+        return if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
             val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
             return if (options.isEmpty())
                 EmptyClickableWidget()
@@ -253,8 +254,22 @@ class PredicateViewWidget(
                     (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}",
                     startingOption = (args[arg.index] as? TypedIdentifier)?.toString() ?: "")
         }
+        else if (isTypedIdentifierList(arg.type)) {
+            val type = arg.type.arguments.firstOrNull()?.type
+                ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
+            val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
+            return if (options.isEmpty())
+                EmptyClickableWidget()
+            else
+                MultiSelectDropdownWidget(
+                options,
+                { selected -> args[arg.index] = selected.ifEmpty { null } },
+                (arg.name ?: "Unknown") + ": ${type}s",
+                notSelectedPlaceholder = "Select an Identifier")
+        }
         else {
-            throw Exception("Couldn't create widget for expected type ${arg.type}.")
+            Logger.log("Couldn't create widget for expected type ${arg.type}.", LogLevel.WARNING)
+            EmptyClickableWidget()
         }
     }
 
@@ -279,6 +294,17 @@ class PredicateViewWidget(
                 null
             }
         }
+
+        private fun isTypedIdentifierList(type: KType): Boolean {
+            return type.isSubtypeOf(typeOf<List<*>>())
+                    && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
+        }
+
+        private val DYNAMIC_REGISTRY_TOOLTIP =
+            Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
+
+        private val MISSING_ARGS_TOOLTIP =
+            Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
     }
 }
 

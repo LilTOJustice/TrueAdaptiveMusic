@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 
 class MultiSelectDropdownWidget(
     private val options: List<String>,
+    private val onChange: (selected: List<String>) -> Unit = {},
     private val title: String = "",
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
@@ -21,7 +22,7 @@ class MultiSelectDropdownWidget(
     x,
     y,
     true) {
-    val selected = mutableSetOf<String>()
+    private val selected = mutableListOf<String>()
 
     init {
         selected.addAll(alreadySelected)
@@ -34,6 +35,7 @@ class MultiSelectDropdownWidget(
                     options,
                     { option ->
                         selected.add(option)
+                        onChange(selected)
                         clearWidgetsFromRender { widget -> widget.id != "dropdown" }
                     },
                     title,
@@ -50,6 +52,7 @@ class MultiSelectDropdownWidget(
                 {
                     ClickableTextWidget(option, onClick = {
                         selected.remove(option)
+                        onChange(selected)
                         clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") }
                     })
                 },
