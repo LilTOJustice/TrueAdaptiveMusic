@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
@@ -16,14 +16,17 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(private val structure: StructureIdentifier): MusicPredicate() {
+class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
-        val structure: Structure =
-            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structure) ?: return false
 
-        return testStructure(structureAccessor, structure, blockPos)
+        return structures.any { structureId ->
+            val structure: Structure =
+                structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structureId) ?: return false
+
+            testStructure(structureAccessor, structure, blockPos)
+        }
     }
 
     override fun test(client: MinecraftClient): Boolean {
@@ -38,7 +41,9 @@ class StructurePredicate internal constructor(private val structure: StructureId
 
     override fun toJson(): JsonObject {
         val result = super.toJson()
-        result.add("id", JsonPrimitive(structure.toString()))
+        val jsonStructures = JsonArray()
+        structures.forEach { structure -> jsonStructures.add(structure.toString()) }
+        result.add("id", jsonStructures)
 
         return result
     }
@@ -47,7 +52,11 @@ class StructurePredicate internal constructor(private val structure: StructureId
         override fun getTypeName(): String { return "structure" }
 
         override fun fromJson(json: JsonObject): StructurePredicate {
-            return StructurePredicate(StructureIdentifier(JsonHelper.getString(json, "id")))
+            return StructurePredicate(
+                if (JsonHelper.hasArray(json, "id"))
+                    JsonHelper.getArray(json, "id").map { element -> StructureIdentifier(element.asString) }
+                else
+                    listOf(StructureIdentifier(JsonHelper.getString(json, "id"))))
         }
 
         fun testStructure(structureAccessor: StructureAccessor, structure: Structure, blockPos: BlockPos): Boolean {
