@@ -9,7 +9,9 @@ class TitleScreenPredicate(): MusicPredicate() {
         return client.world == null
     }
 
-    override fun getIDs(): List<String> { return emptyList() }  // return immutable list, won't be using this
+    override fun getPredicateParams(): List<PredicateParam> {
+        return emptyList()
+    }
 
     companion object: MusicPredicateCompanion<TitleScreenPredicate> {
         override fun getTypeName(): String { return "title_screen" }

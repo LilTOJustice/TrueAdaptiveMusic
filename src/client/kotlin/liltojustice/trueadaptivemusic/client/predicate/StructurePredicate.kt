@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
@@ -15,12 +16,12 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(private val feature: StructureIdentifier): MusicPredicate() {
+class StructurePredicate internal constructor(private val structure: StructureIdentifier): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
         val structure: Structure =
-            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(feature) ?: return false
+            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structure) ?: return false
 
         return testStructure(structureAccessor, structure, blockPos)
     }
@@ -35,7 +36,16 @@ class StructurePredicate internal constructor(private val feature: StructureIden
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
-    override fun getIDs(): List<String> { return listOf(feature.toString()) }
+    override fun getPredicateParams(): List<PredicateParam> {
+        return listOf(PredicateParam(::structure.name, structure))
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.add("id", JsonPrimitive(structure.toString()))
+
+        return result
+    }
 
     companion object: MusicPredicateCompanion<StructurePredicate> {
         override fun getTypeName(): String { return "structure" }

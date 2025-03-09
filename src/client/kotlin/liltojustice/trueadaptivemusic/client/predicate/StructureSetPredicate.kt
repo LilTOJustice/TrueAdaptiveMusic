@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.StructureSetIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
@@ -9,12 +10,12 @@ import net.minecraft.structure.StructureSet
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
 
-class StructureSetPredicate internal constructor(private val feature: StructureSetIdentifier): MusicPredicate() {
+class StructureSetPredicate internal constructor(private val structureSet: StructureSetIdentifier): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
         val structureSet: StructureSet =
-            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(feature) ?: return false
+            structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(structureSet) ?: return false
 
         return structureSet.structures.any { structureWeightedEntry ->
             StructurePredicate.testStructure(structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
@@ -30,7 +31,16 @@ class StructureSetPredicate internal constructor(private val feature: StructureS
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
-    override fun getIDs(): List<String> { return listOf(feature.toString()) }
+    override fun getPredicateParams(): List<PredicateParam> {
+        return listOf(PredicateParam(::structureSet.name, structureSet))
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.add("id", JsonPrimitive(structureSet.toString()))
+
+        return result
+    }
 
     companion object: MusicPredicateCompanion<StructureSetPredicate> {
         override fun getTypeName(): String { return "structure_set" }

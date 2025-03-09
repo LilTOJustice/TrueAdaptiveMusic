@@ -104,8 +104,9 @@ class PredicateViewWidget(
         requiredArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
         args = selectedNode?.let {
             if (it.predicate.getTypeName() == selectedPredicateTypeName)
-                it.predicate.getIDs().toMutableList()
-            else null
+                it.predicate.getPredicateParams().map { param -> param.value }.toMutableList()
+            else
+                null
         } ?: requiredArgs.map { null }.toMutableList()
 
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("predicateTypeChoice", "musicChoice") }
@@ -250,7 +251,7 @@ class PredicateViewWidget(
                     options,
                     { id -> args[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
                     (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}",
-                    startingOption = args[arg.index] as? String ?: "")
+                    startingOption = (args[arg.index] as? TypedIdentifier)?.toString() ?: "")
         }
         else {
             throw Exception("Couldn't create widget for expected type ${arg.type}.")

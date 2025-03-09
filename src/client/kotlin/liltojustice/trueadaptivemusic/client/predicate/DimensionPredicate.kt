@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.DimensionIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
@@ -10,7 +11,16 @@ class DimensionPredicate(private val dimension: DimensionIdentifier): MusicPredi
         return client.player?.world?.dimensionEntry?.matchesId(dimension) ?: false
     }
 
-    override fun getIDs(): List<String> { return listOf(dimension.toString()) }
+    override fun getPredicateParams(): List<PredicateParam> {
+        return listOf(PredicateParam(::dimension.name, dimension))
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.add("id", JsonPrimitive(dimension.toString()))
+
+        return result
+    }
 
     companion object: MusicPredicateCompanion<DimensionPredicate> {
         override fun getTypeName(): String { return "dimension" }

@@ -11,7 +11,9 @@ class NightTimePredicate: MusicPredicate() {
         return time in 13000..23999
     }
 
-    override fun getIDs(): List<String> { return emptyList() }  // return immutable list, won't be using this
+    override fun getPredicateParams(): List<PredicateParam> {
+        return emptyList()
+    }
 
     companion object: MusicPredicateCompanion<NightTimePredicate>
     {

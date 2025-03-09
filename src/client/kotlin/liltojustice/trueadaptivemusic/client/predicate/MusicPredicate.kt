@@ -10,23 +10,25 @@ import kotlin.reflect.full.*
 
 sealed class MusicPredicate {
     abstract fun test(client: MinecraftClient): Boolean
-    abstract fun getIDs(): List<String>
+    abstract fun getPredicateParams(): List<PredicateParam>
 
-    fun toJson(): JsonObject {
+    open fun toJson(): JsonObject {
         val result = JsonObject()
         result.add("type", JsonPrimitive(getTypeName()))
-        result.add("id", JsonPrimitive(getIDs().firstOrNull() ?: ""))
 
         return result
     }
 
     fun getPredicateId(): String {
         val companion = javaClass.kotlin.companionObjectInstance
-        if (companion is MusicPredicateCompanion<*>)
-        {
-            return "${companion.getTypeName()}{${getIDs().joinToString(",")}}"
-        } else throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
-                " create one that inherits from ${MusicPredicateCompanion::class.simpleName}")
+        if (companion is MusicPredicateCompanion<*>) {
+            val params = getPredicateParams()
+            return companion.getTypeName() + if (params.isEmpty()) "" else "{${params.joinToString(",")}}"
+        }
+        else {
+            throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
+                    " create one that inherits from ${MusicPredicateCompanion::class.simpleName}")
+        }
     }
 
     fun getTypeName(): String {

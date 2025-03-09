@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.BiomeIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
@@ -10,7 +11,16 @@ class BiomePredicate(private val biome: BiomeIdentifier): MusicPredicate() {
         return if (client.player != null) client.world?.getBiome(client.player!!.blockPos)?.matchesId(biome) ?: false else false
     }
 
-    override fun getIDs(): List<String> { return listOf(biome.toString()) }
+    override fun getPredicateParams(): List<PredicateParam> {
+        return listOf(PredicateParam(::biome.name, biome))
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.add("id", JsonPrimitive(biome.toString()))
+
+        return result
+    }
 
     companion object: MusicPredicateCompanion<BiomePredicate> {
         override fun getTypeName(): String { return "biome" }

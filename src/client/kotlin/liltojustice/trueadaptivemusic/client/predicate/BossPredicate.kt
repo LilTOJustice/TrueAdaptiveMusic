@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.TranslatableTextContent
@@ -15,7 +16,16 @@ class BossPredicate(private val boss: EntityTypeIdentifier): MusicPredicate() {
         }
     }
 
-    override fun getIDs(): List<String> { return listOf(boss.toString()) }
+    override fun getPredicateParams(): List<PredicateParam> {
+        return listOf(PredicateParam(::boss.name, boss))
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.add("id", JsonPrimitive(boss.toString()))
+
+        return result
+    }
 
     companion object: MusicPredicateCompanion<BossPredicate> {
         override fun getTypeName(): String { return "boss" }
