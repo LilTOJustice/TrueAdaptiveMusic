@@ -1,19 +1,23 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.identifier.DimensionIdentifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
-class DimensionPredicate(private val dimension: DimensionIdentifier): MusicPredicate() {
+class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        return client.player?.world?.dimensionEntry?.matchesId(dimension) ?: false
+        val playerDimension = client.player?.world?.dimensionEntry ?: return false
+
+        return dimensions.any { dimension -> playerDimension.matchesId(dimension) }
     }
 
     override fun toJson(): JsonObject {
         val result = super.toJson()
-        result.add("id", JsonPrimitive(dimension.toString()))
+        val jsonDimensions = JsonArray()
+        dimensions.forEach { dimension -> jsonDimensions.add(dimension.toString()) }
+        result.add("id", jsonDimensions)
 
         return result
     }
@@ -22,7 +26,11 @@ class DimensionPredicate(private val dimension: DimensionIdentifier): MusicPredi
         override fun getTypeName(): String { return "dimension" }
 
         override fun fromJson(json: JsonObject): DimensionPredicate {
-            return DimensionPredicate(DimensionIdentifier(JsonHelper.getString(json, "id")))
+            return DimensionPredicate(
+                if (JsonHelper.hasArray(json, "id"))
+                    JsonHelper.getArray(json, "id").map { element -> DimensionIdentifier(element.asString) }
+                else
+                    listOf(DimensionIdentifier(JsonHelper.getString(json, "id"))))
         }
     }
 }
