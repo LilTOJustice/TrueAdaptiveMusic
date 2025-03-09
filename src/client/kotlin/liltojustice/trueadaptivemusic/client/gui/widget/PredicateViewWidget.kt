@@ -262,10 +262,13 @@ class PredicateViewWidget(
                 EmptyClickableWidget()
             else
                 MultiSelectDropdownWidget(
-                options,
-                { selected -> args[arg.index] = selected.ifEmpty { null } },
-                (arg.name ?: "Unknown") + ": ${type}s",
-                notSelectedPlaceholder = "Select an Identifier")
+                    options,
+                    { selected -> args[arg.index] = selected
+                        .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
+                        .ifEmpty { null } },
+                    (arg.name ?: "Unknown") + ": ${type.toString().split('.').last()}s",
+                    notSelectedPlaceholder = "Select an Identifier",
+                    alreadySelected = (args[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
         }
         else {
             Logger.log("Couldn't create widget for expected type ${arg.type}.", LogLevel.WARNING)
