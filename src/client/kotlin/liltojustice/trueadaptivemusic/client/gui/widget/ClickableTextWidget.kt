@@ -8,7 +8,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
 class ClickableTextWidget(
-    private var text: String,
+    text: String,
     x: Int = 0,
     y: Int = 0,
     private val showHighlight: Boolean = true,
@@ -17,6 +17,8 @@ class ClickableTextWidget(
     : ClickableWidget(x, y, 0, 0, Text.literal("Clickable Text Widget")) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     var color: Int = Colors.WHITE
+    var text = text
+        private set
 
     init {
         width = textRenderer.getWidth(text)

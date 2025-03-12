@@ -1,7 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.gui.widget.DropdownWidget.DropdownResultsWidget.Companion.TEXT_HEIGHT_BUFFER
-import liltojustice.trueadaptivemusic.client.gui.widget.DropdownWidget.DropdownResultsWidget.Companion.TEXT_WIDTH_BUFFER
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.TextFieldWidget
@@ -14,6 +12,7 @@ class DropdownWidget(
     getOptions: (() -> List<String>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: String = "",
+    onHover: (option: String?) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -31,7 +30,7 @@ class DropdownWidget(
             if (notSelectedPlaceholder != null)
                 textRenderer.getWidth(notSelectedPlaceholder)
             else
-                    (options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0)) +
+                (options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0)) +
             TEXT_WIDTH_BUFFER
     private var dropdownResultsWidget: DropdownResultsWidget
     private val textInputWidget = TextFieldWidget(
@@ -59,6 +58,7 @@ class DropdownWidget(
             getOptions,
             notSelectedPlaceholder,
             startingOption,
+            onHover,
             x,
             y)
         textInputWidget.setChangedListener { newText ->
@@ -83,12 +83,18 @@ class DropdownWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    class DropdownResultsWidget(
+    companion object {
+        const val TEXT_WIDTH_BUFFER = 15
+        const val TEXT_HEIGHT_BUFFER = 5
+    }
+
+    private class DropdownResultsWidget(
         private val options: List<String>,
         val onSelectOption: (optionText: String) -> Unit,
-        private val getOptions: (() -> List<String>)? = null,
-        notSelectedPlaceholder: String? = null,
-        startingOption: String = "",
+        private val getOptions: (() -> List<String>)?,
+        notSelectedPlaceholder: String?,
+        startingOption: String,
+        private val onHover: (option: String?) -> Unit,
         x: Int = 0,
         y: Int = 0)
         : ContainerWidget(
@@ -114,9 +120,9 @@ class DropdownWidget(
                 return
             }
 
-            (getOptions?.invoke() ?: options)
+            val optionsWidgets = (getOptions?.invoke() ?: options)
                 .filter { option -> option.lowercase().contains(searchText.lowercase()) }
-                .forEachIndexed { index, option ->
+                .mapIndexed { index, option ->
                     addWidgetFromRender(
                         {
                             ClickableTextWidget(
@@ -128,8 +134,15 @@ class DropdownWidget(
                         },
                         option,
                         index
-                    )
+                    ) as ClickableTextWidget
+
                 }
+
+            val hoveredWidget = optionsWidgets
+                .firstOrNull { widget -> widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
+
+            onHover(hoveredWidget?.text)
+
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
             super.render(context, mouseX, mouseY, delta)
         }
@@ -143,8 +156,6 @@ class DropdownWidget(
         }
 
         companion object {
-            const val TEXT_WIDTH_BUFFER = 15
-            const val TEXT_HEIGHT_BUFFER = 5
             const val MAX_DISPLAYED_OPTIONS = 5
         }
     }

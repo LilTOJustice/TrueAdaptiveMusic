@@ -10,6 +10,7 @@ class MultiSelectDropdownWidget(
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<String> = listOf(),
+    private val onHover: (option: String?) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -42,6 +43,7 @@ class MultiSelectDropdownWidget(
                     getOptions,
                     notSelectedPlaceholder,
                     "",
+                    onHover,
                     x,
                     y)
             },
