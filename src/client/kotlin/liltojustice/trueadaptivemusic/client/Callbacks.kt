@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client
 
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+
 class Callbacks {
     companion object {
         fun getCurrentMusicPack(): MusicPack? {
@@ -14,6 +16,10 @@ class Callbacks {
 
         fun refreshCurrentMusicPack() {
             setCurrentMusicPack(getCurrentMusicPack())
+        }
+
+        fun playSoundNow(sound: PlayableSound?) {
+            PlaySoundNowCallback.EVENT.invoker().playSoundNow(sound)
         }
     }
 }

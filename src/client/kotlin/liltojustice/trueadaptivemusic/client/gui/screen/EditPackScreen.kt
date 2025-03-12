@@ -23,6 +23,7 @@ class EditPackScreen(
     private lateinit var predicateViewWidget: PredicateViewWidget
 
     override fun init() {
+        Callbacks.playSoundNow(null)
         musicPack.initEdit(musicPack)
 
         val saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {

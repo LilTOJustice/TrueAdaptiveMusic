@@ -139,7 +139,7 @@ class DropdownWidget(
                 }
 
             val hoveredWidget = optionsWidgets
-                .firstOrNull { widget -> widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
+                .firstOrNull { widget -> childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
 
             onHover(hoveredWidget?.text)
 

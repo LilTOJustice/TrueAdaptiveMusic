@@ -17,13 +17,16 @@ class MusicManager(
     private var toStop: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
     private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
+    private var onDemandSound: PlayableSound? = null
+    private var onDemandSoundInstance: SoundInstance? = null
 
     init {
         client.soundManager.registerListener { instance, _ ->
             if (musicPack != null
                 && instance.category == SoundCategory.MUSIC
                 && instance != soundInstance
-                && instance != oldSoundInstance) {
+                && instance != oldSoundInstance
+                && instance != onDemandSoundInstance) {
                 toStop = instance
                 setInstanceVolume(toStop!!, 0F)
             }
@@ -44,6 +47,10 @@ class MusicManager(
             client.soundManager.stop(toStop)
         }
 
+        if (onDemandSound != null) {
+            return
+        }
+
         processFades()
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
@@ -56,6 +63,26 @@ class MusicManager(
 
         currentMusicPredId = identifier
         startNewMusic(nextMusic)
+    }
+
+    fun playNow(sound: PlayableSound?) {
+        if (sound == onDemandSound) {
+            return
+        }
+
+        if (sound == null) {
+            stop()
+            onDemandSound = null
+
+            return
+        }
+
+        client.soundManager.stopAll()
+        onDemandSound = sound
+        onDemandSound?.let {
+            onDemandSoundInstance = it.makeSoundInstance()
+            client.soundManager.play(onDemandSoundInstance)
+        }
     }
 
     private fun processFades() {
@@ -97,6 +124,8 @@ class MusicManager(
         client.soundManager.close()
         soundInstance = null
         oldSoundInstance = null
+        onDemandSound = null
+        onDemandSoundInstance = null
     }
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {

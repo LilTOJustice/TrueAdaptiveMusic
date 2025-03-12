@@ -23,6 +23,13 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
 
         GetMusicPackCallback.EVENT.register { packResult ->
             packResult[0] = musicManager?.getMusicPack()
+
+            return@register ActionResult.PASS
+        }
+
+        PlaySoundNowCallback.EVENT.register { sound ->
+            musicManager?.playNow(sound)
+
             return@register ActionResult.PASS
         }
 
