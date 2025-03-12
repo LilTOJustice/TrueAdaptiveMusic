@@ -30,7 +30,7 @@ class MultiSelectDropdownWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        addWidgetFromRender(
+        val dropdownWidget = addWidgetFromRender(
             {
                 DropdownWidget(
                     options,
@@ -48,8 +48,9 @@ class MultiSelectDropdownWidget(
                     y)
             },
             "dropdown"
-        )
-        selected.forEach { option ->
+        ) as DropdownWidget
+
+        val selectedWidgets = selected.map { option ->
             addWidgetFromRender(
                 {
                     ClickableTextWidget(option, onClick = {
@@ -59,8 +60,17 @@ class MultiSelectDropdownWidget(
                     })
                 },
                 "selectedOption: $option"
-            )
+            ) as ClickableTextWidget
         }
+
+        val hoveredSelectedWidget = selectedWidgets.firstOrNull { widget ->
+            childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+        }
+
+        if (!dropdownWidget.isOpen() || hoveredSelectedWidget != null) {
+            onHover(hoveredSelectedWidget?.text)
+        }
+
         super.render(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }

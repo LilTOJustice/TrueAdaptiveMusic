@@ -70,6 +70,10 @@ class DropdownWidget(
         addWidget(dropdownResultsWidget, 2)
     }
 
+    fun isOpen(): Boolean {
+        return dropdownResultsWidget.visible
+    }
+
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         val showTextInput = screen?.focused == textInputWidget
         textInputWidget.visible = showTextInput
@@ -141,7 +145,9 @@ class DropdownWidget(
             val hoveredWidget = optionsWidgets
                 .firstOrNull { widget -> childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
 
-            onHover(hoveredWidget?.text)
+            if (hoveredWidget != null || isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+                onHover(hoveredWidget?.text)
+            }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
             super.render(context, mouseX, mouseY, delta)
