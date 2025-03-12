@@ -19,6 +19,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -246,7 +247,8 @@ class PredicateViewWidget(
     }
 
     private fun widgetMaker(arg: KParameter): ClickableWidget {
-        val prompt = (arg.name ?: "Unknown") + ": ${arg.type.toString().split('.').last()}"
+        val prompt = (arg.name ?: "Unknown") +
+                ": ${arg.type.toString().split('.').last().replace(">", "")}"
         return if (arg.type == typeOf<Int>()) {
             val input = TextInputWidget(
                 screen!!,
@@ -284,6 +286,33 @@ class PredicateViewWidget(
                 checked = args[arg.index] as? Boolean ?: false)
 
             input
+        }
+        else if (arg.type.isSubtypeOf(typeOf<Enum<*>>())) {
+            val enumClass = (arg.type.classifier as KClass<*>).java
+            val options = enumClass.enumConstants.map { enum -> enum.toString() }
+
+            if (options.isEmpty())
+                EmptyClickableWidget()
+            else
+                DropdownWidget(
+                    options,
+                    { enumOption -> args[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption} },
+                    prompt,
+                    startingOption = (args[arg.index] as? Enum<*>)?.name ?: "")
+        }
+        else if (isEnumList(arg.type)) {
+            val type = arg.type.arguments.firstOrNull()?.type
+                ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
+            val enumClass = (type.classifier as KClass<*>).java
+            val options = enumClass.enumConstants.map { enum -> enum.toString() }
+            MultiSelectDropdownWidget(
+                options,
+                { selected -> args[arg.index] = selected
+                    .map { enumOption -> enumClass.enumConstants.first { enum -> enum.toString() == enumOption } }
+                    .ifEmpty { null } },
+                "${prompt}s",
+                notSelectedPlaceholder = "Select a value",
+                alreadySelected = (args[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf())
         }
         else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
             val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
@@ -340,6 +369,11 @@ class PredicateViewWidget(
             catch (e: InvalidIdentifierException) {
                 null
             }
+        }
+
+        private fun isEnumList(type: KType): Boolean {
+            return type.isSubtypeOf(typeOf<List<*>>())
+                    && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<Enum<*>>()) == true }
         }
 
         private fun isTypedIdentifierList(type: KType): Boolean {
