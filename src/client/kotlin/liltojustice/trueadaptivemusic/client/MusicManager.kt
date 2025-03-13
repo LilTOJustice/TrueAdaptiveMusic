@@ -71,8 +71,9 @@ class MusicManager(
         }
 
         if (sound == null) {
-            stop()
+            client.soundManager.stop(onDemandSoundInstance)
             onDemandSound = null
+            onDemandSoundInstance = null
 
             return
         }
