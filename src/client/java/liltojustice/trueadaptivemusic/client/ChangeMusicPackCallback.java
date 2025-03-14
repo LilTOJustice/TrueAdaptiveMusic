@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client;
 
 import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.LogLevel;
+import liltojustice.trueadaptivemusic.Logger;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.util.ActionResult;

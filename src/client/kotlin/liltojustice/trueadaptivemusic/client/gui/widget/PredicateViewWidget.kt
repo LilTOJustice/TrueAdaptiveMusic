@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.client.Logger
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate

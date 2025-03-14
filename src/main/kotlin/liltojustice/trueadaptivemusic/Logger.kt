@@ -1,7 +1,4 @@
-package liltojustice.trueadaptivemusic.client
-
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
+package liltojustice.trueadaptivemusic
 
 class Logger {
     companion object {
