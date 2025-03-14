@@ -117,6 +117,10 @@ class MusicManager(
         if (soundInstance == null) {
             soundInstance = newMusic.makeSoundInstance()
             client.soundManager.play(soundInstance)
+            if (!client.soundManager.isPlaying(soundInstance)) {
+                soundInstance = null
+            }
+
             return
         }
 
