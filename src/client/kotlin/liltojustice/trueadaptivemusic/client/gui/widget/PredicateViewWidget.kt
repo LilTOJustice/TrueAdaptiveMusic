@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
@@ -37,12 +38,12 @@ class PredicateViewWidget(
         .filter { typeName -> typeName != RootPredicate.getTypeName() }
     private var requiredArgs = listOf<KParameter>()
     private var args = mutableListOf<Any?>()
-
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var movingNode: MusicPredicateTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
+    private var assets = musicPack.getEditPackAssets()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -147,7 +148,8 @@ class PredicateViewWidget(
                                 .filter { path -> path.contains("music.") }).toList()
                     },
                     "Select a track",
-                    selectedMusicPaths)
+                    selectedMusicPaths,
+                    onHover = { option -> Callbacks.playSoundNow(option?.let { toPlayableSound(assets, it) }) })
             },
             "musicChoice"
         ) as MultiSelectDropdownWidget
@@ -163,7 +165,7 @@ class PredicateViewWidget(
                 ClickableTextWidget(
                     "Save",
                     onClick = {
-                        val assets = musicPack.getEditPackAssets()
+                        assets = musicPack.getEditPackAssets()
                         if (selectedNode != null) {
                             selectedNode!!.predicate =
                                 if (selectedNode!!.predicate.getTypeName() == RootPredicate.getTypeName())

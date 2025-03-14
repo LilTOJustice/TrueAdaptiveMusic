@@ -30,6 +30,8 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     private lateinit var wikiButton: ButtonWidget
 
     override fun init() {
+        Callbacks.playSoundNow(null)
+
         ChangeMusicPackCallback.EVENT.register { musicPack ->
             editButton.visible = musicPack != null
             return@register ActionResult.PASS

@@ -291,6 +291,11 @@ abstract class ContainerWidget(
         }
     }
 
+    fun childVisible(widget: ClickableWidget): Boolean {
+        val childWidget = children.values.firstOrNull { child -> child.widget === widget }?.translated(scrollPosition)
+        return childWidget?.let { childVisible(it) } == true
+    }
+
     private fun childVisible(translated: ChildWidget): Boolean {
         return translated.widget.visible && translated.row >= 0 && translated.row < totalRows()
     }
