@@ -28,10 +28,14 @@ class CombatPredicate: MusicPredicate() {
             val mobEntity: MobEntity = entity as? MobEntity ?: continue
             val mobCloseEnough = closeEnough(playerBlockPos, mobEntity.blockPos,
                 Vec3d(mobEntity.boundingBox.xLength,
-                mobEntity.boundingBox.yLength,
-                mobEntity.boundingBox.zLength))
-            oneCloseEnough = if (mobCloseEnough && mobEntity.isAttacking) true else oneCloseEnough
-            if (mobEntity.attacking?.id == playerEntity.id || (mobEntity.isAttacking && mobCloseEnough))
+                    mobEntity.boundingBox.yLength,
+                    mobEntity.boundingBox.zLength))
+
+            if (mobCloseEnough && mobEntity.isAttacking) {
+                oneCloseEnough = true
+            }
+
+            if (mobEntity.attacking?.id == playerEntity.id || oneCloseEnough)
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
@@ -44,13 +48,7 @@ class CombatPredicate: MusicPredicate() {
             }
         }
 
-        if (!oneCloseEnough)
-        {
-            aggroTimerTask?.cancel()
-            aggroTimerTask?.run()
-        }
-
-        return false
+        return isAggro
     }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
@@ -61,7 +59,7 @@ class CombatPredicate: MusicPredicate() {
         }
 
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
-        private const val AGGRO_TIMER_SECONDS = 10L
+        private const val AGGRO_TIMER_SECONDS = 2L
 
         fun closeEnough(playerPos: BlockPos, attackerPos: BlockPos, attackerSize: Vec3d): Boolean
         {
