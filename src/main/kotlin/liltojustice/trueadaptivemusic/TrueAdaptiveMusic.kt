@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic
 
 import net.fabricmc.api.ModInitializer
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -16,5 +17,9 @@ class TrueAdaptiveMusic: ModInitializer {
         {
             Files.createFile(selectedPackFile)
         }
+    }
+
+    companion object {
+        val LOGGER: org.slf4j.Logger = LoggerFactory.getLogger(TrueAdaptiveMusic::class.java)
     }
 }

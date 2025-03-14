@@ -54,6 +54,8 @@ class MusicManager(
             return
         }
 
+        Logger.log("Playing $identifier")
+
         currentMusicPredId = identifier
         startNewMusic(nextMusic)
     }

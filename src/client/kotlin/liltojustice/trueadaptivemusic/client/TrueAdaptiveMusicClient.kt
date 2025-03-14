@@ -1,7 +1,8 @@
 package liltojustice.trueadaptivemusic.client
 
 import kotlinx.io.files.FileNotFoundException
-import liltojustice.trueadaptivemusic.*
+import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.LogLevel
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.util.ActionResult
@@ -54,4 +55,5 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
             musicManager!!.tick()
         }
     }
+
 }

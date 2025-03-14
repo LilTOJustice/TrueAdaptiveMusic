@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.predicate
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.Logger
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -18,7 +18,7 @@ import net.minecraft.util.JsonHelper
 typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
 
 class MusicPredicateTree private constructor(
-    json: JsonObject? = null, private val soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
+    json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
     private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
 
     fun toJson(): JsonObject {
