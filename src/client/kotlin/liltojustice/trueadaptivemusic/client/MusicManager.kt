@@ -152,7 +152,6 @@ class MusicManager(
 
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
         client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
-            source.isPlaying
             source.setVolume(volume)
             if (volume == 0f) {
                 source.stop()
