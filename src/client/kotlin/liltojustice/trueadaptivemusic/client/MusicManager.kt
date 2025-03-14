@@ -154,6 +154,9 @@ class MusicManager(
         client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
             source.isPlaying
             source.setVolume(volume)
+            if (volume == 0f) {
+                source.stop()
+            }
         }
     }
 }
