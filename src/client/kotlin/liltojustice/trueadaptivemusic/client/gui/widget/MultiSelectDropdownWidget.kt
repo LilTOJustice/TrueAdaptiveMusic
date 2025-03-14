@@ -50,7 +50,7 @@ class MultiSelectDropdownWidget(
             "dropdown"
         ) as DropdownWidget
 
-        val selectedWidgets = selected.map { option ->
+        val selectedWidgets = selected.sorted().map { option ->
             addWidgetFromRender(
                 {
                     ClickableTextWidget(option, onClick = {
