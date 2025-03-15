@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client
 
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -61,8 +60,6 @@ class MusicManager(
         {
             return
         }
-
-        Logger.log("Playing $identifier")
 
         currentMusicPredId = identifier
         startNewMusic(nextMusic)
