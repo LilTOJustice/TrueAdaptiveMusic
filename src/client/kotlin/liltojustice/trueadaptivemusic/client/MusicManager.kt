@@ -114,6 +114,10 @@ class MusicManager(
         if (soundInstance == null) {
             soundInstance = newMusic.makeSoundInstance()
             client.soundManager.play(soundInstance)
+            if (!client.soundManager.isPlaying(soundInstance)) {
+                soundInstance = null
+            }
+
             return
         }
 
@@ -145,8 +149,10 @@ class MusicManager(
 
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
         client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
-            source.isPlaying
             source.setVolume(volume)
+            if (volume == 0f) {
+                source.stop()
+            }
         }
     }
 }
