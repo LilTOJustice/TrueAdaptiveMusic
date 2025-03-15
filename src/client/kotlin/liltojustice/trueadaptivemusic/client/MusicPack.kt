@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
@@ -74,6 +73,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         if (!metaFile.exists()) {
             metaFile.createFile()
         }
+
         metaFile.writeText(getGson().toJson(metadata.toJson()))
     }
 
@@ -222,7 +222,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     data class Metadata(var description: String = "") {
         fun toJson(): JsonObject {
             val result = JsonObject()
-            result.add("description", JsonPrimitive(description))
+            result.addProperty("description", description)
 
             return result
         }

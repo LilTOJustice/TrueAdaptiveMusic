@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.enum.Weather
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
@@ -22,7 +21,7 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
 
     override fun toJson(): JsonObject {
         val result = super.toJson()
-        result.add(FIELD_NAME, JsonPrimitive(weather.name))
+        result.addProperty(FIELD_NAME, weather.name)
 
         return result
     }

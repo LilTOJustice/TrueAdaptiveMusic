@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import liltojustice.trueadaptivemusic.client.predicate.PredicateParam
 import net.minecraft.client.MinecraftClient
@@ -38,7 +37,7 @@ sealed class MusicPredicate {
 
     open fun toJson(): JsonObject {
         val result = JsonObject()
-        result.add("type", JsonPrimitive(getTypeName()))
+        result.addProperty("type", getTypeName())
 
         return result
     }

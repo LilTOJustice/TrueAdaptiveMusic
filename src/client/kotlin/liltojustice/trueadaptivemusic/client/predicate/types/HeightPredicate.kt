@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
@@ -14,8 +13,8 @@ class HeightPredicate(private val above: Boolean, private val y: Int): MusicPred
 
     override fun toJson(): JsonObject {
         val result = super.toJson()
-        result.add("above", JsonPrimitive(above))
-        result.add("y", JsonPrimitive(y))
+        result.addProperty("above", above)
+        result.addProperty("y", y)
 
         return result
     }
