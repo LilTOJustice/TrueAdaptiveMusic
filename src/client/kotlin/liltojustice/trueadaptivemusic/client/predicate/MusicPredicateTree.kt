@@ -211,6 +211,26 @@ class MusicPredicateTree private constructor(
                 else mutableListOf()
             }
         }
+
+        data class Parameters(val trackDelay: Int = 0) {
+            fun toJson(): JsonObject {
+                val result = JsonObject()
+                result.addProperty("trackDelay", trackDelay)
+
+                return result
+            }
+
+            companion object {
+                fun init(vararg constructorArgs: Any): Parameters {
+                    return Parameters::class.primaryConstructor?.call(*constructorArgs) ?: Parameters()
+                }
+
+                fun fromJson(json: JsonObject): Parameters {
+                    return Parameters(
+                        json.getAsJsonPrimitive("trackDelay")?.asInt ?: 0)
+                }
+            }
+        }
     }
 
     class Result(val playableSounds: List<PlayableSound>, val path: String)
