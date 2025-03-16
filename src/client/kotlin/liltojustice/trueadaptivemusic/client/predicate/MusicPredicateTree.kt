@@ -29,7 +29,10 @@ class MusicPredicateTree private constructor(
 
     fun getMusicToPlay(client: MinecraftClient): Result {
         val bottomSatisfied = root.getBottomSatisfied(client)
-        return Result(bottomSatisfied.first, bottomSatisfied.second.joinToString("/"))
+        return Result(
+            bottomSatisfied.second.joinToString("/"),
+            bottomSatisfied.first.playableSounds,
+            bottomSatisfied.first.parameters)
     }
 
     private fun traverseRecursive(
@@ -95,22 +98,22 @@ class MusicPredicateTree private constructor(
             return result
         }
 
-        fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<List<PlayableSound>, List<String>> {
+        fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
             if (!predicate.test(client))
             {
-                return Pair(playableSounds, listOf())
+                return Pair(this, listOf())
             }
 
             val newPath = path.toMutableList()
             newPath.add(predicate.getPredicateId())
 
-            val bottoms: List<Pair<List<PlayableSound>, List<String>>> = List(children.size) { i ->
+            val bottoms: List<Pair<Node, List<String>>> = List(children.size) { i ->
                 children[i].getBottomSatisfied(client, newPath)
             }
 
             if (bottoms.all { bottom -> bottom.second.isEmpty() })
             {
-                return Pair(playableSounds, newPath)
+                return Pair(this, newPath)
             }
 
             return bottoms.maxBy { bottom -> bottom.second.size }
@@ -250,5 +253,5 @@ class MusicPredicateTree private constructor(
         }
     }
 
-    class Result(val playableSounds: List<PlayableSound>, val path: String)
+    class Result(val path: String, val playableSounds: List<PlayableSound>, val parameters: Node.Parameters)
 }
