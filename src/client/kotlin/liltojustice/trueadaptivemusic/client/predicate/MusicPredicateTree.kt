@@ -14,6 +14,8 @@ import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.primaryConstructor
 
 typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
 
@@ -66,6 +68,7 @@ class MusicPredicateTree private constructor(
     class Node private constructor(
         var predicate: MusicPredicate,
         var playableSounds: List<PlayableSound>,
+        var parameters: Parameters = Parameters(),
         private val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
@@ -87,6 +90,7 @@ class MusicPredicateTree private constructor(
             children.forEach { child -> jsonChildren.add(child.toJson()) }
             result.add("musicPath", jsonMusicPath)
             result.add("children", jsonChildren)
+            result.add("parameters", parameters.toJson())
 
             return result
         }
@@ -112,8 +116,12 @@ class MusicPredicateTree private constructor(
             return bottoms.maxBy { bottom -> bottom.second.size }
         }
 
-        fun newChild(predicateType: String, vararg args: Any, sounds: List<PlayableSound>) {
-            val child = Node(MusicPredicate.initializeFromArgs(predicateType, *args), sounds)
+        fun newChild(
+            predicateType: String, nodeArgs: List<Any>, predicateArgs: List<Any>, sounds: List<PlayableSound>) {
+            val child = Node(
+                MusicPredicate.initializeFromArgs(predicateType, *predicateArgs.toTypedArray()),
+                sounds,
+                Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
             children.add(child)
         }
@@ -178,10 +186,11 @@ class MusicPredicateTree private constructor(
             }
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
-                val pred = MusicPredicate.fromJson(json)
                 return Node(
-                    pred,
+                    MusicPredicate.fromJson(json),
                     parseMusicPath(json, soundLibrary),
+                    json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
+                        ?: Parameters(),
                     parseChildren(json, soundLibrary)
                 )
             }
@@ -212,22 +221,30 @@ class MusicPredicateTree private constructor(
             }
         }
 
-        data class Parameters(val trackDelay: Int = 0) {
+        data class Parameters(val trackDelay: UInt = 0U) {
             fun toJson(): JsonObject {
                 val result = JsonObject()
-                result.addProperty("trackDelay", trackDelay)
+                result.addProperty("trackDelay", trackDelay.toInt())
 
                 return result
             }
 
+            fun constructorParams(): List<Any?> {
+                return this::class.declaredMemberProperties
+                    .filter { property ->
+                        this::class.primaryConstructor!!.parameters.any { param -> property.name == param.name } }
+                    .map { property ->
+                        property.getter.call(this)
+                    }
+            }
+
             companion object {
-                fun init(vararg constructorArgs: Any): Parameters {
+                fun initializeFromArgs(vararg constructorArgs: Any): Parameters {
                     return Parameters::class.primaryConstructor?.call(*constructorArgs) ?: Parameters()
                 }
 
                 fun fromJson(json: JsonObject): Parameters {
-                    return Parameters(
-                        json.getAsJsonPrimitive("trackDelay")?.asInt ?: 0)
+                    return Parameters(json.getAsJsonPrimitive("trackDelay")?.asInt?.toUInt() ?: 0U)
                 }
             }
         }
