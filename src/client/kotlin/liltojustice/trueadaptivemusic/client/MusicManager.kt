@@ -7,6 +7,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
+import java.util.*
+import kotlin.concurrent.schedule
 
 class MusicManager(
     private val client: MinecraftClient) {
@@ -19,6 +21,9 @@ class MusicManager(
     private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
+    private var timedIdentifier = ""
+    private var timedIdentifierTimer = Timer()
+    private var timedIdentifierTimerTask: TimerTask? = null
 
     init {
         client.soundManager.registerListener { instance, _ ->
@@ -54,8 +59,29 @@ class MusicManager(
         processFades()
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
-        val nextMusic = predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
         val identifier = predicateResult?.path ?: ""
+        val parameters = predicateResult?.parameters
+        val trackDelay = parameters?.trackDelay ?: 0U
+
+        if (identifier == timedIdentifier) {
+            return
+        }
+        else if (trackDelay > 0U && currentMusicPredId == identifier && !isPlaying(soundInstance)) {
+            timedIdentifier = identifier
+            timedIdentifierTimerTask = timedIdentifierTimer.schedule(trackDelay.toLong() * 1000L) {
+                timedIdentifier = ""
+                currentMusicPredId = ""
+            }
+
+            return
+        }
+        else {
+            timedIdentifierTimerTask?.cancel()
+            timedIdentifier = ""
+        }
+
+        val nextMusic = predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
+
         if (!shouldPlay(nextMusic, identifier))
         {
             return
@@ -116,6 +142,7 @@ class MusicManager(
             client.soundManager.play(soundInstance)
             if (!client.soundManager.isPlaying(soundInstance)) {
                 soundInstance = null
+                currentMusicPredId = ""
             }
 
             return
@@ -131,6 +158,10 @@ class MusicManager(
         oldSoundInstance = null
         onDemandSound = null
         onDemandSoundInstance = null
+        timedIdentifierTimerTask?.cancel()
+        timedIdentifier = ""
+        timedIdentifierTimerTask = null
+        currentMusicPredId = ""
     }
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
