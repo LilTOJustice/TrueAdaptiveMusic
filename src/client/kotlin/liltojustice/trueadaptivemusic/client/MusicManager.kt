@@ -13,8 +13,9 @@ import kotlin.concurrent.schedule
 class MusicManager(
     private val client: MinecraftClient) {
     private var musicPack: MusicPack? = null
-    private var currentMusicPredId: String = ""
-    private var soundInstance: SoundInstance? = null
+    private var currentMusicPredicateId: String = ""
+    private var oldMusicPredicateId: String = ""
+    private var currentSoundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
     private var toStop: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
@@ -24,12 +25,13 @@ class MusicManager(
     private var timedIdentifier = ""
     private var timedIdentifierTimer = Timer()
     private var timedIdentifierTimerTask: TimerTask? = null
+    private var shouldResume = false
 
     init {
         client.soundManager.registerListener { instance, _ ->
             if (musicPack != null
                 && instance.category == SoundCategory.MUSIC
-                && instance != soundInstance
+                && instance != currentSoundInstance
                 && instance != oldSoundInstance
                 && instance != onDemandSoundInstance) {
                 toStop = instance
@@ -66,11 +68,11 @@ class MusicManager(
         if (identifier == timedIdentifier) {
             return
         }
-        else if (trackDelay > 0U && currentMusicPredId == identifier && !isPlaying(soundInstance)) {
+        else if (trackDelay > 0U && currentMusicPredicateId == identifier && !isPlaying(currentSoundInstance)) {
             timedIdentifier = identifier
             timedIdentifierTimerTask = timedIdentifierTimer.schedule(trackDelay.toLong() * 1000L) {
                 timedIdentifier = ""
-                currentMusicPredId = ""
+                currentMusicPredicateId = ""
             }
 
             return
@@ -87,7 +89,13 @@ class MusicManager(
             return
         }
 
-        currentMusicPredId = identifier
+        shouldResume = oldMusicPredicateId == identifier
+        oldMusicPredicateId =
+            if (identifier != currentMusicPredicateId)
+                currentMusicPredicateId
+            else
+                oldMusicPredicateId
+        currentMusicPredicateId = identifier
         startNewMusic(nextMusic)
     }
 
@@ -122,54 +130,66 @@ class MusicManager(
     }
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
-        return(music == null || identifier != currentMusicPredId || !isPlaying(soundInstance))
+        return (music == null || identifier != currentMusicPredicateId || !isPlaying(currentSoundInstance))
                 && musicVolumeOption.value > 0
     }
 
     private fun startNewMusic(newMusic: PlayableSound?) {
         if (newMusic == null)
         {
-            if (isPlaying(soundInstance)) {
-                fadeInstances.add(FadeInstance(soundInstance!!, false))
-                soundInstance = null
+            if (isPlaying(currentSoundInstance)) {
+                fadeInstances.add(FadeInstance(currentSoundInstance!!, false))
+                currentSoundInstance = null
             }
 
             return
         }
 
-        if (soundInstance == null) {
-            soundInstance = newMusic.makeSoundInstance()
-            client.soundManager.play(soundInstance)
-            if (!client.soundManager.isPlaying(soundInstance)) {
-                soundInstance = null
-                currentMusicPredId = ""
+        if (currentSoundInstance == null) {
+            currentSoundInstance = newMusic.makeSoundInstance()
+            client.soundManager.play(currentSoundInstance)
+            if (!client.soundManager.isPlaying(currentSoundInstance)) {
+                currentSoundInstance = null
+                currentMusicPredicateId = ""
             }
 
             return
         }
 
-        beginCrossfade(newMusic.makeSoundInstance())
+        if (shouldResume) {
+            oldSoundInstance?.let { beginCrossfade(it) }
+        }
+        else {
+            beginCrossfade(newMusic.makeSoundInstance())
+        }
     }
 
     private fun stop() {
         client.soundManager.stopAll()
         client.soundManager.close()
-        soundInstance = null
+        currentSoundInstance = null
         oldSoundInstance = null
         onDemandSound = null
         onDemandSoundInstance = null
         timedIdentifierTimerTask?.cancel()
         timedIdentifier = ""
         timedIdentifierTimerTask = null
-        currentMusicPredId = ""
+        currentMusicPredicateId = ""
+        oldMusicPredicateId = ""
     }
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
-        oldSoundInstance = soundInstance
-        soundInstance = newSoundInstance
-        client.soundManager.play(soundInstance)
+        oldSoundInstance = currentSoundInstance
+        currentSoundInstance = newSoundInstance
 
-        fadeInstances.add(FadeInstance(soundInstance!!, true))
+        if (shouldResume) {
+            client.soundManager.soundSystem.sources[currentSoundInstance]?.run { source -> source.resume() }
+        }
+        else {
+            client.soundManager.play(currentSoundInstance)
+        }
+
+        fadeInstances.add(FadeInstance(currentSoundInstance!!, true))
         fadeInstances.add(FadeInstance(oldSoundInstance!!, false))
     }
 
@@ -181,7 +201,14 @@ class MusicManager(
     private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
         client.soundManager.soundSystem.sources[soundInstance]?.run { source ->
             source.setVolume(volume)
-            if (volume == 0f) {
+            if (volume != 0F) {
+                return@run
+            }
+
+            if (soundInstance === oldSoundInstance) {
+                source.pause()
+            }
+            else {
                 source.stop()
             }
         }
