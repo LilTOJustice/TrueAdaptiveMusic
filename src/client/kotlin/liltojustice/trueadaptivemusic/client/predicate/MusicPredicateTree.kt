@@ -28,7 +28,7 @@ class MusicPredicateTree private constructor(
     }
 
     fun getMusicToPlay(client: MinecraftClient): Result {
-        val bottomSatisfied = root.getBottomSatisfied(client)
+        val bottomSatisfied = root.getSatisfiedNode(client)
         return Result(
             bottomSatisfied.second.joinToString("/"),
             bottomSatisfied.first.playableSounds,
@@ -98,53 +98,21 @@ class MusicPredicateTree private constructor(
             return result
         }
 
-        /*
-        fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
-            if (!predicate.test(client))
-            {
+        fun getSatisfiedNode(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
+            if (!predicate.test(client)) {
                 return Pair(this, listOf())
             }
+            val newPath = path + predicate.getPredicateId()
 
-            val newPath = path.toMutableList()
-            newPath.add(predicate.getPredicateId())
+            for (child in children) {
+                val result = child.getSatisfiedNode(client, newPath)
 
-            val bottoms: List<Pair<Node, List<String>>> = List(children.size) { i ->
-                children[i].getBottomSatisfied(client, newPath)
-            }
-
-            if (bottoms.all { bottom -> bottom.second.isEmpty() })
-            {
-                return Pair(this, newPath)
-            }
-
-            return bottoms.maxBy { bottom -> bottom.second.size }
-        }
-        */
-
-        /*
-        if predicate doesn't pass, return (this, empty list)
-        else append predicate.getPredicateId() to path
-
-        then, iterate over children
-
-        if child pred == true, make recursive call to getBottomSatisfied & return first valid result
-        else return the current node and its path.
-        */
-        fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
-            if (!predicate.test(client)) {
-                return Pair(this, listOf()) // invalid result -> invalid list == no valid path
-            }
-
-            val newPath = path + predicate.getPredicateId() // construct path throughout traversal
-
-            for (child in children) {   // check children
-                val result = child.getBottomSatisfied(client, newPath)  // make recursive call, passing in new path
-                if (result.second.isNotEmpty()) {   // if path is not empty, valid node was found
+                if (result.second.isNotEmpty()) {
                     return result
                 }
             }
 
-            return Pair(this, newPath)  // no children satisfy, return current node
+            return Pair(this, newPath)
         }
 
         fun newChild(
