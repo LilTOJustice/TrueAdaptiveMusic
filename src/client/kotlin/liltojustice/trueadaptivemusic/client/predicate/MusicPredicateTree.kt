@@ -98,6 +98,7 @@ class MusicPredicateTree private constructor(
             return result
         }
 
+        /*
         fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
             if (!predicate.test(client))
             {
@@ -117,6 +118,33 @@ class MusicPredicateTree private constructor(
             }
 
             return bottoms.maxBy { bottom -> bottom.second.size }
+        }
+        */
+
+        /*
+        if predicate doesn't pass, return (this, empty list)
+        else append predicate.getPredicateId() to path
+
+        then, iterate over children
+
+        if child pred == true, make recursive call to getBottomSatisfied & return first valid result
+        else return the current node and its path.
+        */
+        fun getBottomSatisfied(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
+            if (!predicate.test(client)) {
+                return Pair(this, listOf()) // invalid result -> invalid list == no valid path
+            }
+
+            val newPath = path + predicate.getPredicateId() // construct path throughout traversal
+
+            for (child in children) {   // check children
+                val result = child.getBottomSatisfied(client, newPath)  // make recursive call, passing in new path
+                if (result.second.isNotEmpty()) {   // if path is not empty, valid node was found
+                    return result
+                }
+            }
+
+            return Pair(this, newPath)  // no children satisfy, return current node
         }
 
         fun newChild(
