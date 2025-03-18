@@ -14,3 +14,6 @@ Features for MusicPack Creators:
 Fixes:
 - Sources in the music manager would leak, causing minecraft to eventually hit its max source count of 8. This would prevent any new music from playing.
 - Combat predicate satisfaction should be much more stable, resulting in smoother combat transitions.
+
+What's Next?
+See the list of planned features/fixes for [1.2](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/3)
