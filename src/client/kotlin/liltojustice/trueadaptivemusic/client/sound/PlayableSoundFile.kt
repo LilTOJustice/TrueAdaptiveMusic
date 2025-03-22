@@ -5,7 +5,7 @@ import net.minecraft.client.sound.SoundInstance
 
 class PlayableSoundFile(private val file: SoundFile): PlayableSound {
     override fun makeSoundInstance(): SoundInstance {
-        return AdaptiveMusicSoundInstance(file.getInputStream())
+        return AdaptiveMusicSoundInstance(file)
     }
 
     override fun getSoundName(): String {

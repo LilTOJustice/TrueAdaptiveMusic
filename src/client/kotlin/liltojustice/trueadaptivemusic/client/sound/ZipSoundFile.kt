@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.ZipInputStream
 import java.io.InputStream
 import java.nio.file.Path
 import java.util.zip.ZipFile
+import kotlin.io.path.extension
 import kotlin.io.path.name
 import kotlin.io.path.pathString
 
@@ -15,5 +16,9 @@ class ZipSoundFile(private val zipFilePath: Path, private val zipEntryPath: Path
 
     override fun getName(): String {
         return zipEntryPath.name
+    }
+
+    override fun getExtension(): String {
+        return zipEntryPath.extension
     }
 }
