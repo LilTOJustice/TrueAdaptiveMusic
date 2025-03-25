@@ -56,7 +56,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     fun getEditPackAssets(): Map<String, PlayableSound> {
         return getEditPackAssetsPath().listDirectoryEntries()
-            .filter { file -> isAsset(file.name) }
+            .filter { file -> isAsset(file.pathString) }
             .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
             .associateBy { file -> file.getSoundName() }
     }
