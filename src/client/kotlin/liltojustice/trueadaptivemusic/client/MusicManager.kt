@@ -170,8 +170,8 @@ class MusicManager(
         try {
             client.soundManager.play(soundInstance)
         }
-        catch (_: Exception) {
-            Logger.log("Error: Failed to play sound instance", LogLevel.ERROR)
+        catch (e: MusicLoadException) {
+            Logger.log("Error: Failed to play sound instance - ${e.message}", LogLevel.ERROR)
         }
     }
 
