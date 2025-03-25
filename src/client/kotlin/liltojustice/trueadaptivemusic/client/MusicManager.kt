@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client
 
+import liltojustice.trueadaptivemusic.LogLevel
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -116,7 +118,7 @@ class MusicManager(
         onDemandSound = sound
         onDemandSound?.let {
             onDemandSoundInstance = it.makeSoundInstance()
-            client.soundManager.play(onDemandSoundInstance)
+            playInstance(onDemandSoundInstance)
         }
     }
 
@@ -147,7 +149,7 @@ class MusicManager(
 
         if (currentSoundInstance == null) {
             currentSoundInstance = newMusic.makeSoundInstance()
-            client.soundManager.play(currentSoundInstance)
+            playInstance(currentSoundInstance)
             if (!client.soundManager.isPlaying(currentSoundInstance)) {
                 currentSoundInstance = null
                 currentMusicPredicateId = ""
@@ -161,6 +163,15 @@ class MusicManager(
         }
         else {
             beginCrossfade(newMusic.makeSoundInstance())
+        }
+    }
+
+    private fun playInstance(soundInstance: SoundInstance?) {
+        try {
+            client.soundManager.play(soundInstance)
+        }
+        catch (_: Exception) {
+            Logger.log("Error: Failed to play sound instance", LogLevel.ERROR)
         }
     }
 
@@ -186,7 +197,7 @@ class MusicManager(
             client.soundManager.soundSystem.sources[currentSoundInstance]?.run { source -> source.resume() }
         }
         else {
-            client.soundManager.play(currentSoundInstance)
+            playInstance(currentSoundInstance)
         }
 
         fadeInstances.add(FadeInstance(currentSoundInstance!!, true))
