@@ -72,7 +72,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             ?: emptyList()
     }
 
-    fun getPackAssetNames(): List<String> {
+    private fun getPackAssetNames(): List<String> {
         return if (packPath.extension == "zip") {
             getZipAssetNames()
         } else {
@@ -140,7 +140,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         }
 
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
-        if (hasFFMpeg && nonOggFiles.isNotEmpty()) {
+        if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
             result.add(ValidationMessage(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
                         "This music will not play unless FFMpeg is installed on your system. See the wiki for details.",
