@@ -31,7 +31,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             assetsDir.createDirectory()
             if (packWithAssets?.isZipped() == true) {
                 ZipFile(Path(Constants.MUSIC_PACK_DIR, packWithAssets.packName).pathString).use { zipFile ->
-                    zipFile.entries().toList().filter { entry -> Path(entry.name).extension == "ogg" }.forEach { entry ->
+                    zipFile.entries().toList().filter { entry -> isAsset(entry.name) }.forEach { entry ->
                         FileOutputStream(Path(assetsDir.pathString, Path(entry.name).name).pathString).use { out ->
                             zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) }
                         }
@@ -56,7 +56,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     fun getEditPackAssets(): Map<String, PlayableSound> {
         return getEditPackAssetsPath().listDirectoryEntries()
-            .filter { file -> file.extension == "ogg" }
+            .filter { file -> isAsset(file.name) }
             .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
             .associateBy { file -> file.getSoundName() }
     }
@@ -131,16 +131,16 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
         var hasFFMpeg = true
         try {
-            val process = Runtime.getRuntime().exec(arrayOf("ffmpeg"))
-            if (process.waitFor() != 0) {
+            val exitCode = Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor()
+            if (exitCode != 1 && exitCode != 0) {
                 hasFFMpeg = false
             }
         } catch (e: IOException) {
             hasFFMpeg = false
         }
 
-        val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension == "ogg" }
-        if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
+        val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
+        if (hasFFMpeg && nonOggFiles.isNotEmpty()) {
             result.add(ValidationMessage(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
                         "This music will not play unless FFMpeg is installed on your system. See the wiki for details.",
@@ -266,6 +266,10 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
     }
 
     data class ValidationMessage(val message: String, val type: Type) {
+        override fun toString(): String {
+            return "$type: $message"
+        }
+
         enum class Type {
             Warning,
             Error
