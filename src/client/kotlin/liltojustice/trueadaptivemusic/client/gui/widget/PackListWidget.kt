@@ -36,8 +36,8 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         private val client: MinecraftClient,
         private val musicPack: MusicPack? = null)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
-        val validation = musicPack?.validate() ?: emptyList()
-        val infoButton = ButtonWidget.Builder(infoText) {}
+        private val validation = musicPack?.validate() ?: emptyList()
+        private val infoButton = ButtonWidget.Builder(infoText) {}
             .tooltip(
                 if (validation.isEmpty())
                     Tooltip.of(Text.literal("No issues found."))
