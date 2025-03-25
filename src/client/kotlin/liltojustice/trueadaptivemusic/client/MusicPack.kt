@@ -10,6 +10,7 @@ import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.*
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -17,6 +18,8 @@ import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
 class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
+    private val packPath = Path(Constants.MUSIC_PACK_DIR, packName)
+
     fun initEdit(packWithAssets: MusicPack? = null) {
         val packDir = getEditPackDir()
         if (!packDir.exists()) {
@@ -56,6 +59,25 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             .filter { file -> file.extension == "ogg" }
             .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
             .associateBy { file -> file.getSoundName() }
+    }
+
+    private fun getZipAssetNames(): List<String> {
+        return ZipFile(packPath.toFile()).use { zipFile ->
+            zipFile.entries().toList().filter { entry -> isAsset(entry.name) }.map { entry -> Path(entry.name).name }
+        }
+    }
+
+    private fun getDirAssetNames(): List<String> {
+        return Path(packPath.pathString, Constants.ASSETS_DIRNAME).toFile().listFiles()?.map { file -> file.name }
+            ?: emptyList()
+    }
+
+    fun getPackAssetNames(): List<String> {
+        return if (packPath.extension == "zip") {
+            getZipAssetNames()
+        } else {
+            getDirAssetNames()
+        }
     }
 
     fun initRules() {
@@ -102,6 +124,30 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         packOngoingDir.deleteRecursively()
 
         return outputPath
+    }
+
+    fun validate(): List<ValidationMessage> {
+        val result = mutableListOf<ValidationMessage>()
+
+        var hasFFMpeg = true
+        try {
+            val process = Runtime.getRuntime().exec(arrayOf("ffmpeg"))
+            if (process.waitFor() != 0) {
+                hasFFMpeg = false
+            }
+        } catch (e: IOException) {
+            hasFFMpeg = false
+        }
+
+        val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension == "ogg" }
+        if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
+            result.add(ValidationMessage(
+                "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
+                        "This music will not play unless FFMpeg is installed on your system. See the wiki for details.",
+                ValidationMessage.Type.Warning))
+        }
+
+        return result
     }
 
     private fun getGson(): Gson {
@@ -188,11 +234,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                 val files = zipFile.entries().toList()
                 var metadata = Metadata()
                 val playableSoundFiles = files
-                    .filter { file ->
-                        val path = Path(file.name)
-                        return@filter path.extension == "ogg" && file.name.contains(
-                            Constants.ASSETS_DIRNAME + path.fileSystem.separator)
-                    }
+                    .filter { file -> isAsset(file.name) }
                     .map { file -> PlayableSoundFile(ZipSoundFile(filePath, Path(file.name))) }
                     .associateBy { file -> file.getSoundName() }
                 val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
@@ -216,6 +258,17 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     filePath.name
                 )
             }
+        }
+
+        private fun isAsset(fileName: String): Boolean {
+            return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
+        }
+    }
+
+    data class ValidationMessage(val message: String, val type: Type) {
+        enum class Type {
+            Warning,
+            Error
         }
     }
 
