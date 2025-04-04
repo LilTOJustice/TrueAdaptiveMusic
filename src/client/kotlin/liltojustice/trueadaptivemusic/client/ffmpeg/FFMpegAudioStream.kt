@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.sound.SoundFile
 import net.minecraft.client.sound.AudioStream
 import java.io.File
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 
 class FFMpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): AudioStream {
@@ -17,13 +18,8 @@ class FFMpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
             "-i", tempFile.absolutePath,
             "-f", "s16le",
             "-acodec", "pcm_s16le",
-            "-probesize", "8192",
             "-")
             .start()
-
-        val resTempFile = File.createTempFile("tamres", ".tmp")
-
-        //resTempFile.writeBytes(ffmpeg.inputStream.readAllBytes())
 
         ffmpeg.inputStream
     }
@@ -37,6 +33,10 @@ class FFMpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
     }
 
     override fun getBuffer(size: Int): ByteBuffer {
-        return ByteBuffer.wrap(inputStream.readNBytes(size)).flip()
+        val bytes = inputStream.readNBytes(size)
+        val buffer = ByteBuffer.allocate(bytes.size)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        buffer.put(bytes)
+        return buffer
     }
 }
