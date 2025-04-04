@@ -31,7 +31,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             assetsDir.createDirectory()
             if (packWithAssets?.isZipped() == true) {
                 ZipFile(Path(Constants.MUSIC_PACK_DIR, packWithAssets.packName).pathString).use { zipFile ->
-                    zipFile.entries().toList().filter { entry -> isAsset(entry.name) }.forEach { entry ->
+                    zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }.forEach { entry ->
                         FileOutputStream(Path(assetsDir.pathString, Path(entry.name).name).pathString).use { out ->
                             zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) }
                         }
@@ -56,14 +56,13 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
     fun getEditPackAssets(): Map<String, PlayableSound> {
         return getEditPackAssetsPath().listDirectoryEntries()
-            .filter { file -> isAsset(file.pathString) }
             .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
             .associateBy { file -> file.getSoundName() }
     }
 
     private fun getZipAssetNames(): List<String> {
         return ZipFile(packPath.toFile()).use { zipFile ->
-            zipFile.entries().toList().filter { entry -> isAsset(entry.name) }.map { entry -> Path(entry.name).name }
+            zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }.map { entry -> Path(entry.name).name }
         }
     }
 
@@ -204,7 +203,6 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
             }
             val playableSoundFiles = assetsDir?.listDirectoryEntries()
-                ?.filter { file -> file.extension == "ogg" }
                 ?.map { file -> PlayableSoundFile(RegularSoundFile(file)) }
                 ?.associateBy { file -> file.getSoundName() } ?: mapOf()
             val rulesFile = files.find { file -> file.fileName.name == Constants.RULES_FILENAME }
@@ -234,7 +232,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                 val files = zipFile.entries().toList()
                 var metadata = Metadata()
                 val playableSoundFiles = files
-                    .filter { file -> isAsset(file.name) }
+                    .filter { file -> isZipAsset(file.name) }
                     .map { file -> PlayableSoundFile(ZipSoundFile(filePath, Path(file.name))) }
                     .associateBy { file -> file.getSoundName() }
                 val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
@@ -260,7 +258,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
         }
 
-        private fun isAsset(fileName: String): Boolean {
+        private fun isZipAsset(fileName: String): Boolean {
             return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
         }
     }
