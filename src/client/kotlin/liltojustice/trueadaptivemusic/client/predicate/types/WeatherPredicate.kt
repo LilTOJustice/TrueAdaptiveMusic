@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.enum.Weather
+import liltojustice.trueadaptivemusic.client.enums.Weather
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 

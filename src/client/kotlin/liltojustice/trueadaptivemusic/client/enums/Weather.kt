@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.enum
+package liltojustice.trueadaptivemusic.client.enums
 
 enum class Weather {
     Clear,
