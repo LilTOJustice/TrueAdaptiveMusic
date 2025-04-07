@@ -34,9 +34,9 @@ class FFMpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
 
     override fun getBuffer(size: Int): ByteBuffer {
         val bytes = inputStream.readNBytes(size)
-        val buffer = ByteBuffer.allocate(bytes.size)
+        val buffer = ByteBuffer.allocateDirect(bytes.size)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(bytes)
-        return buffer
+        return buffer.flip()
     }
 }
