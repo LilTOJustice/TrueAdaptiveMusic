@@ -37,14 +37,14 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         private val musicPack: MusicPack? = null)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val validation = musicPack?.validate() ?: emptyList()
-        private val infoButton = ButtonWidget.Builder(infoText) {}
-            .tooltip(
-                if (validation.isEmpty())
-                    Tooltip.of(Text.literal("No issues found."))
-                else
-                    Tooltip.of(Text.literal(validation.joinToString { message -> "$message\n" })))
-            .width(client.textRenderer.getWidth(infoText) + 5)
-            .build()
+        private val issuesButton =
+            if (validation.isEmpty())
+                null
+            else
+                ButtonWidget.Builder(issuesText) {}
+                .tooltip(Tooltip.of(Text.literal(validation.joinToString { message -> "$message\n" })))
+                .width(client.textRenderer.getWidth(issuesText) + 5)
+                .build()
 
         override fun render(
             context: DrawContext?,
@@ -67,9 +67,12 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
                     x + 3, y + 14 + 3,
                     Colors.GRAY,
                     false)
-                infoButton.x = x + entryWidth - infoButton.width - 5
-                infoButton.y = y + entryHeight - infoButton.height - 5
-                infoButton.render(context, mouseX, mouseY, tickDelta)
+
+                issuesButton?.let {
+                    issuesButton.x = x + entryWidth - issuesButton.width - 5
+                    issuesButton.y = y + entryHeight - issuesButton.height - 5
+                    issuesButton.render(context, mouseX, mouseY, tickDelta)
+                }
             }
 
             if (musicPack == null) {
@@ -99,7 +102,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
         }
 
         companion object {
-            private val infoText = Text.literal("Info")
+            private val issuesText = Text.literal("Issues Found")
         }
     }
 }
