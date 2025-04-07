@@ -220,10 +220,11 @@ class MusicPredicateTree private constructor(
             }
         }
 
-        data class Parameters(val trackDelay: UInt = 0U) {
+        data class Parameters(val trackDelay: UInt = 0U, val trackDelayNoise: UInt = 0U) {
             fun toJson(): JsonObject {
                 val result = JsonObject()
                 result.addProperty("trackDelay", trackDelay.toInt())
+                result.addProperty("trackDelayNoise", trackDelayNoise.toInt())
 
                 return result
             }
@@ -243,7 +244,9 @@ class MusicPredicateTree private constructor(
                 }
 
                 fun fromJson(json: JsonObject): Parameters {
-                    return Parameters(json.getAsJsonPrimitive("trackDelay")?.asInt?.toUInt() ?: 0U)
+                    return Parameters(
+                        json.getAsJsonPrimitive("trackDelay")?.asInt?.toUInt() ?: 0U,
+                        json.getAsJsonPrimitive("trackDelayNoise")?.asInt?.toUInt() ?: 0U)
                 }
             }
         }

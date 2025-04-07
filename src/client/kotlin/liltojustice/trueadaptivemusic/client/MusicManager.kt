@@ -11,6 +11,7 @@ import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 import java.util.*
 import kotlin.concurrent.schedule
+import kotlin.math.max
 
 class MusicManager(
     private val client: MinecraftClient) {
@@ -64,15 +65,20 @@ class MusicManager(
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
         val identifier = predicateResult?.path ?: ""
-        val parameters = predicateResult?.parameters
-        val trackDelay = parameters?.trackDelay ?: 0U
+        val parameters = predicateResult?.parameters ?: MusicPredicateTree.Node.Parameters()
+        val trackDelayNoise = parameters.trackDelayNoise
+        val trackDelay = parameters.trackDelay
 
         if (identifier == timedIdentifier) {
             return
         }
-        else if (trackDelay > 0U && currentMusicPredicateId == identifier && !isPlaying(currentSoundInstance)) {
+        else if (trackDelay != 0U && currentMusicPredicateId == identifier && !isPlaying(currentSoundInstance)) {
+            val actualTrackDelay =
+                max(0, (parameters.trackDelay.toInt() - trackDelayNoise.toInt()
+                        ..parameters.trackDelay.toInt() + trackDelayNoise.toInt()).random()).toUInt()
+
             timedIdentifier = identifier
-            timedIdentifierTimerTask = timedIdentifierTimer.schedule(trackDelay.toLong() * 1000L) {
+            timedIdentifierTimerTask = timedIdentifierTimer.schedule(actualTrackDelay.toLong() * 1000L) {
                 timedIdentifier = ""
                 currentMusicPredicateId = ""
             }

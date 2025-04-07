@@ -54,7 +54,7 @@ class TextInputWidget(
     }
 
     companion object {
-        private const val HEIGHT = 14
+        private const val HEIGHT = 10
         private const val PADDING = 5
     }
 }
