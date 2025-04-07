@@ -118,7 +118,7 @@ class PredicateViewWidget(
         requiredPredicateArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
         predicateArgs = selectedNode?.let {
             if (it.predicate.getTypeName() == selectedPredicateTypeName)
-                it.predicate.getPredicateParams().map { param -> param.value }.toMutableList()
+                it.predicate.getTriggerParams().map { param -> param.value }.toMutableList()
             else
                 null
         } ?: requiredPredicateArgs.map { null }.toMutableList()
