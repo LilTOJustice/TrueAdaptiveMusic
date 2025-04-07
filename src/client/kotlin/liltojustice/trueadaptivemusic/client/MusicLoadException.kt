@@ -1,3 +1,5 @@
 package liltojustice.trueadaptivemusic.client
 
-class MusicLoadException(message: String?, inner: Exception? = null): Exception(message, inner)
+import liltojustice.trueadaptivemusic.TrueAdaptiveMusicException
+
+class MusicLoadException(message: String?, inner: Exception? = null): TrueAdaptiveMusicException(message, inner)
