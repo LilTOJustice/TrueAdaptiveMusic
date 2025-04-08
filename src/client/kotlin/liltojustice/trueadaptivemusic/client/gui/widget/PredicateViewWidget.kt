@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
@@ -42,6 +43,9 @@ class PredicateViewWidget(
     private var predicateArgs = mutableListOf<Any?>()
     private val requiredNodeArgs = MusicPredicateTree.Node.Parameters::class.primaryConstructor?.parameters ?: listOf()
     private var nodeArgs: MutableList<Any?> = requiredNodeArgs.map { null }.toMutableList()
+    private var requiredEventArgs = listOf<KParameter>()
+    private var eventArgs = mutableListOf<Any?>()
+    private val events = mutableListOf<MusicEvent>()
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
@@ -197,6 +201,7 @@ class PredicateViewWidget(
                                 selectedPredicateTypeName,
                                 nodeArgs.filterNotNull(),
                                 predicateArgs.filterNotNull(),
+                                events,
                                 selectedMusicPaths.mapNotNull { path -> toPlayableSound(assets, path) })
                         }
 

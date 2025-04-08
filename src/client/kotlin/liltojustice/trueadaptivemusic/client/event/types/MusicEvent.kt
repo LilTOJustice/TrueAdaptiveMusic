@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.event.types
 
+import com.google.gson.JsonArray
 import liltojustice.trueadaptivemusic.client.MusicTrigger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import kotlin.reflect.KClass
@@ -14,6 +15,10 @@ abstract class MusicEvent: MusicTrigger {
     interface MusicEventCompanion<TSelf>: MusicTrigger.MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
         override fun getImplementingClass(): KClass<MusicEvent> {
             return MusicEvent::class
+        }
+
+        fun arrayFromJsonArray(array: JsonArray): List<MusicEvent> {
+            return array.map { json -> fromJson(json.asJsonObject) }
         }
     }
 }

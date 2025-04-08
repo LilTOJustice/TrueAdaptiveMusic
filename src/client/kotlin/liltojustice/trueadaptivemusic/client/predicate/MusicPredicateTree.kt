@@ -4,6 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -71,6 +72,7 @@ class MusicPredicateTree private constructor(
     class Node private constructor(
         var predicate: MusicPredicate,
         var playableSounds: List<PlayableSound>,
+        var events: List<MusicEvent>,
         var parameters: Parameters = Parameters(),
         private val children: MutableList<Node> = mutableListOf()
     ) {
@@ -91,9 +93,12 @@ class MusicPredicateTree private constructor(
             playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
             val jsonChildren = JsonArray(children.size)
             children.forEach { child -> jsonChildren.add(child.toJson()) }
+            val jsonEvents = JsonArray(events.size)
+            events.forEach { event -> jsonEvents.add(event.toJson()) }
             result.add("musicPath", jsonMusicPath)
-            result.add("children", jsonChildren)
+            result.add("events", jsonEvents)
             result.add("parameters", parameters.toJson())
+            result.add("children", jsonChildren)
 
             return result
         }
@@ -116,10 +121,15 @@ class MusicPredicateTree private constructor(
         }
 
         fun newChild(
-            predicateType: String, nodeArgs: List<Any>, predicateArgs: List<Any>, sounds: List<PlayableSound>) {
+            predicateType: String,
+            nodeArgs: List<Any>,
+            predicateArgs: List<Any>,
+            events: List<MusicEvent>,
+            sounds: List<PlayableSound>) {
             val child = Node(
                 MusicPredicate.initializeFromArgs(predicateType, *predicateArgs.toTypedArray()),
                 sounds,
+                events,
                 Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
             children.add(child)
@@ -181,13 +191,14 @@ class MusicPredicateTree private constructor(
 
         companion object {
             fun makeRoot(): Node {
-                return Node(RootPredicate(), listOf())
+                return Node(RootPredicate(), listOf(), listOf())
             }
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
                     MusicPredicate.fromJson(json),
                     parseMusicPath(json, soundLibrary),
+                    MusicEvent.arrayFromJsonArray(json.getAsJsonArray("events") ?: JsonArray()),
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)
