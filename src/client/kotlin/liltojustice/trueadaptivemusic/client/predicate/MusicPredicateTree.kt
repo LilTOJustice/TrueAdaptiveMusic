@@ -21,19 +21,10 @@ typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
 
 class MusicPredicateTree private constructor(
     json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
-    private val root = if (json != null)
-        if (json.has("predicates"))
-            Node.fromJson(json.getAsJsonObject("predicates"), soundLibrary)
-        else
-            Node.fromJson(json, soundLibrary)
-
-    else
-        Node.makeRoot()
+    private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
 
     fun toJson(): JsonObject {
-        val predicatesJson = JsonObject()
-        predicatesJson.add("predicates", root.toJson())
-        return predicatesJson
+        return root.toJson()
     }
 
     fun getMusicToPlay(client: MinecraftClient): Result {
