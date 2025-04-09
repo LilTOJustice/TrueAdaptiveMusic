@@ -24,11 +24,12 @@ class MusicPredicateTree private constructor(
     }
 
     fun getMusicToPlay(client: MinecraftClient): Result {
-        val bottomSatisfied = root.getSatisfiedNode(client)
+        val result = root.getSatisfiedNode(client)
         return Result(
-            bottomSatisfied.second.joinToString("/"),
-            bottomSatisfied.first.playableSounds,
-            bottomSatisfied.first.parameters)
+            result.second.joinToString("/"),
+            result.first.playableSounds,
+            result.first.parameters,
+            result.third)
     }
 
     private fun traverseRecursive(
@@ -98,21 +99,25 @@ class MusicPredicateTree private constructor(
             return result
         }
 
-        fun getSatisfiedNode(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
+        fun getSatisfiedNode(
+            client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
+        : Triple<Node, List<String>, Map<String, MusicEvent>> {
             if (!predicate.test(client)) {
-                return Pair(this, listOf())
+                return Triple(this, emptyList(), emptyMap())
             }
+
             val newPath = path + predicate.getTriggerId()
+            val newEvents = events + this.events.map { event -> Pair(event.getTriggerId(), event) }
 
             for (child in children) {
-                val result = child.getSatisfiedNode(client, newPath)
+                val result = child.getSatisfiedNode(client, newPath, newEvents)
 
                 if (result.second.isNotEmpty()) {
                     return result
                 }
             }
 
-            return Pair(this, newPath)
+            return Triple(this, newPath, newEvents)
         }
 
         fun newChild(
@@ -241,5 +246,9 @@ class MusicPredicateTree private constructor(
         }
     }
 
-    class Result(val path: String, val playableSounds: List<PlayableSound>, val parameters: Node.Parameters)
+    class Result(
+        val path: String,
+        val playableSounds: List<PlayableSound>,
+        val parameters: Node.Parameters,
+        val events: Map<String, MusicEvent>)
 }
