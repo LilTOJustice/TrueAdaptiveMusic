@@ -229,6 +229,7 @@ class PredicateViewWidget(
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *predicateArgs.filterNotNull().toTypedArray())
+                            selectedNode!!.events = events
                             selectedNode!!.playableSounds = selectedMusicPaths
                                 .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
                             selectedNode!!.parameters =

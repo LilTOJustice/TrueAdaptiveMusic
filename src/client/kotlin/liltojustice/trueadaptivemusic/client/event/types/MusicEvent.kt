@@ -12,6 +12,15 @@ import kotlin.reflect.KClass
 sealed class MusicEvent: MusicTrigger {
     var playableSounds: List<PlayableSound> = emptyList()
 
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        val musicPathJson = JsonArray()
+        playableSounds.forEach { playableSound -> musicPathJson.add(playableSound.getSoundName()) }
+        result.add("musicPath", musicPathJson)
+
+        return result
+    }
+
     companion object: MusicEventCompanion<MusicEvent> {
         override fun getTypeName(): String {
             throw MusicPredicateException("Attempt to get type name from abstract event type.")
@@ -23,14 +32,14 @@ sealed class MusicEvent: MusicTrigger {
             return MusicEvent::class
         }
 
-        fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent {
-            val event = fromJson(json)
+        fun fromJsonWithLibrary(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent {
+            val event = super.fromJson(json)
             event.playableSounds = MusicPack.parseMusicPath(json, soundLibrary)
             return event
         }
 
         fun arrayFromJsonArray(array: JsonArray, soundLibrary: Map<String, PlayableSoundFile>): List<MusicEvent> {
-            return array.map { json -> fromJson(json.asJsonObject, soundLibrary) }
+            return array.map { json -> fromJsonWithLibrary(json.asJsonObject, soundLibrary) }
         }
     }
 }
