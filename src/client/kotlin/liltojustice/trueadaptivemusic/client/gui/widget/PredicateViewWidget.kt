@@ -118,6 +118,7 @@ class PredicateViewWidget(
     fun onEventModeExit(newEvent: MusicEvent?) {
         events.remove(selectedEvent)
         newEvent?.let { events.add(it) }
+        selectedEvent = null
     }
 
     private fun setSelectedPredicateTypeName(typeName: String) {
