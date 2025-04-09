@@ -9,7 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import kotlin.reflect.KClass
 
-abstract class MusicEvent: MusicTrigger {
+sealed class MusicEvent: MusicTrigger {
     var playableSounds: List<PlayableSound> = emptyList()
 
     companion object: MusicEventCompanion<MusicEvent> {
