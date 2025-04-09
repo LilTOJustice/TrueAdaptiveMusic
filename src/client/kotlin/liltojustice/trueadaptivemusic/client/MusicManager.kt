@@ -70,6 +70,8 @@ class MusicManager(
             client.soundManager.stop(toStop)
         }
 
+        processFades()
+
         if (onDemandSound != null) {
             if (!client.soundManager.isPlaying(onDemandSoundInstance)) {
                 onDemandSound = null
@@ -78,8 +80,6 @@ class MusicManager(
 
             return
         }
-
-        processFades()
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
         val identifier = predicateResult?.path ?: ""
@@ -139,7 +139,9 @@ class MusicManager(
             return
         }
 
-        client.soundManager.stopAll()
+        client.soundManager.stop(oldSoundInstance)
+        fadeInstances.add(FadeInstance(currentSoundInstance!!, false, 10))
+
         onDemandSound = sound
         onDemandSound?.let {
             onDemandSoundInstance = it.makeSoundInstance()
