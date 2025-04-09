@@ -1,11 +1,17 @@
 package liltojustice.trueadaptivemusic.client.event.types
 
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.MusicTrigger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import kotlin.reflect.KClass
 
 abstract class MusicEvent: MusicTrigger {
+    var playableSounds: List<PlayableSound> = emptyList()
+
     companion object: MusicEventCompanion<MusicEvent> {
         override fun getTypeName(): String {
             throw MusicPredicateException("Attempt to get type name from abstract event type.")
@@ -17,8 +23,14 @@ abstract class MusicEvent: MusicTrigger {
             return MusicEvent::class
         }
 
-        fun arrayFromJsonArray(array: JsonArray): List<MusicEvent> {
-            return array.map { json -> fromJson(json.asJsonObject) }
+        fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent {
+            val event = fromJson(json)
+            event.playableSounds = MusicPack.parseMusicPath(json, soundLibrary)
+            return event
+        }
+
+        fun arrayFromJsonArray(array: JsonArray, soundLibrary: Map<String, PlayableSoundFile>): List<MusicEvent> {
+            return array.map { json -> fromJson(json.asJsonObject, soundLibrary) }
         }
     }
 }

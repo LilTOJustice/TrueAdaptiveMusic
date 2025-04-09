@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
-import liltojustice.trueadaptivemusic.client.predicate.PredicateParam
+import liltojustice.trueadaptivemusic.client.predicate.TriggerParam
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -11,7 +11,7 @@ import kotlin.reflect.full.*
 import kotlin.reflect.jvm.isAccessible
 
 interface MusicTrigger {
-    fun getTriggerParams(): List<PredicateParam> {
+    fun getTriggerParams(): List<TriggerParam> {
         val constructor = this::class.primaryConstructor
             ?: throw MusicPredicateException("No constructor found for ${this::class.simpleName}." +
                     " It must have a constructor.")
@@ -22,7 +22,7 @@ interface MusicTrigger {
                 property.isAccessible = true
                 val value = property.getter.call(this)
                 property.isAccessible = accessible
-                PredicateParam(property.name, value)
+                TriggerParam(property.name, value)
             }
 
         if (result.size < constructor.parameters.size) {
@@ -40,7 +40,7 @@ interface MusicTrigger {
         return result
     }
 
-    fun getPredicateId(): String {
+    fun getTriggerId(): String {
         val companion = javaClass.kotlin.companionObjectInstance
         if (companion is MusicTriggerCompanion<*>) {
             val params = getTriggerParams()

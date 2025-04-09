@@ -2,6 +2,8 @@ package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
+import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
 import net.fabricmc.api.EnvType
@@ -21,12 +23,21 @@ class EditPackScreen(
     private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     private lateinit var predicateViewWidget: PredicateViewWidget
+    private lateinit var predicateTreeWidget: PredicateTreeWidget
+    private lateinit var eventViewWidget: EventViewWidget
+    private lateinit var saveButtonWidget: IconButtonWidget
+    private lateinit var closeButtonWidget: ButtonWidget
+    private lateinit var openAssetsFolderButtonWidget: ButtonWidget
+    private var selectedEvent: MusicEvent? = null
+
+    private val eventView: Boolean
+        get() = eventViewWidget.visible
 
     override fun init() {
         Callbacks.playSoundNow(null)
         musicPack.initEdit(musicPack)
 
-        val saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
+        saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
             Callbacks.setCurrentMusicPack(null)
             val path = musicPack.save()
             Callbacks.setCurrentMusicPack(MusicPack.fromFile(path))
@@ -36,54 +47,73 @@ class EditPackScreen(
             .textureSize(9, 8)
             .xyOffset(32, 6)
             .build()
-        saveButtonWidget.width = 90
 
-        val closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
+        closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
             close()
         }
             .build()
-        closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
-        closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
-        closeButtonWidget.tooltip = Tooltip.of(Text.literal("Changes will be saved"))
 
-        val openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
+        openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
             Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
         }
             .build()
-        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
-        openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
 
-        val gridWidget = GridWidget()
-        gridWidget.mainPositioner
-            .marginLeft(LEFT_MARGIN / 2)
-            .marginRight(RIGHT_MARGIN / 2)
-        val adder: GridWidget.Adder? = gridWidget.createAdder(3)
-
-        lateinit var predicateTreeWidget: PredicateTreeWidget
         predicateViewWidget = PredicateViewWidget(
-            (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-            (height - TOP_MARGIN - BOTTOM_MARGIN),
+            getContainerWidth(),
+            getContainerHeight(),
             musicPack,
-            { predicateTreeWidget.initPredicateWidgets() })
+            { predicateTreeWidget.initPredicateWidgets() },
+            { event -> switchToEventView(event) },
+            { eventView })
         predicateTreeWidget = PredicateTreeWidget(
-            (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt(),
-            (height - TOP_MARGIN - BOTTOM_MARGIN),
+            getContainerWidth(),
+            getContainerHeight(),
             musicPack,
-            { node -> predicateViewWidget.setEditExistingNode(node) },
-            { parent -> predicateViewWidget.setCreateNewNode(parent) })
-        adder?.add(predicateTreeWidget, 2)
-        adder?.add(predicateViewWidget, 1)
+            { node ->
+                predicateViewWidget.setEditExistingNode(node)
+                switchToPredicateView()
+            },
+            { parent ->
+                predicateViewWidget.setCreateNewNode(parent)
+                switchToPredicateView()
+            })
+        eventViewWidget = EventViewWidget(
+            getContainerWidth(),
+            getContainerHeight(),
+            musicPack,
+            { newEvent ->
+                predicateViewWidget.onEventModeExit(newEvent)
+                switchToPredicateView() }
+        )
 
-        gridWidget.refreshPositions()
-        SimplePositioningWidget.setPos(
-            gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
         addDrawableChild(saveButtonWidget)
         addDrawableChild(closeButtonWidget)
         addDrawableChild(openAssetsFolderButtonWidget)
-        gridWidget.forEachChild { drawableElement: ClickableWidget? ->
-            this.addDrawableChild(
-                drawableElement
-            )
+        addDrawableChild(predicateViewWidget)
+        addDrawableChild(predicateTreeWidget)
+        addDrawableChild(eventViewWidget)
+
+        saveButtonWidget.width = 90
+        closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
+        closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        closeButtonWidget.tooltip = Tooltip.of(Text.literal("Changes will be saved"))
+        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
+        openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
+
+        val containerWidth = getContainerWidth()
+        val containerHeight = getContainerHeight()
+        predicateTreeWidget.width = containerWidth
+        predicateTreeWidget.height = containerHeight
+        predicateViewWidget.width = containerWidth
+        predicateViewWidget.height = containerHeight
+        eventViewWidget.width = containerWidth
+        eventViewWidget.height = containerHeight
+
+        if (selectedEvent == null) {
+            switchToPredicateView()
+        }
+        else {
+            switchToEventView(selectedEvent)
         }
     }
 
@@ -100,6 +130,48 @@ class EditPackScreen(
         renderBackground(context)
         context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 12, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
+    }
+
+    private fun positionContainers() {
+        val gridWidget = GridWidget()
+        gridWidget.mainPositioner
+            .marginLeft(LEFT_MARGIN / 2)
+            .marginRight(RIGHT_MARGIN / 2)
+        val adder: GridWidget.Adder? = gridWidget.createAdder(2)
+
+        if (eventView) {
+            adder?.add(predicateViewWidget)
+            adder?.add(eventViewWidget)
+        }
+        else {
+            adder?.add(predicateTreeWidget)
+            adder?.add(predicateViewWidget)
+        }
+
+        gridWidget.refreshPositions()
+        SimplePositioningWidget.setPos(
+            gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
+    }
+
+    private fun switchToEventView(event: MusicEvent?) {
+        eventViewWidget.visible = true
+        predicateTreeWidget.visible = false
+        eventViewWidget.setEvent(event)
+        positionContainers()
+    }
+
+    private fun switchToPredicateView() {
+        predicateTreeWidget.visible = true
+        eventViewWidget.visible = false
+        positionContainers()
+    }
+
+    private fun getContainerWidth(): Int {
+        return (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt()
+    }
+
+    private fun getContainerHeight(): Int {
+        return (height - TOP_MARGIN - BOTTOM_MARGIN)
     }
 
     companion object {

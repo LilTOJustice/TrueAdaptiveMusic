@@ -10,7 +10,7 @@ class MultiSelectDropdownWidget(
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<String> = listOf(),
-    private val onHover: (option: String?) -> Unit = {},
+    private val onHoverOption: (option: String) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -24,13 +24,14 @@ class MultiSelectDropdownWidget(
     y,
     true) {
     private val selected = mutableListOf<String>()
+    private var hoveredWidget: ClickableTextWidget? = null
 
     init {
         selected.addAll(alreadySelected)
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val dropdownWidget = addWidgetFromRender(
+        addWidgetFromRender(
             {
                 DropdownWidget(
                     options,
@@ -43,7 +44,7 @@ class MultiSelectDropdownWidget(
                     getOptions,
                     notSelectedPlaceholder,
                     "",
-                    onHover,
+                    onHoverOption,
                     x,
                     y)
             },
@@ -63,12 +64,16 @@ class MultiSelectDropdownWidget(
             ) as ClickableTextWidget
         }
 
-        val hoveredSelectedWidget = selectedWidgets.firstOrNull { widget ->
+        val newHoveredWidget = selectedWidgets.firstOrNull { widget ->
             childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
         }
 
-        if (!dropdownWidget.isOpen() || hoveredSelectedWidget != null) {
-            onHover(hoveredSelectedWidget?.text)
+        if (newHoveredWidget != null && newHoveredWidget != hoveredWidget) {
+            hoveredWidget = newHoveredWidget
+            onHoverOption(hoveredWidget!!.text)
+        }
+        else if (newHoveredWidget == null) {
+            hoveredWidget = null
         }
 
         super.render(context, mouseX, mouseY, delta)

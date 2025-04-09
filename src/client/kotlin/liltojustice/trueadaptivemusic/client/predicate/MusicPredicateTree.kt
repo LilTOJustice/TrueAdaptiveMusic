@@ -2,18 +2,13 @@ package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.Registries
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -107,7 +102,7 @@ class MusicPredicateTree private constructor(
             if (!predicate.test(client)) {
                 return Pair(this, listOf())
             }
-            val newPath = path + predicate.getPredicateId()
+            val newPath = path + predicate.getTriggerId()
 
             for (child in children) {
                 val result = child.getSatisfiedNode(client, newPath)
@@ -197,30 +192,13 @@ class MusicPredicateTree private constructor(
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
                     MusicPredicate.fromJson(json),
-                    parseMusicPath(json, soundLibrary),
-                    MusicEvent.arrayFromJsonArray(json.getAsJsonArray("events") ?: JsonArray()),
+                    MusicPack.parseMusicPath(json, soundLibrary),
+                    MusicEvent.arrayFromJsonArray(
+                        json.getAsJsonArray("events") ?: JsonArray(), soundLibrary),
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)
                 )
-            }
-
-            private fun parseMusicPath(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-                    : List<PlayableSound> {
-                return (if (JsonHelper.hasString(json, "musicPath"))
-                    listOf(JsonHelper.getString(json, "musicPath"))
-                else
-                    JsonHelper.getArray(json, "musicPath").map { element -> element.asString })
-                    .map { path ->
-                        try {
-                            return@map soundLibrary[path]
-                                ?: PlayableSoundEvent(Registries.SOUND_EVENT[Identifier(path)]
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"))
-                        } catch (_: InvalidIdentifierException) {}
-
-                        Logger.log("Could not find \"$path\", skipping...", LogLevel.WARNING)
-                        return@map null
-                    }.filterNotNull()
             }
 
             private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MutableList<Node> {
