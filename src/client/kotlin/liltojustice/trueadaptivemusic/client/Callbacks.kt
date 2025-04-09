@@ -21,5 +21,9 @@ class Callbacks {
         fun playSoundNow(sound: PlayableSound?) {
             PlaySoundNowCallback.EVENT.invoker().playSoundNow(sound)
         }
+
+        fun invokeMusicEvent(eventName: String) {
+            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName)
+        }
     }
 }

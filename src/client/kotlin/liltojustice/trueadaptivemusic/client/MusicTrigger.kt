@@ -1,8 +1,10 @@
 package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import liltojustice.trueadaptivemusic.client.predicate.TriggerParam
+import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -48,7 +50,9 @@ interface MusicTrigger {
         }
         else {
             throw MusicPredicateException("Failed to find valid companion object for $javaClass make sure to" +
-                    " create one that inherits from ${MusicTriggerCompanion::class.simpleName}")
+                    " create one that inherits from " +
+                    "${MusicPredicate.MusicPredicateCompanion::class.simpleName} for predicates or " +
+                    "${MusicEvent.MusicEventCompanion::class.simpleName} for events.")
         }
     }
 

@@ -29,7 +29,7 @@ class MusicPredicateTree private constructor(
             result.second.joinToString("/"),
             result.first.playableSounds,
             result.first.parameters,
-            result.third)
+            result.third.values.toList())
     }
 
     private fun traverseRecursive(
@@ -250,5 +250,5 @@ class MusicPredicateTree private constructor(
         val path: String,
         val playableSounds: List<PlayableSound>,
         val parameters: Node.Parameters,
-        val events: Map<String, MusicEvent>)
+        val events: List<MusicEvent>)
 }

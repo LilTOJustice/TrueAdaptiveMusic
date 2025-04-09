@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -9,6 +10,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
+import net.minecraft.util.ActionResult
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max
@@ -29,6 +31,7 @@ class MusicManager(
     private var timedIdentifierTimer = Timer()
     private var timedIdentifierTimerTask: TimerTask? = null
     private var shouldResume = false
+    private var activeEvents: List<MusicEvent> = emptyList()
 
     init {
         client.soundManager.registerListener { instance, _ ->
@@ -40,6 +43,16 @@ class MusicManager(
                 toStop = instance
                 setInstanceVolume(toStop!!, 0F)
             }
+        }
+
+        InvokeMusicEventCallback.EVENT.register { eventType ->
+            activeEvents.filter { event -> eventType == event.getTypeName() }.forEach { event ->
+                event.playableSounds.randomOrNull()?.let {
+                    playNow(it)
+                }
+            }
+
+            ActionResult.PASS
         }
     }
 
@@ -68,6 +81,7 @@ class MusicManager(
         val parameters = predicateResult?.parameters ?: MusicPredicateTree.Node.Parameters()
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
+        activeEvents = predicateResult?.events ?: emptyList()
 
         if (identifier == timedIdentifier) {
             return
