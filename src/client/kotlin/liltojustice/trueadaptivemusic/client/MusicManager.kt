@@ -71,6 +71,11 @@ class MusicManager(
         }
 
         if (onDemandSound != null) {
+            if (!client.soundManager.isPlaying(onDemandSoundInstance)) {
+                onDemandSound = null
+                onDemandSoundInstance = null
+            }
+
             return
         }
 
