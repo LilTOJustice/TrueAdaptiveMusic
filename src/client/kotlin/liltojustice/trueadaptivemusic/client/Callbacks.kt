@@ -23,8 +23,8 @@ class Callbacks {
             setCurrentMusicPack(getCurrentMusicPack())
         }
 
-        fun playSoundNow(sound: PlayableSound?) {
-            getClientMusicManager()?.playNow(sound)
+        fun playSoundNow(sound: PlayableSound?, keepBackground: Boolean = false) {
+            getClientMusicManager()?.playNow(sound, keepBackground)
         }
 
         fun invokeMusicEvent(eventName: String) {

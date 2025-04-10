@@ -2,15 +2,22 @@ package liltojustice.trueadaptivemusic.client.instance
 
 import net.minecraft.client.sound.SoundInstance
 
-class FadeInstance(val soundInstance: SoundInstance, private val fadeIn: Boolean, private val totalTicks: Int = 50) {
-    private var fadeTicks: Int = if (fadeIn) 0 else totalTicks
+class FadeInstance(
+    val soundInstance: SoundInstance,
+    private val fadeIn: Boolean,
+    private val totalTicks: Int = 50,
+    private val minimumVolume: Float = 0F) {
+    private var fadeTicks: Int = 0
 
     fun tick(): Float {
-        fadeTicks += if (fadeIn) 1 else -1
-        return fadeTicks * 1f / totalTicks
+        fadeTicks++
+        return if (fadeIn)
+            (fadeTicks * 1F / totalTicks) * (1 - minimumVolume) + minimumVolume
+        else
+            (fadeTicks * 1F / totalTicks) * (minimumVolume - 1) + 1
     }
 
     fun done(): Boolean {
-        return if (fadeIn) fadeTicks == totalTicks else fadeTicks == 0
+        return fadeTicks == totalTicks
     }
 }

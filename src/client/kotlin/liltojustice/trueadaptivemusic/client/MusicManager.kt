@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
+import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.instance.FadeInstance
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -22,7 +23,6 @@ class MusicManager(
     private var oldMusicPredicateId: String = ""
     private var currentSoundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
-    private var toStop: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
     private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
     private var onDemandSound: PlayableSound? = null
@@ -37,7 +37,7 @@ class MusicManager(
         InvokeMusicEventCallback.EVENT.register { eventType ->
             activeEvents.filter { event -> eventType == event.getTypeName() }.forEach { event ->
                 event.playableSounds.randomOrNull()?.let {
-                    playNow(it)
+                    playNow(it, true)
                 }
             }
 
@@ -55,16 +55,17 @@ class MusicManager(
     }
 
     fun tick() {
-        if (toStop != null) {
-            client.soundManager.stop(toStop)
-        }
-
         processFades()
 
         if (onDemandSound != null) {
             if (!client.soundManager.isPlaying(onDemandSoundInstance)) {
                 onDemandSound = null
                 onDemandSoundInstance = null
+                currentSoundInstance?.let {
+                    resumeSound(it)
+                    fadeInstances.add(FadeInstance(it, true, PLAY_NOW_FADE_TICKS, 0.2F))
+                }
+                processFades()
             }
 
             return
@@ -115,7 +116,7 @@ class MusicManager(
         startNewMusic(nextMusic)
     }
 
-    fun playNow(sound: PlayableSound?) {
+    fun playNow(sound: PlayableSound?, keepBackground: Boolean = false) {
         if (sound == onDemandSound) {
             return
         }
@@ -124,12 +125,18 @@ class MusicManager(
             client.soundManager.stop(onDemandSoundInstance)
             onDemandSound = null
             onDemandSoundInstance = null
+            currentSoundInstance?.let {
+                resumeSound(it)
+                fadeInstances.add(FadeInstance(it, true, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F))
+            }
 
             return
         }
 
         client.soundManager.stop(oldSoundInstance)
-        fadeInstances.add(FadeInstance(currentSoundInstance!!, false, 10))
+        currentSoundInstance?.let {
+            fadeInstances.add(FadeInstance(it, false, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F))
+        }
 
         client.soundManager.stop(onDemandSoundInstance)
         onDemandSound = sound
@@ -137,6 +144,10 @@ class MusicManager(
             onDemandSoundInstance = it.makeSoundInstance()
             playInstance(onDemandSoundInstance)
         }
+    }
+
+    fun hasAdvancementEvent(): Boolean {
+        return activeEvents.any { event -> event.getTypeName() == OnAdvancementGetEvent.getTypeName() }
     }
 
     private fun processFades() {
@@ -211,7 +222,7 @@ class MusicManager(
         currentSoundInstance = newSoundInstance
 
         if (shouldResume) {
-            client.soundManager.soundSystem.sources[currentSoundInstance]?.run { source -> source.resume() }
+            resumeSound(currentSoundInstance)
         }
         else {
             playInstance(currentSoundInstance)
@@ -233,12 +244,22 @@ class MusicManager(
                 return@run
             }
 
-            if (soundInstance === oldSoundInstance) {
+            if (soundInstance === oldSoundInstance || onDemandSoundInstance != null) {
                 source.pause()
             }
             else {
                 source.stop()
             }
         }
+    }
+
+    private fun resumeSound(sound: SoundInstance?) {
+        sound?.let {
+            client.soundManager.soundSystem.sources[it]?.run { source -> source.resume() }
+        }
+    }
+
+    companion object {
+        private const val PLAY_NOW_FADE_TICKS = 10
     }
 }
