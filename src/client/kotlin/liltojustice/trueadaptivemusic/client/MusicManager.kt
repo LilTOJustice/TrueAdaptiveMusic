@@ -34,17 +34,6 @@ class MusicManager(
     private var activeEvents: List<MusicEvent> = emptyList()
 
     init {
-        client.soundManager.registerListener { instance, _ ->
-            if (musicPack != null
-                && instance.category == SoundCategory.MUSIC
-                && instance != currentSoundInstance
-                && instance != oldSoundInstance
-                && instance != onDemandSoundInstance) {
-                toStop = instance
-                setInstanceVolume(toStop!!, 0F)
-            }
-        }
-
         InvokeMusicEventCallback.EVENT.register { eventType ->
             activeEvents.filter { event -> eventType == event.getTypeName() }.forEach { event ->
                 event.playableSounds.randomOrNull()?.let {
