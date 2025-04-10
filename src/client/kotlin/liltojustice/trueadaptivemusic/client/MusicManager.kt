@@ -24,7 +24,7 @@ class MusicManager(
     private var currentSoundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
-    private val fadeInstances: MutableList<FadeInstance> = mutableListOf()
+    private val fadeInstances: MutableMap<SoundInstance, FadeInstance> = mutableMapOf()
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
     private var timedIdentifier = ""
@@ -63,7 +63,7 @@ class MusicManager(
                 onDemandSoundInstance = null
                 currentSoundInstance?.let {
                     resumeSound(it)
-                    fadeInstances.add(FadeInstance(it, true, PLAY_NOW_FADE_TICKS, 0.2F))
+                    fadeInstances[it] = FadeInstance(it, true, PLAY_NOW_FADE_TICKS, 0.2F)
                 }
                 processFades()
             }
@@ -127,7 +127,7 @@ class MusicManager(
             onDemandSoundInstance = null
             currentSoundInstance?.let {
                 resumeSound(it)
-                fadeInstances.add(FadeInstance(it, true, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F))
+                fadeInstances[it] = FadeInstance(it, true, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F)
             }
 
             return
@@ -135,7 +135,7 @@ class MusicManager(
 
         client.soundManager.stop(oldSoundInstance)
         currentSoundInstance?.let {
-            fadeInstances.add(FadeInstance(it, false, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F))
+            fadeInstances[it] = FadeInstance(it, false, PLAY_NOW_FADE_TICKS, if (keepBackground) 0.2F else 0F)
         }
 
         client.soundManager.stop(onDemandSoundInstance)
@@ -151,12 +151,12 @@ class MusicManager(
     }
 
     private fun processFades() {
-        fadeInstances.forEach { fadeInstance ->
+        fadeInstances.values.forEach { fadeInstance ->
             val volume: Float = fadeInstance.tick()
             setInstanceVolume(fadeInstance.soundInstance, musicVolumeOption.value.toFloat() * volume)
         }
 
-        fadeInstances.removeIf { fadeInstance -> fadeInstance.done() }
+        fadeInstances.values.forEach { fadeInstance -> if (fadeInstance.done()) fadeInstances.remove(fadeInstance.soundInstance) }
     }
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
@@ -168,14 +168,14 @@ class MusicManager(
         if (newMusic == null)
         {
             if (isPlaying(currentSoundInstance)) {
-                fadeInstances.add(FadeInstance(currentSoundInstance!!, false))
+                fadeInstances[currentSoundInstance!!] = FadeInstance(currentSoundInstance!!, false)
                 currentSoundInstance = null
             }
 
             return
         }
 
-        if (currentSoundInstance == null) {
+        if (currentSoundInstance == null || (!shouldResume && !isPlaying(oldSoundInstance))) {
             currentSoundInstance = newMusic.makeSoundInstance()
             playInstance(currentSoundInstance)
             if (!client.soundManager.isPlaying(currentSoundInstance)) {
@@ -228,8 +228,8 @@ class MusicManager(
             playInstance(currentSoundInstance)
         }
 
-        fadeInstances.add(FadeInstance(currentSoundInstance!!, true))
-        fadeInstances.add(FadeInstance(oldSoundInstance!!, false))
+        fadeInstances[currentSoundInstance!!] = FadeInstance(currentSoundInstance!!, true)
+        fadeInstances[oldSoundInstance!!] = FadeInstance(oldSoundInstance!!, false)
     }
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
