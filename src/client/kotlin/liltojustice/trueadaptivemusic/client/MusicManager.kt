@@ -142,6 +142,7 @@ class MusicManager(
         client.soundManager.stop(oldSoundInstance)
         fadeInstances.add(FadeInstance(currentSoundInstance!!, false, 10))
 
+        client.soundManager.stop(onDemandSoundInstance)
         onDemandSound = sound
         onDemandSound?.let {
             onDemandSoundInstance = it.makeSoundInstance()
