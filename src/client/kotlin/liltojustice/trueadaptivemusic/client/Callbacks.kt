@@ -4,14 +4,19 @@ import liltojustice.trueadaptivemusic.client.sound.PlayableSound
 
 class Callbacks {
     companion object {
+        fun getClientMusicManager(): MusicManager? {
+            val result = Array<MusicManager?>(1) { null }
+            GetMusicManagerCallback.EVENT.invoker().getMusicManager(result)
+            return result[0]
+        }
+
         fun getCurrentMusicPack(): MusicPack? {
-            val packResult = Array<MusicPack?>(1) { null }
-            GetMusicPackCallback.EVENT.invoker().getPack(packResult)
-            return packResult[0]
+            return getClientMusicManager()?.getMusicPack()
         }
 
         fun setCurrentMusicPack(musicPack: MusicPack?) {
             ChangeMusicPackCallback.EVENT.invoker().selectPack(musicPack)
+            getClientMusicManager()?.selectMusicPack(musicPack)
         }
 
         fun refreshCurrentMusicPack() {
@@ -19,7 +24,7 @@ class Callbacks {
         }
 
         fun playSoundNow(sound: PlayableSound?) {
-            PlaySoundNowCallback.EVENT.invoker().playSoundNow(sound)
+            getClientMusicManager()?.playNow(sound)
         }
 
         fun invokeMusicEvent(eventName: String) {
