@@ -114,7 +114,7 @@ class EventViewWidget(
                         newEvent.playableSounds =
                             selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
 
-                        onExitView(newEvent)
+                        exit(newEvent)
                     })
             },
             "Save"
@@ -126,7 +126,7 @@ class EventViewWidget(
                     ClickableTextWidget(
                         "Delete",
                         onClick = {
-                            onExitView(null)
+                            exit(null)
                         }
                     )
                 },
@@ -153,6 +153,16 @@ class EventViewWidget(
         requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("eventTypeChoice", "musicChoice") }
+    }
+
+    private fun exit(event: MusicEvent?) {
+        selectedEvent = null
+        selectedMusicPaths = mutableListOf()
+        selectedEventTypeName = eventTypeNameOptions.firstOrNull() ?: ""
+        requiredEventArgs = emptyList()
+        eventArgs = mutableListOf()
+        clearWidgetsFromRender()
+        onExitView(event)
     }
 
     companion object {
