@@ -27,8 +27,8 @@ class Callbacks {
             getClientMusicManager()?.playNow(sound, keepBackground)
         }
 
-        fun invokeMusicEvent(eventName: String) {
-            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName)
+        fun invokeMusicEvent(eventName: String, vararg eventArgs: Any?) {
+            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName, *eventArgs)
         }
     }
 }

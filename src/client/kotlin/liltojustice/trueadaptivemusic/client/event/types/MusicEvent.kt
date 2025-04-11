@@ -12,6 +12,10 @@ import kotlin.reflect.KClass
 sealed class MusicEvent: MusicTrigger {
     var playableSounds: List<PlayableSound> = emptyList()
 
+    open fun validate(vararg eventArgs: Any?): Boolean {
+        return true
+    }
+
     override fun toJson(): JsonObject {
         val result = super.toJson()
         val musicPathJson = JsonArray()

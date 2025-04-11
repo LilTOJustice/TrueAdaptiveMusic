@@ -34,7 +34,7 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                 }
                 catch (e: MusicLoadException) {
                     Logger.log(
-                        "Selected pack \"$selectedPackName\" failed to load. Error:\n${e.message}",
+                        "Selected pack \"$selectedPackName\" failed to load. Error:\n$e",
                         LogLevel.ERROR)
                 }
             }

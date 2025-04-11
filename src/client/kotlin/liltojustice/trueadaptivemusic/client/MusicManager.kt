@@ -36,12 +36,13 @@ class MusicManager(
     private var activeEvents: List<MusicEvent> = emptyList()
 
     init {
-        InvokeMusicEventCallback.EVENT.register { eventType ->
-            activeEvents.firstOrNull { event -> eventType == event.getTypeName() }?.let { event ->
-                event.playableSounds.randomOrNull()?.let {
-                    playNow(it, true)
+        InvokeMusicEventCallback.EVENT.register { eventType, args ->
+            activeEvents.firstOrNull { event -> eventType == event.getTypeName() && event.validate(*args) }
+                ?.let { event ->
+                    event.playableSounds.randomOrNull()?.let {
+                        playNow(it, true)
+                    }
                 }
-            }
 
             ActionResult.PASS
         }
