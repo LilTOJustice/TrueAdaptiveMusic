@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.mixin;
 import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.client.Callbacks;
 import liltojustice.trueadaptivemusic.client.MusicManager;
+import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
 import net.minecraft.sound.SoundCategory;
@@ -32,6 +33,7 @@ public class SoundManagerPlayMixin {
 
     @Unique
     private static boolean ignoreAdvancement(SoundInstance sound, MusicManager musicManager) {
-        return musicManager.hasAdvancementEvent() && sound.getId() == SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.getId();
+        return musicManager.hasActiveEvent(OnAdvancementGetEvent.Companion.getTypeName())
+                && sound.getId() == SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.getId();
     }
 }

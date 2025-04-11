@@ -30,5 +30,9 @@ class Callbacks {
         fun invokeMusicEvent(eventName: String, vararg eventArgs: Any?) {
             InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName, *eventArgs)
         }
+
+        fun eventActive(eventName: String): Boolean {
+            return getClientMusicManager()?.hasActiveEvent(eventName) ?: false
+        }
     }
 }

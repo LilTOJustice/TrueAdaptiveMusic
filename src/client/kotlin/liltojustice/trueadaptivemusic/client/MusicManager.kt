@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
-import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.FadeManager
 import liltojustice.trueadaptivemusic.client.sound.PlayableSound
@@ -150,8 +149,8 @@ class MusicManager(
         startNewMusic(nextMusic)
     }
 
-    fun hasAdvancementEvent(): Boolean {
-        return activeEvents.any { event -> event.getTypeName() == OnAdvancementGetEvent.getTypeName() }
+    fun hasActiveEvent(eventName: String): Boolean {
+        return activeEvents.any { event -> event.getTypeName() == eventName }
     }
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
