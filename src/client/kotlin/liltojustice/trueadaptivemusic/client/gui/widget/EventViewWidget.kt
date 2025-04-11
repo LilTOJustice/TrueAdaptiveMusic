@@ -149,6 +149,10 @@ class EventViewWidget(
     }
 
     private fun setSelectedEventTypeName(typeName: String) {
+        if (selectedEventTypeName == typeName) {
+            return
+        }
+
         selectedEventTypeName = typeName
         requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
