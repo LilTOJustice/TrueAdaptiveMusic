@@ -8,7 +8,8 @@ import net.minecraft.util.JsonHelper
 
 class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEvent() {
     override fun validate(vararg eventArgs: Any?): Boolean {
-        val bossId = eventArgs[0] as? Identifier ?: return false
+        val bossId = Identifier.tryParse((eventArgs[0] as? Identifier)
+            ?.path?.split(".")?.drop(1)?.joinToString(":")) ?: return false
         return bosses.isEmpty()
                 || bosses.any {
                     bossId.namespace == it.namespace && bossId.path.split(".").lastOrNull() == it.path }
