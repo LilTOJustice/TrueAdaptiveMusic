@@ -93,8 +93,8 @@ class InputWidgetMaker {
                 MultiSelectDropdownWidget(
                     options,
                     { selected -> outArgs[arg.index] = selected
-                        .map { enumOption -> enumClass.enumConstants.first { enum -> enum.toString() == enumOption } }
-                        .ifEmpty { null } },
+                        .map { enumOption ->
+                            enumClass.enumConstants.first { enum -> enum.toString() == enumOption } } },
                     "${prompt}s",
                     notSelectedPlaceholder = "Select a value",
                     alreadySelected = (outArgs[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf())
@@ -121,9 +121,9 @@ class InputWidgetMaker {
                 else
                     MultiSelectDropdownWidget(
                         options,
-                        { selected -> outArgs[arg.index] = selected
-                            .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
-                            .ifEmpty { null } },
+                        { selected ->
+                            outArgs[arg.index] = selected
+                                .map { id -> TypedIdentifier.initializeFromIdString(type, id) } },
                         "${prompt}s",
                         notSelectedPlaceholder = "Select an Identifier",
                         alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())

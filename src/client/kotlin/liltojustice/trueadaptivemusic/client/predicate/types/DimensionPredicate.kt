@@ -10,7 +10,7 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     override fun test(client: MinecraftClient): Boolean {
         val playerDimension = client.player?.world?.dimensionEntry ?: return false
 
-        return dimensions.any { dimension -> playerDimension.matchesId(dimension) }
+        return dimensions.isEmpty() || dimensions.any { dimension -> playerDimension.matchesId(dimension) }
     }
 
     override fun toJson(): JsonObject {

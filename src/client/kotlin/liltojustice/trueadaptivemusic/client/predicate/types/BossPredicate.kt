@@ -11,7 +11,7 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     override fun test(client: MinecraftClient): Boolean {
         return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
             val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
-            bosses.any { boss ->
+            bosses.isEmpty() || bosses.any { boss ->
                 toTranslationKey(bossName) == boss.toTranslationKey()
             }
         }
