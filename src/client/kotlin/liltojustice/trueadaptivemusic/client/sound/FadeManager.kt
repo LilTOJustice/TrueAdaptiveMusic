@@ -1,9 +1,6 @@
-package liltojustice.trueadaptivemusic.client.sound.fade
+package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
-import liltojustice.trueadaptivemusic.client.sound.pauseInstance
-import liltojustice.trueadaptivemusic.client.sound.resumeInstance
-import liltojustice.trueadaptivemusic.client.sound.setInstanceVolume
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager

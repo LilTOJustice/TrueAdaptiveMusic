@@ -26,7 +26,7 @@ public class SoundManagerPlayMixin {
 
     @Unique
     private static boolean shouldIgnoreSound(SoundInstance sound, MusicManager musicManager) {
-        return sound.getId() != Constants.Companion.getTRUEADAPTIVEMUSIC_ID()
+        return sound.getId() != Constants.Companion.getAUDIO_FILE_STREAM_ID()
                 && (sound.getCategory() == SoundCategory.MUSIC || ignoreAdvancement(sound, musicManager));
     }
 

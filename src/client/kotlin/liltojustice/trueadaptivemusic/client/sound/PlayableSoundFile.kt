@@ -1,11 +1,11 @@
 package liltojustice.trueadaptivemusic.client.sound
 
-import liltojustice.trueadaptivemusic.client.sound.instance.AdaptiveMusicSoundInstance
+import liltojustice.trueadaptivemusic.client.sound.instance.AudioFileSoundInstance
 import net.minecraft.client.sound.SoundInstance
 
 class PlayableSoundFile(private val file: SoundFile): PlayableSound {
     override fun makeSoundInstance(): SoundInstance {
-        return AdaptiveMusicSoundInstance(file)
+        return AudioFileSoundInstance(file)
     }
 
     override fun getSoundName(): String {
