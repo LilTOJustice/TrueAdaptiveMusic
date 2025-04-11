@@ -140,7 +140,6 @@ class MusicManager(
         }
 
         shouldResume = oldMusicPredicateId == identifier
-        println("$identifier == $oldMusicPredicateId = $shouldResume")
         oldMusicPredicateId =
             if (identifier != currentMusicPredicateId)
                 currentMusicPredicateId
