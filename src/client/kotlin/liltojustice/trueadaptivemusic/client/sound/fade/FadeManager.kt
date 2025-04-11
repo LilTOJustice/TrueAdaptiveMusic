@@ -16,7 +16,7 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
         soundManager.resumeInstance(soundInstance)
         val existingFade = fades[soundInstance]
         if (existingFade != null) {
-            existingFade.redirect(targetVolume, ticksToComplete)
+            existingFade.redirect(targetVolume, ticksToComplete, stopWhenDone)
         } else {
             fades[soundInstance] = Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone)
         }
@@ -55,7 +55,7 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
         val soundInstance: SoundInstance,
         private var totalTicks: Int,
         private var targetVolume: Float,
-        val stopWhenDone: Boolean) {
+        var stopWhenDone: Boolean) {
         private var fadeTicks: Int = 0
         private var currentVolume: Float = getInstanceVolume(soundInstance)
 
@@ -72,9 +72,10 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
             return currentVolume
         }
 
-        fun redirect(targetVolume: Float, totalTicks: Int) {
+        fun redirect(targetVolume: Float, totalTicks: Int, stopWhenDone: Boolean) {
             this.targetVolume = targetVolume
             this.totalTicks = totalTicks
+            this.stopWhenDone = stopWhenDone
             fadeTicks = 0
         }
 

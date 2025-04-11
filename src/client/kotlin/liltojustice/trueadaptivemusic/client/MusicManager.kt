@@ -64,7 +64,9 @@ class MusicManager(
         val targetVolume = if (keepBackground) BACKGROUND_VOLUME else 0F
 
         if (sound == null) {
-            client.soundManager.stop(onDemandSoundInstance)
+            onDemandSoundInstance?.let {
+                fadeManager.startFade(it, PLAY_NOW_FADE_TICKS, 0F, true)
+            }
             onDemandSound = null
             onDemandSoundInstance = null
             currentSoundInstance?.let {
