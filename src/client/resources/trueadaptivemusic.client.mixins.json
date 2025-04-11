@@ -6,9 +6,10 @@
   "client": [
     "SoundManagerPlayMixin",
     "SoundOptionsScreenMixin",
-    "event.OnToastMixin",
     "event.OnBossDefeatEventMixin",
-    "event.OnJoinWorldEventMixin"
+    "event.OnDayStartEventMixin",
+    "event.OnJoinWorldEventMixin",
+    "event.OnToastMixin"
   ],
   "injectors": {
     "defaultRequire": 1
