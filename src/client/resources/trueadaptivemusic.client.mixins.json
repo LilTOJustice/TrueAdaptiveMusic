@@ -6,7 +6,8 @@
   "client": [
     "SoundManagerPlayMixin",
     "SoundOptionsScreenMixin",
-    "event.OnAdvancementGetEventMixin"
+    "event.OnAdvancementGetEventMixin",
+    "event.OnJoinWorldEventMixin"
   ],
   "injectors": {
     "defaultRequire": 1
