@@ -9,6 +9,7 @@
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",
     "event.OnJoinWorldEventMixin",
+    "event.OnNightStartMixin",
     "event.OnToastMixin",
     "event.OnWakeUpEventMixin"
   ],
