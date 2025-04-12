@@ -15,13 +15,14 @@ class StructureSetPredicate internal constructor(private val structureSets: List
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return structureSets.any { structureSetId ->
-            val structureSet: StructureSet =
-                structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(structureSetId) ?: return false
+        return (structureSets.takeIf { structureSets.isNotEmpty() } ?: StructureSetIdentifier.getRegistryIds())
+            .any { structureSetId ->
+                val structureSet: StructureSet =
+                    structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(structureSetId) ?: return false
 
-            structureSet.structures.any { structureWeightedEntry ->
-                StructurePredicate.testStructure(structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
-        }
+                structureSet.structures.any { structureWeightedEntry ->
+                    StructurePredicate.testStructure(structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
+            }
     }
 
     override fun test(client: MinecraftClient): Boolean {

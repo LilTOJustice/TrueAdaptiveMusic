@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.instance
+package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.sound.FFMpeg
@@ -13,8 +13,9 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import java.util.concurrent.CompletableFuture
 
-class AdaptiveMusicSoundInstance(private val soundFile: SoundFile)
-    : AbstractSoundInstance(Constants.TRUEADAPTIVEMUSIC_ID, SoundCategory.MUSIC, SoundInstance.createRandom()) {
+class AudioFileSoundInstance(private val soundFile: SoundFile)
+    : AbstractSoundInstance(Constants.AUDIO_FILE_STREAM_ID, SoundCategory.MUSIC, SoundInstance.createRandom()),
+    VolumeControlled {
     override fun getAudioStream(loader: SoundLoader, id: Identifier, repeatInstantly: Boolean):
             CompletableFuture<AudioStream> {
         val extension = soundFile.getExtension()
@@ -28,5 +29,13 @@ class AdaptiveMusicSoundInstance(private val soundFile: SoundFile)
         catch (e: Exception) {
             throw MusicLoadException("Failed to play sound file '${soundFile.getName()}'")
         }
+    }
+
+    override fun getVolume(): Float {
+        return volume
+    }
+
+    override fun setVolume(volume: Float) {
+        this.volume = volume
     }
 }

@@ -8,10 +8,10 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.*
-import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
-import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import net.minecraft.registry.Registries
+import net.minecraft.sound.SoundEvent
+import net.minecraft.util.Identifier
+import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
 import java.io.IOException
@@ -194,6 +194,35 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to read music pack: $filePath", e)
+            }
+        }
+
+        fun parseMusicPath(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
+                : List<PlayableSound> {
+            return (if (JsonHelper.hasString(json, "musicPath"))
+                listOf(JsonHelper.getString(json, "musicPath"))
+            else
+                JsonHelper.getArray(json, "musicPath").map { element -> element.asString })
+                .map { path ->
+                    try {
+                        return@map soundLibrary[path]
+                            ?: PlayableSoundEvent(
+                                Registries.SOUND_EVENT[Identifier(path)]
+                                ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
+                            )
+                    } catch (_: InvalidIdentifierException) {}
+
+                    Logger.log("Could not find \"$path\", skipping...", LogLevel.WARNING)
+                    return@map null
+                }.filterNotNull()
+        }
+
+        fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
+            return assets[id] ?: try {
+                PlayableSoundEvent(SoundEvent.of(Identifier(id)))
+            }
+            catch (e: InvalidIdentifierException) {
+                null
             }
         }
 

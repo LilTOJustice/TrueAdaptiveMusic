@@ -1,48 +1,40 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.registry.Registries
-import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
-import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.KType
-import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.typeOf
 
 class PredicateViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
     private val onChangesSaved: () -> Unit,
+    private val onEventClick: (event: MusicEvent?) -> Unit,
+    private val inEventView: () -> Boolean,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(width, height, "Predicate View", true, false, true, x, y) {
     private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
         .filter { typeName -> typeName != RootPredicate.getTypeName() }
+    private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
     private val requiredNodeArgs = MusicPredicateTree.Node.Parameters::class.primaryConstructor?.parameters ?: listOf()
     private var nodeArgs: MutableList<Any?> = requiredNodeArgs.map { null }.toMutableList()
-    private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
+    private var events = mutableListOf<MusicEvent>()
+    private var selectedEvent: MusicEvent? = null
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var movingNode: MusicPredicateTree.Node? = null
@@ -52,6 +44,14 @@ class PredicateViewWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (isMouseOver(mouseX, mouseY)) {
+            screen?.focused = null
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button)
+    }
+
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
         if (!visible) {
@@ -59,7 +59,7 @@ class PredicateViewWidget(
         }
 
         if (newPredicateParent != null || selectedNode != null) {
-            renderEditMode()
+            renderEditMode(mouseX, mouseY)
         }
         else {
             drawCenteredText(
@@ -87,6 +87,7 @@ class PredicateViewWidget(
         newPredicateParent = null
         movingNode = null
         nodeArgs = node.parameters.constructorParams().toMutableList()
+        events = node.events.toMutableList()
         resetScrolling()
     }
 
@@ -110,7 +111,15 @@ class PredicateViewWidget(
         requiredPredicateArgs = listOf()
         predicateArgs = mutableListOf()
         nodeArgs.replaceAll { null }
+        events = mutableListOf()
         resetScrolling()
+    }
+
+    fun onEventModeExit(newEvent: MusicEvent?) {
+        events.remove(selectedEvent)
+        newEvent?.let { events.add(it) }
+        selectedEvent = null
+        clearWidgetsFromRender()
     }
 
     private fun setSelectedPredicateTypeName(typeName: String) {
@@ -118,7 +127,7 @@ class PredicateViewWidget(
         requiredPredicateArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
         predicateArgs = selectedNode?.let {
             if (it.predicate.getTypeName() == selectedPredicateTypeName)
-                it.predicate.getPredicateParams().map { param -> param.value }.toMutableList()
+                it.predicate.getTriggerParams().map { param -> param.value }.toMutableList()
             else
                 null
         } ?: requiredPredicateArgs.map { null }.toMutableList()
@@ -126,7 +135,7 @@ class PredicateViewWidget(
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("predicateTypeChoice", "musicChoice") }
     }
 
-    private fun renderEditMode() {
+    private fun renderEditMode(mouseX: Int, mouseY: Int) {
         if (selectedNode?.predicate?.getTypeName() != RootPredicate.getTypeName()) {
             addWidgetFromRender(
                 {
@@ -140,7 +149,7 @@ class PredicateViewWidget(
                 row = 1)
         }
 
-        addWidgetFromRender(
+        val musicDropdownWidget = addWidgetFromRender(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
@@ -155,24 +164,59 @@ class PredicateViewWidget(
                     },
                     "Select a track",
                     selectedMusicPaths,
-                    onHover = { option -> Callbacks.playSoundNow(option?.let { toPlayableSound(assets, it) }) })
+                    onHoverOption = { option -> Callbacks.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
             },
             "musicChoice"
-        ) as MultiSelectDropdownWidget
+        )
+
+        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+            && !musicDropdownWidget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+            Callbacks.playSoundNow(null)
+        }
 
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
-                { widgetMaker(screen!!, predicateArgs, arg) },
+                { InputWidgetMaker.makeWidget(screen!!, predicateArgs, arg) },
                 "predicateArg: ${arg.name ?: arg.index}"
             )
         }
 
         requiredNodeArgs.forEach { arg ->
             addWidgetFromRender(
-                { widgetMaker(screen!!, nodeArgs, arg) },
+                { InputWidgetMaker.makeWidget(screen!!, nodeArgs, arg) },
                 "nodeArg: ${arg.name ?: arg.index}"
             )
         }
+
+        addWidgetFromRender({ EmptyClickableWidget() }, "empty")
+
+        addWidgetFromRender({
+            val newWidget = ClickableTextWidget("Events:")
+            newWidget.active = false
+            newWidget
+        }, "events")
+
+        events.forEach { event ->
+            addWidgetFromRender(
+                { ClickableTextWidget(
+                    event.getTypeName(),
+                    onClick = {
+                        selectedEvent = event
+                        onEventClick(event) },
+                    isSelected = { selectedEvent == event }) },
+                "event: ${event.hashCode()}")
+        }
+
+        addWidgetFromRender(
+            { ClickableTextWidget(
+                "+ Add",
+                onClick = {
+                    selectedEvent = null
+                    onEventClick(null) },
+                isSelected = { selectedEvent == null && inEventView() }) },
+            "Add Event")
+
+        addWidgetFromRender({ EmptyClickableWidget() }, "empty")
 
         val saveWidget = addWidgetFromRender(
             {
@@ -186,8 +230,9 @@ class PredicateViewWidget(
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *predicateArgs.filterNotNull().toTypedArray())
+                            selectedNode!!.events = events
                             selectedNode!!.playableSounds = selectedMusicPaths
-                                .mapNotNull { path -> toPlayableSound(assets, path) }
+                                .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
                             selectedNode!!.parameters =
                                 MusicPredicateTree.Node.Parameters.initializeFromArgs(
                                     *nodeArgs.filterNotNull().toTypedArray())
@@ -197,7 +242,8 @@ class PredicateViewWidget(
                                 selectedPredicateTypeName,
                                 nodeArgs.filterNotNull(),
                                 predicateArgs.filterNotNull(),
-                                selectedMusicPaths.mapNotNull { path -> toPlayableSound(assets, path) })
+                                events,
+                                selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) })
                         }
 
                         save()
@@ -258,7 +304,7 @@ class PredicateViewWidget(
             if (saveWidget.active)
                 null
             else if (requiredPredicateArgs.any { arg ->
-                isTypedIdentifierList(arg.type)
+                InputWidgetMaker.isTypedIdentifierList(arg.type)
                         && TypedIdentifier.getRegistryIdsFromType(arg.type.arguments.firstOrNull()!!.type!!)
                             .isEmpty() })
                 DYNAMIC_REGISTRY_TOOLTIP
@@ -279,146 +325,6 @@ class PredicateViewWidget(
     }
 
     companion object {
-        private fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
-            return assets[id] ?: try {
-                PlayableSoundEvent(SoundEvent.of(Identifier(id)))
-            }
-            catch (e: InvalidIdentifierException) {
-                null
-            }
-        }
-
-        private fun widgetMaker(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter): ClickableWidget {
-            val prompt = (arg.name ?: "Unknown") +
-                    ": ${arg.type.toString().split('.').last().replace(">", "")}"
-            return if (arg.type == typeOf<Int>()) {
-                TextInputWidget(
-                    screen,
-                    prompt,
-                    30,
-                    { widget, text ->
-                        if (text == "0-") {
-                            widget.text = "-0"
-                            return@TextInputWidget
-                        }
-
-                        val value = text.toIntOrNull()
-                        if (text != "-0" && value == null) {
-                            widget.text = "0"
-                            return@TextInputWidget
-                        }
-
-                        if (text != "-0" && text != value.toString()) {
-                            widget.text = value.toString()
-                            return@TextInputWidget
-                        }
-
-                        outArgs[arg.index] = value
-                    },
-                    outArgs[arg.index]?.toString() ?: ""
-                )
-            }
-            else if (arg.type == typeOf<UInt>()) {
-                TextInputWidget(
-                    screen,
-                    prompt,
-                    30,
-                    { widget, text ->
-                        val value = text.toUIntOrNull()
-                        if (value == null) {
-                            widget.text = "0"
-                            return@TextInputWidget
-                        }
-
-                        if (text != value.toString()) {
-                            widget.text = value.toString()
-                            return@TextInputWidget
-                        }
-
-                        outArgs[arg.index] = value
-                    },
-                    outArgs[arg.index]?.toString() ?: ""
-                )
-            }
-            else if (arg.type == typeOf<Boolean>()) {
-                CheckboxWidget(
-                    10,
-                    prompt,
-                    { checked -> outArgs[arg.index] = checked },
-                    checked = outArgs[arg.index] as? Boolean ?: false)
-            }
-            else if (arg.type.isSubtypeOf(typeOf<Enum<*>>())) {
-                val enumClass = (arg.type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
-
-                if (options.isEmpty())
-                    EmptyClickableWidget()
-                else
-                    DropdownWidget(
-                        options,
-                        { enumOption -> outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption} },
-                        prompt,
-                        startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: "")
-            }
-            else if (isEnumList(arg.type)) {
-                val type = arg.type.arguments.firstOrNull()?.type
-                    ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
-                val enumClass = (type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
-                MultiSelectDropdownWidget(
-                    options,
-                    { selected -> outArgs[arg.index] = selected
-                        .map { enumOption -> enumClass.enumConstants.first { enum -> enum.toString() == enumOption } }
-                        .ifEmpty { null } },
-                    "${prompt}s",
-                    notSelectedPlaceholder = "Select a value",
-                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf())
-            }
-            else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
-                val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
-
-                if (options.isEmpty())
-                    EmptyClickableWidget()
-                else
-                    DropdownWidget(
-                        options,
-                        { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
-                        prompt,
-                        startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: "")
-            }
-            else if (isTypedIdentifierList(arg.type)) {
-                val type = arg.type.arguments.firstOrNull()?.type
-                    ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
-                val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
-
-                if (options.isEmpty())
-                    EmptyClickableWidget()
-                else
-                    MultiSelectDropdownWidget(
-                        options,
-                        { selected -> outArgs[arg.index] = selected
-                            .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
-                            .ifEmpty { null } },
-                        "${prompt}s",
-                        notSelectedPlaceholder = "Select an Identifier",
-                        alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
-            }
-            else {
-                Logger.log("Couldn't create widget for expected type ${arg.type}.", LogLevel.WARNING)
-                EmptyClickableWidget()
-            }
-        }
-
-        private fun isEnumList(type: KType): Boolean {
-            return type.isSubtypeOf(typeOf<List<*>>())
-                    && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<Enum<*>>()) == true }
-        }
-
-        private fun isTypedIdentifierList(type: KType): Boolean {
-            return type.isSubtypeOf(typeOf<List<*>>())
-                    && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
-        }
-
         private val DYNAMIC_REGISTRY_TOOLTIP =
             Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
 
@@ -426,4 +332,3 @@ class PredicateViewWidget(
             Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
     }
 }
-

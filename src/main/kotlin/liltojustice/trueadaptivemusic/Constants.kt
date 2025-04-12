@@ -11,6 +11,6 @@ class Constants {
         const val META_FILENAME = "meta.json"
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
-        val TRUEADAPTIVEMUSIC_ID = Identifier("trueadaptivemusic:trueadaptivemusicstream")
+        val AUDIO_FILE_STREAM_ID = Identifier("trueadaptivemusic:audiofilestream")
     }
 }

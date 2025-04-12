@@ -1,3 +1,6 @@
 package liltojustice.trueadaptivemusic.client.predicate
 
-class RulesParserException(message: String?, inner: Exception? = null): Exception(message, inner)
+import liltojustice.trueadaptivemusic.TrueAdaptiveMusicException
+
+class RulesParserException(message: String? = null, inner: Exception? = null)
+    : TrueAdaptiveMusicException(message, inner)

@@ -2,17 +2,13 @@ package liltojustice.trueadaptivemusic.client.predicate
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.Registries
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -28,11 +24,12 @@ class MusicPredicateTree private constructor(
     }
 
     fun getMusicToPlay(client: MinecraftClient): Result {
-        val bottomSatisfied = root.getSatisfiedNode(client)
+        val result = root.getSatisfiedNode(client)
         return Result(
-            bottomSatisfied.second.joinToString("/"),
-            bottomSatisfied.first.playableSounds,
-            bottomSatisfied.first.parameters)
+            result.second.joinToString("/"),
+            result.first.playableSounds,
+            result.first.parameters,
+            result.third.values.toList())
     }
 
     private fun traverseRecursive(
@@ -69,10 +66,11 @@ class MusicPredicateTree private constructor(
     }
 
     class Node private constructor(
-            var predicate: MusicPredicate,
-            var playableSounds: List<PlayableSound>,
-            var parameters: Parameters = Parameters(),
-            private val children: MutableList<Node> = mutableListOf()
+        var predicate: MusicPredicate,
+        var playableSounds: List<PlayableSound>,
+        var events: List<MusicEvent>,
+        var parameters: Parameters = Parameters(),
+        private val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
             private set
@@ -91,35 +89,47 @@ class MusicPredicateTree private constructor(
             playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
             val jsonChildren = JsonArray(children.size)
             children.forEach { child -> jsonChildren.add(child.toJson()) }
+            val jsonEvents = JsonArray(events.size)
+            events.forEach { event -> jsonEvents.add(event.toJson()) }
             result.add("musicPath", jsonMusicPath)
-            result.add("children", jsonChildren)
+            result.add("events", jsonEvents)
             result.add("parameters", parameters.toJson())
+            result.add("children", jsonChildren)
 
             return result
         }
 
-        fun getSatisfiedNode(client: MinecraftClient, path: List<String> = listOf()): Pair<Node, List<String>> {
+        fun getSatisfiedNode(
+            client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
+        : Triple<Node, List<String>, Map<String, MusicEvent>> {
             if (!predicate.test(client)) {
-                return Pair(this, listOf())
+                return Triple(this, emptyList(), emptyMap())
             }
-            val newPath = path + predicate.getPredicateId()
+
+            val newPath = path + predicate.getTriggerId()
+            val newEvents = events + this.events.map { event -> Pair(event.getTriggerId(), event) }
 
             for (child in children) {
-                val result = child.getSatisfiedNode(client, newPath)
+                val result = child.getSatisfiedNode(client, newPath, newEvents)
 
                 if (result.second.isNotEmpty()) {
                     return result
                 }
             }
 
-            return Pair(this, newPath)
+            return Triple(this, newPath, newEvents)
         }
 
         fun newChild(
-            predicateType: String, nodeArgs: List<Any>, predicateArgs: List<Any>, sounds: List<PlayableSound>) {
+            predicateType: String,
+            nodeArgs: List<Any>,
+            predicateArgs: List<Any>,
+            events: List<MusicEvent>,
+            sounds: List<PlayableSound>) {
             val child = Node(
                 MusicPredicate.initializeFromArgs(predicateType, *predicateArgs.toTypedArray()),
                 sounds,
+                events,
                 Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
             children.add(child)
@@ -181,35 +191,19 @@ class MusicPredicateTree private constructor(
 
         companion object {
             fun makeRoot(): Node {
-                return Node(RootPredicate(), listOf())
+                return Node(RootPredicate(), listOf(), listOf())
             }
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
                     MusicPredicate.fromJson(json),
-                    parseMusicPath(json, soundLibrary),
+                    MusicPack.parseMusicPath(json, soundLibrary),
+                    MusicEvent.arrayFromJsonArray(
+                        json.getAsJsonArray("events") ?: JsonArray(), soundLibrary),
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)
                 )
-            }
-
-            private fun parseMusicPath(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-                    : List<PlayableSound> {
-                return (if (JsonHelper.hasString(json, "musicPath"))
-                    listOf(JsonHelper.getString(json, "musicPath"))
-                else
-                    JsonHelper.getArray(json, "musicPath").map { element -> element.asString })
-                    .map { path ->
-                        try {
-                            return@map soundLibrary[path]
-                                ?: PlayableSoundEvent(Registries.SOUND_EVENT[Identifier(path)]
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"))
-                        } catch (_: InvalidIdentifierException) {}
-
-                        Logger.log("Could not find \"$path\", skipping...", LogLevel.WARNING)
-                        return@map null
-                    }.filterNotNull()
             }
 
             private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MutableList<Node> {
@@ -252,5 +246,9 @@ class MusicPredicateTree private constructor(
         }
     }
 
-    class Result(val path: String, val playableSounds: List<PlayableSound>, val parameters: Node.Parameters)
+    class Result(
+        val path: String,
+        val playableSounds: List<PlayableSound>,
+        val parameters: Node.Parameters,
+        val events: List<MusicEvent>)
 }

@@ -21,12 +21,13 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return structures.any { structureId ->
-            val structure: Structure =
-                structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structureId) ?: return false
+        return (structures.takeIf { structures.isNotEmpty() } ?: StructureIdentifier.getRegistryIds())
+            .any { structureId ->
+                val structure: Structure =
+                    structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structureId) ?: return false
 
-            testStructure(structureAccessor, structure, blockPos)
-        }
+                testStructure(structureAccessor, structure, blockPos)
+            }
     }
 
     override fun test(client: MinecraftClient): Boolean {

@@ -12,7 +12,7 @@ class DropdownWidget(
     getOptions: (() -> List<String>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: String = "",
-    onHover: (option: String?) -> Unit = {},
+    onHoverOption: (option: String) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -58,7 +58,7 @@ class DropdownWidget(
             getOptions,
             notSelectedPlaceholder,
             startingOption,
-            onHover,
+            onHoverOption,
             x,
             y)
         textInputWidget.setChangedListener { newText ->
@@ -68,10 +68,6 @@ class DropdownWidget(
         addWidget(selectedOptionWidget, 1)
         addWidget(textInputWidget, 1)
         addWidget(dropdownResultsWidget, 2)
-    }
-
-    fun isOpen(): Boolean {
-        return dropdownResultsWidget.visible
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -98,7 +94,7 @@ class DropdownWidget(
         private val getOptions: (() -> List<String>)?,
         notSelectedPlaceholder: String?,
         startingOption: String,
-        private val onHover: (option: String?) -> Unit,
+        private val onHoverOption: (option: String) -> Unit,
         x: Int = 0,
         y: Int = 0)
         : ContainerWidget(
@@ -112,6 +108,7 @@ class DropdownWidget(
         y) {
         private var selectedOption = startingOption.ifEmpty { null } ?: notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
+        private var hoveredWidget: ClickableTextWidget? = null
 
         init {
             if (selectedOption.isNotBlank() && notSelectedPlaceholder == null) {
@@ -142,11 +139,15 @@ class DropdownWidget(
 
                 }
 
-            val hoveredWidget = optionsWidgets
+            val newHoveredWidget = optionsWidgets
                 .firstOrNull { widget -> childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
 
-            if (hoveredWidget != null || isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
-                onHover(hoveredWidget?.text)
+            if (newHoveredWidget != null && newHoveredWidget != hoveredWidget) {
+                hoveredWidget = newHoveredWidget
+                onHoverOption(hoveredWidget!!.text)
+            }
+            else if (newHoveredWidget == null) {
+                hoveredWidget = null
             }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)

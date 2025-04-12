@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client
 
-import kotlinx.io.files.FileNotFoundException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
@@ -13,24 +12,8 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
     override fun onInitializeClient() {
         var musicManager: MusicManager? = null
 
-        ChangeMusicPackCallback.EVENT.register { musicPack ->
-            try {
-                musicManager?.selectMusicPack(musicPack)
-            } catch (_: FileNotFoundException) {
-                return@register ActionResult.FAIL
-            }
-
-            return@register ActionResult.PASS
-        }
-
-        GetMusicPackCallback.EVENT.register { packResult ->
-            packResult[0] = musicManager?.getMusicPack()
-
-            return@register ActionResult.PASS
-        }
-
-        PlaySoundNowCallback.EVENT.register { sound ->
-            musicManager?.playNow(sound)
+        GetMusicManagerCallback.EVENT.register { managerResult ->
+            managerResult[0] = musicManager
 
             return@register ActionResult.PASS
         }
@@ -40,23 +23,19 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
             if (musicManager == null)
             {
                 musicManager = MusicManager(client)
-                try {
-                    val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
+                val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
 
-                    try {
-                        Callbacks.setCurrentMusicPack(
-                            if (selectedPackName.isBlank())
-                                null
-                            else
-                                MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, selectedPackName)))
-                    }
-                    catch (e: MusicLoadException) {
-                        Logger.log(
-                            "Selected pack \"$selectedPackName\" failed to load. Error:\n${e}")
-                    }
+                try {
+                    Callbacks.setCurrentMusicPack(
+                        if (selectedPackName.isBlank())
+                            null
+                        else
+                            MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, selectedPackName)))
                 }
-                catch (e: FileNotFoundException) {
-                    Logger.log("Couldn't find selected music pack. Error:\n${e.message}.", LogLevel.ERROR)
+                catch (e: MusicLoadException) {
+                    Logger.log(
+                        "Selected pack \"$selectedPackName\" failed to load. Error:\n$e",
+                        LogLevel.ERROR)
                 }
             }
 

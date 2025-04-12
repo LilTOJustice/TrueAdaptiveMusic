@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -14,19 +15,29 @@ abstract class ContainerWidget(
     width: Int,
     height: Int,
     message: String,
-    private var showHeader: Boolean,
-    private var bordered: Boolean,
+    private val showHeader: Boolean,
+    private val bordered: Boolean,
     private val indentChildren: Boolean = true,
     x: Int = 0,
     y: Int = 0,
-    private val translucentInteract: Boolean = false)
+    private val translucentInteract: Boolean = false,
+    backButtonCallback: (() -> Unit)? = null)
     : ClickableWidget(x, y, width, height, Text.literal(message)) {
     private val children = mutableMapOf<String, ChildWidget>()
     private val renderChildren = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
-    protected val textRenderer = client.textRenderer
+    protected val textRenderer: TextRenderer = client.textRenderer
     protected val screen = client.currentScreen
     private var scrollPosition = 0
+    private var backButton = backButtonCallback?.let { makeBackButton(it) }
+
+    fun addBackButton(backButtonCallback: (() -> Unit)) {
+        backButton = makeBackButton(backButtonCallback)
+    }
+
+    fun setHeight(height: Int) {
+        this.height = height
+    }
 
     override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
     }
@@ -58,6 +69,11 @@ abstract class ContainerWidget(
                 OPTIONS_BACKGROUND_TEXTURE, x, y, 0F, 0F, width, TOP_MARGIN, 32, 32)
             context?.setShaderColor(1f, 1f, 1f, 1f)
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
+            backButton?.let {
+                it.x = x + 5
+                it.y = (y + getHeaderOffset() - getRowHeight(textRenderer.fontHeight)).toInt()
+                it.render(context, mouseX, mouseY, delta)
+            }
         }
 
         if (bordered) {
@@ -84,9 +100,15 @@ abstract class ContainerWidget(
             return false
         }
 
+        backButton?.let {
+            if (it.isMouseOver(mouseX, mouseY)) {
+                it.mouseClicked(mouseX, mouseY, button)
+                return true
+            }
+        }
+
         // Copy to avoid concurrent modification
         val children = children.toList()
-        screen?.focused = null
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
@@ -306,11 +328,17 @@ abstract class ContainerWidget(
                     child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY) }
     }
 
+
     companion object {
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
+
         private fun getRowHeight(fontHeight: Int): Double {
             return (1.35 * fontHeight)
+        }
+
+        private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
+            return backButtonCallback.let { ClickableTextWidget("Back", onClick = { it() } ) }
         }
     }
 
