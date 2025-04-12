@@ -8,6 +8,10 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.*
+import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
+import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
 import java.io.IOException

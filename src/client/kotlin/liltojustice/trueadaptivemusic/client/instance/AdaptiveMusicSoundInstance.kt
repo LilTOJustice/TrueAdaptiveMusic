@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.instance
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.ffmpeg.FFMpeg
+import liltojustice.trueadaptivemusic.client.sound.FFMpeg
 import liltojustice.trueadaptivemusic.client.MusicLoadException
-import liltojustice.trueadaptivemusic.client.sound.SoundFile
+import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import net.minecraft.client.sound.AbstractSoundInstance
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.OggAudioStream

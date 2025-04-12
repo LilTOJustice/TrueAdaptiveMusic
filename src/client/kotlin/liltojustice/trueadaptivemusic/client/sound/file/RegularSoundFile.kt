@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.sound
+package liltojustice.trueadaptivemusic.client.sound.file
 
 import java.io.InputStream
 import java.nio.file.Path

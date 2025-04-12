@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client;
 
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound;
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.util.ActionResult;

@@ -1,6 +1,6 @@
-package liltojustice.trueadaptivemusic.client.ffmpeg
+package liltojustice.trueadaptivemusic.client.sound.stream
 
-import liltojustice.trueadaptivemusic.client.sound.SoundFile
+import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import net.minecraft.client.sound.AudioStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

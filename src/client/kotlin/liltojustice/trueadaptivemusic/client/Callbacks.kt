@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 
 class Callbacks {
     companion object {

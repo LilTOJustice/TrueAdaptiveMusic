@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.sound
+package liltojustice.trueadaptivemusic.client.sound.playable
 
 import net.minecraft.client.sound.SoundInstance
 

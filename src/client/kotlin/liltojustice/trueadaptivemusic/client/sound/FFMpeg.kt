@@ -1,6 +1,7 @@
-package liltojustice.trueadaptivemusic.client.ffmpeg
+package liltojustice.trueadaptivemusic.client.sound
 
-import liltojustice.trueadaptivemusic.client.sound.SoundFile
+import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
+import liltojustice.trueadaptivemusic.client.sound.stream.FFMpegAudioStream
 import net.minecraft.util.JsonHelper
 import java.io.BufferedReader
 import java.io.InputStreamReader

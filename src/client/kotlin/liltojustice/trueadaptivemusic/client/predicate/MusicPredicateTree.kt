@@ -6,9 +6,9 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
@@ -69,10 +69,10 @@ class MusicPredicateTree private constructor(
     }
 
     class Node private constructor(
-        var predicate: MusicPredicate,
-        var playableSounds: List<PlayableSound>,
-        var parameters: Parameters = Parameters(),
-        private val children: MutableList<Node> = mutableListOf()
+            var predicate: MusicPredicate,
+            var playableSounds: List<PlayableSound>,
+            var parameters: Parameters = Parameters(),
+            private val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
             private set

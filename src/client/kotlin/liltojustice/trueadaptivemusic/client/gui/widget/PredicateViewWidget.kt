@@ -8,8 +8,8 @@ import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundEvent
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
