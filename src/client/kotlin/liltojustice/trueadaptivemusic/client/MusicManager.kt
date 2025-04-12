@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.FadeManager
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import liltojustice.trueadaptivemusic.client.sound.setInstanceVolume
 import net.minecraft.client.MinecraftClient

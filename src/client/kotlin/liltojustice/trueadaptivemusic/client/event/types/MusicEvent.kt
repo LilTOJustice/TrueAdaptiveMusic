@@ -5,8 +5,8 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.MusicTrigger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import kotlin.reflect.KClass
 
 sealed class MusicEvent: MusicTrigger {

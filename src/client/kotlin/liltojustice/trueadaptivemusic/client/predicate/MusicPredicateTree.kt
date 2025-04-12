@@ -6,8 +6,8 @@ import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
-import liltojustice.trueadaptivemusic.client.sound.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties

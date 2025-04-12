@@ -7,7 +7,11 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
-import liltojustice.trueadaptivemusic.client.sound.*
+import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
+import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
