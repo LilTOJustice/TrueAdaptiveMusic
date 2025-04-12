@@ -9,7 +9,8 @@
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",
     "event.OnJoinWorldEventMixin",
-    "event.OnToastMixin"
+    "event.OnToastMixin",
+    "event.OnWakeUpEventMixin"
   ],
   "injectors": {
     "defaultRequire": 1
