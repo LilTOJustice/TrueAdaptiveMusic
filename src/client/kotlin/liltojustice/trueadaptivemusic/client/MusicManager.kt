@@ -33,6 +33,7 @@ class MusicManager(
     private var timedIdentifierTimerTask: TimerTask? = null
     private var shouldResume = false
     private var activeEvents: List<MusicEvent> = emptyList()
+    private var keepBackground = false
 
     init {
         InvokeMusicEventCallback.EVENT.register { eventType, args ->
@@ -57,6 +58,7 @@ class MusicManager(
     }
 
     fun playNow(sound: PlayableSound?, keepBackground: Boolean = false) {
+        this.keepBackground = keepBackground
         if (sound == onDemandSound) {
             return
         }
@@ -101,7 +103,9 @@ class MusicManager(
                 }
             }
 
-            return
+            if (!keepBackground) {
+                return
+            }
         }
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
