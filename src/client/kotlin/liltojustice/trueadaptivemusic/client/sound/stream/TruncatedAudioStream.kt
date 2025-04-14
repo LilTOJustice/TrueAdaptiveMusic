@@ -1,23 +1,26 @@
 package liltojustice.trueadaptivemusic.client.sound.stream
 
-import net.minecraft.client.sound.OggAudioStream
-import java.io.InputStream
+import net.minecraft.client.sound.AudioStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import javax.sound.sampled.AudioFormat
 
-class OggTruncatedAudioStream(inputStream: InputStream): OggAudioStream(inputStream) {
+class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream {
     private var nonZeroRead: Boolean = true
     private var isNew: Boolean = true
 
+    override fun close() {
+        backingStream.close()
+    }
+
+    override fun getFormat(): AudioFormat {
+        return backingStream.format
+    }
+
     override fun getBuffer(size: Int): ByteBuffer? {
-        var numDiscarded = 0
         var resultArray: ByteArray?
 
         do {
-            if (numDiscarded != 0) {
-                println("Discarding buffer")
-            }
-            numDiscarded++
             resultArray = getTruncatedArray(size)
             isNew = false
         } while (!nonZeroRead && resultArray != null)
@@ -26,7 +29,7 @@ class OggTruncatedAudioStream(inputStream: InputStream): OggAudioStream(inputStr
     }
 
     private fun getTruncatedArray(size: Int): ByteArray? {
-        val buffer = super.getBuffer(size)
+        val buffer = backingStream.getBuffer(size)
         val remaining = buffer.remaining()
         if (remaining == 0) {
             return null
