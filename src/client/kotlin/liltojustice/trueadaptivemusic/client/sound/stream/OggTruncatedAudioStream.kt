@@ -7,8 +7,9 @@ import java.nio.ByteOrder
 
 class OggTruncatedAudioStream(inputStream: InputStream): OggAudioStream(inputStream) {
     private var nonZeroRead: Boolean = true
+    private var isNew: Boolean = true
 
-    override fun getBuffer(size: Int): ByteBuffer {
+    override fun getBuffer(size: Int): ByteBuffer? {
         var numDiscarded = 0
         var resultArray: ByteArray?
 
@@ -18,11 +19,10 @@ class OggTruncatedAudioStream(inputStream: InputStream): OggAudioStream(inputStr
             }
             numDiscarded++
             resultArray = getTruncatedArray(size)
+            isNew = false
         } while (!nonZeroRead && resultArray != null)
 
-        println("Discarded ${numDiscarded - 1} buffers")
-
-        return resultArray?.let { makeByteBuffer(it) } ?: ByteBuffer.allocateDirect(0)
+        return resultArray?.let { makeByteBuffer(it) }
     }
 
     private fun getTruncatedArray(size: Int): ByteArray? {
@@ -34,15 +34,27 @@ class OggTruncatedAudioStream(inputStream: InputStream): OggAudioStream(inputStr
 
         val copyArray = ByteArray(remaining)
         buffer.get(copyArray)
-        val resultArray = copyArray.dropWhile { it == zeroByte }.toByteArray()
+        val bytesPerSample = format.sampleSizeInBits / 8
+        val resultArray = copyArray
+            .toList()
+            .chunked(bytesPerSample)
+            .dropWhile {
+                val first = it.first()
+                it.all { byte -> byte == first }
+            }
+            .flatten()
+            .let {
+                val padding = it.size % 4
+                it.plus(List(padding) { 0 })
+            }
+            .toByteArray()
+
         nonZeroRead = resultArray.isNotEmpty()
 
-        return resultArray
+        return if (nonZeroRead) copyArray else resultArray
     }
 
     companion object {
-        private const val zeroByte = 0.toByte()
-
         private fun makeByteBuffer(bytes: ByteArray): ByteBuffer {
             val buffer = ByteBuffer.allocateDirect(bytes.size)
             buffer.order(ByteOrder.LITTLE_ENDIAN)
