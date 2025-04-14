@@ -1,11 +1,12 @@
 package liltojustice.trueadaptivemusic.client.predicate.types
 
 import liltojustice.trueadaptivemusic.client.MusicTrigger
+import liltojustice.trueadaptivemusic.client.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import net.minecraft.client.MinecraftClient
 import kotlin.reflect.KClass
 
-sealed class MusicPredicate: MusicTrigger {
+abstract class MusicPredicate: MusicTrigger {
     abstract fun test(client: MinecraftClient): Boolean
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
@@ -16,8 +17,8 @@ sealed class MusicPredicate: MusicTrigger {
 
     interface MusicPredicateCompanion<TSelf>: MusicTrigger.MusicTriggerCompanion<MusicPredicate>
             where TSelf: MusicPredicate {
-        override fun getImplementingClass(): KClass<MusicPredicate> {
-            return MusicPredicate::class
+        override fun getTriggerImplementerSubclasses(): List<KClass<out MusicPredicate>> {
+            return ReflectionHelper.getSubclassesOf(MusicPredicate::class)
         }
     }
 }

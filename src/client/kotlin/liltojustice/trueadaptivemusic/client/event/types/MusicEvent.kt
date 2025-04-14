@@ -4,12 +4,13 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.MusicTrigger
+import liltojustice.trueadaptivemusic.client.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateException
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import kotlin.reflect.KClass
 
-sealed class MusicEvent: MusicTrigger {
+abstract class MusicEvent: MusicTrigger {
     var playableSounds: List<PlayableSound> = emptyList()
 
     open fun validate(vararg eventArgs: Any?): Boolean {
@@ -32,8 +33,8 @@ sealed class MusicEvent: MusicTrigger {
     }
 
     interface MusicEventCompanion<TSelf>: MusicTrigger.MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
-        override fun getImplementingClass(): KClass<MusicEvent> {
-            return MusicEvent::class
+        override fun getTriggerImplementerSubclasses(): List<KClass<out MusicEvent>> {
+            return ReflectionHelper.getSubclassesOf(MusicEvent::class)
         }
 
         fun fromJsonWithLibrary(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent {

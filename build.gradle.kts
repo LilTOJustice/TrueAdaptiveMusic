@@ -53,6 +53,14 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+
+    implementation("org.reflections:reflections:0.10.2")?.let { includeInternal(it) }
+}
+
+tasks.remapJar {
+    from("META-INF/jars/reflections-0.10.2.jar") {
+        to("liltojustice")
+    }
 }
 
 tasks.processResources {
