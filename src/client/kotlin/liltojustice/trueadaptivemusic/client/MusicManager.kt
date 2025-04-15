@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
+import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.sound.FadeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
