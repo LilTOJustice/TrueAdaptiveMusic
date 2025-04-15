@@ -4,10 +4,9 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
-import liltojustice.trueadaptivemusic.client.sound.FadeManager
+import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
-import liltojustice.trueadaptivemusic.client.sound.setInstanceVolume
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
@@ -25,7 +24,7 @@ class MusicManager(
     private var currentSoundInstance: SoundInstance? = null
     private var oldSoundInstance: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> = client.options.getSoundVolumeOption(SoundCategory.MUSIC)
-    private val fadeManager = FadeManager(client.soundManager, musicVolumeOption)
+    private val volumeManager = VolumeManager(client.soundManager, musicVolumeOption)
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
     private var timedIdentifier = ""
@@ -67,12 +66,12 @@ class MusicManager(
 
         if (sound == null) {
             onDemandSoundInstance?.let {
-                fadeManager.startFade(it, PLAY_NOW_FADE_TICKS, 0F, true)
+                volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 0F, true)
             }
             onDemandSound = null
             onDemandSoundInstance = null
             currentSoundInstance?.let {
-                fadeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
+                volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
             }
 
             return
@@ -80,7 +79,7 @@ class MusicManager(
 
         client.soundManager.stop(oldSoundInstance)
         currentSoundInstance?.let {
-            fadeManager.startFade(it, PLAY_NOW_FADE_TICKS, targetVolume)
+            volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, targetVolume)
         }
 
         client.soundManager.stop(onDemandSoundInstance)
@@ -92,14 +91,15 @@ class MusicManager(
     }
 
     fun tick() {
-        fadeManager.tick()
+        volumeManager.tick()
 
         if (onDemandSound != null) {
             if (!client.soundManager.isPlaying(onDemandSoundInstance)) {
                 onDemandSound = null
                 onDemandSoundInstance = null
+                keepBackground = false
                 currentSoundInstance?.let {
-                    fadeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
+                    volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
                 }
             }
 
@@ -166,16 +166,16 @@ class MusicManager(
         if (newMusic == null)
         {
             if (isPlaying(currentSoundInstance)) {
-                fadeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 0F)
+                volumeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 0F)
                 currentSoundInstance = null
             }
 
             return
         }
 
-        if (currentSoundInstance == null) { //|| (!shouldResume && !isPlaying(oldSoundInstance))) {
+        if (currentSoundInstance == null) {
             currentSoundInstance = newMusic.makeSoundInstance()
-            playInstance(currentSoundInstance)
+            playInstance(currentSoundInstance, keepBackground)
             if (!client.soundManager.isPlaying(currentSoundInstance)) {
                 currentSoundInstance = null
                 currentMusicPredicateId = ""
@@ -192,9 +192,12 @@ class MusicManager(
         }
     }
 
-    private fun playInstance(soundInstance: SoundInstance?) {
+    private fun playInstance(soundInstance: SoundInstance?, background: Boolean = false) {
         try {
             client.soundManager.play(soundInstance)
+            if (background) {
+                soundInstance?.let { volumeManager.setInstanceVolume(it, BACKGROUND_VOLUME) }
+            }
         }
         catch (e: MusicLoadException) {
             Logger.log("Error: Failed to play sound instance - ${e.message}", LogLevel.ERROR)
@@ -202,7 +205,7 @@ class MusicManager(
     }
 
     private fun stop() {
-        fadeManager.clearFades()
+        volumeManager.clearFades()
         client.soundManager.stopAll()
         client.soundManager.close()
         currentSoundInstance = null
@@ -218,22 +221,29 @@ class MusicManager(
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
         if (oldSoundInstance != newSoundInstance) {
-            oldSoundInstance?.let { fadeManager.startFade(it, REGULAR_FADE_TICKS, 0F, true) }
+            oldSoundInstance?.let { volumeManager.startFade(it, REGULAR_FADE_TICKS, 0F, true) }
         }
 
         oldSoundInstance = currentSoundInstance
         currentSoundInstance = newSoundInstance
 
         if (shouldResume) {
+            if (keepBackground) {
+                volumeManager.setInstanceVolume(currentSoundInstance!!, BACKGROUND_VOLUME)
+            }
+
             client.soundManager.resumeInstance(currentSoundInstance)
         }
         else {
-            playInstance(currentSoundInstance)
+            playInstance(currentSoundInstance, keepBackground)
         }
 
-        client.soundManager.setInstanceVolume(currentSoundInstance, 0F, musicVolumeOption)
-        fadeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 1F)
-        fadeManager.startFade(oldSoundInstance!!, REGULAR_FADE_TICKS, 0F)
+        if (!keepBackground) {
+            volumeManager.setInstanceVolume(currentSoundInstance!!, 0F)
+            volumeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 1F)
+        }
+
+        volumeManager.startFade(oldSoundInstance!!, REGULAR_FADE_TICKS, 0F)
     }
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {

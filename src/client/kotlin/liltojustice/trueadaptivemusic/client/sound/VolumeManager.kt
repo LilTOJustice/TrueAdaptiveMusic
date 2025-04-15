@@ -5,7 +5,7 @@ import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
 
-class FadeManager(private val soundManager: SoundManager, private val musicVolumeOption: SimpleOption<Double>) {
+class VolumeManager(private val soundManager: SoundManager, private val musicVolumeOption: SimpleOption<Double>) {
     private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
 
     fun startFade(
@@ -40,7 +40,7 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
         }
     }
 
-    private fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
+    fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
         soundManager.setInstanceVolume(soundInstance, volume, musicVolumeOption)
 
         if (volume == 0F) {
@@ -48,7 +48,7 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
         }
     }
 
-    class Fade(
+    private class Fade(
         val soundInstance: SoundInstance,
         private var totalTicks: Int,
         private var targetVolume: Float,
@@ -82,7 +82,7 @@ class FadeManager(private val soundManager: SoundManager, private val musicVolum
     }
 
     companion object {
-        private fun getInstanceVolume(soundInstance: SoundInstance?): Float {
+        fun getInstanceVolume(soundInstance: SoundInstance?): Float {
             return (soundInstance as? VolumeControlled)?.getVolume() ?: 1F
         }
     }
