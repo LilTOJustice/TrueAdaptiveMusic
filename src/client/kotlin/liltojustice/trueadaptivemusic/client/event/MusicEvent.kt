@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.event
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.MusicPack
 import liltojustice.trueadaptivemusic.client.MusicTrigger
 import liltojustice.trueadaptivemusic.client.ReflectionHelper
@@ -49,6 +50,10 @@ abstract class MusicEvent: MusicTrigger {
 
         fun arrayFromJsonArray(array: JsonArray, soundLibrary: Map<String, PlayableSoundFile>): List<MusicEvent> {
             return array.map { json -> fromJsonWithLibrary(json.asJsonObject, soundLibrary) }
+        }
+
+        fun invokeMusicEvent(eventName: String, vararg eventArgs: Any?) {
+            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName, *eventArgs)
         }
     }
 }

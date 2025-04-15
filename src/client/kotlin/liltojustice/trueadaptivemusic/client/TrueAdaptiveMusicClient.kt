@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.util.ActionResult
@@ -26,7 +27,7 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
                 val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
 
                 try {
-                    Callbacks.setCurrentMusicPack(
+                    setCurrentMusicPack(
                         if (selectedPackName.isBlank())
                             null
                         else
@@ -43,4 +44,32 @@ class TrueAdaptiveMusicClient: ClientModInitializer {
         }
     }
 
+    companion object {
+        fun getMusicManager(): MusicManager? {
+            val result = Array<MusicManager?>(1) { null }
+            GetMusicManagerCallback.EVENT.invoker().getMusicManager(result)
+            return result[0]
+        }
+
+        fun getCurrentMusicPack(): MusicPack? {
+            return getMusicManager()?.getMusicPack()
+        }
+
+        fun setCurrentMusicPack(musicPack: MusicPack?) {
+            ChangeMusicPackCallback.EVENT.invoker().selectPack(musicPack)
+            getMusicManager()?.selectMusicPack(musicPack)
+        }
+
+        fun refreshCurrentMusicPack() {
+            setCurrentMusicPack(getCurrentMusicPack())
+        }
+
+        fun playSoundNow(sound: PlayableSound?, keepBackground: Boolean = false) {
+            getMusicManager()?.playNow(sound, keepBackground)
+        }
+
+        fun eventActive(eventName: String): Boolean {
+            return getMusicManager()?.hasActiveEvent(eventName) ?: false
+        }
+    }
 }

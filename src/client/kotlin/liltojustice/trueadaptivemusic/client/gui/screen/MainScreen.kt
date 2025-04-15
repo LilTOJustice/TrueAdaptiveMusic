@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.ChangeMusicPackCallback
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient
 import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -30,7 +30,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     private lateinit var wikiButton: ButtonWidget
 
     override fun init() {
-        Callbacks.playSoundNow(null)
+        TrueAdaptiveMusicClient.playSoundNow(null)
 
         ChangeMusicPackCallback.EVENT.register { musicPack ->
             editButton.visible = musicPack != null
@@ -68,7 +68,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
 
         editButton = ButtonWidget.Builder(EDIT_TEXT)
         {
-            val currentPack = Callbacks.getCurrentMusicPack()
+            val currentPack = TrueAdaptiveMusicClient.getCurrentMusicPack()
             val ongoingEdit = getOngoingEdit()
             val editScreen = EditPackScreen(this, currentPack ?: return@Builder)
             if (ongoingEdit != null && ongoingEdit.name != currentPack.packName) {
@@ -85,7 +85,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
             .build()
         editButton.width = textRenderer.getWidth(EDIT_TEXT) + 10
         editButton.y = height - editButton.height
-        editButton.visible = Callbacks.getCurrentMusicPack() != null
+        editButton.visible = TrueAdaptiveMusicClient.getCurrentMusicPack() != null
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> reload() }
             .build()

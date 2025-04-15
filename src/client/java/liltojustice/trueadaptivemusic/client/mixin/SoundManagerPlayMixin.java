@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.Constants;
-import liltojustice.trueadaptivemusic.client.Callbacks;
 import liltojustice.trueadaptivemusic.client.MusicManager;
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient;
 import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SoundManagerPlayMixin {
     @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)V", at = @At("HEAD"), cancellable = true)
     public void play(SoundInstance sound, CallbackInfo ci) {
-        @Nullable MusicManager musicManager = Callbacks.Companion.getClientMusicManager();
+        @Nullable MusicManager musicManager = TrueAdaptiveMusicClient.Companion.getMusicManager();
         if (musicManager != null && musicManager.getMusicPack() != null && shouldIgnoreSound(sound, musicManager)) {
             ci.cancel();
         }

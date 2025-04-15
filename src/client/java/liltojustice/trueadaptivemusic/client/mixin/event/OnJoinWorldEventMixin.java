@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.Callbacks;
+import liltojustice.trueadaptivemusic.client.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnJoinWorldEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
@@ -14,7 +14,7 @@ public class OnJoinWorldEventMixin {
     @Inject(at = @At("HEAD"), method = "setWorld(Lnet/minecraft/client/world/ClientWorld;)V")
     public void setWorld(ClientWorld world, CallbackInfo ci) {
         if (world != null) {
-            Callbacks.Companion.invokeMusicEvent(OnJoinWorldEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnJoinWorldEvent.Companion.getTypeName());
         }
     }
 }

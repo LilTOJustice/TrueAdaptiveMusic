@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.Callbacks;
+import liltojustice.trueadaptivemusic.client.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnWakeUpEvent;
 import net.minecraft.client.gui.screen.SleepingChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +22,7 @@ public class OnWakeUpEventMixin {
     @Inject(at = @At("HEAD"), method = "closeChatIfEmpty()V")
     public void closeChatIfEmpty(CallbackInfo ci) {
         if (!stopSleepingPressed) {
-            Callbacks.Companion.invokeMusicEvent(OnWakeUpEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnWakeUpEvent.Companion.getTypeName());
         }
 
         stopSleepingPressed = false;

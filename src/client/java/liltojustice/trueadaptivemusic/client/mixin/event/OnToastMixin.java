@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.Callbacks;
+import liltojustice.trueadaptivemusic.client.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnRecipeUnlockEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnTutorialPopupEvent;
@@ -15,13 +15,13 @@ public class OnToastMixin {
     @Inject(at = @At("HEAD"), method = "add(Lnet/minecraft/client/toast/Toast;)V")
     public void add(Toast toast, CallbackInfo ci) {
         if (toast instanceof AdvancementToast) {
-            Callbacks.Companion.invokeMusicEvent(OnAdvancementGetEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnAdvancementGetEvent.Companion.getTypeName());
         }
         else if (toast instanceof RecipeToast) {
-            Callbacks.Companion.invokeMusicEvent(OnRecipeUnlockEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnRecipeUnlockEvent.Companion.getTypeName());
         }
         else if (toast instanceof TutorialToast) {
-            Callbacks.Companion.invokeMusicEvent(OnTutorialPopupEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnTutorialPopupEvent.Companion.getTypeName());
         }
     }
 }

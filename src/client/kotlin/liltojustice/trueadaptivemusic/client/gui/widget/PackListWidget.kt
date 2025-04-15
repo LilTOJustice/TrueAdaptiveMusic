@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.Callbacks
 import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -25,7 +25,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             .forEach { musicPack ->
                 val newEntry = Entry(this, client, musicPack)
                 addEntry(newEntry)
-                if (musicPack.packName == Callbacks.getCurrentMusicPack()?.packName) {
+                if (musicPack.packName == TrueAdaptiveMusicClient.getCurrentMusicPack()?.packName) {
                     setSelected(newEntry)
                 }
             }
@@ -93,7 +93,7 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             }
             
             packListWidget.setSelected(this)
-            Callbacks.setCurrentMusicPack(musicPack)
+            TrueAdaptiveMusicClient.setCurrentMusicPack(musicPack)
             return true
         }
 

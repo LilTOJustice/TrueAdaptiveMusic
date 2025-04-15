@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.Callbacks;
+import liltojustice.trueadaptivemusic.client.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnNightStartEvent;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ public class OnNightStartMixin {
     public void tick(CallbackInfo ci) {
         MinecraftClient thisObject = (MinecraftClient)(Object)this;
         if (thisObject.world != null && thisObject.world.getTimeOfDay() % 24000L == 13000L) {
-            Callbacks.Companion.invokeMusicEvent(OnNightStartEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(OnNightStartEvent.Companion.getTypeName());
         }
     }
 }
