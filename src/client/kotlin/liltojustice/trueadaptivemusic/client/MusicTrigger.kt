@@ -61,17 +61,12 @@ interface MusicTrigger {
     }
 
     companion object: MusicTriggerCompanion<MusicTrigger> {
-        override fun getTypeName(): String {
-            throw MusicPredicateException("Attempt to get type name from MusicTrigger interface.")
-        }
-
-        override fun getTriggerImplementerSubclasses(): List<KClass<out MusicTrigger>> {
-            return ReflectionHelper.getSubclassesOf(MusicTrigger::class)
-        }
-
-        override fun fromJson(json: JsonObject): MusicTrigger {
+        fun fromJsonProvideSubclasses(
+            json: JsonObject,
+            subclasses: List<KClass<out MusicTrigger>> = getTriggerImplementerSubclasses())
+        : MusicTrigger {
             val type = JsonHelper.getString(json, "type")
-            for (subclass in getTriggerImplementerSubclasses())
+            for (subclass in subclasses)
             {
                 if ((subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "getTypeName" }
                         ?: throw MusicPredicateException(getMissingCompanionExceptionText(subclass)))
@@ -87,6 +82,18 @@ interface MusicTrigger {
             throw MusicPredicateException("Invalid music predicate type: $type")
         }
 
+        override fun getTriggerImplementerSubclasses(): List<KClass<out MusicTrigger>> {
+            return ReflectionHelper.getSubclassesOf(MusicTrigger::class)
+        }
+
+        override fun getTypeName(): String {
+            throw MusicPredicateException("Attempt to get type name from MusicTrigger interface.")
+        }
+
+        override fun fromJson(json: JsonObject): MusicTrigger {
+            return fromJsonProvideSubclasses(json)
+        }
+
         private fun getMissingCompanionExceptionText(offendingClass: KClass<out MusicTrigger>): String {
             return "Failed to find valid companion object for ${offendingClass.simpleName}. make sure to create one " +
                     "that inherits from ${offendingClass.superclasses.first().companionObject!!.qualifiedName}"
@@ -94,10 +101,9 @@ interface MusicTrigger {
     }
 
     interface MusicTriggerCompanion<TSelf> where TSelf: MusicTrigger {
-        fun getTypeName(): String
         fun getTriggerImplementerSubclasses(): List<KClass<out TSelf>>
+        fun getTypeName(): String
         fun fromJson(json: JsonObject): TSelf
-
 
         fun getTypeNames(): List<String> {
             return getTriggerImplementerSubclasses().mapNotNull { subclass ->

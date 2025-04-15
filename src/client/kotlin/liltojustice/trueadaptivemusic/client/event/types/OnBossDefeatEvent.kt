@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.event.types
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper

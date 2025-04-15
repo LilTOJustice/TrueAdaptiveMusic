@@ -3,8 +3,7 @@ package liltojustice.trueadaptivemusic.client.predicate
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.MusicPack
-import liltojustice.trueadaptivemusic.client.event.types.MusicEvent
-import liltojustice.trueadaptivemusic.client.predicate.types.MusicPredicate
+import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound

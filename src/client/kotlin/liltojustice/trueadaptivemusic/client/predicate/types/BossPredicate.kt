@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.predicate.types
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusic.client.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.JsonHelper

@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.event.types
 
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.event.MusicEvent
 
 class OnAdvancementGetEvent(): MusicEvent() {
     companion object: MusicEventCompanion<OnAdvancementGetEvent> {
