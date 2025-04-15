@@ -69,7 +69,25 @@ interface MusicTrigger {
             return ReflectionHelper.getSubclassesOf(MusicTrigger::class)
         }
 
-        private fun getMissingCompanionExceptionText(offendingClass: KClass<MusicTrigger>): String {
+        override fun fromJson(json: JsonObject): MusicTrigger {
+            val type = JsonHelper.getString(json, "type")
+            for (subclass in getTriggerImplementerSubclasses())
+            {
+                if ((subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "getTypeName" }
+                        ?: throw MusicPredicateException(getMissingCompanionExceptionText(subclass)))
+                        .call(subclass.companionObjectInstance) == type)
+                {
+                    return (subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
+                        ?: throw MusicPredicateException("fromJson method missing."))
+                        .call(subclass.companionObjectInstance, json) as? MusicTrigger
+                        ?: throw MusicPredicateException("Could not instantiate music predicate from json")
+                }
+            }
+
+            throw MusicPredicateException("Invalid music predicate type: $type")
+        }
+
+        private fun getMissingCompanionExceptionText(offendingClass: KClass<out MusicTrigger>): String {
             return "Failed to find valid companion object for ${offendingClass.simpleName}. make sure to create one " +
                     "that inherits from ${offendingClass.superclasses.first().companionObject!!.qualifiedName}"
         }
@@ -78,26 +96,8 @@ interface MusicTrigger {
     interface MusicTriggerCompanion<TSelf> where TSelf: MusicTrigger {
         fun getTypeName(): String
         fun getTriggerImplementerSubclasses(): List<KClass<out TSelf>>
+        fun fromJson(json: JsonObject): TSelf
 
-        @Suppress("UNCHECKED_CAST")
-        fun fromJson(json: JsonObject): TSelf {
-            val type = JsonHelper.getString(json, "type")
-            for (subclass in getTriggerImplementerSubclasses())
-            {
-                if ((subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "getTypeName" }
-                        ?: throw MusicPredicateException(
-                            getMissingCompanionExceptionText(subclass as KClass<MusicTrigger>)))
-                        .call(subclass.companionObjectInstance) == type)
-                {
-                        return (subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
-                            ?: throw MusicPredicateException("fromJson method missing."))
-                            .call(subclass.companionObjectInstance, json) as? TSelf
-                            ?: throw MusicPredicateException("Could not instantiate music predicate from json")
-                }
-            }
-
-            throw MusicPredicateException("Invalid music predicate type: $type")
-        }
 
         fun getTypeNames(): List<String> {
             return getTriggerImplementerSubclasses().mapNotNull { subclass ->
