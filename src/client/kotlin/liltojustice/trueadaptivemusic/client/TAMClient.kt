@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger.Companion.log
+import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
 import java.io.FileOutputStream
@@ -49,6 +50,10 @@ object TAMClient {
         return musicManager?.hasActiveEvent(eventType) ?: false
     }
 
+    fun getPlayingEvent(): MusicEvent? {
+        return musicManager?.playingEvent
+    }
+
     private fun initialize(client: MinecraftClient) {
         if (initialized) {
             return
@@ -73,5 +78,4 @@ object TAMClient {
 
         initialized = true
     }
-
 }

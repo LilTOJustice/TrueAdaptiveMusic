@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.MixinHelpers;
+import liltojustice.trueadaptivemusic.client.JavaSucks;
 import liltojustice.trueadaptivemusic.client.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.event.types.OnBossDefeatEvent;
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier;
@@ -16,7 +16,7 @@ public class OnBossDefeatEventMixin {
     @Inject(at = @At("HEAD"), method = "onDeath(Lnet/minecraft/entity/damage/DamageSource;)V")
     public void onDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity thisObject = (LivingEntity)(Object)this;
-        if (MixinHelpers.Companion.isBoss(thisObject)) {
+        if (JavaSucks.isBoss(thisObject)) {
             MusicEvent.Companion.invokeMusicEvent(
                     OnBossDefeatEvent.Companion.getTypeName(),
                     new EntityTypeIdentifier(thisObject.getType().toString()));

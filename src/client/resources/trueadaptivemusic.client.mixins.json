@@ -4,10 +4,12 @@
   "package": "liltojustice.trueadaptivemusic.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "DebugHudMixin",
     "SoundManagerPlayMixin",
     "SoundOptionsScreenMixin",
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",
+    "event.OnDeathEventMixin",
     "event.OnJoinWorldEventMixin",
     "event.OnNightStartMixin",
     "event.OnToastMixin",
@@ -15,8 +17,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "event.OnDeathEventMixin"
-  ]
+  }
 }

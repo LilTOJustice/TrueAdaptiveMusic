@@ -27,6 +27,8 @@ class MusicManager(
     private val volumeManager = VolumeManager(client.soundManager, musicVolumeOption)
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
+    var playingEvent: MusicEvent? = null
+        private set
     private var timedIdentifier = ""
     private var timedIdentifierTimer = Timer()
     private var timedIdentifierTimerTask: TimerTask? = null
@@ -41,6 +43,7 @@ class MusicManager(
                     event.playableSounds.randomOrNull()?.let {
                         playNow(it, true)
                     }
+                    playingEvent = event
                 }
 
             ActionResult.PASS
@@ -57,6 +60,7 @@ class MusicManager(
     }
 
     fun playNow(sound: PlayableSound?, keepBackground: Boolean = false) {
+        playingEvent = null
         this.keepBackground = keepBackground
         if (sound == onDemandSound) {
             return
@@ -97,6 +101,7 @@ class MusicManager(
             if (!client.soundManager.isPlaying(onDemandSoundInstance)) {
                 onDemandSound = null
                 onDemandSoundInstance = null
+                playingEvent = null
                 keepBackground = false
                 currentSoundInstance?.let {
                     volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)

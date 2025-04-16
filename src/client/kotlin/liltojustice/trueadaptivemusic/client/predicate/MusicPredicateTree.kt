@@ -12,7 +12,7 @@ import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 
-typealias NodeVisitor = (MusicPredicateTree.Node, Int) -> Unit
+typealias NodeVisitor = (MusicPredicateTree.Node, List<String>) -> Unit
 
 class MusicPredicateTree private constructor(
     json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
@@ -25,17 +25,21 @@ class MusicPredicateTree private constructor(
     fun getMusicToPlay(client: MinecraftClient): Result {
         val result = root.getSatisfiedNode(client)
         return Result(
-            result.second.joinToString("/"),
+            result.second.joinToString(PATH_SEPARATOR),
             result.first.playableSounds,
             result.first.parameters,
             result.third.values.toList())
     }
 
     private fun traverseRecursive(
-        root: Node, preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null, depth: Int = 0) {
-        preorderVisitor?.invoke(root, depth)
-        root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, depth + 1)}
-        postorderVisitor?.invoke(root, depth)
+        root: Node,
+        preorderVisitor: NodeVisitor? = null,
+        postorderVisitor: NodeVisitor? = null,
+        path: List<String> = emptyList()) {
+        val newPath = path + root.predicate.getTriggerId()
+        preorderVisitor?.invoke(root, newPath)
+        root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, newPath) }
+        postorderVisitor?.invoke(root, newPath)
     }
 
     fun traverse(preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null) {
@@ -51,6 +55,8 @@ class MusicPredicateTree private constructor(
     }
 
     companion object {
+        const val PATH_SEPARATOR = "/"
+
         fun makeEmpty(): MusicPredicateTree {
             return MusicPredicateTree()
         }
@@ -100,7 +106,7 @@ class MusicPredicateTree private constructor(
 
         fun getSatisfiedNode(
             client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
-        : Triple<Node, List<String>, Map<String, MusicEvent>> {
+                : Triple<Node, List<String>, Map<String, MusicEvent>> {
             if (!predicate.test(client)) {
                 return Triple(this, emptyList(), emptyMap())
             }

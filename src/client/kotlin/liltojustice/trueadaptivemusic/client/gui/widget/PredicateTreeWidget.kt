@@ -24,7 +24,7 @@ class PredicateTreeWidget(
         clearWidgets()
         var row = 0
         musicPack.rules.traverse(
-            { node, depth ->
+            { node, path ->
                 addWidget(
                     ClickableTextWidget(
                         node.predicate.getTypeName(),
@@ -34,9 +34,9 @@ class PredicateTreeWidget(
                         },
                         isSelected = { widget -> widget === selectedWidget}),
                     row++,
-                    depth * INDENT)
+                    (path.size - 1) * INDENT)
             },
-            { node, depth ->
+            { node, path ->
                 addWidget(
                     ClickableTextWidget("+ Add",
                         onClick = { widget ->
@@ -44,7 +44,7 @@ class PredicateTreeWidget(
                             onSelectCreateNewNode(node) },
                         isSelected = { widget -> widget === selectedWidget }),
                     row++,
-                    (depth + 1) * INDENT)
+                    path.size * INDENT)
             })
     }
 

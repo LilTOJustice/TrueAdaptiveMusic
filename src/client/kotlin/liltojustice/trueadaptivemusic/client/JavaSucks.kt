@@ -4,8 +4,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.LivingEntity
 import net.minecraft.text.TranslatableTextContent
 
-class MixinHelpers {
+class JavaSucks {
     companion object {
+        @JvmStatic
         fun isBoss(entity: LivingEntity): Boolean {
             val client = MinecraftClient.getInstance()
             return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
