@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.event.MusicEvent;
-import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent;
-import liltojustice.trueadaptivemusic.client.event.types.OnRecipeUnlockEvent;
-import liltojustice.trueadaptivemusic.client.event.types.OnTutorialPopupEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent;
 import net.minecraft.client.toast.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

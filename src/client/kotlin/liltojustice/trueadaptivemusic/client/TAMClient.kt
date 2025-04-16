@@ -3,7 +3,10 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger.Companion.log
-import liltojustice.trueadaptivemusic.client.event.MusicEvent
+import liltojustice.trueadaptivemusic.client.music.MusicLoadException
+import liltojustice.trueadaptivemusic.client.music.MusicManager
+import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
 import java.io.FileOutputStream

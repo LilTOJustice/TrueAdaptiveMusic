@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.client.music.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.FFMpeg
-import liltojustice.trueadaptivemusic.client.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.sound.*

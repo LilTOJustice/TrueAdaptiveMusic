@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.MusicPack
+import liltojustice.trueadaptivemusic.client.music.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext

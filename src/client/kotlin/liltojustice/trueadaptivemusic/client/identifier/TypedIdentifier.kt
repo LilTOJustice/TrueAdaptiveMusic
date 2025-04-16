@@ -17,7 +17,7 @@ sealed class TypedIdentifier(id: String): Identifier(id) {
                 ?: throw TypedIdentifierException("Failed to find valid companion for $type. " +
                         "Ensure it has a companion object implementing the " +
                         "${TypedIdentifierCompanion::class.simpleName} interface.")
-            return (typeCompanion.functions.firstOrNull { f -> f.name == ::getRegistryIds.name }
+            return (typeCompanion.functions.firstOrNull { f -> f.name == Companion::getRegistryIds.name }
                 ?.call(typeCompanion.objectInstance) as? List<*>)?.mapNotNull { x -> x as? Identifier }
                 ?: throw TypedIdentifierException(
                     "Failed to get registry ids from identifier type ${type}. " +

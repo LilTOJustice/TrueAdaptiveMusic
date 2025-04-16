@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.client.TAMClient;
-import liltojustice.trueadaptivemusic.client.event.types.OnAdvancementGetEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
 import net.minecraft.sound.SoundCategory;

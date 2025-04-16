@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.event.MusicEvent;
-import liltojustice.trueadaptivemusic.client.event.types.OnDayStartEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

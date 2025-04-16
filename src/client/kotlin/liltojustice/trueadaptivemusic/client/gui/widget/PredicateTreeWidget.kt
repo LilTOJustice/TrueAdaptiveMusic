@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.MusicPack
-import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 
 class PredicateTreeWidget(
