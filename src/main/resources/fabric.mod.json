@@ -11,7 +11,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient"
+      "liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClientInitializer"
     ],
     "main": [
       "liltojustice.trueadaptivemusic.TrueAdaptiveMusic"

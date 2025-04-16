@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic
 
-abstract class TrueAdaptiveMusicException(message: String?, inner: Exception?): Exception(message, inner) {
+open class TrueAdaptiveMusicException(message: String? = null, inner: Exception? = null): Exception(message, inner) {
     override fun toString(): String {
         return cause?.let {
             "${super.toString()}\nInner Exception: $it" +

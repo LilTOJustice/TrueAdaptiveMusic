@@ -19,7 +19,13 @@ import java.util.function.Function;
 public record TrueAdaptiveMusicOptionCallback<T>(MinecraftClient client)
         implements SimpleOption.Callbacks<T> {
     @Override
-    public Function<SimpleOption<T>, ClickableWidget> getWidgetCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width, Consumer<T> changeCallback) {
+    public Function<SimpleOption<T>, ClickableWidget> getWidgetCreator(
+            SimpleOption.TooltipFactory<T> tooltipFactory,
+            GameOptions gameOptions,
+            int x,
+            int y,
+            int width,
+            Consumer<T> changeCallback) {
         return option -> {
             assert client.currentScreen != null;
             return new ButtonWidget.Builder(Text.literal("True Adaptive Music"),

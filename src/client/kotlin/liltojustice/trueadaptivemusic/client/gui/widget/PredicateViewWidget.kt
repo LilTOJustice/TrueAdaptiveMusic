@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.MusicPack
-import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.predicate.types.RootPredicate
@@ -165,14 +165,14 @@ class PredicateViewWidget(
                     "Select a track",
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TrueAdaptiveMusicClient.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
             },
             "musicChoice"
         )
 
         if (isMouseOver(mouseX.toDouble(), mouseY.toDouble())
             && !musicDropdownWidget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
-            TrueAdaptiveMusicClient.playSoundNow(null)
+            TAMClient.playSoundNow(null)
         }
 
         requiredPredicateArgs.forEach { arg ->

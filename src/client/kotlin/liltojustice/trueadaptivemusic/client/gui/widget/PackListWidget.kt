@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.MusicPack
-import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient
+import liltojustice.trueadaptivemusic.client.TAMClient
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -10,7 +10,14 @@ import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
-class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int, bottom: Int, itemHeight: Int)
+class PackListWidget(
+    client: MinecraftClient,
+    width: Int,
+    height: Int,
+    top: Int,
+    bottom: Int,
+    itemHeight: Int,
+    private val onSelectPack: (selectedPack: MusicPack?) -> Unit = {})
     : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
     init {
         init()
@@ -18,14 +25,14 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
 
     fun init() {
         clearEntries()
-        val vanillaEntry = Entry(this, client)
+        val vanillaEntry = Entry(this, client, null, onSelectPack)
         addEntry(vanillaEntry)
         setSelected(vanillaEntry)
         MusicPack.loadAllPacks()
             .forEach { musicPack ->
-                val newEntry = Entry(this, client, musicPack)
+                val newEntry = Entry(this, client, musicPack, onSelectPack)
                 addEntry(newEntry)
-                if (musicPack.packName == TrueAdaptiveMusicClient.getCurrentMusicPack()?.packName) {
+                if (musicPack.packName == TAMClient.musicPack?.packName) {
                     setSelected(newEntry)
                 }
             }
@@ -34,7 +41,8 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
     class Entry(
         private val packListWidget: PackListWidget,
         private val client: MinecraftClient,
-        private val musicPack: MusicPack? = null)
+        private val musicPack: MusicPack?,
+        private val onSelectPack: (selectedPack: MusicPack?) -> Unit)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val validation = musicPack?.validate() ?: emptyList()
         private val issuesButton =
@@ -93,7 +101,8 @@ class PackListWidget(client: MinecraftClient, width: Int, height: Int, top: Int,
             }
             
             packListWidget.setSelected(this)
-            TrueAdaptiveMusicClient.setCurrentMusicPack(musicPack)
+            onSelectPack(musicPack)
+
             return true
         }
 

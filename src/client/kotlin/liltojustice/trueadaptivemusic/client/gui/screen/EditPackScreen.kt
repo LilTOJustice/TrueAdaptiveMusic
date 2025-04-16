@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.client.MusicPack
-import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClient
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
@@ -34,13 +34,13 @@ class EditPackScreen(
         get() = eventViewWidget.visible
 
     override fun init() {
-        TrueAdaptiveMusicClient.playSoundNow(null)
+        TAMClient.playSoundNow(null)
         musicPack.initEdit(musicPack)
 
         saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
-            TrueAdaptiveMusicClient.setCurrentMusicPack(null)
+            TAMClient.musicPack = null
             val path = musicPack.save()
-            TrueAdaptiveMusicClient.setCurrentMusicPack(MusicPack.fromFile(path))
+            TAMClient.musicPack = MusicPack.fromFile(path)
             this.close()
         }
             .iconSize(9, 8)
@@ -122,7 +122,7 @@ class EditPackScreen(
             parent.reload()
         }
 
-        TrueAdaptiveMusicClient.refreshCurrentMusicPack()
+        TAMClient.refreshCurrentMusicPack()
         client?.setScreen(parent)
     }
 
