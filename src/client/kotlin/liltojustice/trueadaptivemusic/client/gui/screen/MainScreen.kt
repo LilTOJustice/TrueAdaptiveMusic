@@ -26,6 +26,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     private lateinit var editButton: ButtonWidget
     private lateinit var refreshButton: ButtonWidget
     private lateinit var wikiButton: ButtonWidget
+    private lateinit var optionsButton: ButtonWidget
 
     override fun init() {
         TAMClient.playSoundNow(null)
@@ -85,6 +86,12 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         wikiButton.width = textRenderer.getWidth(WIKI_TEXT) + 10
         wikiButton.x = width - wikiButton.width
 
+        optionsButton = ButtonWidget.builder(OPTIONS_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(OptionsScreen(this)) }.build()
+        optionsButton.y = doneButton.y - doneButton.height - 5
+        optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
+        optionsButton.x = width - optionsButton.width
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
@@ -92,6 +99,7 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         addDrawableChild(editButton)
         addDrawableChild(refreshButton)
         addDrawableChild(wikiButton)
+        addDrawableChild(optionsButton)
     }
 
     override fun close() {
@@ -120,5 +128,6 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
         private val REFRESH_TEXT = Text.literal("Refresh")
         private val EDIT_TEXT = Text.literal("Edit Pack")
         private val WIKI_TEXT = Text.literal("Open Wiki")
+        private val OPTIONS_TEXT = Text.literal("Options")
     }
 }

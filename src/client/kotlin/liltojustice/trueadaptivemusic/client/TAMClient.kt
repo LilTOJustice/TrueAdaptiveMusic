@@ -10,14 +10,18 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
 import java.io.IOException
 import kotlin.io.path.Path
 
 object TAMClient {
     private var initialized = false
     private var musicManager: MusicManager? = null
-    private var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
+
+    var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
+        set(value) {
+            field = value
+            options.save()
+        }
 
     var musicPack: MusicPack?
         get() = musicManager?.getMusicPack()
@@ -26,8 +30,7 @@ object TAMClient {
 
             val packName = value?.packName ?: ""
             try {
-                options.selectedPack = packName
-                options.save()
+                options = options.copy(selectedPack = packName)
             } catch (ignored: IOException) {
                 log("Failed to save selected pack \"$packName\"", LogLevel.ERROR)
             }
@@ -57,6 +60,7 @@ object TAMClient {
         return musicManager?.playingEvent
     }
 
+
     private fun initialize(client: MinecraftClient) {
         if (initialized) {
             return
@@ -66,10 +70,10 @@ object TAMClient {
 
         options =
             try {
-                TrueAdaptiveMusicOptions.fromJson(
-                    JsonHelper.deserialize(Path(Constants.OPTIONS_FILENAME).toFile().reader()))
+                TrueAdaptiveMusicOptions.jsonDecode(Path(Constants.OPTIONS_FILENAME).toFile().readText())
             }
             catch (_: Exception) {
+                log("Failed to load TrueAdaptiveMusic settings. Resetting...", LogLevel.ERROR)
                 TrueAdaptiveMusicOptions()
             }
 
@@ -81,12 +85,8 @@ object TAMClient {
                     MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, options.selectedPack))
         }
         catch (e: MusicLoadException) {
-            log(
-                "Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e",
-                LogLevel.ERROR)
+            log("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e", LogLevel.ERROR)
         }
-
-        options.save()
 
         initialized = true
     }

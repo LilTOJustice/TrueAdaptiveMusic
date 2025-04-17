@@ -1,32 +1,40 @@
 package liltojustice.trueadaptivemusic
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import net.minecraft.util.JsonHelper
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlin.io.path.Path
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.primaryConstructor
 
-class TrueAdaptiveMusicOptions(
-    var selectedPack: String = "",
-    var useDebugHud: Boolean = false) {
-    private fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty("selectedPack", selectedPack)
-        result.addProperty("useDebugHud", useDebugHud)
-
-        return result
-    }
+@Serializable
+data class TrueAdaptiveMusicOptions(
+    val selectedPack: String = "",
+    val useDebugHud: Boolean = false) {
 
     fun save() {
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        Path(Constants.OPTIONS_FILENAME).toFile().writeText(gson.toJson(toJson()))
+        Path(Constants.OPTIONS_FILENAME).toFile().writeText(jsonEncode())
+    }
+
+    fun getArgs(): List<Any?> {
+        return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
+    }
+
+    private fun jsonEncode(): String {
+        return json.encodeToString(this)
     }
 
     companion object {
-        fun fromJson(json: JsonObject): TrueAdaptiveMusicOptions {
-            return TrueAdaptiveMusicOptions(
-                JsonHelper.getString(json, "selectedPack") ?: "",
-                JsonHelper.getBoolean(json, "useDebugHud"),
-            )
+        private val json = Json {
+            encodeDefaults = true
+            prettyPrint = true
+        }
+
+        fun jsonDecode(string: String): TrueAdaptiveMusicOptions {
+            return json.decodeFromString(string)
+        }
+
+        fun getRequiredArgs(): List<KParameter> {
+            return TrueAdaptiveMusicOptions::class.primaryConstructor?.parameters ?: emptyList()
         }
     }
 }

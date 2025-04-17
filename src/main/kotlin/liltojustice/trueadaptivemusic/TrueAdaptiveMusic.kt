@@ -12,11 +12,6 @@ class TrueAdaptiveMusic: ModInitializer {
 
         val optionsFilePath = Path(Constants.OPTIONS_FILENAME)
 
-        if (optionsFilePath.exists() && optionsFilePath.isDirectory())
-        {
-            optionsFilePath.deleteRecursively()
-        }
-
         if (!optionsFilePath.exists()) {
             Files.createFile(optionsFilePath)
         }

@@ -13,6 +13,10 @@ class DebugHudMixinHelper {
 
         @JvmStatic
         fun render(context: DrawContext) {
+            if (!TAMClient.options.useDebugHud) {
+                return
+            }
+
             val musicPack = TAMClient.musicPack ?: return
 
             val client = MinecraftClient.getInstance()

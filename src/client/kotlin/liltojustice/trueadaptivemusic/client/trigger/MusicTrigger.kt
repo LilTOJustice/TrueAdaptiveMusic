@@ -9,29 +9,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
-import kotlin.reflect.jvm.isAccessible
 
 interface MusicTrigger {
     fun getTriggerParams(): List<TriggerParam> {
-        val constructor = this::class.primaryConstructor
-            ?: throw MusicPredicateException("No constructor found for ${this::class.simpleName}." +
-                    " It must have a constructor.")
-        val result = this::class.declaredMemberProperties
-            .filter { property -> constructor.parameters.any { param -> property.name == param.name } }
-            .map { property ->
-                val accessible = property.isAccessible
-                property.isAccessible = true
-                val value = property.getter.call(this)
-                property.isAccessible = accessible
-                TriggerParam(property.name, value)
-            }
-
-        if (result.size < constructor.parameters.size) {
-            throw MusicPredicateException("Couldn't read all expected parameters for ${this::class.simpleName}." +
-                    " Make sure all arguments to its primary constructor are declared properties.")
-        }
-
-        return result
+        return ReflectionHelper.getConstructorParameterValues(this)
+            .map { param -> TriggerParam(param.name, param.value) }
     }
 
     fun toJson(): JsonObject {

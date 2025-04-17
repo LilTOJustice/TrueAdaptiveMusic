@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.0.20"
+    kotlin("plugin.serialization") version "2.1.20"
     id("fabric-loom") version "1.7.1"
     id("maven-publish")
 }
@@ -55,6 +56,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
     implementation("org.reflections:reflections:0.10.2")?.let { includeInternal(it) }
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")?.let { includeInternal(it) }
 }
 
 tasks.remapJar {
