@@ -3,20 +3,21 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger.Companion.log
+import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.music.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.MusicManager
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
-import java.io.FileOutputStream
+import net.minecraft.util.JsonHelper
 import java.io.IOException
-import java.nio.file.Paths
 import kotlin.io.path.Path
 
 object TAMClient {
     private var initialized = false
     private var musicManager: MusicManager? = null
+    private var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
 
     var musicPack: MusicPack?
         get() = musicManager?.getMusicPack()
@@ -25,9 +26,8 @@ object TAMClient {
 
             val packName = value?.packName ?: ""
             try {
-                FileOutputStream(Paths.get(Constants.SELECTED_PACK).toFile(), false).use { outputStream ->
-                    outputStream.write(packName.toByteArray())
-                }
+                options.selectedPack = packName
+                options.save()
             } catch (ignored: IOException) {
                 log("Failed to save selected pack \"$packName\"", LogLevel.ERROR)
             }
@@ -64,20 +64,29 @@ object TAMClient {
 
         musicManager = MusicManager(client)
 
-        val selectedPackName = Path(Constants.SELECTED_PACK).toFile().readText()
+        options =
+            try {
+                TrueAdaptiveMusicOptions.fromJson(
+                    JsonHelper.deserialize(Path(Constants.OPTIONS_FILENAME).toFile().reader()))
+            }
+            catch (_: Exception) {
+                TrueAdaptiveMusicOptions()
+            }
 
         try {
             musicPack =
-                if (selectedPackName.isBlank())
+                if (options.selectedPack.isBlank())
                     null
                 else
-                    MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, selectedPackName))
+                    MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, options.selectedPack))
         }
         catch (e: MusicLoadException) {
             log(
-                "Selected pack \"$selectedPackName\" failed to load. Error:\n$e",
+                "Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e",
                 LogLevel.ERROR)
         }
+
+        options.save()
 
         initialized = true
     }

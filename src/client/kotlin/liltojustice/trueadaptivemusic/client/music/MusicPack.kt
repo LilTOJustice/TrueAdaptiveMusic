@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Logger.Companion.log
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -179,7 +179,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     return@mapNotNull fromFile(path)
                 }
                 catch (e: Exception) {
-                    Logger.log("Failed to load pack from path $path:\n${e}", LogLevel.ERROR)
+                    log("Failed to load pack from path $path:\n${e}", LogLevel.ERROR)
                 }
 
                 return@mapNotNull null
@@ -219,7 +219,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                             )
                     } catch (_: InvalidIdentifierException) {}
 
-                    Logger.log("Could not find \"$path\", skipping...", LogLevel.WARNING)
+                    log("Could not find \"$path\", skipping...", LogLevel.WARNING)
                     return@map null
                 }.filterNotNull()
         }
@@ -239,8 +239,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
             if (assetsDir == null)
             {
-                Logger.log(
-                    "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
+                log("Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
             }
             val playableSoundFiles = assetsDir?.listDirectoryEntries()
                 ?.map { file -> PlayableSoundFile(RegularSoundFile(file)) }

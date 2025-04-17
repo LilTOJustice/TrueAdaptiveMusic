@@ -3,19 +3,22 @@ package liltojustice.trueadaptivemusic
 import net.fabricmc.api.ModInitializer
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
-import kotlin.io.path.Path
-import kotlin.io.path.exists
+import kotlin.io.path.*
 
 class TrueAdaptiveMusic: ModInitializer {
+    @OptIn(ExperimentalPathApi::class)
     override fun onInitialize() {
         Files.createDirectories(Path(Constants.MUSIC_PACK_DIR))
-        Files.createDirectories(Path(Constants.MISC_DIR))
 
-        val selectedPackFile = Path(Constants.SELECTED_PACK)
+        val optionsFilePath = Path(Constants.OPTIONS_FILENAME)
 
-        if (!selectedPackFile.exists())
+        if (optionsFilePath.exists() && optionsFilePath.isDirectory())
         {
-            Files.createFile(selectedPackFile)
+            optionsFilePath.deleteRecursively()
+        }
+
+        if (!optionsFilePath.exists()) {
+            Files.createFile(optionsFilePath)
         }
     }
 
