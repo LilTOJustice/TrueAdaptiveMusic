@@ -2,7 +2,10 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.text.Text
+import net.minecraft.util.Colors
 
 class PredicateTreeWidget(
     width: Int,
@@ -14,7 +17,8 @@ class PredicateTreeWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Pack Structure", true, false, true, x, y) {
-    private var selectedWidget: ClickableTextWidget? = null
+    private var selected: Selected? = null
+    private var mouseButtonHeld = false
 
     init {
         initPredicateWidgets()
@@ -29,20 +33,33 @@ class PredicateTreeWidget(
                     ClickableTextWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
-                            selectedWidget = widget
-                            onSelectEditExistingNode(node)
+                            if (isMovingNode() && node.parent != null) {
+                                node.parent!!.adoptChild(selected!!.node!!, node.parent!!.children.indexOf(node))
+                                return@ClickableTextWidget
+                            }
+                            else {
+                                onSelectEditExistingNode(node)
+                            }
+                            selected = Selected(node, widget)
                         },
-                        isSelected = { widget -> widget === selectedWidget}),
+                        isSelected = { widget -> widget === selected?.widget }),
                     row++,
                     (path.size - 1) * INDENT)
             },
             { node, path ->
                 addWidget(
-                    ClickableTextWidget("+ Add",
+                    ClickableTextWidget(
+                        "+ Add",
                         onClick = { widget ->
-                            selectedWidget = widget
-                            onSelectCreateNewNode(node) },
-                        isSelected = { widget -> widget === selectedWidget }),
+                            if (isMovingNode()) {
+                                node.adoptChild(selected!!.node!!)
+                            }
+                            else {
+                                onSelectCreateNewNode(node)
+                            }
+                            selected = Selected(null, widget)
+                        },
+                        isSelected = { widget -> widget === selected?.widget }),
                     row++,
                     path.size * INDENT)
             })
@@ -51,7 +68,63 @@ class PredicateTreeWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
+        mouseButtonHeld = false
+        forEachChild { child ->
+            if (child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
+                mouseButtonHeld = true
+                return@forEachChild
+            }
+        }
+
+        return result
+    }
+
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        super.mouseReleased(mouseX, mouseY, button)
+        forEachChild { child ->
+            if (selected?.widget !== child && child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
+                child.onClick(mouseX, mouseY)
+                initPredicateWidgets()
+                return@forEachChild
+            }
+        }
+
+        mouseButtonHeld = false
+
+        return true
+    }
+
+    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        super.render(context, mouseX, mouseY, delta)
+
+        if (!isMovingNode()) {
+            return
+        }
+
+        forEachChild { child ->
+            if (child is ClickableTextWidget && child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+                context?.drawText(
+                    textRenderer,
+                    ARROW_TEXT,
+                    child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
+                    Colors.WHITE,
+                    false)
+                return@forEachChild
+            }
+        }
+    }
+
+    private fun isMovingNode(): Boolean {
+        return mouseButtonHeld && selected?.node != null
+    }
+
+    data class Selected(val node: MusicPredicateTree.Node?, val widget: ClickableTextWidget)
+
     companion object {
         const val INDENT = 10
+        val ARROW_TEXT: Text = Text.literal("->")
     }
 }
