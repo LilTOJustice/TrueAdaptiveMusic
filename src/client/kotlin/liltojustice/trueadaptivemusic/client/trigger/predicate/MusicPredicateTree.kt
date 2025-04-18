@@ -140,6 +140,38 @@ class MusicPredicateTree private constructor(
             children.add(child)
         }
 
+        fun isValidNewChild(child: Node): Boolean {
+            return !(this === child || isChildOf(child))
+        }
+
+        fun orphan() {
+            parent?.removeChild(this)
+            parent = null
+        }
+
+        fun adoptChild(child: Node, position: Int? = null): Boolean {
+            if (!isValidNewChild(child)) {
+                return false
+            }
+
+            val adjustedPosition = position?.let { if (children.indexOf(child) <= it) it - 1 else it }
+            child.orphan()
+            addChild(child, adjustedPosition)
+
+            return true
+        }
+
+        fun adoptChildFront(child: Node): Boolean {
+            if (!isValidNewChild(child)) {
+                return false
+            }
+
+            child.orphan()
+            addChildFront(child)
+
+            return true
+        }
+
         private fun addChild(child: Node, position: Int?) {
             position?.let {
                 children.add(it, child)
@@ -154,34 +186,6 @@ class MusicPredicateTree private constructor(
 
         private fun removeChild(child: Node) {
             children.remove(child)
-        }
-
-        fun orphan() {
-            parent?.removeChild(this)
-            parent = null
-        }
-
-        fun adoptChild(child: Node, position: Int? = null): Boolean {
-            if (this === child || isChildOf(child)) {
-                return false
-            }
-
-            val adjustedPosition = position?.let { if (children.indexOf(child) <= it) it - 1 else it }
-            child.orphan()
-            addChild(child, adjustedPosition)
-
-            return true
-        }
-
-        fun adoptChildFront(child: Node): Boolean {
-            if (this === child || isChildOf(child)) {
-                return false
-            }
-
-            child.orphan()
-            addChildFront(child)
-
-            return true
         }
 
         private fun isChildOf(node: Node): Boolean {

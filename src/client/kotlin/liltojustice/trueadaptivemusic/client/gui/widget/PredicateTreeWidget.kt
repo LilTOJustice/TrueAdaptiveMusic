@@ -42,7 +42,8 @@ class PredicateTreeWidget(
                             }
                             selected = Selected(node, widget)
                         },
-                        isSelected = { widget -> widget === selected?.widget }),
+                        isSelected = { widget -> widget === selected?.widget })
+                        .withCustomData(node),
                     row++,
                     (path.size - 1) * INDENT)
             },
@@ -59,7 +60,8 @@ class PredicateTreeWidget(
                             }
                             selected = Selected(null, widget)
                         },
-                        isSelected = { widget -> widget === selected?.widget }),
+                        isSelected = { widget -> widget === selected?.widget })
+                        .withCustomData(node),
                     row++,
                     path.size * INDENT)
             })
@@ -84,7 +86,7 @@ class PredicateTreeWidget(
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
         super.mouseReleased(mouseX, mouseY, button)
         forEachChild { child ->
-            if (selected?.widget !== child && child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
+            if (child !== selected?.widget && child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
                 child.onClick(mouseX, mouseY)
                 initPredicateWidgets()
                 return@forEachChild
@@ -104,7 +106,10 @@ class PredicateTreeWidget(
         }
 
         forEachChild { child ->
-            if (child is ClickableTextWidget && child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+            if (child is ClickableTextWidget
+                && child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+                && selected?.node?.let { (child.customData as MusicPredicateTree.Node).isValidNewChild(it) } == true
+            ) {
                 context?.drawText(
                     textRenderer,
                     ARROW_TEXT,
