@@ -8,7 +8,7 @@ import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
-class PredicateTreeWidget(
+class PackStructureWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,

@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.screen
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
-import liltojustice.trueadaptivemusic.client.gui.widget.PredicateTreeWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.PackStructureWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import net.fabricmc.api.EnvType
@@ -23,7 +23,7 @@ class EditPackScreen(
     private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     private lateinit var predicateViewWidget: PredicateViewWidget
-    private lateinit var predicateTreeWidget: PredicateTreeWidget
+    private lateinit var packStructureWidget: PackStructureWidget
     private lateinit var eventViewWidget: EventViewWidget
     private lateinit var saveButtonWidget: IconButtonWidget
     private lateinit var closeButtonWidget: ButtonWidget
@@ -62,10 +62,10 @@ class EditPackScreen(
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            { predicateTreeWidget.initPredicateWidgets() },
+            { packStructureWidget.initPredicateWidgets() },
             { event -> switchToEventView(event) },
             { eventView })
-        predicateTreeWidget = PredicateTreeWidget(
+        packStructureWidget = PackStructureWidget(
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
@@ -90,7 +90,7 @@ class EditPackScreen(
         addDrawableChild(closeButtonWidget)
         addDrawableChild(openAssetsFolderButtonWidget)
         addDrawableChild(predicateViewWidget)
-        addDrawableChild(predicateTreeWidget)
+        addDrawableChild(packStructureWidget)
         addDrawableChild(eventViewWidget)
 
         saveButtonWidget.width = 90
@@ -102,8 +102,8 @@ class EditPackScreen(
 
         val containerWidth = getContainerWidth()
         val containerHeight = getContainerHeight()
-        predicateTreeWidget.width = containerWidth
-        predicateTreeWidget.height = containerHeight
+        packStructureWidget.width = containerWidth
+        packStructureWidget.height = containerHeight
         predicateViewWidget.width = containerWidth
         predicateViewWidget.height = containerHeight
         eventViewWidget.width = containerWidth
@@ -144,7 +144,7 @@ class EditPackScreen(
             adder?.add(eventViewWidget)
         }
         else {
-            adder?.add(predicateTreeWidget)
+            adder?.add(packStructureWidget)
             adder?.add(predicateViewWidget)
         }
 
@@ -155,13 +155,13 @@ class EditPackScreen(
 
     private fun switchToEventView(event: MusicEvent?) {
         eventViewWidget.visible = true
-        predicateTreeWidget.visible = false
+        packStructureWidget.visible = false
         eventViewWidget.setEvent(event)
         positionContainers()
     }
 
     private fun switchToPredicateView() {
-        predicateTreeWidget.visible = true
+        packStructureWidget.visible = true
         eventViewWidget.visible = false
         positionContainers()
     }
