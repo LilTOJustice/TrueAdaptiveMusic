@@ -37,7 +37,6 @@ class PredicateViewWidget(
     private var selectedEvent: MusicEvent? = null
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
-    private var movingNode: MusicPredicateTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var assets = musicPack.getEditPackAssets()
 
@@ -71,43 +70,22 @@ class PredicateViewWidget(
     }
 
     fun setEditExistingNode(node: MusicPredicateTree.Node) {
-        movingNode?.let {
-            if (node == it) {
-                return@let
-            }
-
-            node.adoptChildFront(it)
-            save()
-        }
-
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
         selectedMusicPaths = selectedNode!!.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         newPredicateParent = null
-        movingNode = null
         nodeArgs = node.parameters.constructorParams().toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }
 
     fun setCreateNewNode(parent: MusicPredicateTree.Node) {
-        movingNode?.let {
-            if (parent == it) {
-                return@let
-            }
-
-            if (parent.adoptChild(it)) {
-                save()
-            }
-        }
-
         clearWidgetsFromRender()
         selectedPredicateTypeName = ""
         selectedNode = null
         selectedMusicPaths = mutableListOf()
         newPredicateParent = parent
-        movingNode = null
         requiredPredicateArgs = listOf()
         predicateArgs = mutableListOf()
         nodeArgs.replaceAll { null }
@@ -265,37 +243,6 @@ class PredicateViewWidget(
                     )
                 },
                 "Delete"
-            )
-
-            if (movingNode == null) {
-                addWidgetFromRender(
-                    {
-                        ClickableTextWidget(
-                            "Move",
-                            onClick = {
-                                movingNode = selectedNode
-                                clearWidgetsFromRender { childWidget -> childWidget.id != "Move" }
-                            }
-                        )
-                    },
-                    "Move"
-                )
-            }
-        }
-
-        if (movingNode != null) {
-            addWidgetFromRender(
-                {
-                    ClickableTextWidget(
-                        "Cancel Move",
-                        onClick = {
-                            movingNode = null
-                            clearWidgetsFromRender { childWidget -> childWidget.id != "Cancel Move" }
-                        },
-                        isSelected = { movingNode != null }
-                    )
-                },
-                "Cancel Move"
             )
         }
 

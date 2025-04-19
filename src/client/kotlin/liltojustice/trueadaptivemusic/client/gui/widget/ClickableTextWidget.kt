@@ -7,14 +7,16 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
-class ClickableTextWidget(
+open class ClickableTextWidget(
     text: String,
     x: Int = 0,
     y: Int = 0,
     private val showHighlight: Boolean = true,
     private val onClick: (ClickableTextWidget) -> Unit = {},
     private val isSelected: (ClickableTextWidget) -> Boolean = { false })
-    : ClickableWidget(x, y, 0, 0, Text.literal("Clickable Text Widget")) {
+    : ClickableWidget(x, y, 0, 0, Text.literal("Clickable Text Widget")),
+    DataWrapped<ClickableTextWidget> {
+    override var customData: Any? = null
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     var color: Int = Colors.WHITE
     var text = text

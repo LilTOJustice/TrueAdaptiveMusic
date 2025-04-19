@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -236,8 +237,8 @@ abstract class ContainerWidget(
                     min(maxRows, maxUsedRow(countOffscreen = true) + 1)
                 else
                     maxUsedRow(countOffscreen = true) + 1)
-                * getRowHeight(textRenderer.fontHeight)
-                + getHeaderOffset()).toInt()
+                        * getRowHeight(textRenderer.fontHeight)
+                        + getHeaderOffset()).toInt()
     }
 
     fun fitToChildrenHeight() {
@@ -267,6 +268,15 @@ abstract class ContainerWidget(
 
     fun resetScrolling() {
         scrollPosition = 0
+    }
+
+    fun childVisible(widget: ClickableWidget): Boolean {
+        val childWidget = children.values.firstOrNull { child -> child.widget === widget }?.translated(scrollPosition)
+        return childWidget?.let { childVisible(it) } == true
+    }
+
+    override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
+        children.values.map { child -> child.widget }.forEach(consumer)
     }
 
     private fun clampScrollPosition() {
@@ -313,11 +323,6 @@ abstract class ContainerWidget(
         }
     }
 
-    fun childVisible(widget: ClickableWidget): Boolean {
-        val childWidget = children.values.firstOrNull { child -> child.widget === widget }?.translated(scrollPosition)
-        return childWidget?.let { childVisible(it) } == true
-    }
-
     private fun childVisible(translated: ChildWidget): Boolean {
         return translated.widget.visible && translated.row >= 0 && translated.row < totalRows()
     }
@@ -325,7 +330,7 @@ abstract class ContainerWidget(
     private fun shouldBlockScroll(mouseX: Double, mouseY: Double): Boolean {
         return (!translucentInteract && visible && active && isMouseOver(mouseX, mouseY))
                 || children.any { (_, child) ->
-                    child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY) }
+            child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY) }
     }
 
 
@@ -333,7 +338,7 @@ abstract class ContainerWidget(
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
 
-        private fun getRowHeight(fontHeight: Int): Double {
+        fun getRowHeight(fontHeight: Int): Double {
             return (1.35 * fontHeight)
         }
 

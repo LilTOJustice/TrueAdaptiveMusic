@@ -75,7 +75,7 @@ class MusicPredicateTree private constructor(
         var playableSounds: List<PlayableSound>,
         var events: List<MusicEvent>,
         var parameters: Parameters = Parameters(),
-        private val children: MutableList<Node> = mutableListOf()
+        val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
             private set
@@ -140,18 +140,8 @@ class MusicPredicateTree private constructor(
             children.add(child)
         }
 
-        fun addChild(child: Node) {
-            children.add(child)
-            child.parent = this
-        }
-
-        fun addChildFront(child: Node) {
-            children.add(0, child)
-            child.parent = this
-        }
-
-        fun removeChild(child: Node) {
-            children.remove(child)
+        fun isValidNewChild(child: Node): Boolean {
+            return !(this === child || isChildOf(child))
         }
 
         fun orphan() {
@@ -159,19 +149,23 @@ class MusicPredicateTree private constructor(
             parent = null
         }
 
-        fun adoptChild(child: Node): Boolean {
-            if (isChildOf(child)) {
+        fun adoptChild(child: Node, position: Int? = null): Boolean {
+            if (!isValidNewChild(child)) {
                 return false
             }
 
+            val adjustedPosition = position?.let {
+                if (children.indexOf(child).let { index -> index != -1 && index <= it }) it - 1 else it
+            }
+
             child.orphan()
-            addChild(child)
+            addChild(child, adjustedPosition)
 
             return true
         }
 
         fun adoptChildFront(child: Node): Boolean {
-            if (isChildOf(child)) {
+            if (!isValidNewChild(child)) {
                 return false
             }
 
@@ -179,6 +173,22 @@ class MusicPredicateTree private constructor(
             addChildFront(child)
 
             return true
+        }
+
+        private fun addChild(child: Node, position: Int?) {
+            position?.let {
+                children.add(it, child)
+            } ?: children.add(child)
+            child.parent = this
+        }
+
+        private fun addChildFront(child: Node) {
+            children.add(0, child)
+            child.parent = this
+        }
+
+        private fun removeChild(child: Node) {
+            children.remove(child)
         }
 
         private fun isChildOf(node: Node): Boolean {
