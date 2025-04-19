@@ -7,7 +7,7 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
-class ClickableTextWidget(
+open class ClickableTextWidget(
     text: String,
     x: Int = 0,
     y: Int = 0,

@@ -17,8 +17,10 @@ class PredicateTreeWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Pack Structure", true, false, true, x, y) {
-    private var selected: Selected? = null
+    private var selectedWidget: NodeWidget? = null
     private var mouseButtonHeld = false
+    private val selectedNode
+        get() = selectedWidget?.targetNode?.let { if (it.isParent) null else it.node }
 
     init {
         initPredicateWidgets()
@@ -30,38 +32,27 @@ class PredicateTreeWidget(
         musicPack.rules.traverse(
             { node, path ->
                 addWidget(
-                    ClickableTextWidget(
+                    NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
-                            if (isMovingNode() && node.parent != null) {
-                                node.parent!!.adoptChild(selected!!.node!!, node.parent!!.children.indexOf(node))
-                                return@ClickableTextWidget
-                            }
-                            else {
-                                onSelectEditExistingNode(node)
-                            }
-                            selected = Selected(node, widget)
+                            onSelectEditExistingNode(node)
+                            selectedWidget = widget as NodeWidget
                         },
-                        isSelected = { widget -> widget === selected?.widget })
-                        .withCustomData(node),
+                        isSelected = { widget -> widget === selectedWidget })
+                        .withCustomData(TargetNode(node, false)),
                     row++,
                     (path.size - 1) * INDENT)
             },
             { node, path ->
                 addWidget(
-                    ClickableTextWidget(
+                    NodeWidget(
                         "+ Add",
                         onClick = { widget ->
-                            if (isMovingNode()) {
-                                node.adoptChild(selected!!.node!!)
-                            }
-                            else {
-                                onSelectCreateNewNode(node)
-                            }
-                            selected = Selected(null, widget)
+                            onSelectCreateNewNode(node)
+                            selectedWidget = widget as NodeWidget
                         },
-                        isSelected = { widget -> widget === selected?.widget })
-                        .withCustomData(node),
+                        isSelected = { widget -> widget === selectedWidget })
+                        .withCustomData(TargetNode(node, true)),
                     row++,
                     path.size * INDENT)
             })
@@ -84,18 +75,35 @@ class PredicateTreeWidget(
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        super.mouseReleased(mouseX, mouseY, button)
+        val result = super.mouseReleased(mouseX, mouseY, button)
+
+        if (!isMovingNode()) {
+            return result
+        }
+
         forEachChild { child ->
-            if (child !== selected?.widget && child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
-                child.onClick(mouseX, mouseY)
-                initPredicateWidgets()
+            if (child === selectedWidget
+                || !child.isMouseOver(mouseX, mouseY)
+                || child !is NodeWidget
+                || selectedNode?.let { child.isValidDestination(it) } != true) {
                 return@forEachChild
             }
+
+            val targetNode = child.targetNode.node
+
+            if (child.targetNode.isParent) {
+                targetNode.adoptChild(selectedNode!!)
+            }
+            else {
+                targetNode.parent!!.adoptChild(selectedNode!!, targetNode.parent!!.children.indexOf(targetNode))
+            }
+
+            initPredicateWidgets()
         }
 
         mouseButtonHeld = false
 
-        return true
+        return result
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -106,30 +114,44 @@ class PredicateTreeWidget(
         }
 
         forEachChild { child ->
-            if (child is ClickableTextWidget
-                && child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-                && selected?.node?.let { (child.customData as MusicPredicateTree.Node).isValidNewChild(it) } == true
+            if (child === selectedWidget
+                || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+                || child !is NodeWidget
+                || selectedNode?.let { child.isValidDestination(it) } != true
             ) {
-                context?.drawText(
-                    textRenderer,
-                    ARROW_TEXT,
-                    child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
-                    child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
-                    Colors.WHITE,
-                    false)
                 return@forEachChild
             }
+
+            context?.drawText(
+                textRenderer,
+                ARROW_TEXT,
+                child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
+                child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
+                Colors.WHITE,
+                false)
+            return@forEachChild
         }
     }
 
     private fun isMovingNode(): Boolean {
-        return mouseButtonHeld && selected?.node != null
+        return mouseButtonHeld && selectedNode != null
     }
-
-    data class Selected(val node: MusicPredicateTree.Node?, val widget: ClickableTextWidget)
 
     companion object {
         const val INDENT = 10
         val ARROW_TEXT: Text = Text.literal("->")
     }
+
+    class NodeWidget(text: String, onClick: (ClickableTextWidget) -> Unit, isSelected: (ClickableTextWidget) -> Boolean)
+        : ClickableTextWidget(text, onClick = onClick, isSelected = isSelected)
+    {
+        val targetNode
+            get() = customData as TargetNode
+
+        fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
+            return targetNode.node.parent != null && targetNode.node.isValidNewChild(selectedNode)
+        }
+    }
+
+    data class TargetNode(val node: MusicPredicateTree.Node, val isParent: Boolean)
 }

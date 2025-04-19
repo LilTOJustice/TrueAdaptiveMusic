@@ -154,7 +154,10 @@ class MusicPredicateTree private constructor(
                 return false
             }
 
-            val adjustedPosition = position?.let { if (children.indexOf(child) <= it) it - 1 else it }
+            val adjustedPosition = position?.let {
+                if (children.indexOf(child).let { index -> index != -1 && index <= it }) it - 1 else it
+            }
+
             child.orphan()
             addChild(child, adjustedPosition)
 
