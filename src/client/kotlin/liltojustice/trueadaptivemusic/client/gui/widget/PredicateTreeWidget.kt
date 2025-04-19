@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
@@ -15,8 +16,7 @@ class PredicateTreeWidget(
     private val onSelectCreateNewNode: (parent: MusicPredicateTree.Node) -> Unit,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(
-    width, height, "Pack Structure", true, false, true, x, y) {
+    : ContainerWidget(width, height, "Pack Structure", true, false, true, x, y) {
     private var selectedWidget: NodeWidget? = null
     private var mouseButtonHeld = false
     private val selectedNode
@@ -111,6 +111,15 @@ class PredicateTreeWidget(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        forEachChild { child ->
+            child.tooltip = if (selectedWidget === child
+                && !child.targetNode.isParent
+                && child.targetNode.node.parent != null)
+                child.tooltip ?: Tooltip.of(MOVE_NODE_TEXT)
+            else
+                null
+        }
+
         super.render(context, mouseX, mouseY, delta)
 
         if (!isMovingNode()) {
@@ -144,6 +153,7 @@ class PredicateTreeWidget(
     companion object {
         const val INDENT = 10
         val ARROW_TEXT: Text = Text.literal("->")
+        val MOVE_NODE_TEXT: Text = Text.literal("Click and drag to move")
     }
 
     class NodeWidget(text: String, onClick: (ClickableTextWidget) -> Unit, isSelected: (ClickableTextWidget) -> Boolean)
