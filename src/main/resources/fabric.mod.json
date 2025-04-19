@@ -5,7 +5,11 @@
   "name": "True Adaptive Music",
   "description": "Experience dynamic music that adapts to what happens in Minecraft!",
   "authors": [],
-  "contact": {},
+  "contact": {
+    "homepage": "https://liltojustice.github.io/TrueAdaptiveMusic/",
+    "issues": "https://github.com/LilTOJustice/TrueAdaptiveMusic/issues",
+    "sources": "https://github.com/LilTOJustice/TrueAdaptiveMusic"
+  },
   "license": "GPL-3.0",
   "icon": "assets/trueadaptivemusic/icon.png",
   "environment": "client",
@@ -15,6 +19,9 @@
     ],
     "main": [
       "liltojustice.trueadaptivemusic.TrueAdaptiveMusic"
+    ],
+    "modmenu": [
+      "liltojustice.trueadaptivemusic.client.integration.TrueAdaptiveMusicModMenu"
     ]
   },
   "mixins": [
