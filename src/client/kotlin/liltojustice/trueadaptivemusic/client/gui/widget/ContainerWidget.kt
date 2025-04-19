@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen.OPTIONS_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -49,25 +48,12 @@ abstract class ContainerWidget(
             return
         }
 
-        if (bordered) {
-            context?.setShaderColor(0f, 0f, 0f, 1f)
-            context?.drawTexture(
-                OPTIONS_BACKGROUND_TEXTURE, x, y, 0f, 0f, width, height, 32, 32
-            )
-        }
-        else {
-            context?.setShaderColor(0.125f, 0.125f, 0.125f, 1.0f)
-            context?.drawTexture(
-                OPTIONS_BACKGROUND_TEXTURE, x, y, 0f, 0f, width, height, 32, 32
-            )
-        }
-        context?.setShaderColor(1f, 1f, 1f, 1f)
-
         if (showHeader)
         {
-            context?.setShaderColor(0.05f, 0.05f, 0.05f, 1.0f)
-            context?.drawTexture(
-                OPTIONS_BACKGROUND_TEXTURE, x, y, 0F, 0F, width, TOP_MARGIN, 32, 32)
+            context?.setShaderColor(0f, 0f, 0f, if (bordered) 1f else 0.5f)
+            context?.fill(x, y, x + this.width, y + this.height, 0, Colors.BLACK)
+            context?.fill(
+                x, y,  x + width, y + TOP_MARGIN, 0, Colors.BLACK)
             context?.setShaderColor(1f, 1f, 1f, 1f)
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
             backButton?.let {
@@ -75,6 +61,7 @@ abstract class ContainerWidget(
                 it.y = (y + getHeaderOffset() - getRowHeight(textRenderer.fontHeight)).toInt()
                 it.render(context, mouseX, mouseY, delta)
             }
+            context?.setShaderColor(1f, 1f, 1f, 1f)
         }
 
         if (bordered) {
