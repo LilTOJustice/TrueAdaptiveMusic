@@ -120,6 +120,7 @@ class PredicateViewWidget(
                     DropdownWidget(
                         predicateTypeNameOptions,
                         { typeName ->  setSelectedPredicateTypeName(typeName) },
+                        width / 2,
                         "Type",
                         startingOption = selectedPredicateTypeName)
                 },
@@ -131,6 +132,7 @@ class PredicateViewWidget(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
+                    (width * 0.75).toInt(),
                     { selected -> selectedMusicPaths = selected.toMutableList() },
                     "Music Choice",
                     {

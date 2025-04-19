@@ -66,6 +66,7 @@ class EventViewWidget(
                 DropdownWidget(
                     eventTypeNameOptions,
                     { typeName ->  setSelectedEventTypeName(typeName) },
+                    width / 2,
                     "Type",
                     startingOption = selectedEventTypeName)
             },
@@ -76,6 +77,7 @@ class EventViewWidget(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
+                    width,
                     { selected -> selectedMusicPaths = selected.toMutableList() },
                     "Music Choice",
                     {

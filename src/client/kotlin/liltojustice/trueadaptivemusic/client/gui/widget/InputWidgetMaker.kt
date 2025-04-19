@@ -82,6 +82,7 @@ class InputWidgetMaker {
                     DropdownWidget(
                         options,
                         { enumOption -> outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption} },
+                        0,
                         prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: "")
             }
@@ -92,6 +93,7 @@ class InputWidgetMaker {
                 val options = enumClass.enumConstants.map { enum -> enum.toString() }
                 MultiSelectDropdownWidget(
                     options,
+                    0,
                     { selected -> outArgs[arg.index] = selected
                         .map { enumOption ->
                             enumClass.enumConstants.first { enum -> enum.toString() == enumOption } } },
@@ -108,6 +110,7 @@ class InputWidgetMaker {
                     DropdownWidget(
                         options,
                         { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
+                        0,
                         prompt,
                         startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: "")
             }
@@ -121,6 +124,7 @@ class InputWidgetMaker {
                 else
                     MultiSelectDropdownWidget(
                         options,
+                        0,
                         { selected ->
                             outArgs[arg.index] = selected
                                 .map { id -> TypedIdentifier.initializeFromIdString(type, id) } },

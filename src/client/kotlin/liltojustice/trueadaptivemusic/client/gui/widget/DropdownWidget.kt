@@ -8,6 +8,7 @@ import net.minecraft.text.Text
 class DropdownWidget(
     options: List<String>,
     onSelectOption: (optionText: String) -> Unit,
+    width: Int = 0,
     title: String = "",
     getOptions: (() -> List<String>)? = null,
     notSelectedPlaceholder: String? = null,
@@ -16,7 +17,7 @@ class DropdownWidget(
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
-    0,
+    width,
     0,
     "Dropdown: $title",
     false,
@@ -26,18 +27,14 @@ class DropdownWidget(
     y,
     true) {
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
-    private var textInputWidth = (
-            if (notSelectedPlaceholder != null)
-                textRenderer.getWidth(notSelectedPlaceholder)
-            else
-                (options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0)) +
-            TEXT_WIDTH_BUFFER
     private var dropdownResultsWidget: DropdownResultsWidget
+    private val realizedWidth = width.takeUnless { width == 0 }
+        ?: ((options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0) + TEXT_WIDTH_BUFFER)
     private val textInputWidget = TextFieldWidget(
         textRenderer,
         0,
         0,
-        textInputWidth,
+        realizedWidth,
         textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
         Text.literal("Dropdown Search"))
     private val selectedOptionWidget = ClickableTextWidget(
@@ -48,7 +45,7 @@ class DropdownWidget(
 
     init {
         titleTextWidget.active = false
-        width = textInputWidth
+        this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
             { option ->
