@@ -51,9 +51,8 @@ abstract class ContainerWidget(
         if (showHeader)
         {
             context?.setShaderColor(0f, 0f, 0f, if (bordered) 1f else 0.5f)
-            context?.fill(x, y, x + this.width, y + this.height, 0, Colors.BLACK)
-            context?.fill(
-                x, y,  x + width, y + TOP_MARGIN, 0, Colors.BLACK)
+            context?.fill(x, y, x + this.width, y + this.height, Colors.BLACK)
+            context?.fill(x, y,  x + width, y + TOP_MARGIN, Colors.BLACK)
             context?.setShaderColor(1f, 1f, 1f, 1f)
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
             backButton?.let {
@@ -65,6 +64,7 @@ abstract class ContainerWidget(
         }
 
         if (bordered) {
+            context?.fill(x, y, x + width, y + height, Colors.BLACK)
             context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
