@@ -31,7 +31,7 @@ class PredicateTreeWidget(
         var row = 0
         musicPack.rules.traverse(
             { node, path ->
-                addWidget(
+                val newWidget = addWidget(
                     NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
@@ -41,7 +41,11 @@ class PredicateTreeWidget(
                         isSelected = { widget -> widget === selectedWidget })
                         .withCustomData(TargetNode(node, false)),
                     row++,
-                    (path.size - 1) * INDENT)
+                    (path.size - 1) * INDENT) as NodeWidget
+
+                if (newWidget.targetNode.node === selectedNode) {
+                    selectedWidget = newWidget
+                }
             },
             { node, path ->
                 addWidget(
