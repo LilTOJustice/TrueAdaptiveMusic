@@ -43,6 +43,8 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
+
+    maven("https://maven.terraformersmc.com/releases/")
 }
 
 dependencies {
@@ -55,14 +57,13 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
-    implementation("org.reflections:reflections:0.10.2")?.let { includeInternal(it) }
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")?.let { includeInternal(it) }
-}
+    modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
 
-tasks.remapJar {
-    from("META-INF/jars/reflections-0.10.2.jar") {
-        to("liltojustice")
-    }
+    implementation("org.reflections:reflections:${project.property("reflections_version")}")
+        ?.let { includeInternal(it) }
+    implementation(
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_version")}")
+        ?.let { includeInternal(it) }
 }
 
 tasks.processResources {
