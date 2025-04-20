@@ -114,12 +114,17 @@ class PackStructureWidget(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         forEachChild { child ->
+            if (child !is NodeWidget) {
+                return@forEachChild
+            }
+
+            val baseTooltipText = child.getBaseTooltipText()
             child.tooltip = if (selectedWidget === child
                 && !child.targetNode.isParent
                 && child.targetNode.node.parent != null)
-                child.tooltip ?: Tooltip.of(MOVE_NODE_TEXT)
+                Tooltip.of(Text.literal("$MOVE_NODE_STRING\n$baseTooltipText"))
             else
-                null
+                Tooltip.of(Text.literal(baseTooltipText))
         }
 
         super.render(context, mouseX, mouseY, delta)
@@ -154,8 +159,8 @@ class PackStructureWidget(
 
     companion object {
         const val INDENT = 10
+        const val MOVE_NODE_STRING = "Click and drag to move"
         val ARROW_TEXT: Text = Text.literal("->")
-        val MOVE_NODE_TEXT: Text = Text.literal("Click and drag to move")
     }
 
     class NodeWidget(text: String, onClick: (ClickableTextWidget) -> Unit, isSelected: (ClickableTextWidget) -> Boolean)
@@ -163,6 +168,25 @@ class PackStructureWidget(
     {
         val targetNode
             get() = customData as TargetNode
+
+        fun getBaseTooltipText(): String {
+            if (targetNode.isParent) {
+                return "Create a new node"
+            }
+
+            val predicate = targetNode.node.predicate
+            val result = StringBuilder()
+            val params = predicate.getTriggerParams()
+            result.appendLine(
+                if (params.isEmpty())
+                    predicate.getTypeName()
+                else
+                    "${predicate.getTypeName()}:"
+            )
+            params.forEach { param -> result.appendLine(param.toString()) }
+
+            return result.trim().toString()
+        }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
             return targetNode.node.parent != null && targetNode.node.isValidNewChild(selectedNode)
