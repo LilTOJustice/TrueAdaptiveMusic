@@ -18,9 +18,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(
-    private val parent: Screen,
-    private val musicPack: MusicPack)
+class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack)
     : Screen(Text.literal("Create/Edit a music pack")) {
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var packStructureWidget: PackStructureWidget
