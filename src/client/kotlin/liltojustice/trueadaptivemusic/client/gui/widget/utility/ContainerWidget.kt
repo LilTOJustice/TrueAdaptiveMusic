@@ -74,7 +74,7 @@ abstract class ContainerWidget(
         clampScrollPosition()
         drawScrollBar(context)
 
-        context?.enableScissor(x, y + getHeaderOffset(), x + width, y + height)
+        context?.enableScissor(x, y + getHeaderOffset() - 2, x + width, y + height)
         children.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
             translated.widget.x = x + translated.xOffset + if (indentChildren) X_MARGIN else 0
