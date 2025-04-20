@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.music
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger.Companion.log
@@ -27,11 +28,19 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
-class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
+class MusicPack private constructor(
+    val metadata: Metadata,
+    val rules: MusicPredicateTree,
+    val packName: String,
+    preValidation: MusicPackValidation? = null) {
     private val packPath = Path(Constants.MUSIC_PACK_DIR, packName)
-    private val validationMessages = mutableListOf<ValidationMessage>()
-    val validation
-        get() = validationMessages.toList()
+    private val validation = MusicPackValidation(preValidation)
+
+    val validationMessages
+        get() = validation.toList()
+
+    val isValid
+        get() = validation.isValid()
 
     fun initEdit(packWithAssets: MusicPack? = null): Path {
         val packDir = getEditPackDir()
@@ -153,29 +162,22 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
         if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
-            validationMessages.add(
-                ValidationMessage(
+            validation.addWarning(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
-                        "This music will not play unless FFMpeg is installed on your system. See the wiki for details.",
-                    ValidationMessage.Type.Warning
-                )
+                        "This music will not play unless FFMpeg is installed on your system. See the wiki for details."
             )
         }
 
         rules.traverse { node, _ ->
             (node.predicate as? ErrorPredicate)?.let {
-                validationMessages.add(ValidationMessage(it.reason, ValidationMessage.Type.Warning))
+                validation.addWarning(it.reason)
             }
             node.events.forEach { event ->
                 (event as? ErrorEvent)?.let {
-                    validationMessages.add(ValidationMessage(it.reason, ValidationMessage.Type.Warning))
+                    validation.addWarning(it.reason)
                 }
             }
         }
-    }
-
-    private fun getGson(): Gson {
-        return GsonBuilder().setPrettyPrinting().create()
     }
 
     private fun getEditPackDir(): Path {
@@ -232,7 +234,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                         return@map soundLibrary[path]
                             ?: PlayableSoundEvent(
                                 Registries.SOUND_EVENT[Identifier(path)]
-                                ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
+                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
                             )
                     } catch (_: InvalidIdentifierException) {}
 
@@ -248,6 +250,10 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             catch (e: InvalidIdentifierException) {
                 null
             }
+        }
+
+        private fun getGson(): Gson {
+            return GsonBuilder().setPrettyPrinting().create()
         }
 
         private fun fromDirectory(filePath: Path): MusicPack {
@@ -275,11 +281,22 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
             }
 
+            val preValidation = MusicPackValidation()
+
+            val rules = try {
+                MusicPredicateTree.fromJson(
+                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
+            }
+            catch (e: JsonParseException) {
+                preValidation.addError("Could not load pack due to json error:\n$e")
+                MusicPredicateTree.makeEmpty()
+            }
+
             return MusicPack(
                 metadata,
-                MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles),
-                filePath.name
+                rules,
+                filePath.name,
+                preValidation
             )
         }
 
@@ -305,28 +322,28 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                         "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}")
                 }
 
+                val preValidation = MusicPackValidation()
+
+                val rules = try {
+                    MusicPredicateTree.fromJson(
+                        JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
+                }
+                catch (e: JsonParseException) {
+                    preValidation.addError("Could not load pack due to json error:\n$e")
+                    MusicPredicateTree.makeEmpty()
+                }
+
                 return MusicPack(
                     metadata,
-                    MusicPredicateTree.fromJson(
-                        JsonHelper.deserialize(zipFile.getInputStream(rulesFile).reader()), playableSoundFiles),
-                    filePath.name
+                    rules,
+                    filePath.name,
+                    preValidation
                 )
             }
         }
 
         private fun isZipAsset(fileName: String): Boolean {
             return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
-        }
-    }
-
-    data class ValidationMessage(val message: String, val type: Type) {
-        override fun toString(): String {
-            return "$type: $message"
-        }
-
-        enum class Type {
-            Warning,
-            Error
         }
     }
 

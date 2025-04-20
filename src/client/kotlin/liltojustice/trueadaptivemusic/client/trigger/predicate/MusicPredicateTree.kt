@@ -221,7 +221,8 @@ class MusicPredicateTree private constructor(
                 )
             }
 
-            private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MutableList<Node> {
+            private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
+            : MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")
                         .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()
