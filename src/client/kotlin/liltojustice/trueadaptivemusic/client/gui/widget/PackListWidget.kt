@@ -49,7 +49,7 @@ class PackListWidget(
                 null
             else
                 ButtonWidget.Builder(issuesText) {}
-                .tooltip(Tooltip.of(Text.literal(musicPack.validation.joinToString { message -> "$message\n" })))
+                .tooltip(Tooltip.of(getValidationText(musicPack.validation)))
                 .width(client.textRenderer.getWidth(issuesText) + 5)
                 .build()
 
@@ -111,6 +111,31 @@ class PackListWidget(
 
         companion object {
             private val issuesText = Text.literal("Issues Found")
+            private fun getValidationText(validation: List<MusicPack.ValidationMessage>): Text {
+                val warnings = validation.filter { it.type == MusicPack.ValidationMessage.Type.Warning }
+                val errors = validation.filter { it.type == MusicPack.ValidationMessage.Type.Error }
+                val result = StringBuilder()
+                if (warnings.isNotEmpty()) {
+                    result.append("${warnings.size} warning(s)")
+                }
+
+                if (warnings.isNotEmpty() && errors.isNotEmpty()) {
+                    result.append(" and ")
+                }
+
+                if (errors.isNotEmpty()) {
+                    result.append("${errors.size} error(s)")
+                }
+
+                if (warnings.isNotEmpty() || errors.isNotEmpty()) {
+                    result.appendLine()
+                    result.appendLine()
+                }
+
+                result.append(validation.joinToString("\n\n") { message -> message.toString() })
+
+                return Text.literal(result.toString())
+            }
         }
     }
 }
