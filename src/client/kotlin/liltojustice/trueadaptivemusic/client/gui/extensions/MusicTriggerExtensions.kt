@@ -5,7 +5,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import net.minecraft.text.Text
 
-
 fun MusicTrigger.getTriggerTooltipString(): String {
     if (this is ErrorPredicate) {
         return "Failed to load this predicate, so it will always be false.\n\nReason: $reason\n\nJson: $shortenedJson"
