@@ -310,10 +310,13 @@ abstract class ContainerWidget(
             val barSize = ratio * adjustedHeight
             val start = (scrollPosition.toDouble() / (usedRows - totalRows)) * adjustedHeight * (1 - ratio)
             val end = start + barSize
+            val y1 = (y + start + getHeaderOffset()).toInt()
+            val y2 = (y + end + getHeaderOffset()).toInt()
+            val diff = y2 - y1
             context?.drawVerticalLine(
                 x + width - 3,
-                (y + start + getHeaderOffset()).toInt(),
-                (y + end + getHeaderOffset()).toInt(),
+                y1,
+                if (diff < 2) y2 + (2 - diff) else y2,
                 Colors.WHITE
             )
         }
