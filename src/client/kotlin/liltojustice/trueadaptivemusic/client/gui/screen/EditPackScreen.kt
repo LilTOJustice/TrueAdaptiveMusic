@@ -31,10 +31,14 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private val eventView: Boolean
         get() = eventViewWidget.visible
 
-    override fun init() {
+    private fun initPack() {
         TAMClient.playSoundNow(null)
         val newPath = musicPack.initEdit(musicPack)
         TAMClient.musicPack = MusicPack.fromFile(newPath)
+    }
+
+    override fun init() {
+        initPack()
 
         saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
             TAMClient.musicPack = null
@@ -61,7 +65,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            { packStructureWidget.initPredicateWidgets() },
+            {
+                initPack()
+                packStructureWidget.initPredicateWidgets()
+            },
             { event -> switchToEventView(event) },
             { eventView })
         packStructureWidget = PackStructureWidget(
