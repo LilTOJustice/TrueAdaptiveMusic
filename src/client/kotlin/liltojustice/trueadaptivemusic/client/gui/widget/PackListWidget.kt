@@ -44,13 +44,12 @@ class PackListWidget(
         private val musicPack: MusicPack?,
         private val onSelectPack: (selectedPack: MusicPack?) -> Unit)
         : AlwaysSelectedEntryListWidget.Entry<Entry>() {
-        private val validation = musicPack?.validate() ?: emptyList()
         private val issuesButton =
-            if (validation.isEmpty())
+            if (musicPack?.validation?.isEmpty() != false)
                 null
             else
                 ButtonWidget.Builder(issuesText) {}
-                .tooltip(Tooltip.of(Text.literal(validation.joinToString { message -> "$message\n" })))
+                .tooltip(Tooltip.of(Text.literal(musicPack.validation.joinToString { message -> "$message\n" })))
                 .width(client.textRenderer.getWidth(issuesText) + 5)
                 .build()
 

@@ -27,6 +27,9 @@ import kotlin.io.path.*
 
 class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
     private val packPath = Path(Constants.MUSIC_PACK_DIR, packName)
+    private val validationMessages = mutableListOf<ValidationMessage>()
+    val validation
+        get() = validationMessages.toList()
 
     fun initEdit(packWithAssets: MusicPack? = null): Path {
         val packDir = getEditPackDir()
@@ -135,9 +138,7 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
         return outputPath
     }
 
-    fun validate(): List<ValidationMessage> {
-        val result = mutableListOf<ValidationMessage>()
-
+    private fun performStaticValidation() {
         var hasFFMpeg = true
         try {
             val exitCode = Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor()
@@ -150,16 +151,14 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
         if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
-            result.add(
+            validationMessages.add(
                 ValidationMessage(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
                         "This music will not play unless FFMpeg is installed on your system. See the wiki for details.",
-                ValidationMessage.Type.Warning
+                    ValidationMessage.Type.Warning
                 )
             )
         }
-
-        return result
     }
 
     private fun getGson(): Gson {
@@ -199,7 +198,10 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
             }
 
             try {
-                return if (zip) fromZipFile(filePath) else fromDirectory(filePath)
+                val pack = if (zip) fromZipFile(filePath) else fromDirectory(filePath)
+                pack.performStaticValidation()
+
+                return pack
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to read music pack: $filePath", e)

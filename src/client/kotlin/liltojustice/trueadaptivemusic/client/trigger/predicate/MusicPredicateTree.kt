@@ -12,7 +12,7 @@ import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 
-typealias NodeVisitor = (MusicPredicateTree.Node, List<String>) -> Unit
+typealias NodeVisitor = (node: MusicPredicateTree.Node, path: List<String>) -> Unit
 
 class MusicPredicateTree private constructor(
     json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
