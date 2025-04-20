@@ -44,7 +44,7 @@ abstract class MusicEvent: MusicTrigger {
             return ReflectionHelper.getSubclassesOf(MusicEvent::class)
         }
 
-        fun fromJsonWithLibrary(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent? {
+        fun fromJsonWithLibrary(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicEvent {
             try {
                 val event = Companion.fromJson(json)
                 event.playableSounds = MusicPack.parseMusicPath(json, soundLibrary)
@@ -52,9 +52,8 @@ abstract class MusicEvent: MusicTrigger {
             }
             catch (e: Exception) {
                 Logger.log("Failed to load music event due to error:\n$e", LogLevel.ERROR)
+                return ErrorEvent(json, e.message ?: "Unknown")
             }
-
-            return null
         }
 
         fun arrayFromJsonArray(array: JsonArray, soundLibrary: Map<String, PlayableSoundFile>): List<MusicEvent> {

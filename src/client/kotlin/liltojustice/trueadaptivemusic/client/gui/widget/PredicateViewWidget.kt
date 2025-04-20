@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipTex
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
@@ -188,6 +189,9 @@ class PredicateViewWidget(
                         onEventClick(event) },
                     isSelected = { selectedEvent == event })
                     eventWidget.tooltip = Tooltip.of(event.getTriggerTooltipText())
+                    if (event is ErrorEvent) {
+                        eventWidget.color = Colors.RED
+                    }
 
                     eventWidget
                 },

@@ -24,7 +24,7 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
 
     companion object: MusicPredicateCompanion<ErrorPredicate> {
         override fun getTypeName(): String {
-            return "error"
+            return "error_predicate"
         }
 
         override fun fromJson(json: JsonObject): MusicPredicate {
