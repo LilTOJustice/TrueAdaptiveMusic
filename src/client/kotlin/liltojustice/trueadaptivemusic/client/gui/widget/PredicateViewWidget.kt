@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
@@ -180,12 +181,16 @@ class PredicateViewWidget(
 
         events.forEach { event ->
             addWidgetFromRender(
-                { ClickableTextWidget(
+                { val eventWidget = ClickableTextWidget(
                     event.getTypeName(),
                     onClick = {
                         selectedEvent = event
                         onEventClick(event) },
-                    isSelected = { selectedEvent == event }) },
+                    isSelected = { selectedEvent == event })
+                    eventWidget.tooltip = Tooltip.of(event.getTriggerTooltipText())
+
+                    eventWidget
+                },
                 "event: ${event.hashCode()}")
         }
 

@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipString
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
@@ -118,13 +119,15 @@ class PackStructureWidget(
                 return@forEachChild
             }
 
-            val baseTooltipText = child.getBaseTooltipText()
-            child.tooltip = if (selectedWidget === child
-                && !child.targetNode.isParent
-                && child.targetNode.node.parent != null)
-                Tooltip.of(Text.literal("$MOVE_NODE_STRING\n$baseTooltipText"))
-            else
-                Tooltip.of(Text.literal(baseTooltipText))
+            val baseTooltipText = child.getBaseTooltipString()
+            child.tooltip =
+                if (selectedWidget === child && !child.targetNode.isParent && child.targetNode.node.parent != null)
+                    if (baseTooltipText.isBlank())
+                        Tooltip.of(Text.literal(MOVE_NODE_STRING))
+                    else
+                        Tooltip.of(Text.literal("$MOVE_NODE_STRING\n$baseTooltipText"))
+                else
+                    Tooltip.of(Text.literal(baseTooltipText))
         }
 
         super.render(context, mouseX, mouseY, delta)
@@ -169,23 +172,12 @@ class PackStructureWidget(
         val targetNode
             get() = customData as TargetNode
 
-        fun getBaseTooltipText(): String {
+        fun getBaseTooltipString(): String {
             if (targetNode.isParent) {
                 return "Create a new node"
             }
 
-            val predicate = targetNode.node.predicate
-            val result = StringBuilder()
-            val params = predicate.getTriggerParams()
-            result.appendLine(
-                if (params.isEmpty())
-                    predicate.getTypeName()
-                else
-                    "${predicate.getTypeName()}:"
-            )
-            params.forEach { param -> result.appendLine(param.toString()) }
-
-            return result.trim().toString()
+            return targetNode.node.predicate.getTriggerTooltipString()
         }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
