@@ -11,6 +11,7 @@ import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundEvent
@@ -158,6 +159,12 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
                     ValidationMessage.Type.Warning
                 )
             )
+        }
+
+        rules.traverse { node, _ ->
+            (node.predicate as? ErrorPredicate)?.let {
+                validationMessages.add(ValidationMessage(it.reason, ValidationMessage.Type.Warning))
+            }
         }
     }
 

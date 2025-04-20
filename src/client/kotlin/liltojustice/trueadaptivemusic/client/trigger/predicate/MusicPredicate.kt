@@ -16,15 +16,14 @@ abstract class MusicPredicate: MusicTrigger {
             throw MusicTriggerException("Attempt to get type name from abstract predicate type.")
         }
 
-        override fun fromJson(json: JsonObject): MusicPredicate? {
+        override fun fromJson(json: JsonObject): MusicPredicate {
             try {
                 return MusicTrigger.fromJsonProvideSubclasses(json, getTriggerImplementerSubclasses()) as MusicPredicate
             }
             catch (e: MusicTriggerException) {
                 Logger.log("Failed to load music predicate due to error:\n$e", LogLevel.ERROR)
+                return ErrorPredicate(json, e.message ?: "Unknown")
             }
-
-            return null
         }
     }
 

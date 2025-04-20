@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipStr
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -35,11 +36,12 @@ class PackStructureWidget(
         var row = 0
         musicPack.rules.traverse(
             { node, path ->
+                val isError = node.predicate is ErrorPredicate
                 val newWidget = addWidget(
                     NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
-                            if (selectedWidget === widget) {
+                            if (selectedWidget === widget || isError) {
                                 return@NodeWidget
                             }
 
@@ -51,11 +53,19 @@ class PackStructureWidget(
                     row++,
                     (path.size - 1) * INDENT) as NodeWidget
 
+                if (isError) {
+                    newWidget.color = Colors.RED
+                }
+
                 if (newWidget.targetNode.node === selectedNode) {
                     selectedWidget = newWidget
                 }
             },
             { node, path ->
+                if (node.predicate is ErrorPredicate) {
+                    return@traverse
+                }
+
                 addWidget(
                     NodeWidget(
                         "+ Add",

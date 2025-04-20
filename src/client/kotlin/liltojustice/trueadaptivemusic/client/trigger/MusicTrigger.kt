@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.util.JsonHelper
@@ -98,10 +99,14 @@ interface MusicTrigger {
     interface MusicTriggerCompanion<TSelf> where TSelf: MusicTrigger {
         fun getTriggerImplementerSubclasses(): List<KClass<out TSelf>>
         fun getTypeName(): String
-        fun fromJson(json: JsonObject): TSelf?
+        fun fromJson(json: JsonObject): TSelf
 
         fun getTypeNames(): List<String> {
             return getTriggerImplementerSubclasses().mapNotNull { subclass ->
+                if (subclass == ErrorPredicate::class) {
+                    return@mapNotNull null
+                }
+
                 subclass.companionObject?.functions?.firstOrNull { f ->
                     f.name == "getTypeName"
                 }?.call(subclass.companionObjectInstance) as? String
