@@ -12,10 +12,7 @@ import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Util
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.extension
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 @Environment(EnvType.CLIENT)
 class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")) {
@@ -30,15 +27,8 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
 
     override fun init() {
         TAMClient.playSoundNow(null)
-
         createNewPackButton = ButtonWidget.Builder(CREATE_PACK_TEXT)
         {
-            val ongoingEdit = getOngoingEdit()
-            if (ongoingEdit != null) {
-                client?.setScreen(ConfirmBackupScreen(this, ongoingEdit, PackNameScreen(this)))
-                return@Builder
-            }
-
             client?.setScreen(PackNameScreen(this))
         }.build()
         createNewPackButton.width = textRenderer.getWidth(CREATE_PACK_TEXT) + 10
@@ -62,9 +52,9 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
 
         editButton = ButtonWidget.Builder(EDIT_TEXT)
         {
-            val currentPack = TAMClient.musicPack
-            val ongoingEdit = getOngoingEdit()
-            val editScreen = EditPackScreen(this, currentPack ?: return@Builder)
+            val currentPack = TAMClient.musicPack!!
+            val ongoingEdit = getOngoingEdit(Path(currentPack.packName))
+            val editScreen = EditPackScreen(this, currentPack)
             if (ongoingEdit != null && ongoingEdit.name != currentPack.packName) {
                 client?.setScreen(ConfirmBackupScreen(this, ongoingEdit, editScreen))
                 return@Builder
@@ -117,10 +107,11 @@ class MainScreen(private val parent: Screen): Screen(Text.literal("Music Packs")
     }
 
     companion object {
-        fun getOngoingEdit(): Path? {
+        fun getOngoingEdit(packName: Path): Path? {
             return Path(Constants.MUSIC_PACK_DIR)
                 .listDirectoryEntries()
-                .firstOrNull() { file -> file.extension == "new" }
+                .firstOrNull() { file ->
+                    packName.nameWithoutExtension == file.nameWithoutExtension && file.extension == "new" }
         }
 
         private val OPEN_MUSIC_PACKS_TEXT = Text.literal("Open Pack Folder")
