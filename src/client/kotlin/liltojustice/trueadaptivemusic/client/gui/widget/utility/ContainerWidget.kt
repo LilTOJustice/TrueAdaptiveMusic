@@ -73,16 +73,15 @@ abstract class ContainerWidget(
         clampScrollPosition()
         drawScrollBar(context)
 
+        context?.enableScissor(x, y + getHeaderOffset(), x + width, y + height)
         children.forEach { (_, child) ->
             val translated = child.translated(scrollPosition)
             translated.widget.x = x + translated.xOffset + if (indentChildren) X_MARGIN else 0
             translated.widget.y = getTranslatedY(translated.row)
             translated.widget.width = min(translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
-            if (childVisible(translated))
-            {
-                translated.widget.render(context, mouseX, mouseY, delta)
-            }
+            translated.widget.render(context, mouseX, mouseY, delta)
         }
+        context?.disableScissor()
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
