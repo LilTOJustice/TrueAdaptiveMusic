@@ -4,7 +4,6 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
@@ -260,11 +259,6 @@ class PredicateViewWidget(
         saveWidget.tooltip =
             if (saveWidget.active)
                 null
-            else if (requiredPredicateArgs.any { arg ->
-                InputWidgetMaker.isTypedIdentifierList(arg.type)
-                        && TypedIdentifier.getRegistryIdsFromType(arg.type.arguments.firstOrNull()!!.type!!)
-                            .isEmpty() })
-                DYNAMIC_REGISTRY_TOOLTIP
             else
                 MISSING_ARGS_TOOLTIP
     }
@@ -282,9 +276,6 @@ class PredicateViewWidget(
     }
 
     companion object {
-        private val DYNAMIC_REGISTRY_TOOLTIP =
-            Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
-
         private val MISSING_ARGS_TOOLTIP =
             Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
     }

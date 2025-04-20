@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -144,11 +143,6 @@ class EventViewWidget(
         saveWidget.tooltip =
             if (saveWidget.active)
                 null
-            else if (requiredEventArgs.any { arg ->
-                    InputWidgetMaker.isTypedIdentifierList(arg.type)
-                            && TypedIdentifier.getRegistryIdsFromType(arg.type.arguments.firstOrNull()!!.type!!)
-                        .isEmpty() })
-                DYNAMIC_REGISTRY_TOOLTIP
             else
                 MISSING_ARGS_TOOLTIP
     }
@@ -175,9 +169,6 @@ class EventViewWidget(
     }
 
     companion object {
-        private val DYNAMIC_REGISTRY_TOOLTIP =
-            Tooltip.of(Text.literal("Can't access required dynamic registry. Try again while a world is loaded."))
-
         private val MISSING_ARGS_TOOLTIP =
             Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
     }
