@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateException
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KClass
@@ -30,7 +30,7 @@ interface MusicTrigger {
             return companion.getTypeName() + if (params.isEmpty()) "" else "{${params.joinToString(",")}}"
         }
         else {
-            throw MusicPredicateException(getMissingCompanionExceptionText(javaClass.kotlin))
+            throw MusicTriggerException(getMissingCompanionExceptionText(javaClass.kotlin))
         }
     }
 
@@ -43,7 +43,7 @@ interface MusicTrigger {
         if (companion is MusicTriggerCompanion<*>) {
             return companion.getTypeName()
         } else {
-            throw MusicPredicateException(getMissingCompanionExceptionText(javaClass.kotlin))
+            throw MusicTriggerException(getMissingCompanionExceptionText(javaClass.kotlin))
         }
     }
 
@@ -55,17 +55,17 @@ interface MusicTrigger {
             for (subclass in subclasses)
             {
                 if ((subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "getTypeName" }
-                        ?: throw MusicPredicateException(getMissingCompanionExceptionText(subclass)))
+                        ?: throw MusicTriggerException(getMissingCompanionExceptionText(subclass)))
                         .call(subclass.companionObjectInstance) == type)
                 {
                     return (subclass.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
-                        ?: throw MusicPredicateException("fromJson method missing."))
+                        ?: throw MusicTriggerException("fromJson method missing."))
                         .call(subclass.companionObjectInstance, json) as? MusicTrigger
-                        ?: throw MusicPredicateException("Could not instantiate music predicate from json")
+                        ?: throw MusicTriggerException("Could not instantiate music predicate from json")
                 }
             }
 
-            throw MusicPredicateException("Invalid music predicate type: $type")
+            throw MusicTriggerException("Invalid music trigger type: $type")
         }
 
         fun getTruncatedTriggerId(triggerId: String): String {
@@ -82,10 +82,10 @@ interface MusicTrigger {
         }
 
         override fun getTypeName(): String {
-            throw MusicPredicateException("Attempt to get type name from MusicTrigger interface.")
+            throw MusicTriggerException("Attempt to get type name from MusicTrigger interface.")
         }
 
-        override fun fromJson(json: JsonObject): MusicTrigger {
+        override fun fromJson(json: JsonObject): MusicTrigger? {
             return fromJsonProvideSubclasses(json)
         }
 
@@ -98,7 +98,7 @@ interface MusicTrigger {
     interface MusicTriggerCompanion<TSelf> where TSelf: MusicTrigger {
         fun getTriggerImplementerSubclasses(): List<KClass<out TSelf>>
         fun getTypeName(): String
-        fun fromJson(json: JsonObject): TSelf
+        fun fromJson(json: JsonObject): TSelf?
 
         fun getTypeNames(): List<String> {
             return getTriggerImplementerSubclasses().mapNotNull { subclass ->
@@ -121,7 +121,7 @@ interface MusicTrigger {
                 subclass.companionObject?.functions?.firstOrNull { f ->
                     f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == typeName }
                 ?.primaryConstructor
-                ?: throw MusicPredicateException("No constructor found for $typeName. It must have a constructor.")
+                ?: throw MusicTriggerException("No constructor found for $typeName. It must have a constructor.")
         }
     }
 }

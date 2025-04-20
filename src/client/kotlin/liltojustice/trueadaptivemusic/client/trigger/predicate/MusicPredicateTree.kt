@@ -16,7 +16,7 @@ typealias NodeVisitor = (MusicPredicateTree.Node, List<String>) -> Unit
 
 class MusicPredicateTree private constructor(
     json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
-    private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
+    private val root = if (json != null) Node.fromJson(json, soundLibrary)!! else Node.makeRoot()
 
     fun toJson(): JsonObject {
         return root.toJson()
@@ -209,9 +209,9 @@ class MusicPredicateTree private constructor(
                 return Node(RootPredicate(), listOf(), listOf())
             }
 
-            fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
+            fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node? {
                 return Node(
-                    MusicPredicate.fromJson(json),
+                    MusicPredicate.fromJson(json) ?: return null,
                     MusicPack.parseMusicPath(json, soundLibrary),
                     MusicEvent.arrayFromJsonArray(
                         json.getAsJsonArray("events") ?: JsonArray(), soundLibrary),
@@ -224,7 +224,7 @@ class MusicPredicateTree private constructor(
             private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")
-                        .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()
+                        .mapNotNull { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()
                 else mutableListOf()
             }
         }
