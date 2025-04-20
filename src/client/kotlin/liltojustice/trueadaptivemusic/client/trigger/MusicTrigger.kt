@@ -65,7 +65,7 @@ interface MusicTrigger {
                 }
             }
 
-            throw MusicTriggerException("Invalid music trigger type: $type")
+            throw MusicTriggerException("Unknown music trigger type: $type")
         }
 
         fun getTruncatedTriggerId(triggerId: String): String {
@@ -85,7 +85,7 @@ interface MusicTrigger {
             throw MusicTriggerException("Attempt to get type name from MusicTrigger interface.")
         }
 
-        override fun fromJson(json: JsonObject): MusicTrigger? {
+        override fun fromJson(json: JsonObject): MusicTrigger {
             return fromJsonProvideSubclasses(json)
         }
 
