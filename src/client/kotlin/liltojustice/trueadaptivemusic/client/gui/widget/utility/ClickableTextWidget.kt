@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -39,7 +39,8 @@ open class ClickableTextWidget(
                 y - BORDER_BUFFER / 2,
                 width + BORDER_BUFFER,
                 height + BORDER_BUFFER,
-                Colors.WHITE)
+                Colors.WHITE
+            )
         }
 
         if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {

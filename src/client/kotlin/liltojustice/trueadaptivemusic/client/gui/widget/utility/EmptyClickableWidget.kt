@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder

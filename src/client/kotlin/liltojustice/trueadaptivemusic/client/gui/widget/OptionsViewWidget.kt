@@ -1,6 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import kotlin.reflect.full.primaryConstructor

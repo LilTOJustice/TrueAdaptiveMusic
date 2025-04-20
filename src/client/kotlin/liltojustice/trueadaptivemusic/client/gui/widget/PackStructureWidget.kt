@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.DrawContext

@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
@@ -70,7 +70,8 @@ class InputWidgetMaker {
                     10,
                     prompt,
                     { checked -> outArgs[arg.index] = checked },
-                    checked = outArgs[arg.index] as? Boolean ?: false)
+                    checked = outArgs[arg.index] as? Boolean ?: false
+                )
             }
             else if (arg.type.isSubtypeOf(typeOf<Enum<*>>())) {
                 val enumClass = (arg.type.classifier as KClass<*>).java
@@ -81,10 +82,13 @@ class InputWidgetMaker {
                 else
                     DropdownWidget(
                         options,
-                        { enumOption -> outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption} },
+                        { enumOption ->
+                            outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
+                        },
                         0,
                         prompt,
-                        startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: "")
+                        startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: ""
+                    )
             }
             else if (isEnumList(arg.type)) {
                 val type = arg.type.arguments.firstOrNull()?.type
@@ -94,9 +98,12 @@ class InputWidgetMaker {
                 MultiSelectDropdownWidget(
                     options,
                     0,
-                    { selected -> outArgs[arg.index] = selected
-                        .map { enumOption ->
-                            enumClass.enumConstants.first { enum -> enum.toString() == enumOption } } },
+                    { selected ->
+                        outArgs[arg.index] = selected
+                            .map { enumOption ->
+                                enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
+                            }
+                    },
                     "${prompt}s",
                     notSelectedPlaceholder = "Select a value",
                     alreadySelected = (outArgs[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf())
@@ -112,7 +119,8 @@ class InputWidgetMaker {
                         { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
                         0,
                         prompt,
-                        startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: "")
+                        startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: ""
+                    )
             }
             else if (isTypedIdentifierList(arg.type)) {
                 val type = arg.type.arguments.firstOrNull()?.type
@@ -127,7 +135,8 @@ class InputWidgetMaker {
                         0,
                         { selected ->
                             outArgs[arg.index] = selected
-                                .map { id -> TypedIdentifier.initializeFromIdString(type, id) } },
+                                .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
+                        },
                         "${prompt}s",
                         notSelectedPlaceholder = "Select an Identifier",
                         alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())

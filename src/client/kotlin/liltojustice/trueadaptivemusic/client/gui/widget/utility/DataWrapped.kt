@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 interface DataWrapped<TImpl: DataWrapped<TImpl>> {
     var customData: Any?

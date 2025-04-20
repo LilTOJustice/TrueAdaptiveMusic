@@ -1,7 +1,8 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
 import net.minecraft.text.Text
@@ -16,7 +17,7 @@ class CheckboxWidget(
     x: Int = 0,
     y: Int = 0,
     checked: Boolean = true): CheckboxWidget(x, y, 0, 0, Text.literal(prompt), checked) {
-    val textRenderer = MinecraftClient.getInstance().textRenderer
+    val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
         width = checkboxSize + PADDING + textRenderer.getWidth(prompt)

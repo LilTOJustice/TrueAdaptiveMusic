@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.gui.widget
+package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
@@ -306,7 +306,8 @@ abstract class ContainerWidget(
                 x + width - 3,
                 (y + start + getHeaderOffset()).toInt(),
                 (y + end + getHeaderOffset()).toInt(),
-                Colors.WHITE)
+                Colors.WHITE
+            )
         }
     }
 
@@ -330,7 +331,7 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget("Back", onClick = { it() } ) }
+            return backButtonCallback.let { ClickableTextWidget("Back", onClick = { it() }) }
         }
     }
 
