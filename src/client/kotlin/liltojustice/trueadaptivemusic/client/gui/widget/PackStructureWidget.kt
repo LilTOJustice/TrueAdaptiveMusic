@@ -1,9 +1,11 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipString
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.DrawContext
@@ -54,6 +56,9 @@ class PackStructureWidget(
 
                 if (node.predicate is ErrorPredicate) {
                     newWidget.color = Colors.RED
+                }
+                else if (node.events.any { event -> event is ErrorEvent }) {
+                    newWidget.color = Constants.Colors.YELLOW
                 }
 
                 if (newWidget.targetNode.node === selectedNode) {
@@ -195,7 +200,10 @@ class PackStructureWidget(
                 return "Create a new node"
             }
 
-            return targetNode.node.predicate.getTriggerTooltipString()
+            return targetNode.node.predicate.getTriggerTooltipString() +
+                    if (targetNode.node.events.any { event -> event is ErrorEvent })
+                        "\n\nHas event errors. Click to see."
+                    else ""
         }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {

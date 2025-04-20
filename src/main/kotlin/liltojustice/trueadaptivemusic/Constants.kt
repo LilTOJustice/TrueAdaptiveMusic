@@ -16,6 +16,7 @@ class Constants {
     class Colors {
         companion object {
             const val GREEN = 0x00FF00
+            const val YELLOW = 0xFFFF00
         }
     }
 }
