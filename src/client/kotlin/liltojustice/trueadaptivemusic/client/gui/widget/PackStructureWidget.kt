@@ -39,6 +39,10 @@ class PackStructureWidget(
                     NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
+                            if (selectedWidget === widget) {
+                                return@NodeWidget
+                            }
+
                             onSelectEditExistingNode(node)
                             selectedWidget = widget as NodeWidget
                         },
@@ -56,6 +60,10 @@ class PackStructureWidget(
                     NodeWidget(
                         "+ Add",
                         onClick = { widget ->
+                            if (selectedWidget === widget) {
+                                return@NodeWidget
+                            }
+
                             onSelectCreateNewNode(node)
                             selectedWidget = widget as NodeWidget
                         },
