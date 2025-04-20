@@ -37,7 +37,7 @@ class EventViewWidget(
         event?.let {
             setSelectedEventTypeName(it.getTypeName())
             eventArgs = (it.getTriggerParams().map { param -> param.value }).toMutableList()
-            selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
+            selectedMusicPaths = it.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         } ?: {
             setSelectedEventTypeName(MusicEvent.getTypeNames().firstOrNull() ?: "")
             selectedMusicPaths = mutableListOf()
@@ -159,7 +159,7 @@ class EventViewWidget(
         selectedEventTypeName = typeName
         requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
-        clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("eventTypeChoice", "musicChoice") }
+        clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("eventTypeChoice") }
     }
 
     private fun exit(event: MusicEvent?) {
