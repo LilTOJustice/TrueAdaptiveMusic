@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.javasucks
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -32,11 +33,7 @@ class DebugHudMixinHelper {
 
             rules.preorderTraverse { _, path ->
                 val pathString = path.joinToString(MusicPredicateTree.PATH_SEPARATOR)
-                val fullText = path.last()
-                val arrays = Regex("\\[[^]]*]").findAll(fullText).map { result -> result.value }
-                val text = arrays.fold(fullText) { partial: String, array ->
-                    partial.replace(array, Regex(",.*").replace(array, ", ...]"))
-                }
+                val text = MusicTrigger.getTruncatedTriggerId(path.last())
 
                 if (currentNodePath.contains(pathString)) {
                     predicateTreeLines.add(Line(path.size - 1, pathString, text, Constants.Colors.GREEN))

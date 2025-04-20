@@ -34,6 +34,10 @@ interface MusicTrigger {
         }
     }
 
+    fun getTruncatedTriggerId(): String {
+        return Companion.getTruncatedTriggerId(getTriggerId())
+    }
+
     fun getTypeName(): String {
         val companion = javaClass.kotlin.companionObjectInstance
         if (companion is MusicTriggerCompanion<*>) {
@@ -46,9 +50,7 @@ interface MusicTrigger {
     companion object: MusicTriggerCompanion<MusicTrigger> {
         fun fromJsonProvideSubclasses(
             json: JsonObject,
-            subclasses: List<KClass<out MusicTrigger>> = getTriggerImplementerSubclasses()
-        )
-        : MusicTrigger {
+            subclasses: List<KClass<out MusicTrigger>> = getTriggerImplementerSubclasses()): MusicTrigger {
             val type = JsonHelper.getString(json, "type")
             for (subclass in subclasses)
             {
@@ -64,6 +66,15 @@ interface MusicTrigger {
             }
 
             throw MusicPredicateException("Invalid music predicate type: $type")
+        }
+
+        fun getTruncatedTriggerId(triggerId: String): String {
+            val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
+            val text = arrays.fold(triggerId) { partial: String, array ->
+                partial.replace(array, Regex(",.*").replace(array, ", ...]"))
+            }
+
+            return text
         }
 
         override fun getTriggerImplementerSubclasses(): List<KClass<out MusicTrigger>> {
