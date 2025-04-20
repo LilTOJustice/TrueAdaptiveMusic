@@ -28,7 +28,7 @@ import kotlin.io.path.*
 class MusicPack private constructor(val metadata: Metadata, val rules: MusicPredicateTree, val packName: String) {
     private val packPath = Path(Constants.MUSIC_PACK_DIR, packName)
 
-    fun initEdit(packWithAssets: MusicPack? = null) {
+    fun initEdit(packWithAssets: MusicPack? = null): Path {
         val packDir = getEditPackDir()
         if (!packDir.exists()) {
             packDir.createDirectory()
@@ -56,6 +56,8 @@ class MusicPack private constructor(val metadata: Metadata, val rules: MusicPred
 
         initRules()
         initMeta()
+
+        return packDir
     }
 
     fun getEditPackAssetsPath(): Path {

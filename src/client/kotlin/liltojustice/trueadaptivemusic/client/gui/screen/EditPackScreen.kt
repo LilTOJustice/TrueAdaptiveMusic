@@ -35,7 +35,8 @@ class EditPackScreen(
 
     override fun init() {
         TAMClient.playSoundNow(null)
-        musicPack.initEdit(musicPack)
+        val newPath = musicPack.initEdit(musicPack)
+        TAMClient.musicPack = MusicPack.fromFile(newPath)
 
         saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
             TAMClient.musicPack = null
