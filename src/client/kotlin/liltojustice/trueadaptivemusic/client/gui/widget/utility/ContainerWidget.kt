@@ -17,6 +17,7 @@ abstract class ContainerWidget(
     message: String,
     private val showHeader: Boolean,
     private val bordered: Boolean,
+    private val scrollable: Boolean = false,
     private val indentChildren: Boolean = true,
     x: Int = 0,
     y: Int = 0,
@@ -131,7 +132,9 @@ abstract class ContainerWidget(
             return false
         }
 
-        scrollPosition -= amount.toInt()
+        if (scrollable) {
+            scrollPosition -= amount.toInt()
+        }
 
         return true
     }

@@ -19,7 +19,8 @@ class PackStructureWidget(
     private val onSelectCreateNewNode: (parent: MusicPredicateTree.Node) -> Unit,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(width, height, "Pack Structure", true, false, true, x, y) {
+    : ContainerWidget(
+    width, height, "Pack Structure", true, false, true, true, x, y) {
     private var selectedWidget: NodeWidget? = null
     private var mouseButtonHeld = false
     private val selectedNode

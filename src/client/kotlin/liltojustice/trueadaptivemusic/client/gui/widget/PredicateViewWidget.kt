@@ -27,7 +27,8 @@ class PredicateViewWidget(
     private val inEventView: () -> Boolean,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(width, height, "Predicate View", true, false, true, x, y) {
+    : ContainerWidget(
+    width, height, "Predicate View", true, false, true, true, x, y) {
     private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
         .filter { typeName -> typeName != RootPredicate.getTypeName() }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""

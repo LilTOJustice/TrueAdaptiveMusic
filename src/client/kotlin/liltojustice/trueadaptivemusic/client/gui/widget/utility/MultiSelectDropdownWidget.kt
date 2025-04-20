@@ -21,6 +21,7 @@ class MultiSelectDropdownWidget(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {

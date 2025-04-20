@@ -20,7 +20,8 @@ class EventViewWidget(
     private val onExitView: (newEvent: MusicEvent?) -> Unit,
     x: Int = 0,
     y: Int = 0)
-    : ContainerWidget(width, height, "Event View", true, false, true, x, y) {
+    : ContainerWidget(
+    width, height, "Event View", true, false, true, true, x, y) {
     private val eventTypeNameOptions = MusicEvent.getTypeNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
     private var requiredEventArgs = listOf<KParameter>()
