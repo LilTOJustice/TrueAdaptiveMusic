@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -35,12 +36,13 @@ class EventViewWidget(
 
     fun setEvent(event: MusicEvent?) {
         selectedEvent = event
-        event?.let {
-            setSelectedEventTypeName(it.getTypeName())
-            eventArgs = (it.getTriggerParams().map { param -> param.value }).toMutableList()
-            selectedMusicPaths = it.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
-        } ?: {
-            setSelectedEventTypeName(MusicEvent.getTypeNames().firstOrNull() ?: "")
+        if (event != null) {
+            setSelectedEventTypeName(event.getTypeName())
+            eventArgs = (event.getTriggerParams().map { param -> param.value }).toMutableList()
+            selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
+        }
+        else {
+            setSelectedEventTypeName(eventTypeNameOptions.firstOrNull() ?: "")
             selectedMusicPaths = mutableListOf()
         }
     }
@@ -58,6 +60,22 @@ class EventViewWidget(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.render(context, mouseX, mouseY, delta)
+        if (selectedEvent is ErrorEvent) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget(
+                        "Delete",
+                        onClick = {
+                            exit(null)
+                        }
+                    )
+                },
+                "Delete"
+            )
+
+            return
+        }
+
         if (!visible) {
             return
         }
@@ -155,7 +173,7 @@ class EventViewWidget(
         selectedEventTypeName = typeName
         requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
-        clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("eventTypeChoice") }
+        clearWidgetsFromRender()
     }
 
     private fun exit(event: MusicEvent?) {

@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
@@ -103,7 +104,7 @@ interface MusicTrigger {
 
         fun getTypeNames(): List<String> {
             return getTriggerImplementerSubclasses().mapNotNull { subclass ->
-                if (subclass == ErrorPredicate::class) {
+                if (subclass == ErrorPredicate::class || subclass == ErrorEvent::class) {
                     return@mapNotNull null
                 }
 

@@ -123,7 +123,7 @@ class PredicateViewWidget(
             return
         }
 
-        if (selectedNode?.predicate is RootPredicate) {
+        if (selectedNode?.predicate !is RootPredicate) {
             addWidgetFromRender(
                 {
                     DropdownWidget(
@@ -191,6 +191,10 @@ class PredicateViewWidget(
                 { val eventWidget = ClickableTextWidget(
                     event.getTypeName(),
                     onClick = {
+                        if (selectedEvent === event) {
+                            return@ClickableTextWidget
+                        }
+
                         selectedEvent = event
                         onEventClick(event) },
                     isSelected = { selectedEvent == event })
