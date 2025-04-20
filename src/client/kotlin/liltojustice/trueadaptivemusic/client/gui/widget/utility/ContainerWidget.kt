@@ -48,6 +48,8 @@ abstract class ContainerWidget(
             return
         }
 
+        super.render(context, mouseX, mouseY, delta)
+
         if (showHeader)
         {
             context?.setShaderColor(0f, 0f, 0f, if (bordered) 1f else 0.5f)

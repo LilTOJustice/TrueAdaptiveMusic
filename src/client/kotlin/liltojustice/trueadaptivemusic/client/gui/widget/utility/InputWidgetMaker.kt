@@ -4,7 +4,9 @@ import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.text.Text
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -110,36 +112,40 @@ class InputWidgetMaker {
             }
             else if (arg.type.isSubtypeOf(typeOf<TypedIdentifier>())) {
                 val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
+                val result = DropdownWidget(
+                    options,
+                    { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
+                    0,
+                    prompt,
+                    startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: ""
+                )
 
-                if (options.isEmpty())
-                    EmptyClickableWidget()
-                else
-                    DropdownWidget(
-                        options,
-                        { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
-                        0,
-                        prompt,
-                        startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: ""
-                    )
+                if (options.isEmpty()) {
+                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
+                }
+
+                result
             }
             else if (isTypedIdentifierList(arg.type)) {
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
                 val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
+                val result = MultiSelectDropdownWidget(
+                    options,
+                    0,
+                    { selected ->
+                        outArgs[arg.index] = selected
+                            .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
+                    },
+                    "${prompt}s",
+                    notSelectedPlaceholder = "Select an Identifier",
+                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
 
-                if (options.isEmpty())
-                    EmptyClickableWidget()
-                else
-                    MultiSelectDropdownWidget(
-                        options,
-                        0,
-                        { selected ->
-                            outArgs[arg.index] = selected
-                                .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
-                        },
-                        "${prompt}s",
-                        notSelectedPlaceholder = "Select an Identifier",
-                        alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
+                if (options.isEmpty()) {
+                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
+                }
+
+                result
             }
             else {
                 Logger.log("Couldn't create widget for expected type ${arg.type}.", LogLevel.WARNING)
@@ -156,5 +162,9 @@ class InputWidgetMaker {
             return type.isSubtypeOf(typeOf<List<*>>())
                     && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
         }
+
+        private val DYNAMIC_REGISTRY_TEXT =
+            Text.literal(
+                "No options available to add due to a dynamic registry requirement. Try joining a world first.")
     }
 }
