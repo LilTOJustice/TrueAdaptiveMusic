@@ -298,6 +298,10 @@ abstract class ContainerWidget(
     }
 
     private fun drawScrollBar(context: DrawContext?) {
+        if (!scrollable) {
+            return
+        }
+
         val usedRows = maxUsedRow(countOffscreen = true) + 1
         val totalRows = totalRows()
         if (usedRows > totalRows) {
