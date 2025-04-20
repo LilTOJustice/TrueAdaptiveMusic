@@ -173,4 +173,3 @@ class EventViewWidget(
             Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
     }
 }
-
