@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
@@ -117,7 +118,12 @@ class PredicateViewWidget(
     }
 
     private fun renderEditMode(mouseX: Int, mouseY: Int) {
-        if (selectedNode?.predicate?.getTypeName() != RootPredicate.getTypeName()) {
+        if (selectedNode?.predicate is ErrorPredicate) {
+            renderErrorMode()
+            return
+        }
+
+        if (selectedNode?.predicate is RootPredicate) {
             addWidgetFromRender(
                 {
                     DropdownWidget(
@@ -265,6 +271,21 @@ class PredicateViewWidget(
                 null
             else
                 MISSING_ARGS_TOOLTIP
+    }
+
+    private fun renderErrorMode() {
+        addWidgetFromRender(
+            {
+                ClickableTextWidget(
+                    "Delete",
+                    onClick = {
+                        selectedNode?.orphan()
+                        save()
+                    }
+                )
+            },
+            "Delete"
+        )
     }
 
     private fun unsetAll() {

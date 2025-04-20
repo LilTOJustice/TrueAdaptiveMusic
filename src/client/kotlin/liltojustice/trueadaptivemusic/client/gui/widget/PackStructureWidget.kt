@@ -36,12 +36,11 @@ class PackStructureWidget(
         var row = 0
         musicPack.rules.traverse(
             { node, path ->
-                val isError = node.predicate is ErrorPredicate
                 val newWidget = addWidget(
                     NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
-                            if (selectedWidget === widget || isError) {
+                            if (selectedWidget === widget) {
                                 return@NodeWidget
                             }
 
@@ -53,7 +52,7 @@ class PackStructureWidget(
                     row++,
                     (path.size - 1) * INDENT) as NodeWidget
 
-                if (isError) {
+                if (node.predicate is ErrorPredicate) {
                     newWidget.color = Colors.RED
                 }
 
