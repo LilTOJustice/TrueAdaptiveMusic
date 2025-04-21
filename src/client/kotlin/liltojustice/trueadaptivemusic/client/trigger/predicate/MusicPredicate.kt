@@ -1,8 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import net.minecraft.client.MinecraftClient
@@ -21,7 +19,6 @@ abstract class MusicPredicate: MusicTrigger {
                 return MusicTrigger.fromJsonProvideSubclasses(json, getTriggerImplementerSubclasses()) as MusicPredicate
             }
             catch (e: MusicTriggerException) {
-                Logger.log("Failed to load music predicate due to error:\n$e", LogLevel.ERROR)
                 return ErrorPredicate(json, e.message ?: "Unknown")
             }
         }

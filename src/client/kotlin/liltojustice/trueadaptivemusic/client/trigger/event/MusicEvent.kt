@@ -2,8 +2,6 @@ package liltojustice.trueadaptivemusic.client.trigger.event
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.music.MusicPack
@@ -51,7 +49,6 @@ abstract class MusicEvent: MusicTrigger {
                 return event
             }
             catch (e: Exception) {
-                Logger.log("Failed to load music event due to error:\n$e", LogLevel.ERROR)
                 return ErrorEvent(json, e.message ?: "Unknown")
             }
         }
