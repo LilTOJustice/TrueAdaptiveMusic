@@ -80,7 +80,10 @@ abstract class ContainerWidget(
             translated.widget.x = x + translated.xOffset + if (indentChildren) X_MARGIN else 0
             translated.widget.y = getTranslatedY(translated.row)
             translated.widget.width = min(translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
+            val prevVisibility = translated.widget.visible
+            translated.widget.visible = prevVisibility && contains(translated.widget)
             translated.widget.render(context, mouseX, mouseY, delta)
+            translated.widget.visible = prevVisibility
         }
         context?.disableScissor()
     }
@@ -332,6 +335,17 @@ abstract class ContainerWidget(
             child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY) }
     }
 
+    private fun contains(widget: ClickableWidget): Boolean {
+        val left = x
+        val right = left + width
+        val top = y + getHeaderOffset()
+        val bottom = top + height - getHeaderOffset()
+        val widgetLeft = widget.x
+        val widgetRight = widgetLeft + widget.width
+        val widgetTop = widget.y
+        val widgetBottom = widgetTop + widget.height
+        return left <= widgetRight && right >= widgetLeft && top <= widgetBottom && bottom >= widgetTop
+    }
 
     companion object {
         private const val TOP_MARGIN = 12

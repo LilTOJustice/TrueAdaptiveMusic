@@ -203,7 +203,8 @@ class PackStructureWidget(
             return targetNode.node.predicate.getTriggerTooltipString() +
                     if (targetNode.node.events.any { event -> event is ErrorEvent })
                         "\n\nHas event errors. Click to see."
-                    else ""
+                    else
+                        ""
         }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
