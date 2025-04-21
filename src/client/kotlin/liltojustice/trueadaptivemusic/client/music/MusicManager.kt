@@ -10,9 +10,11 @@ import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
+import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.ActionResult
+import net.minecraft.util.math.Vec3d
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max
@@ -142,7 +144,11 @@ class MusicManager(
             timedIdentifier = ""
         }
 
-        val nextMusic = predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
+        val nextMusic =
+            if (jukeboxPlaying())
+                null
+            else
+                predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
 
         if (!shouldPlay(nextMusic, identifier))
         {
@@ -255,6 +261,17 @@ class MusicManager(
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
         return client.soundManager.isPlaying(soundInstance) &&
                 !(client.soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
+    }
+
+    private fun jukeboxPlaying(): Boolean {
+        return client.soundManager.soundSystem.sources.keys.any {
+            instance -> instance.category == SoundCategory.RECORDS
+                && instance is PositionedSoundInstance
+                && client.player?.let {
+                    Vec3d(instance.x, instance.y, instance.z)
+                        .squaredDistanceTo(it.pos) < instance.sound.attenuation * instance.sound.attenuation * 4
+                } ?: false
+        }
     }
 
     companion object {
