@@ -207,7 +207,7 @@ class PackStructureWidget(
         }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
-            return targetNode.node.parent != null && targetNode.node.isValidNewChild(selectedNode)
+            return (targetNode.node.parent != null || targetNode.isParent) && targetNode.node.isValidNewChild(selectedNode)
         }
     }
 
