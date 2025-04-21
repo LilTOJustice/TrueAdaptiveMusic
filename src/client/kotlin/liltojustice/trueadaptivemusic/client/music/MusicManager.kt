@@ -172,7 +172,7 @@ class MusicManager(
         if (newMusic == null)
         {
             if (isPlaying(currentSoundInstance)) {
-                volumeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 0F)
+                volumeManager.startFade(currentSoundInstance!!, REGULAR_FADE_TICKS, 0F, true)
                 currentSoundInstance = null
             }
 
