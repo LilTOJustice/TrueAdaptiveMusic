@@ -107,7 +107,12 @@ class MusicPredicateTree private constructor(
         fun getSatisfiedNode(
             client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
                 : Triple<Node, List<String>, Map<String, MusicEvent>> {
-            if (!predicate.test(client)) {
+            try {
+                if (!predicate.test(client)) {
+                    return Triple(this, emptyList(), emptyMap())
+                }
+            }
+            catch (e: Throwable) {
                 return Triple(this, emptyList(), emptyMap())
             }
 
