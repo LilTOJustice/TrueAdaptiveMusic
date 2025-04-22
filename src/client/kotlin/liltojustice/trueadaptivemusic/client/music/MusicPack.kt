@@ -223,8 +223,8 @@ class MusicPack private constructor(
         if (badReferences.isNotEmpty()) {
             validation.addWarning(
                 "$parentType$typeName references ${badReferences.size} unknown class(es) from " +
-                        "${commonPackages.size} missing package(s):\n\n" +
-                        commonPackages.joinToString("\n"))
+                        "${commonPackages.size} missing package(s):\n\n" + commonPackages.joinToString("\n")
+                        + "\nYou are probably missing a mod.")
         }
     }
 
