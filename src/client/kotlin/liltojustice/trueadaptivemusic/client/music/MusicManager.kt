@@ -41,7 +41,8 @@ class MusicManager(
 
     init {
         InvokeMusicEventCallback.EVENT.register { eventType, args ->
-            activeEvents.firstOrNull { event -> eventType == event.getTypeName() && event.validate(*args) }
+            activeEvents.firstOrNull { event ->
+                eventType == event.getTypeName() && runCatching { event.validate(*args) }.getOrNull() == true }
                 ?.let { event ->
                     event.playableSounds.randomOrNull()?.let {
                         playNow(it, true)
