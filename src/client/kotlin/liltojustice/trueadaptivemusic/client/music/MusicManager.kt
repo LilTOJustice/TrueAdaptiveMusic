@@ -229,6 +229,7 @@ class MusicManager(
         timedIdentifierTimerTask = null
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
+        activeEvents = emptyList()
     }
 
     private fun beginCrossfade(newSoundInstance: SoundInstance) {
