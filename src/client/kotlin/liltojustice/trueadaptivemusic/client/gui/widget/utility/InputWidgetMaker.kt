@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import net.minecraft.client.gui.screen.Screen
@@ -148,7 +147,7 @@ class InputWidgetMaker {
                 result
             }
             else {
-                Logger.log("Couldn't create widget for expected type ${arg.type}.", LogLevel.WARNING)
+                Logger.logWarning("Couldn't create widget for expected type ${arg.type}.")
                 EmptyClickableWidget()
             }
         }

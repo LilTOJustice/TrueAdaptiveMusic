@@ -5,8 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger.Companion.log
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -192,9 +191,10 @@ class MusicPack private constructor(
             }
         }
 
-        val analyzer = ASMDependencyAnalyzer()
+        // TODO: Figure out how to properly include ASMDependencyAnalyzer
+        /*val analyzer = ASMDependencyAnalyzer()
         usedPredicateTypes.forEach { kClass -> validateClass(kClass, analyzer) }
-        usedEventTypes.forEach { kClass -> validateClass(kClass, analyzer) }
+        usedEventTypes.forEach { kClass -> validateClass(kClass, analyzer) }*/
     }
 
     private fun validateClass(kClass: KClass<*>, analyzer: ASMDependencyAnalyzer) {
@@ -243,7 +243,7 @@ class MusicPack private constructor(
                     return@mapNotNull fromFile(path)
                 }
                 catch (e: Exception) {
-                    log("Failed to load pack from path $path:\n${e}", LogLevel.ERROR)
+                    Logger.logError("Failed to load pack from path $path:\n${e}")
                 }
 
                 return@mapNotNull null
@@ -286,7 +286,7 @@ class MusicPack private constructor(
                             )
                     } catch (_: InvalidIdentifierException) {}
 
-                    log("Could not find \"$path\", skipping...", LogLevel.WARNING)
+                    Logger.logWarning("Could not find \"$path\", skipping...")
                     return@map null
                 }.filterNotNull()
         }
@@ -310,7 +310,8 @@ class MusicPack private constructor(
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
             if (assetsDir == null)
             {
-                log("Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
+                Logger.logInfo(
+                    "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
             }
             val playableSoundFiles = assetsDir?.listDirectoryEntries()
                 ?.map { file -> PlayableSoundFile(RegularSoundFile(file)) }

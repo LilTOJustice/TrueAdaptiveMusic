@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.music
 
-import liltojustice.trueadaptivemusic.LogLevel
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
@@ -213,7 +212,7 @@ class MusicManager(
             }
         }
         catch (e: MusicLoadException) {
-            Logger.log("Error: Failed to play sound instance - ${e.message}", LogLevel.ERROR)
+            Logger.logError("Error: Failed to play sound instance - ${e.message}")
         }
     }
 

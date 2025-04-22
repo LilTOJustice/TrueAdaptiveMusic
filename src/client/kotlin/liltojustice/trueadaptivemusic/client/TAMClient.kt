@@ -1,8 +1,7 @@
 package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.LogLevel
-import liltojustice.trueadaptivemusic.Logger.Companion.log
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.music.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.MusicManager
@@ -32,7 +31,7 @@ object TAMClient {
             try {
                 options = options.copy(selectedPack = packName)
             } catch (ignored: IOException) {
-                log("Failed to save selected pack \"$packName\"", LogLevel.ERROR)
+                Logger.logError("Failed to save selected pack \"$packName\"")
             }
         }
 
@@ -73,7 +72,7 @@ object TAMClient {
                 TrueAdaptiveMusicOptions.jsonDecode(Path(Constants.OPTIONS_FILENAME).toFile().readText())
             }
             catch (_: Exception) {
-                log("Failed to load TrueAdaptiveMusic settings. Resetting...", LogLevel.ERROR)
+                Logger.logError("Failed to load TrueAdaptiveMusic settings. Resetting...")
                 TrueAdaptiveMusicOptions()
             }
 
@@ -85,7 +84,7 @@ object TAMClient {
                     MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, options.selectedPack))
         }
         catch (e: MusicLoadException) {
-            log("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e", LogLevel.ERROR)
+            Logger.logError("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e")
         }
 
         initialized = true

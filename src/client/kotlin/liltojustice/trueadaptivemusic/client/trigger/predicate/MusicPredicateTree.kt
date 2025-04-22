@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
@@ -112,7 +113,20 @@ class MusicPredicateTree private constructor(
                     return Triple(this, emptyList(), emptyMap())
                 }
             }
-            catch (e: Throwable) {
+            catch (e: NoClassDefFoundError) {
+                Logger.logError(
+                    "Testing predicate type ${predicate.getTypeName()} failed due to a class loader error. " +
+                            "Are you missing a mod?\nError: ${e.message}",
+                    true)
+
+                return Triple(this, emptyList(), emptyMap())
+            }
+            catch (e: Exception) {
+                Logger.logError(
+                    "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: " +
+                            "${e.message}",
+                    true)
+
                 return Triple(this, emptyList(), emptyMap())
             }
 
