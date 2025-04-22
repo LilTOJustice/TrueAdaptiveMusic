@@ -116,15 +116,14 @@ class MusicPredicateTree private constructor(
             catch (e: NoClassDefFoundError) {
                 Logger.logError(
                     "Testing predicate type ${predicate.getTypeName()} failed due to a class loader error. " +
-                            "Are you missing a mod?\nError: ${e.message}",
+                            "Are you missing a mod?\nError: $e",
                     true)
 
                 return Triple(this, emptyList(), emptyMap())
             }
             catch (e: Exception) {
                 Logger.logError(
-                    "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: " +
-                            "${e.message}",
+                    "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: $e",
                     true)
 
                 return Triple(this, emptyList(), emptyMap())
