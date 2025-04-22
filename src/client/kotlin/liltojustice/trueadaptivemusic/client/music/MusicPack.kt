@@ -13,6 +13,7 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
@@ -31,6 +32,7 @@ import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObject
+import kotlin.reflect.full.isSubclassOf
 
 class MusicPack private constructor(
     val metadata: Metadata,
@@ -173,6 +175,7 @@ class MusicPack private constructor(
         }
 
         val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
+        val usedEventTypes = mutableSetOf<KClass<out MusicEvent>>()
         rules.traverse { node, _ ->
             (node.predicate as? ErrorPredicate)?.let {
                 validation.addWarning(it.reason)
@@ -184,33 +187,45 @@ class MusicPack private constructor(
                 (event as? ErrorEvent)?.let {
                     validation.addWarning(it.reason)
                 }
+
+                usedEventTypes.add(event::class)
             }
         }
 
         val analyzer = ASMDependencyAnalyzer()
-        usedPredicateTypes
-            .forEach { kClass ->
-                val typeName = (kClass.companionObject?.objectInstance as? MusicPredicate.MusicPredicateCompanion<*>)
-                    ?.getTypeName() ?: kClass.qualifiedName
-                val packageName = kClass.java.packageName
-                val referencedClasses = analyzer.analyze(kClass.java.protectionDomain.codeSource.location)
-                val badReferences =
-                    referencedClasses.filter { ref ->
-                        !relatedPackages(packageNameOf(ref), packageName) &&
-                                runCatching { kClass.java.classLoader.loadClass(ref) }
-                                    .getOrDefault(false) == false }
-                val commonPackages = badReferences.map { outerRef ->
-                    badReferences.fold(outerRef) { acc, innerRef ->
-                        commonPackage(acc, innerRef) ?: acc
-                    }
-                }.toSet()
-                if (badReferences.isNotEmpty()) {
-                    validation.addWarning(
-                        "Predicate type $typeName references ${badReferences.size} unknown class(es) from " +
-                                "${commonPackages.size} missing package(s):\n\n" +
-                                commonPackages.joinToString("\n"))
-                }
+        usedPredicateTypes.forEach { kClass -> validateClass(kClass, analyzer) }
+        usedEventTypes.forEach { kClass -> validateClass(kClass, analyzer) }
+    }
+
+    private fun validateClass(kClass: KClass<*>, analyzer: ASMDependencyAnalyzer) {
+        val typeName = (kClass.companionObject?.objectInstance as? MusicPredicate.MusicPredicateCompanion<*>)
+            ?.getTypeName() ?: kClass.qualifiedName
+        val packageName = kClass.java.packageName
+        val referencedClasses = analyzer.analyze(kClass.java.protectionDomain.codeSource.location)
+        val badReferences =
+            referencedClasses.filter { ref ->
+                !relatedPackages(packageNameOf(ref), packageName) &&
+                        runCatching { kClass.java.classLoader.loadClass(ref) }
+                            .getOrDefault(false) == false }
+        val commonPackages = badReferences.map { outerRef ->
+            badReferences.fold(outerRef) { acc, innerRef ->
+                commonPackage(acc, innerRef) ?: acc
             }
+        }.toSet()
+        val parentType =
+            if (kClass.isSubclassOf(MusicPredicate::class))
+                "Predicate "
+            else if (kClass.isSubclassOf(MusicEvent::class))
+                "Event "
+            else
+                ""
+
+        if (badReferences.isNotEmpty()) {
+            validation.addWarning(
+                "$parentType$typeName references ${badReferences.size} unknown class(es) from " +
+                        "${commonPackages.size} missing package(s):\n\n" +
+                        commonPackages.joinToString("\n"))
+        }
     }
 
     private fun getEditPackDir(): Path {
