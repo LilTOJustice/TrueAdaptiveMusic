@@ -59,7 +59,6 @@ object TAMClient {
         return musicManager?.playingEvent
     }
 
-
     private fun initialize(client: MinecraftClient) {
         if (initialized) {
             return
