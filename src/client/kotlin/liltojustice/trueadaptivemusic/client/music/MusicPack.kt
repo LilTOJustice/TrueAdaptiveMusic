@@ -14,12 +14,14 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.registry.Registries
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
+import org.apache.maven.shared.dependency.analyzer.asm.ASMDependencyAnalyzer
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Path
@@ -27,6 +29,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.companionObject
 
 class MusicPack private constructor(
     val metadata: Metadata,
@@ -168,16 +172,45 @@ class MusicPack private constructor(
             )
         }
 
+        val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
         rules.traverse { node, _ ->
             (node.predicate as? ErrorPredicate)?.let {
                 validation.addWarning(it.reason)
             }
+
+            usedPredicateTypes.add(node.predicate::class)
+
             node.events.forEach { event ->
                 (event as? ErrorEvent)?.let {
                     validation.addWarning(it.reason)
                 }
             }
         }
+
+        val analyzer = ASMDependencyAnalyzer()
+        usedPredicateTypes
+            .forEach { kClass ->
+                val typeName = (kClass.companionObject?.objectInstance as? MusicPredicate.MusicPredicateCompanion<*>)
+                    ?.getTypeName() ?: kClass.qualifiedName
+                val packageName = kClass.java.packageName
+                val referencedClasses = analyzer.analyze(kClass.java.protectionDomain.codeSource.location)
+                val badReferences =
+                    referencedClasses.filter { ref ->
+                        !relatedPackages(packageNameOf(ref), packageName) &&
+                                runCatching { kClass.java.classLoader.loadClass(ref) }
+                                    .getOrDefault(false) == false }
+                val commonPackages = badReferences.map { outerRef ->
+                    badReferences.fold(outerRef) { acc, innerRef ->
+                        commonPackage(acc, innerRef) ?: acc
+                    }
+                }.toSet()
+                if (badReferences.isNotEmpty()) {
+                    validation.addWarning(
+                        "Predicate type $typeName references ${badReferences.size} unknown class(es) from " +
+                                "${commonPackages.size} missing package(s):\n\n" +
+                                commonPackages.joinToString("\n"))
+                }
+            }
     }
 
     private fun getEditPackDir(): Path {
@@ -344,6 +377,20 @@ class MusicPack private constructor(
 
         private fun isZipAsset(fileName: String): Boolean {
             return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
+        }
+
+        private fun packageNameOf(qualifiedClassName: String): String {
+            return qualifiedClassName.split(".").dropLast(1).joinToString(".")
+        }
+
+        private fun commonPackage(first: String, second: String): String? {
+            return first.commonPrefixWith(second)
+                .dropLastWhile { c -> c == '.' }
+                .takeIf { it.split(".").size > 1 }
+        }
+
+        private fun relatedPackages(first: String, second: String): Boolean {
+            return commonPackage(first, second) != null
         }
     }
 
