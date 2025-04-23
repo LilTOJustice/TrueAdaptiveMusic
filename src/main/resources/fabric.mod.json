@@ -25,7 +25,6 @@
     ]
   },
   "mixins": [
-    "trueadaptivemusic.mixins.json",
     {
       "config": "trueadaptivemusic.client.mixins.json",
       "environment": "client"
