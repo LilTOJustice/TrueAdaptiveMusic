@@ -21,7 +21,6 @@ import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
-import org.apache.maven.shared.dependency.analyzer.asm.ASMDependencyAnalyzer
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Path
@@ -30,8 +29,6 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.isSubclassOf
 
 class MusicPack private constructor(
     val metadata: Metadata,
@@ -197,7 +194,7 @@ class MusicPack private constructor(
         usedEventTypes.forEach { kClass -> validateClass(kClass, analyzer) }*/
     }
 
-    private fun validateClass(kClass: KClass<*>, analyzer: ASMDependencyAnalyzer) {
+    /*private fun validateClass(kClass: KClass<*>, analyzer: ASMDependencyAnalyzer) {
         val typeName = (kClass.companionObject?.objectInstance as? MusicPredicate.MusicPredicateCompanion<*>)
             ?.getTypeName() ?: kClass.qualifiedName
         val packageName = kClass.java.packageName
@@ -226,7 +223,7 @@ class MusicPack private constructor(
                         "${commonPackages.size} missing package(s):\n\n" + commonPackages.joinToString("\n")
                         + "\nYou are probably missing a mod.")
         }
-    }
+    }*/
 
     private fun getEditPackDir(): Path {
         return Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")

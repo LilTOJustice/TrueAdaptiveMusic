@@ -64,8 +64,8 @@ dependencies {
     implementation(
         "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_version")}")
         ?.let { includeInternal(it) }
-    implementation("org.apache.maven.shared:maven-dependency-analyzer:${project.property("mda_version")}")
-        ?.let { includeInternal(it) }
+    //implementation("org.apache.maven.shared:maven-dependency-analyzer:${project.property("mda_version")}")
+    //    ?.let { includeInternal(it) }
 }
 
 tasks.processResources {
