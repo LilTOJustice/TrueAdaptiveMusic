@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.music.MusicLoadException
-import liltojustice.trueadaptivemusic.client.sound.FFMpeg
+import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.sound.*
@@ -20,7 +20,7 @@ class AudioFileSoundInstance(private val soundFile: SoundFile)
             return if (extension == "ogg") {
                 CompletableFuture.completedFuture(TruncatedAudioStream(OggAudioStream(soundFile.getInputStream())))
             } else {
-                CompletableFuture.completedFuture(TruncatedAudioStream(FFMpeg.makeStream(soundFile)))
+                CompletableFuture.completedFuture(TruncatedAudioStream(FFmpeg.makeStream(soundFile)))
             }
         }
         catch (e: Exception) {

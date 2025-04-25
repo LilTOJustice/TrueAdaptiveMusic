@@ -1,15 +1,15 @@
 package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
-import liltojustice.trueadaptivemusic.client.sound.stream.FFMpegAudioStream
+import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import net.minecraft.util.JsonHelper
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.sound.sampled.AudioFormat
 
-class FFMpeg {
+class FFmpeg {
     companion object {
-        fun makeStream(soundFile: SoundFile): FFMpegAudioStream {
+        fun makeStream(soundFile: SoundFile): FFmpegAudioStream {
             val ffprobe = ProcessBuilder(
                 "ffprobe",
                 "-hide_banner",
@@ -42,7 +42,7 @@ class FFMpeg {
             val channels = stream["channels"].asInt
             val sampleRate = stream["sample_rate"].asInt
 
-            return FFMpegAudioStream(
+            return FFmpegAudioStream(
                 soundFile,
                 AudioFormat(
                     sampleRate.toFloat(),

@@ -6,7 +6,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 
-class FFMpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): AudioStream {
+class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): AudioStream {
     private val ffmpeg = run {
         val ffmpeg = ProcessBuilder(
             "ffmpeg",

@@ -166,7 +166,7 @@ class MusicPack private constructor(
         if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
             validation.addWarning(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
-                        "This music will not play unless FFMpeg is installed on your system. See the wiki for details."
+                        "This music will not play unless FFmpeg is installed on your system. See the wiki for details."
             )
         }
 
