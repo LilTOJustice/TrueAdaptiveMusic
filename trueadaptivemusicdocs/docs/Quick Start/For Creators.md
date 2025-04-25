@@ -28,19 +28,7 @@ As you can see, the edit screen is seperated into two panels, let's talk about t
 
 ### Pack Structure Panel
 
-The pack structure defines the structural logic of your music pack, specifically when certain music should play. Every music pack has a tree-like structure, with the top level only holding the "root" node in that tree. Every node in this tree represents a predicate. A predicate is just a condition in which certain music can be played, and can be one of many different types. For a list of all types, you can visit the [Predicate Types](MusicPacks/Predicate%20Types.md) page. Every node in the tree has a depth, denoted by how indented the node is on screen, and the "child" node of another node will have 1 more than the depth of its parent. Also within each node is a list of songs to play when that node is chosen (this is what we chose when setting music on the root node).
-
-#### How is a Predicate Node Chosen
-
-!!! Info
-
-    This recently changed in TrueAdaptiveMusic 1.1
-    
-Every tick of the game, there is a music manager that traverses this tree and decides what music should be played. It will always pick the music belonging to the first satisfied node with no children that are satisfied. If a node has no children and it satisfied, that is the node that will be chosen. This is important as it allows for sectioning off different types of music for different scenarios (we'll dive deeper into this very soon). Another consequence of this is that we must have a root node that is always considered satisfied, as that allows us to define music (or no music) to play when no other predicate nodes are satisfied. This is why you are hearing music right now if you are following this tutorial in order. There are no other predicates to satisfy so it is defaulting to play music defined in the root predicate node. This behavior allows sectioning of music as it allows for something like the following scenario:
-
-##### An Example
-
-Let's say you want to make a very simple music pack that adds combat music to minecraft. You could just add a "combat" node under the root node and put some combat music in that node and you're done... but what if you wanted the music to be different based on what dimension you are in? You could then create a dimension node as a child of the combat node. Since only one dimension predicate will be satisfied (you can't be in multiple dimensions at once), it will only play the combat music that you set for that dimension. You could also add some wandering music to each dimension node for some nice atmosphere in between combat by adding another dimension node as the child of root and giving it some music.
+The pack structure defines the structural logic of your music pack, specifically when certain music should play. Every music pack has a tree-like structure, with the top level only holding the "root" node in that tree. Every node in this tree represents a predicate. A predicate is just a condition in which certain music can be played, and can be one of many different types. For a list of all types, you can visit the [Predicate Types](MusicPacks/Predicate%20Types.md) page. Every node in the tree has a depth, denoted by how indented the node is on screen, and the "child" node of another node will have 1 more than the depth of its parent. Also within each node is a list of songs to play when that node is chosen (this is what we chose when setting music on the root node). For an explanation of how predicate nodes are chosen each tick of the game, go [here](../Music%20Packs/Predicates.md#How-is-a-Predicate-Node-Chosen).
 
 #### Adding Assets
 
@@ -95,12 +83,4 @@ This will delete your ".new" directory and replace it with a zipped up version i
 
 ### Outro
 
-Congrats on making it through this "quick" start. Once again, please let us know if there is anything you want to see improved with this wiki! You can now continue to the next section for some additional information on the editor, or head to the MusicPacks section at the top left of this wiki for more info on the inner workings of MusicPacks!
-
-### Other Functionalities
-
-Here is a list of some other features you can use in the editor.
-
-#### Moving Predicates
-
-This feature allows you to move predicates that you have already made to other places within the pack structure. For example, you might make some combat music, and then later realize you want to make it only play when in a certain dimension. To move a node (other than "root"), select the node on the Pack Structure side. At the bottom of the Predicate View side of the editor, you will see a "Move" button. Click this button to start moving the node. You can click on any "+ Add" space to move the node there, or any other node itself to make this node the first of its children. You can also click the "Moving" button to cancel. That's it!
+Congrats on making it through this "quick" start. Once again, please let us know if there is anything you want to see improved with this wiki! You can now continue to the next section for some additional information on the editor, or head to the MusicPacks section at the top left of this wiki for more info on the inner workings of MusicPacks! If you want to take a look at some more advanced capabilities for Music Pack creation, take a look at the [advanced topics](../Advanced%20Topics/Advanced%20Topics.md) section.

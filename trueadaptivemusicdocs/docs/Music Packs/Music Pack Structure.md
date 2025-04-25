@@ -29,9 +29,9 @@ This file is optional but can contain any extra data to display your pack. Right
 
 ## rules.json
 
-This is the **most important file in the pack**, as it contains all of the logic that tells the mod when to play certain music. This json file defines the **PredicateTree** structure, which is a tree made of nodes that each represent a condition where certain music should be played. For a list of conditions (predicate types), see the [Predicate Types](Predicate%20Types.md) section.
+This is the **most important file in the pack**, as it contains all of the logic that tells the mod when to play certain music. This json file defines the **PredicateTree** structure, which is a tree made of nodes that each represent a condition where certain music should be played. For a list of conditions (predicate types), see the [Predicates](Predicates.md) section. Additionally, each node in the tree contains a list of events that can trigger one-shot music playback when certain events occur. Check out [Events](Events.md) for more info.
 
-The structure of the rules is recursive, with one object called a PredicateNode. A Predicate Node contains the Predicate Type, a list of music to play (either by sound event ID or by filename in the assets/ folder), and a list of all of its child nodes. This is visited in more depth within the [How is a Predicate Node Chosen](../index.md#how-is-a-predicate-node-chosen) section of the Quick Start.
+The structure of the rules is recursive, with one object called a PredicateNode. A Predicate Node contains the Predicate Type, a list of music to play (either by sound event ID or by filename in the assets/ folder), any events associated with it, and a list of all of its child nodes. This is visited in more depth within the [How is a Predicate Node Chosen](../Quick%20Start/For%20Creators.md#how-is-a-predicate-node-chosen) section of the Quick Start.
 
 For example:
 
