@@ -152,18 +152,18 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
-        var hasFFMpeg = true
+        var hasFFmpeg = true
         try {
             val exitCode = Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor()
             if (exitCode != 1 && exitCode != 0) {
-                hasFFMpeg = false
+                hasFFmpeg = false
             }
         } catch (e: IOException) {
-            hasFFMpeg = false
+            hasFFmpeg = false
         }
 
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
-        if (!hasFFMpeg && nonOggFiles.isNotEmpty()) {
+        if (!hasFFmpeg && nonOggFiles.isNotEmpty()) {
             validation.addWarning(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
                         "This music will not play unless FFmpeg is installed on your system. See the wiki for details."
