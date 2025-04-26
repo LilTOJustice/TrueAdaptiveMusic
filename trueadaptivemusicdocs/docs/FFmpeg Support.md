@@ -7,14 +7,14 @@ The pack will still be usable, but any non-ogg files will be skipped. To make th
 
 ## How to install and set up FFmpeg
 
-### Step 1: Open Powershell
+### Step 1: Open Powershell as Administrator
 
 First open the windows search, search for powershell and click "Open as Administrator". Hit yes for any following dialogs.
 ![Open powershell](open_powershell.png)
 
 ### Step 2: Install FFmpeg
 
-Now run the command `winget install "FFmpeg (Essentials Build)"`
+Now run the command `winget install "FFmpeg (Essentials Build)"`. Just type it into the prompt and hit enter.
 ![ffmpeg install](ffmpeg.png)
 
 ### Step 3: Restart Your PC
