@@ -13,15 +13,13 @@ Packs can be directories or .zip, but must follow the exact structure above.
 
 The assets folder should contain all the audio files you plan to use in your modpack. If you are only using music that's loaded into minecraft (vanilla or modded), this directory should be empty.
 
-As of right now, the only supported audio file type is .ogg, though we plan to try and add .mp3 and .wav support later on
+By default, the only supported audio file type is .ogg. In order to use packs that utilize other audio types, follow [this guide](../FFmpeg%20Support.md).
 
 ## meta.json
 
 This file is optional but can contain any extra data to display your pack. Right now there is only one field this stores, the description of the pack, and there is currently no way to set this within the UI, so if you really want to set it, you'll have to go into the meta.json generated with your mod and change it yourself.
 
-### meta.json structure
-
-```json
+```json title="meta.json"
 {
     "description": "{Your music pack description text here}"
 }
@@ -63,7 +61,7 @@ For example:
 ```
 
 1. The top-level node is always of type "root"
-2. You can use audio files from assets/ and minecraft sound events that start with "music.". Even non-ogg files are supported [if you have ffmpeg installed](../FFMPeg%20Support.md).
+2. You can use audio files from assets/ and minecraft sound events that start with "music.". Even non-ogg files are supported [if you have FFmpeg installed](../FFmpeg%20Support.md).
 3. And now this node's children, which themselves have the same structure
 4. Some predicates require extra parameters, such as the 'id' field here. This predicate will only be true when the player is in the overworld dimension
 5. Since music path is empty, no music will play when this predicate is true

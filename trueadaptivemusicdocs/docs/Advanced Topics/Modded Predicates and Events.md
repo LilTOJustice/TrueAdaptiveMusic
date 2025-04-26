@@ -2,7 +2,7 @@
 
 !!! warning
 
-    This is an advanced topic that requires at least some programming experience in Java/Kotlin or other similar high-level languages. Modding experience (particularly in Minecraft) is also recommended. I assume here that you already know how to create a mod for Minecraft. If you are completely new and want to learn how to create a mod, follow the [fabric tutorial here.](https://wiki.fabricmc.net/tutorial:start) as well as using [this page](https://wiki.fabricmc.net/tutorial:setup) to set up your development environment. Kotlin is **required** to implement modded events/predicates.
+    This is an advanced topic that requires at least some programming experience in Java/Kotlin or other similar high-level languages. Modding experience (particularly in Minecraft) is also recommended. I assume here that you already know how to create a mod for Minecraft. If you are completely new and want to learn how to create a mod, follow the [fabric tutorial here](https://wiki.fabricmc.net/tutorial:start) as well as using [this page](https://docs.fabricmc.net/develop/getting-started/setting-up-a-development-environment) to set up your development environment. Kotlin is **required** to implement modded events/predicates.
 
 As of version 1.2, TrueAdaptiveMusic now allows the creation of custom predicate and event types! This allows for a whole new level of Music Pack creation as predicates and events can be made that are specific to other mods. One great example is with the Cobblemon mod. This fantastic mod adds the world of Pokémon to Minecraft, and one staple of Pokémon is the battles! There's just one problem, the battles have absolutely no music. What if we could make a new predicate type that specifically is true when the user is in a battle? Then we could specify some battle music to play when it's true! Let's dive in.
 
@@ -45,7 +45,7 @@ Now implement the missing virtual function implementation, `test(MinecraftClient
 ```kotlin
 class PokeBattlePredicate: MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        return false;
+        return false
     }
 }
 ```
@@ -145,10 +145,10 @@ As you can see, we are calling `MusicEvent.invokeMusicEvent` and passing in the 
 #### Implementing the validate Function
 If you do add parameters to the event type, you'll want to override the `validate` member function (outisde of the companion object). This function is called just before your event is invoked to add an additional layer of logic to determine whether the event should occur. The parameters that are passed into `validate` are determined at the call site of the event invocation (i.e. in the mixin). For example you might have a setup like this (`stringToTest` is an event parameter as described [here](#adding-parameters-to-your-predicate-or-event-type)):
 ```kotlin title="OnSomethingEvent.kt"
-class OnSomethingEvent(private val stringToTest): MusicEvent() {
+class OnSomethingEvent(private val stringToTest: String): MusicEvent() {
     override fun validate(vararg eventArgs: Any?): Boolean {
-        val someCondition = eventArgs[0] as? Boolean ?: return false;
-        val someString = eventArgs[1] as? String ?: return false;
+        val someCondition = eventArgs[0] as? Boolean ?: return false
+        val someString = eventArgs[1] as? String ?: return false
         return someCondition && someString == stringToTest
     }
 
@@ -160,7 +160,7 @@ The above code takes in some arguments from the event invoker and interprets the
 Then at the event call site:
 ```kotlin title="SomeMixin.java"
 ...
-MusicEvent.invokeMusicEvent(OnSomethingEvent.getTypeName(), someCondition, someString);
+MusicEvent.invokeMusicEvent(OnSomethingEvent.getTypeName(), someCondition, someString)
 ...
 ```
 We pass in the type name like usual, but then include the parameters matching the types used in the `validate` definition.
