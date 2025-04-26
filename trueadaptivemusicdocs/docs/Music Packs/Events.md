@@ -1,6 +1,6 @@
 # Events
 
-In a Music Pack, Events are one-shot music that is played when some in-game event occurs, for example the player getting an advancement, or waking up from a bed.
+In a Music Pack, Events are one-shot music that is played when some in-game event occurs, for example the player getting an advancement, or waking up from a bed. When an event plays, any ongoing music will quiet down until the event music finishes.
 
 ## The Event Pool
 
