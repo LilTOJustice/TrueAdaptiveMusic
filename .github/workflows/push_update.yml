@@ -16,6 +16,10 @@ jobs:
   update_version:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
@@ -26,10 +30,6 @@ jobs:
           sed -i 's/mod_version*\n/mod_version:${{ github.event.inputs.update_version }}/g' gradle.properties
           git commit -a
           git push
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Create patch
         run: git format-patch ${{ github.event.inputs.start_commit }}^..HEAD --stdout > patch.patch
       - name: Create and publish branches
