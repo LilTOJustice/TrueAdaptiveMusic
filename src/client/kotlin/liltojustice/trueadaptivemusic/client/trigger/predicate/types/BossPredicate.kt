@@ -12,7 +12,7 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     override fun test(client: MinecraftClient): Boolean {
         return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
             val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
-            bosses.isEmpty() || bosses.any { boss -> toTranslationKey(bossName) == boss.toTranslationKey() }
+            bosses.isEmpty() || bosses.any { boss -> EntityTypeIdentifier.entityToTranslationKey(bossName) == boss.toTranslationKey() }
         }
     }
 
@@ -34,10 +34,6 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
                     JsonHelper.getArray(json, "id").map { element -> EntityTypeIdentifier(element.asString) }
                 else
                     listOf(EntityTypeIdentifier(JsonHelper.getString(json, "id"))))
-        }
-
-        fun toTranslationKey(textKey: String): String {
-            return textKey.split(".").drop(1).joinToString(".")
         }
     }
 }

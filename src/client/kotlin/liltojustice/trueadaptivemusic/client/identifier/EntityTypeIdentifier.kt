@@ -8,5 +8,9 @@ class EntityTypeIdentifier(id: String): TypedIdentifier(id) {
         override fun getRegistryIds(): List<Identifier> {
             return Registries.ENTITY_TYPE.ids.toList()
         }
+
+        fun entityToTranslationKey(textKey: String): String {
+            return textKey.split(".").drop(1).joinToString(".")
+        }
     }
 }
