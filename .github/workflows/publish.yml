@@ -3,7 +3,9 @@ name: Publish on GitHub, CurseForge & Modrinth
 on:
   push:
     branches:
-      - '*.*'
+      - 'versions/*.*'
+    branches-ignore:
+      - 'versions/*.*-update-*'
   workflow_dispatch:
 
 env:

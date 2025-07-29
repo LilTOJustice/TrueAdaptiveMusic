@@ -1,0 +1,51 @@
+name: Push update to all minecraft version branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_commit:
+        description: 'First commit hash for the update (inclusive)'
+        required: true
+        type: string
+      update_version:
+        description: 'Version string e.g. 1.1'
+        required: true
+        type: string
+
+jobs:
+  update_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "LilTOJustice@users.noreply.github.com"
+      - name: Update repo mod version
+        run: |
+          sed -i 's/VERSION:*\n/VERSION: \'${{ github.event.inputs.update_version }}\'/g' workflows/publish.yml
+          sed -i 's/mod_version*\n/mod_version:${{ github.event.inputs.update_version }}/g' gradle.properties
+          git commit -a
+          git push
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create patch
+        run: git format-patch ${{ github.event.inputs.start_commit }}^..HEAD --stdout > patch.patch
+      - name: Create and publish branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+        run: |
+          count=0
+          regex_prefix="origin\/versions\/"
+          branches=$(git branch -r | tr -d ' '); while read -r line; do
+                  if [[ "$line" =~ $regex_prefix.* ]]; then
+                          branch_name="${line:${#regex_prefix}-1}-update-${{ github.event.inputs.update_version }}"
+                          git checkout -b $branch_name
+                          git am --reject patch.patch
+                          git push -u origin $branch_name
+                          gh pr create --base master
+                          count=$((count + 1))
+                  fi
+          done <<< "$branches"
+          echo "Created $count PRs"
