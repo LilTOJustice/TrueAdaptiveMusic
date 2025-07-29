@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - 'versions/*.*'
-    branches-ignore:
-      - 'versions/*-update-*'
+      - '!versions/*-update-*'
   workflow_dispatch:
 
 env:
