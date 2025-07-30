@@ -165,8 +165,8 @@ class MusicManager(
         startNewMusic(nextMusic)
     }
 
-    fun hasActiveEvent(eventName: String): Boolean {
-        return activeEvents.any { event -> event.getTypeName() == eventName }
+    fun hasSoundInstance(instance: SoundInstance): Boolean {
+        return currentSoundInstance === instance || oldSoundInstance === instance || onDemandSoundInstance === instance
     }
 
     private fun shouldPlay(music: PlayableSound?, identifier: String): Boolean {
