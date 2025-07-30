@@ -9,6 +9,7 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
 import kotlin.io.path.Path
 
@@ -30,7 +31,7 @@ object TAMClient {
             val packName = value?.packName ?: ""
             try {
                 options = options.copy(selectedPack = packName)
-            } catch (ignored: IOException) {
+            } catch (_: IOException) {
                 Logger.logError("Failed to save selected pack \"$packName\"")
             }
         }
@@ -51,12 +52,12 @@ object TAMClient {
         musicPack = musicPack
     }
 
-    fun hasActiveEvent(eventType: String): Boolean {
-        return musicManager?.hasActiveEvent(eventType) ?: false
-    }
-
     fun getPlayingEvent(): MusicEvent? {
         return musicManager?.playingEvent
+    }
+
+    fun hasSoundInstance(instance: SoundInstance): Boolean {
+        return musicManager?.hasSoundInstance(instance) ?: false
     }
 
     private fun initialize(client: MinecraftClient) {
