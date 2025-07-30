@@ -10,12 +10,9 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
         val properties = client.world?.levelProperties ?: return false
 
         return when(weather) {
-            Weather.Clear ->
-                !properties.isRaining
-            Weather.Rain ->
-                properties.isRaining
-            Weather.Thunder ->
-                properties.isThundering
+            Weather.Clear -> !properties.isRaining
+            Weather.Rain -> properties.isRaining
+            Weather.Thunder -> properties.isThundering
         }
     }
 
