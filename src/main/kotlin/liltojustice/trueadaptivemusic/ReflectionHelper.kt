@@ -18,7 +18,8 @@ class ReflectionHelper {
             val constructor = instance::class.primaryConstructor
                 ?: throw ReflectionHelperException("No constructor found for ${instance::class.simpleName}." +
                         " It must have a constructor.")
-            val result = instance::class.declaredMemberProperties
+            val fieldMap = instance.javaClass.declaredFields.withIndex().associate { p -> p.value.name to p.index }
+            val result = instance::class.declaredMemberProperties.sortedBy { member -> fieldMap[member.name] }
                 .filter { property -> constructor.parameters.any { param -> property.name == param.name } }
                 .map { property ->
                     val accessible = property.isAccessible
