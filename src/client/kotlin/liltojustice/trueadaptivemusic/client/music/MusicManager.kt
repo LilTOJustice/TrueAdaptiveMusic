@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
@@ -153,6 +154,10 @@ class MusicManager(
         if (!shouldPlay(nextMusic, identifier))
         {
             return
+        }
+
+        if (identifier != currentMusicPredicateId && predicateResult?.events?.any { event -> event is OnEnterPredicateEvent } ?: false) {
+            MusicEvent.invokeMusicEvent(OnEnterPredicateEvent.getTypeName())
         }
 
         shouldResume = oldMusicPredicateId == identifier
