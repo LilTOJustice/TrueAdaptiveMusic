@@ -9,9 +9,9 @@ import net.minecraft.util.JsonHelper
 
 class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        val vehicleKey = EntityTypeIdentifier.entityToTranslationKey(
-            client.player?.vehicle?.type?.translationKey ?: return false)
-        return entities.isEmpty() || entities.any { entity -> entity.toTranslationKey() == vehicleKey }
+        val vehicleKey = client.player?.vehicle?.type?.translationKey ?: return false
+
+        return entities.isEmpty() || entities.any { entity -> entity.toTranslationKey("entity") == vehicleKey }
     }
 
     override fun toJson(): JsonObject {
