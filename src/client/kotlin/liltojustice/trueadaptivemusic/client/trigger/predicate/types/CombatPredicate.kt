@@ -5,13 +5,15 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.Entity
 import net.minecraft.entity.mob.MobEntity
-import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
-import net.minecraft.util.math.Vec3i
 import java.util.*
 import kotlin.concurrent.schedule
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.atan
 import kotlin.math.cbrt
+import kotlin.math.tan
 
 class CombatPredicate: MusicPredicate() {
     private val aggroTimer: Timer = Timer()
@@ -20,23 +22,32 @@ class CombatPredicate: MusicPredicate() {
 
     override fun test(client: MinecraftClient): Boolean {
         val playerEntity = client.player ?: return false
-        val playerBlockPos = playerEntity.blockPos ?: return false
         val world = client.world ?: return false
-        var oneCloseEnough = false
+        val verticalFov = client.options.fov.value.toDouble() / DEG_PER_RAD
+        val horizontalFov = 2 * atan(tan(verticalFov / 2) * client.window.width / client.window.height)
+        val verticalAngle = acos(playerEntity.rotationVecClient.y)
+        val horizontalAngle = acos(playerEntity.rotationVecClient.x)
 
         for (entity: Entity? in world.entities)
         {
             val mobEntity: MobEntity = entity as? MobEntity ?: continue
-            val mobCloseEnough = closeEnough(playerBlockPos, mobEntity.blockPos,
-                Vec3d(mobEntity.boundingBox.xLength,
-                    mobEntity.boundingBox.yLength,
-                    mobEntity.boundingBox.zLength))
+            val relativeMobEntityPosN = mobEntity.pos.subtract(playerEntity.pos).normalize()
 
-            if (mobCloseEnough && mobEntity.isAttacking) {
-                oneCloseEnough = true
+            val mobVerticalAngle = acos(relativeMobEntityPosN.y)
+            val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
+
+            if (!isAggro && (abs(mobVerticalAngle - verticalAngle) > verticalFov / 2
+                        || abs(mobHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
+                continue
             }
 
-            if (mobEntity.attacking?.id == playerEntity.id || oneCloseEnough)
+            if (mobEntity.attacking?.id == playerEntity.id
+                || (mobEntity.isAttacking
+                        && closeEnough(
+                    relativeMobEntityPosN,
+                    Vec3d(mobEntity.boundingBox.xLength,
+                        mobEntity.boundingBox.yLength,
+                        mobEntity.boundingBox.zLength))))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
@@ -61,20 +72,16 @@ class CombatPredicate: MusicPredicate() {
 
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 2L
+        private const val DEG_PER_RAD = 180.0 / PI
 
-        fun closeEnough(playerPos: BlockPos, attackerPos: BlockPos, attackerSize: Vec3d): Boolean
+        fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
         {
-            val displacement: BlockPos = playerPos.subtract(attackerPos)
-            val axialDistance = Vec3i(abs(displacement.x), abs(displacement.y), abs(displacement.z))
+            val axialDistance = Vec3d(abs(displacement.x), abs(displacement.y), abs(displacement.z))
             val scaledAttackerMinDistance = baseAxialDistance
                 .multiply(Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
-            val intScaledAttackerMinDistance = Vec3i(
-                scaledAttackerMinDistance.x.toInt(),
-                scaledAttackerMinDistance.y.toInt(),
-                scaledAttackerMinDistance.z.toInt())
-            return axialDistance.x < intScaledAttackerMinDistance.x
-                    && axialDistance.y < intScaledAttackerMinDistance.y
-                    && axialDistance.z < intScaledAttackerMinDistance.z
+            return axialDistance.x < scaledAttackerMinDistance.x
+                    && axialDistance.y < scaledAttackerMinDistance.y
+                    && axialDistance.z < scaledAttackerMinDistance.z
         }
     }
 }
