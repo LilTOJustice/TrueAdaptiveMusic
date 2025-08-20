@@ -4,6 +4,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.text.Text
+import kotlin.math.max
 
 class DropdownWidget(
     options: List<String>,
@@ -30,7 +31,9 @@ class DropdownWidget(
     private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
     private var dropdownResultsWidget: DropdownResultsWidget
     private val realizedWidth = width.takeUnless { width == 0 }
-        ?: ((options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0) + TEXT_WIDTH_BUFFER)
+        ?: (max(
+            textRenderer.getWidth(title),
+            options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0) + TEXT_WIDTH_BUFFER)
     private val textInputWidget = TextFieldWidget(
         textRenderer,
         0,
