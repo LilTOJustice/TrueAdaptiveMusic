@@ -163,17 +163,18 @@ class PackStructureWidget(
             if (child === selectedWidget
                 || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
                 || child !is NodeWidget
-                || selectedNode?.let { child.isValidDestination(it) } != true
             ) {
                 return@forEachChild
             }
+
+            val valid = selectedNode?.let { child.isValidDestination(it) } == true
 
             context?.drawText(
                 textRenderer,
                 ARROW_TEXT,
                 child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
                 child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
-                Colors.WHITE,
+                if (valid) Colors.WHITE else Colors.RED,
                 false)
             return@forEachChild
         }
