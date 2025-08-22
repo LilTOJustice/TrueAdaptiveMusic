@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 
 abstract class MusicEvent: MusicTrigger() {
@@ -12,7 +13,7 @@ abstract class MusicEvent: MusicTrigger() {
         return if (this is ErrorEvent)
             ErrorEvent.NAME
         else
-            MusicEventRegistry[this::class]
+            TAMClient.eventRegistry[this::class]
     }
 
     companion object: MusicEventCompanion<MusicEvent> {

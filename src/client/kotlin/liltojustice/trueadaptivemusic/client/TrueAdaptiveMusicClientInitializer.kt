@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent
@@ -11,7 +10,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnNightStartEve
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
@@ -36,36 +34,36 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
-        MusicPredicateRegistry["biome"] = BiomePredicate::class
-        MusicPredicateRegistry["boss"] = BossPredicate::class
-        MusicPredicateRegistry["combat"] = CombatPredicate::class
-        MusicPredicateRegistry["day"] = DayTimePredicate::class
-        MusicPredicateRegistry["dimension"] = DimensionPredicate::class
-        MusicPredicateRegistry["first_day"] = FirstDayPredicate::class
-        MusicPredicateRegistry["game_mode"] = GameModePredicate::class
-        MusicPredicateRegistry["health"] = HealthPredicate::class
-        MusicPredicateRegistry["height"] = HeightPredicate::class
-        MusicPredicateRegistry["moon_phase"] = MoonPhasePredicate::class
-        MusicPredicateRegistry["night"] = NightTimePredicate::class
-        MusicPredicateRegistry["pillager_raid"] = PillagerRaidPredicate::class
-        MusicPredicateRegistry["riding"] = RidingPredicate::class
-        MusicPredicateRegistry["root"] = RootPredicate::class
-        MusicPredicateRegistry["status_effect"] = StatusEffectPredicate::class
-        MusicPredicateRegistry["structure"] = StructurePredicate::class
-        MusicPredicateRegistry["structure_set"] = StructureSetPredicate::class
-        MusicPredicateRegistry["title_screen"] = TitleScreenPredicate::class
-        MusicPredicateRegistry["weather"] = WeatherPredicate::class
+        TAMClient.registerPredicate("biome", BiomePredicate::class)
+        TAMClient.registerPredicate("boss", BossPredicate::class)
+        TAMClient.registerPredicate("combat", CombatPredicate::class)
+        TAMClient.registerPredicate("day", DayTimePredicate::class)
+        TAMClient.registerPredicate("dimension", DimensionPredicate::class)
+        TAMClient.registerPredicate("first_day", FirstDayPredicate::class)
+        TAMClient.registerPredicate("game_mode", GameModePredicate::class)
+        TAMClient.registerPredicate("health", HealthPredicate::class)
+        TAMClient.registerPredicate("height", HeightPredicate::class)
+        TAMClient.registerPredicate("moon_phase", MoonPhasePredicate::class)
+        TAMClient.registerPredicate("night", NightTimePredicate::class)
+        TAMClient.registerPredicate("pillager_raid", PillagerRaidPredicate::class)
+        TAMClient.registerPredicate("riding", RidingPredicate::class)
+        TAMClient.registerPredicate("root", RootPredicate::class)
+        TAMClient.registerPredicate("status_effect", StatusEffectPredicate::class)
+        TAMClient.registerPredicate("structure", StructurePredicate::class)
+        TAMClient.registerPredicate("structure_set", StructureSetPredicate::class)
+        TAMClient.registerPredicate("title_screen", TitleScreenPredicate::class)
+        TAMClient.registerPredicate("weather", WeatherPredicate::class)
 
-        MusicEventRegistry["on_advancement_get"] = OnAdvancementGetEvent::class
-        MusicEventRegistry["on_boss_defeat"] = OnBossDefeatEvent::class
-        MusicEventRegistry["on_day_start"] = OnDayStartEvent::class
-        MusicEventRegistry["on_death"] = OnDeathEvent::class
-        MusicEventRegistry["on_enter_predicate"] = OnEnterPredicateEvent::class
-        MusicEventRegistry["on_join_world"] = OnJoinWorldEvent::class
-        MusicEventRegistry["on_night_start"] = OnNightStartEvent::class
-        MusicEventRegistry["on_recipe_unlock"] = OnRecipeUnlockEvent::class
-        MusicEventRegistry["on_tutorial_popup"] = OnTutorialPopupEvent::class
-        MusicEventRegistry["on_wake_up"] = OnWakeUpEvent::class
+        TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
+        TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
+        TAMClient.registerEvent("on_day_start", OnDayStartEvent::class)
+        TAMClient.registerEvent("on_death", OnDeathEvent::class)
+        TAMClient.registerEvent("on_enter_predicate", OnEnterPredicateEvent::class)
+        TAMClient.registerEvent("on_join_world", OnJoinWorldEvent::class)
+        TAMClient.registerEvent("on_night_start", OnNightStartEvent::class)
+        TAMClient.registerEvent("on_recipe_unlock", OnRecipeUnlockEvent::class)
+        TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
+        TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             TAMClient.tick(client)

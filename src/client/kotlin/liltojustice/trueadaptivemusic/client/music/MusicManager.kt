@@ -2,11 +2,11 @@ package liltojustice.trueadaptivemusic.client.music
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
@@ -158,7 +158,7 @@ class MusicManager(
         }
 
         if (identifier != currentMusicPredicateId && predicateResult?.events?.any { event -> event is OnEnterPredicateEvent } ?: false) {
-            MusicEvent.invokeMusicEvent(MusicEventRegistry[OnEnterPredicateEvent::class])
+            MusicEvent.invokeMusicEvent(TAMClient.eventRegistry[OnEnterPredicateEvent::class])
         }
 
         shouldResume = oldMusicPredicateId == identifier

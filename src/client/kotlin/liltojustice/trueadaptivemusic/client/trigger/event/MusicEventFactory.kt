@@ -2,6 +2,6 @@ package liltojustice.trueadaptivemusic.client.trigger.event
 
 import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerFactory
 
-object MusicEventFactory: MusicTriggerFactory<MusicEvent>(
-    MusicEventRegistry, { json, e -> ErrorEvent(json, e.message ?: "Unknown") }) {
+class MusicEventFactory(musicEventRegistry: MusicEventRegistry): MusicTriggerFactory<MusicEvent>(
+    musicEventRegistry, { json, e -> ErrorEvent(json, e.message ?: "Unknown") }) {
 }

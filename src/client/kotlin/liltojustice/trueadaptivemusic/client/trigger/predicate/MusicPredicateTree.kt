@@ -3,10 +3,10 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
@@ -148,7 +148,7 @@ class MusicPredicateTree private constructor(
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
             playableSounds: List<PlayableSound>) {
-            val predicate = MusicPredicateFactory.fromArgs(
+            val predicate = TAMClient.predicateFactory.fromArgs(
                 predicateType, playableSounds, *predicateArgs.toTypedArray())
             val child = Node(predicate, events, Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
@@ -210,9 +210,9 @@ class MusicPredicateTree private constructor(
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
-                    MusicPredicateFactory.fromJson(json, soundLibrary),
+                    TAMClient.predicateFactory.fromJson(json, soundLibrary),
                     (json.getAsJsonArray("events") ?: JsonArray())
-                        .map { element -> MusicEventFactory.fromJson(element.asJsonObject, soundLibrary) },
+                        .map { element -> TAMClient.eventFactory.fromJson(element.asJsonObject, soundLibrary) },
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)

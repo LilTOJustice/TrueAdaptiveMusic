@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.javasucks
 
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.LivingEntity
@@ -15,7 +15,7 @@ class OnBossDefeatEventMixinHelper {
             if (isBoss(entity))
             {
                 MusicEvent.invokeMusicEvent(
-                    MusicEventRegistry[OnBossDefeatEvent::class],
+                    TAMClient.eventRegistry[OnBossDefeatEvent::class],
                     EntityTypeIdentifier(entity.type.toString())
                 )
             }

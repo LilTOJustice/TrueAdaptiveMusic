@@ -8,14 +8,24 @@ import liltojustice.trueadaptivemusic.client.music.MusicManager
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
 import kotlin.io.path.Path
+import kotlin.reflect.KClass
 
 object TAMClient {
     private var initialized = false
     private var musicManager: MusicManager? = null
+    val predicateRegistry = MusicPredicateRegistry()
+    val eventRegistry = MusicEventRegistry()
+    val predicateFactory = MusicPredicateFactory(predicateRegistry)
+    val eventFactory = MusicEventFactory(eventRegistry)
 
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -58,6 +68,22 @@ object TAMClient {
 
     fun hasSoundInstance(instance: SoundInstance): Boolean {
         return musicManager?.hasSoundInstance(instance) ?: false
+    }
+
+    fun registerPredicate(name: String, triggerType: KClass<out MusicPredicate>) {
+        predicateRegistry[name] = triggerType
+    }
+
+    fun registerEvent(name: String, triggerType: KClass<out MusicEvent>) {
+        eventRegistry[name] = triggerType
+    }
+
+    fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
+        predicateRegistry[name] = triggerType
+    }
+
+    fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
+        eventRegistry[name] = triggerType
     }
 
     private fun initialize(client: MinecraftClient) {

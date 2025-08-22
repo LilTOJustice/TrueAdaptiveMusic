@@ -16,7 +16,7 @@ import kotlin.reflect.full.primaryConstructor
 
 @Suppress("UNCHECKED_CAST")
 abstract class MusicTriggerFactory<T: MusicTrigger>(
-    protected val registry: MusicTriggerRegistry<T>, private val errorFallback: (JsonObject, Exception) -> T) {
+    private val registry: MusicTriggerRegistry<T>, private val errorFallback: (JsonObject, Exception) -> T) {
     fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): T {
         return try {
             val typeName = JsonHelper.getString(json, "type")

@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import net.minecraft.client.MinecraftClient
 
@@ -10,7 +11,7 @@ abstract class MusicPredicate: MusicTrigger() {
         return if (this is ErrorPredicate)
             ErrorPredicate.NAME
         else
-            MusicPredicateRegistry[this::class]
+            TAMClient.predicateRegistry[this::class]
     }
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
