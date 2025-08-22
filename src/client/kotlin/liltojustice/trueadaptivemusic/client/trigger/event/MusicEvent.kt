@@ -69,8 +69,8 @@ abstract class MusicEvent: MusicTrigger {
             return getConstructorFromTypeName(typeName).parameters
         }
 
-        fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
-            return MusicEventRegistry[typeName]::class.primaryConstructor
+        private fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
+            return MusicEventRegistry[typeName].primaryConstructor
                 ?: throw MusicTriggerException(
                     "Trigger type with name \"$typeName\" has no primary constructor.")
         }

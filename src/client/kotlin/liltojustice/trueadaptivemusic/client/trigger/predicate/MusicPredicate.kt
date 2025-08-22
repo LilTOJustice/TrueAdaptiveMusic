@@ -33,14 +33,14 @@ abstract class MusicPredicate: MusicTrigger {
             return if (typeName == ErrorPredicate.NAME) emptyList() else getConstructorFromTypeName(typeName).parameters
         }
 
-        fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
-            return MusicPredicateRegistry[typeName]::class.primaryConstructor
+        private fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
+            return MusicPredicateRegistry[typeName].primaryConstructor
                 ?: throw MusicTriggerException(
                     "Trigger type with name \"$typeName\" has no primary constructor.")
         }
 
         override fun initializeFromArgs(typeName: String, vararg args: Any): MusicPredicate {
-            return MusicPredicateRegistry[typeName]::class.primaryConstructor?.call(*args) as MusicPredicate
+            return getConstructorFromTypeName(typeName).call(*args) as MusicPredicate
         }
     }
 }
