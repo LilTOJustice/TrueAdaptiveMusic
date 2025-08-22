@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -22,7 +23,7 @@ class EventViewWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Event View", true, false, true, true, x, y) {
-    private val eventTypeNameOptions = MusicEvent.getTypeNames()
+    private val eventTypeNameOptions = MusicEventRegistry.getAllNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
     private var requiredEventArgs = listOf<KParameter>()
     private var eventArgs = mutableListOf<Any?>()

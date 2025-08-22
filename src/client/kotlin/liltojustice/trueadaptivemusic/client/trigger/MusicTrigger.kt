@@ -32,7 +32,7 @@ interface MusicTrigger {
             json: JsonObject,
             registry: MusicTriggerRegistry<out MusicTrigger>): MusicTrigger {
             val typeName = JsonHelper.getString(json, "type")
-            val type = registry.getType(typeName)
+            val type = registry[typeName]
             return (type.companionObject?.functions?.firstOrNull{ f -> f.name == "fromJson" }
                 ?: throw MusicTriggerException("fromJson method missing."))
                 .call(type.companionObjectInstance, json) as? MusicTrigger

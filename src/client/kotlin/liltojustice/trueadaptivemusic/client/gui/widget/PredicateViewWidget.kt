@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.DrawContext
@@ -30,8 +31,8 @@ class PredicateViewWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Predicate View", true, false, true, true, x, y) {
-    private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
-        .filter { typeName -> typeName != MusicPredicate.getNameFromType(RootPredicate::class) }
+    private val predicateTypeNameOptions = MusicPredicateRegistry.getAllNames()
+        .filter { typeName -> typeName != MusicPredicateRegistry[RootPredicate::class] }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
@@ -228,7 +229,7 @@ class PredicateViewWidget(
                         if (selectedNode != null) {
                             selectedNode!!.predicate =
                                 if (selectedNode!!.predicate.getTypeName()
-                                    == MusicPredicate.getNameFromType(RootPredicate::class))
+                                    == MusicPredicateRegistry[RootPredicate::class])
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *predicateArgs.filterNotNull().toTypedArray())

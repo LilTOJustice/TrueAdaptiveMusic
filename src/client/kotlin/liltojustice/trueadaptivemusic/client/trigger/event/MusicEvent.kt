@@ -7,9 +7,7 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerRegistry
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
-import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
@@ -34,35 +32,13 @@ abstract class MusicEvent: MusicTrigger {
         return if (this is ErrorEvent)
             ErrorEvent.NAME
         else
-            registry.getTypeName(this::class)
+            MusicEventRegistry[this::class]
     }
 
     companion object: MusicEventCompanion<MusicEvent> {
-        private val registry = MusicTriggerRegistry<MusicEvent>()
-
-        fun register(name: String, type: Class<out MusicEvent>) {
-            registry.register(name, type.kotlin)
-        }
-
-        fun register(name: String, type: KClass<out MusicEvent>) {
-            registry.register(name, type)
-        }
-
-        fun getTypeNames(): List<String> {
-            return registry.getAll().map { entry -> entry.key }
-        }
-
-        fun getNameFromType(type: KClass<out MusicEvent>): String {
-            return registry.getTypeName(type)
-        }
-
-        fun getNameFromType(type: Class<out MusicEvent>): String {
-            return getNameFromType(type.kotlin)
-        }
-
         override fun fromJson(json: JsonObject): MusicEvent {
             return try {
-                MusicTrigger.fromJsonProvideRegistry(json, registry)
+                MusicTrigger.fromJsonProvideRegistry(json, MusicEventRegistry)
             } catch (e: MusicTriggerException) {
                 ErrorEvent(json, e.message ?: "Unknown")
             } as MusicEvent
@@ -94,7 +70,7 @@ abstract class MusicEvent: MusicTrigger {
         }
 
         fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
-            return registry.getType(typeName)::class.primaryConstructor
+            return MusicEventRegistry[typeName]::class.primaryConstructor
                 ?: throw MusicTriggerException(
                     "Trigger type with name \"$typeName\" has no primary constructor.")
         }

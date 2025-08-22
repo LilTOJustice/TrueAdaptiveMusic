@@ -3,11 +3,23 @@ package liltojustice.trueadaptivemusic.client.trigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import kotlin.reflect.KClass
 
-class MusicTriggerRegistry<T : MusicTrigger> {
+open class MusicTriggerRegistry<T : MusicTrigger> {
     private val nameToClass = HashMap<String, KClass<out T>>()
     private val classNameToName = HashMap<String, String>()
 
-    fun register(name: String, triggerType: KClass<out T>) {
+    fun getAll(): List<Map.Entry<String, KClass<out T>>> {
+        return nameToClass.entries.sortedBy { entry -> entry.key }
+    }
+
+    fun getAllNames(): List<String> {
+        return getAll().map { entry -> entry.key }
+    }
+
+    operator fun set(name: String, triggerType: Class<out T>) {
+        this[name] = triggerType.kotlin
+    }
+
+    operator fun set(name: String, triggerType: KClass<out T>) {
         if (nameToClass.containsKey(name)) {
             throw MusicTriggerException("A trigger class with name \"${name}\" is already registered.")
         }
@@ -24,17 +36,17 @@ class MusicTriggerRegistry<T : MusicTrigger> {
         classNameToName[qualifiedName] = name
     }
 
-    fun getAll(): List<Map.Entry<String, KClass<out T>>> {
-        return nameToClass.entries.sortedBy { entry -> entry.key }
+    operator fun get(name: String): KClass<out T> {
+        return nameToClass[name] ?: throw MusicTriggerException("Unknown trigger name \"$name\"")
     }
 
-    fun getTypeName(triggerType: KClass<out MusicTrigger>): String {
+    operator fun get(triggerType: Class<out T>): String {
+        return this[triggerType.kotlin]
+    }
+
+    operator fun get(triggerType: KClass<out T>): String {
         return classNameToName[triggerType.qualifiedName]
             ?: throw MusicTriggerException(
                 "Unknown trigger type of qualified name \"${triggerType.qualifiedName}\"")
-    }
-
-    fun getType(name: String): KClass<out T> {
-        return nameToClass[name] ?: throw MusicTriggerException("Unknown trigger name \"$name\"")
     }
 }

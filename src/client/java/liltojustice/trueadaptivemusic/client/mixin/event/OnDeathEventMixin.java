@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry;
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDeathEvent;
 import net.minecraft.client.gui.screen.DeathScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnDeathEventMixin {
     @Inject(at = @At("HEAD"), method = "init()V")
     public void init(CallbackInfo ci) {
-        MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnDeathEvent.class));
+        MusicEvent.Companion.invokeMusicEvent(MusicEventRegistry.INSTANCE.get(OnDeathEvent.class));
     }
 }
