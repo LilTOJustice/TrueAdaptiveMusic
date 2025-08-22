@@ -40,11 +40,11 @@ abstract class MusicEvent: MusicTrigger {
     companion object: MusicEventCompanion<MusicEvent> {
         private val registry = MusicTriggerRegistry<MusicEvent>()
 
-        fun register(name: String, type: Class<MusicEvent>) {
+        fun register(name: String, type: Class<out MusicEvent>) {
             registry.register(name, type.kotlin)
         }
 
-        fun register(name: String, type: KClass<MusicEvent>) {
+        fun register(name: String, type: KClass<out MusicEvent>) {
             registry.register(name, type)
         }
 
@@ -62,8 +62,7 @@ abstract class MusicEvent: MusicTrigger {
 
         override fun fromJson(json: JsonObject): MusicEvent {
             return try {
-                MusicTrigger
-                    .fromJsonProvideSubclasses(json, registry.getAll().map { entry -> entry.value })
+                MusicTrigger.fromJsonProvideRegistry(json, registry)
             } catch (e: MusicTriggerException) {
                 ErrorEvent(json, e.message ?: "Unknown")
             } as MusicEvent
