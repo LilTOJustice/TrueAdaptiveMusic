@@ -19,7 +19,7 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty(FIELD_NAME, moonPhase.name)
 
         return result

@@ -13,7 +13,7 @@ class HeightPredicate(private val above: Boolean, private val y: Int): MusicPred
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty("above", above)
         result.addProperty("y", y)
 

@@ -17,7 +17,7 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonEntities = JsonArray()
         statusEffects.forEach { statusEffect -> jsonEntities.add(statusEffect.toString()) }
         result.add("statusEffects", jsonEntities)

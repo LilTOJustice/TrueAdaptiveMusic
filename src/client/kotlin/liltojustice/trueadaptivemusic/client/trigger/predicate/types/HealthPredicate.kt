@@ -19,7 +19,7 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty("healthType", healthType.name)
         result.addProperty("direction", direction.name)
         result.addProperty("health", health)

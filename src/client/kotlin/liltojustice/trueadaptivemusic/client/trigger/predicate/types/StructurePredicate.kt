@@ -42,7 +42,7 @@ class StructurePredicate internal constructor(private val structures: List<Struc
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonStructures = JsonArray()
         structures.forEach { structure -> jsonStructures.add(structure.toString()) }
         result.add("id", jsonStructures)

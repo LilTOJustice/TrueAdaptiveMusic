@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -133,9 +134,12 @@ class EventViewWidget(
                     "Save",
                     onClick = {
                         assets = musicPack.getEditPackAssets()
-                        val newEvent = MusicEvent.initializeFromArgs(selectedEventTypeName, *eventArgs.filterNotNull().toTypedArray())
-                        newEvent.playableSounds =
-                            selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
+                        val newEvent = MusicEventFactory
+                            .fromArgs(
+                                selectedEventTypeName,
+                                selectedMusicPaths
+                                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                                *eventArgs.filterNotNull().toTypedArray())
 
                         exit(newEvent)
                     })
@@ -172,7 +176,7 @@ class EventViewWidget(
         }
 
         selectedEventTypeName = typeName
-        requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
+        requiredEventArgs = MusicEventFactory.getRequiredArgs(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
         clearWidgetsFromRender()
     }

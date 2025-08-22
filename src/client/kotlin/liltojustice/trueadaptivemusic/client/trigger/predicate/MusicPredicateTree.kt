@@ -3,10 +3,10 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
@@ -27,7 +27,7 @@ class MusicPredicateTree private constructor(
         val result = root.getSatisfiedNode(client)
         return Result(
             result.second.joinToString(PATH_SEPARATOR),
-            result.first.playableSounds,
+            result.first.predicate.playableSounds,
             result.first.parameters,
             result.third.values.toList())
     }
@@ -73,7 +73,6 @@ class MusicPredicateTree private constructor(
 
     class Node private constructor(
         var predicate: MusicPredicate,
-        var playableSounds: List<PlayableSound>,
         var events: List<MusicEvent>,
         var parameters: Parameters = Parameters(),
         val children: MutableList<Node> = mutableListOf()
@@ -90,13 +89,13 @@ class MusicPredicateTree private constructor(
         }
 
         fun toJson(): JsonObject {
-            val result = predicate.toJson()
-            val jsonMusicPath = JsonArray(playableSounds.size)
-            playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
+            val result = predicate.toJsonFull()
+            val jsonMusicPath = JsonArray(predicate.playableSounds.size)
+            predicate.playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
             val jsonChildren = JsonArray(children.size)
             children.forEach { child -> jsonChildren.add(child.toJson()) }
             val jsonEvents = JsonArray(events.size)
-            events.forEach { event -> jsonEvents.add(event.toJson()) }
+            events.forEach { event -> jsonEvents.add(event.toJsonFull()) }
             result.add("musicPath", jsonMusicPath)
             result.add("events", jsonEvents)
             result.add("parameters", parameters.toJson())
@@ -148,12 +147,10 @@ class MusicPredicateTree private constructor(
             nodeArgs: List<Any>,
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
-            sounds: List<PlayableSound>) {
-            val child = Node(
-                MusicPredicate.initializeFromArgs(predicateType, *predicateArgs.toTypedArray()),
-                sounds,
-                events,
-                Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
+            playableSounds: List<PlayableSound>) {
+            val predicate = MusicPredicateFactory.fromArgs(
+                predicateType, playableSounds, *predicateArgs.toTypedArray())
+            val child = Node(predicate, events, Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
             children.add(child)
         }
@@ -208,15 +205,14 @@ class MusicPredicateTree private constructor(
 
         companion object {
             fun makeRoot(): Node {
-                return Node(RootPredicate(), listOf(), listOf())
+                return Node(RootPredicate(), listOf())
             }
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
-                    MusicPredicate.fromJson(json),
-                    MusicPack.parseMusicPath(json, soundLibrary),
-                    MusicEvent.arrayFromJsonArray(
-                        json.getAsJsonArray("events") ?: JsonArray(), soundLibrary),
+                    MusicPredicateFactory.fromJson(json, soundLibrary),
+                    (json.getAsJsonArray("events") ?: JsonArray())
+                        .map { element -> MusicEventFactory.fromJson(element.asJsonObject, soundLibrary) },
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)

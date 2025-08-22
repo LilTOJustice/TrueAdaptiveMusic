@@ -17,7 +17,7 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val bossesArray = JsonArray()
         bosses.forEach { bossesArray.add(it.toString()) }
         result.add("bosses", bossesArray)
