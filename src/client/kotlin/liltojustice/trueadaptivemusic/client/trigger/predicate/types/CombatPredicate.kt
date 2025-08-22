@@ -64,8 +64,6 @@ class CombatPredicate: MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
-        override fun getTypeName(): String { return "combat" }
-
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate()
         }

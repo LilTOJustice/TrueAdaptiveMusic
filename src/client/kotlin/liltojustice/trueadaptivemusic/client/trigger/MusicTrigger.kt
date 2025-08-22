@@ -2,14 +2,10 @@ package liltojustice.trueadaptivemusic.client.trigger
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
-import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
 
 interface MusicTrigger {
@@ -26,33 +22,16 @@ interface MusicTrigger {
     }
 
     fun getTriggerId(): String {
-        val companion = javaClass.kotlin.companionObjectInstance
-        if (companion is MusicTriggerCompanion<*>) {
-            val params = getTriggerParams()
-            return companion.getTypeName() + if (params.isEmpty()) "" else "{${params.joinToString(",")}}"
-        }
-        else {
-            throw MusicTriggerException(getMissingCompanionExceptionText(javaClass.kotlin))
-        }
+        val params = getTriggerParams()
+        return getTypeName() + if (params.isEmpty()) "" else "{${params.joinToString(",")}}"
     }
 
-    fun getTruncatedTriggerId(): String {
-        return Companion.getTruncatedTriggerId(getTriggerId())
-    }
-
-    fun getTypeName(): String {
-        val companion = javaClass.kotlin.companionObjectInstance
-        if (companion is MusicTriggerCompanion<*>) {
-            return companion.getTypeName()
-        } else {
-            throw MusicTriggerException(getMissingCompanionExceptionText(javaClass.kotlin))
-        }
-    }
+    fun getTypeName(): String
 
     companion object: MusicTriggerCompanion<MusicTrigger> {
         fun fromJsonProvideSubclasses(
             json: JsonObject,
-            subclasses: List<KClass<out MusicTrigger>> = getTriggerImplementerSubclasses()): MusicTrigger {
+            subclasses: List<KClass<out MusicTrigger>>): MusicTrigger {
             val type = JsonHelper.getString(json, "type")
             for (subclass in subclasses)
             {
@@ -79,16 +58,12 @@ interface MusicTrigger {
             return text
         }
 
-        override fun getTriggerImplementerSubclasses(): List<KClass<out MusicTrigger>> {
-            return ReflectionHelper.getSubclassesOf(MusicTrigger::class)
-        }
-
-        override fun getTypeName(): String {
-            throw MusicTriggerException("Attempt to get type name from MusicTrigger interface.")
-        }
-
         override fun fromJson(json: JsonObject): MusicTrigger {
-            return fromJsonProvideSubclasses(json)
+            return fromJsonProvideSubclasses(json, emptyList())
+        }
+
+        override fun initializeFromArgs(typeName: String, vararg args: Any): MusicTrigger {
+            throw MusicTriggerException("Cannot initialize MusicTrigger.")
         }
 
         private fun getMissingCompanionExceptionText(offendingClass: KClass<out MusicTrigger>): String {
@@ -98,36 +73,7 @@ interface MusicTrigger {
     }
 
     interface MusicTriggerCompanion<TSelf> where TSelf: MusicTrigger {
-        fun getTriggerImplementerSubclasses(): List<KClass<out TSelf>>
-        fun getTypeName(): String
         fun fromJson(json: JsonObject): TSelf
-
-        fun getTypeNames(): List<String> {
-            return getTriggerImplementerSubclasses().mapNotNull { subclass ->
-                if (subclass == ErrorPredicate::class || subclass == ErrorEvent::class) {
-                    return@mapNotNull null
-                }
-
-                subclass.companionObject?.functions?.firstOrNull { f ->
-                    f.name == "getTypeName"
-                }?.call(subclass.companionObjectInstance) as? String
-            }
-        }
-
-        fun getRequiredArgsFromTypeName(typeName: String): List<KParameter> {
-            return getConstructorFromTypeName(typeName).parameters
-        }
-
-        fun initializeFromArgs(typeName: String, vararg args: Any): TSelf {
-            return getConstructorFromTypeName(typeName).call(*args)
-        }
-
-        fun getConstructorFromTypeName(typeName: String): KFunction<TSelf> {
-            return getTriggerImplementerSubclasses().firstOrNull { subclass ->
-                subclass.companionObject?.functions?.firstOrNull { f ->
-                    f.name == "getTypeName" }?.call(subclass.companionObjectInstance) == typeName }
-                ?.primaryConstructor
-                ?: throw MusicTriggerException("No constructor found for $typeName. It must have a constructor.")
-        }
+        fun initializeFromArgs(typeName: String, vararg args: Any): TSelf
     }
 }

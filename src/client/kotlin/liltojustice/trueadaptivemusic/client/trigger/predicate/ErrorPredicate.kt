@@ -23,12 +23,10 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
     }
 
     companion object: MusicPredicateCompanion<ErrorPredicate> {
-        override fun getTypeName(): String {
-            return "error_predicate"
-        }
-
         override fun fromJson(json: JsonObject): MusicPredicate {
             throw MusicTriggerException("'Error' predicate type is invalid and should not be used.")
         }
+
+        const val NAME = "error_predicate"
     }
 }

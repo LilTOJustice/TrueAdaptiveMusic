@@ -22,7 +22,7 @@ public class OnWakeUpEventMixin {
     @Inject(at = @At("HEAD"), method = "closeChatIfEmpty()V")
     public void closeChatIfEmpty(CallbackInfo ci) {
         if (!stopSleepingPressed) {
-            MusicEvent.Companion.invokeMusicEvent(OnWakeUpEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnWakeUpEvent.class));
         }
 
         stopSleepingPressed = false;

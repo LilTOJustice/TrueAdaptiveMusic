@@ -25,8 +25,6 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
     }
 
     companion object: MusicPredicateCompanion<BiomePredicate> {
-        override fun getTypeName(): String { return "biome" }
-
         override fun fromJson(json: JsonObject): BiomePredicate {
             return BiomePredicate(
                     if (JsonHelper.hasArray(json, "id"))

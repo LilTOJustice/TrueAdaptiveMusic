@@ -10,8 +10,6 @@ class TitleScreenPredicate(): MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<TitleScreenPredicate> {
-        override fun getTypeName(): String { return "title_screen" }
-
         override fun fromJson(json: JsonObject): TitleScreenPredicate {
             return TitleScreenPredicate()
         }

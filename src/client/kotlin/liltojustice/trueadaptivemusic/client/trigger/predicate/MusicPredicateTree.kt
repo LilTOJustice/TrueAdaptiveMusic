@@ -37,7 +37,11 @@ class MusicPredicateTree private constructor(
         preorderVisitor: NodeVisitor? = null,
         postorderVisitor: NodeVisitor? = null,
         path: List<String> = emptyList()) {
-        val newPath = path + root.predicate.getTriggerId()
+        var newPath = emptyList<String>()
+        try {
+            newPath = path + root.predicate.getTriggerId()
+        }
+        catch (_: Exception) {}
         preorderVisitor?.invoke(root, newPath)
         root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, newPath) }
         postorderVisitor?.invoke(root, newPath)
@@ -49,10 +53,6 @@ class MusicPredicateTree private constructor(
 
     fun preorderTraverse(preorderVisitor: NodeVisitor) {
         traverseRecursive(root, preorderVisitor = preorderVisitor)
-    }
-
-    fun postorderTraverse(postorderVisitor: NodeVisitor) {
-        traverseRecursive(root, postorderVisitor = postorderVisitor)
     }
 
     companion object {
@@ -182,26 +182,10 @@ class MusicPredicateTree private constructor(
             return true
         }
 
-        fun adoptChildFront(child: Node): Boolean {
-            if (!isValidNewChild(child)) {
-                return false
-            }
-
-            child.orphan()
-            addChildFront(child)
-
-            return true
-        }
-
         private fun addChild(child: Node, position: Int?) {
             position?.let {
                 children.add(it, child)
             } ?: children.add(child)
-            child.parent = this
-        }
-
-        private fun addChildFront(child: Node) {
-            children.add(0, child)
             child.parent = this
         }
 
@@ -240,7 +224,7 @@ class MusicPredicateTree private constructor(
             }
 
             private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-            : MutableList<Node> {
+                    : MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")
                         .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()

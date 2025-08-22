@@ -24,8 +24,6 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
     }
 
     companion object: MusicPredicateCompanion<RidingPredicate> {
-        override fun getTypeName(): String { return "riding" }
-
         override fun fromJson(json: JsonObject): RidingPredicate {
             return RidingPredicate(
                 JsonHelper.getArray(json, "entities")

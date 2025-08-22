@@ -14,10 +14,7 @@ class NightTimePredicate: MusicPredicate() {
 
     companion object: MusicPredicateCompanion<NightTimePredicate>
     {
-        override fun getTypeName(): String { return "night" }
-
-        override fun fromJson(json: JsonObject): NightTimePredicate
-        {
+        override fun fromJson(json: JsonObject): NightTimePredicate {
             return NightTimePredicate()
         }
     }

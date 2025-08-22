@@ -1,0 +1,40 @@
+package liltojustice.trueadaptivemusic.client.trigger
+
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
+import kotlin.reflect.KClass
+
+class MusicTriggerRegistry<T : MusicTrigger> {
+    private val nameToClass = HashMap<String, KClass<T>>()
+    private val classNameToName = HashMap<String, String>()
+
+    fun register(name: String, triggerType: KClass<T>) {
+        if (nameToClass.containsKey(name)) {
+            throw MusicTriggerException("A trigger class with name \"${name}\" is already registered.")
+        }
+
+        val qualifiedName = triggerType.qualifiedName
+            ?: throw MusicTriggerException("Provided trigger type is missing qualified name.")
+
+        if (classNameToName.containsKey(qualifiedName)) {
+            throw MusicTriggerException(
+                "Duplicate trigger type from qualified name \"${qualifiedName}\" registered.")
+        }
+
+        nameToClass[name] = triggerType
+        classNameToName[qualifiedName] = name
+    }
+
+    fun getAll(): List<Map.Entry<String, KClass<T>>> {
+        return nameToClass.entries.sortedBy { entry -> entry.key }
+    }
+
+    fun getTypeName(triggerType: KClass<out MusicTrigger>): String {
+        return classNameToName[triggerType.qualifiedName]
+            ?: throw MusicTriggerException(
+                "Unknown trigger type of qualified name \"${triggerType.qualifiedName}\"")
+    }
+
+    fun getType(name: String): KClass<T> {
+        return nameToClass[name] ?: throw MusicTriggerException("Unknown trigger name \"$name\"")
+    }
+}

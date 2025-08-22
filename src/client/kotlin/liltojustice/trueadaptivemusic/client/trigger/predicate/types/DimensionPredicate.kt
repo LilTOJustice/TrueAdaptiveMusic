@@ -24,8 +24,6 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     }
 
     companion object: MusicPredicateCompanion<DimensionPredicate> {
-        override fun getTypeName(): String { return "dimension" }
-
         override fun fromJson(json: JsonObject): DimensionPredicate {
             return DimensionPredicate(
                 if (JsonHelper.hasArray(json, "id"))

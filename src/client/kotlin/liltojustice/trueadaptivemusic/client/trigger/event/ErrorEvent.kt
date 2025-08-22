@@ -16,12 +16,10 @@ class ErrorEvent(private val actualJson: JsonObject, val reason: String): MusicE
     }
 
     companion object: MusicEventCompanion<ErrorEvent> {
-        override fun getTypeName(): String {
-            return "error_event"
-        }
-
         override fun fromJson(json: JsonObject): MusicEvent {
             throw MusicTriggerException("'Error' event type is invalid and should not be used.")
         }
+
+        const val NAME = "error_predicate"
     }
 }

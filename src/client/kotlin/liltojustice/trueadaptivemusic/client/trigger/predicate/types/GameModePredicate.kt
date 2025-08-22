@@ -21,8 +21,6 @@ class GameModePredicate(private val gameMode: GameMode): MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<GameModePredicate> {
-        override fun getTypeName(): String { return "game_mode" }
-
         override fun fromJson(json: JsonObject): GameModePredicate {
             return GameModePredicate(GameMode.valueOf(JsonHelper.getString(json, FIELD_NAME)))
         }

@@ -26,8 +26,6 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     }
 
     companion object: MusicPredicateCompanion<BossPredicate> {
-        override fun getTypeName(): String { return "boss" }
-
         override fun fromJson(json: JsonObject): BossPredicate {
             return BossPredicate(
                 if (JsonHelper.hasArray(json, "id"))

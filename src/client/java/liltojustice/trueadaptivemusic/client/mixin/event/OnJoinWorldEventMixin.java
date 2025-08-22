@@ -14,7 +14,7 @@ public class OnJoinWorldEventMixin {
     @Inject(at = @At("HEAD"), method = "setWorld(Lnet/minecraft/client/world/ClientWorld;)V")
     public void setWorld(ClientWorld world, CallbackInfo ci) {
         if (world != null) {
-            MusicEvent.Companion.invokeMusicEvent(OnJoinWorldEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnJoinWorldEvent.class));
         }
     }
 }

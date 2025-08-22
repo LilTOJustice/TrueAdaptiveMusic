@@ -46,8 +46,6 @@ class StructureSetPredicate internal constructor(private val structureSets: List
     }
 
     companion object: MusicPredicateCompanion<StructureSetPredicate> {
-        override fun getTypeName(): String { return "structure_set" }
-
         override fun fromJson(json: JsonObject): StructureSetPredicate {
             return StructureSetPredicate(
                 if (JsonHelper.hasArray(json, "id"))

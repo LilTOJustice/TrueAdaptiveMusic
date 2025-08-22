@@ -15,13 +15,13 @@ public class OnToastMixin {
     @Inject(at = @At("HEAD"), method = "add(Lnet/minecraft/client/toast/Toast;)V")
     public void add(Toast toast, CallbackInfo ci) {
         if (toast instanceof AdvancementToast) {
-            MusicEvent.Companion.invokeMusicEvent(OnAdvancementGetEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnAdvancementGetEvent.class));
         }
         else if (toast instanceof RecipeToast) {
-            MusicEvent.Companion.invokeMusicEvent(OnRecipeUnlockEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnRecipeUnlockEvent.class));
         }
         else if (toast instanceof TutorialToast) {
-            MusicEvent.Companion.invokeMusicEvent(OnTutorialPopupEvent.Companion.getTypeName());
+            MusicEvent.Companion.invokeMusicEvent(MusicEvent.Companion.getNameFromType(OnTutorialPopupEvent.class));
         }
     }
 }

@@ -21,8 +21,6 @@ class HeightPredicate(private val above: Boolean, private val y: Int): MusicPred
     }
 
     companion object: MusicPredicateCompanion<HeightPredicate> {
-        override fun getTypeName(): String { return "height" }
-
         override fun fromJson(json: JsonObject): HeightPredicate {
             return HeightPredicate(JsonHelper.getBoolean(json, "above"), JsonHelper.getInt(json, "y"))
         }

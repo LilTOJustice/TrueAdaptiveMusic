@@ -59,8 +59,6 @@ dependencies {
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
 
-    implementation("org.reflections:reflections:${project.property("reflections_version")}")
-        ?.let { includeInternal(it) }
     implementation(
         "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_version")}")
         ?.let { includeInternal(it) }

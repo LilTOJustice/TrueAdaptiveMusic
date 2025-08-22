@@ -31,7 +31,7 @@ class PredicateViewWidget(
     : ContainerWidget(
     width, height, "Predicate View", true, false, true, true, x, y) {
     private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
-        .filter { typeName -> typeName != RootPredicate.getTypeName() }
+        .filter { typeName -> typeName != MusicPredicate.getNameFromType(RootPredicate::class) }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
@@ -227,7 +227,8 @@ class PredicateViewWidget(
                         assets = musicPack.getEditPackAssets()
                         if (selectedNode != null) {
                             selectedNode!!.predicate =
-                                if (selectedNode!!.predicate.getTypeName() == RootPredicate.getTypeName())
+                                if (selectedNode!!.predicate.getTypeName()
+                                    == MusicPredicate.getNameFromType(RootPredicate::class))
                                     selectedNode!!.predicate
                                 else MusicPredicate.initializeFromArgs(
                                     selectedPredicateTypeName, *predicateArgs.filterNotNull().toTypedArray())

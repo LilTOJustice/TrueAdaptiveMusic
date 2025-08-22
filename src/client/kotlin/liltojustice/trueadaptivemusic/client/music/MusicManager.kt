@@ -157,7 +157,7 @@ class MusicManager(
         }
 
         if (identifier != currentMusicPredicateId && predicateResult?.events?.any { event -> event is OnEnterPredicateEvent } ?: false) {
-            MusicEvent.invokeMusicEvent(OnEnterPredicateEvent.getTypeName())
+            MusicEvent.invokeMusicEvent(MusicEvent.getNameFromType(OnEnterPredicateEvent::class))
         }
 
         shouldResume = oldMusicPredicateId == identifier
