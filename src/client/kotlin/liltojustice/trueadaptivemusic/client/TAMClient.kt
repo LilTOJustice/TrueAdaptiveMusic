@@ -76,22 +76,6 @@ object TAMClient {
         return musicManager?.hasSoundInstance(instance) ?: false
     }
 
-    fun registerInputWidget(
-        predicate: (parameterType: KType) -> Boolean,
-        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
-        inputWidgetMaker.register(predicate, widgetMaker)
-    }
-
-    fun registerInputWidget(
-        parameterType: KType,
-        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
-        registerInputWidget({ type -> type == parameterType}, widgetMaker)
-    }
-
-    fun makeInputWidget(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter): ClickableWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg)
-    }
-
     fun registerPredicate(name: String, triggerType: KClass<out MusicPredicate>) {
         predicateRegistry[name] = triggerType
     }
@@ -106,6 +90,22 @@ object TAMClient {
 
     fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
         eventRegistry[name] = triggerType
+    }
+
+    fun registerInputWidget(
+        predicate: (parameterType: KType) -> Boolean,
+        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        inputWidgetMaker.register(predicate, widgetMaker)
+    }
+
+    fun registerInputWidget(
+        parameterType: KType,
+        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        registerInputWidget({ type -> type == parameterType}, widgetMaker)
+    }
+
+    fun makeInputWidget(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter): ClickableWidget {
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg)
     }
 
     private fun initialize(client: MinecraftClient) {
