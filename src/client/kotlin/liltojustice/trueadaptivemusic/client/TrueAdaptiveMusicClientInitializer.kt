@@ -23,6 +23,21 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
+            typeOf<String>(),
+            { prompt, screen, outArgs, arg ->
+                TextInputWidget(
+                    screen,
+                    prompt,
+                    30,
+                    { widget, text ->
+                        outArgs[arg.index] = text
+                    },
+                    outArgs[arg.index]?.toString() ?: ""
+                )
+            }
+        )
+
+        TAMClient.registerInputWidget(
             typeOf<Int>(),
             { prompt, screen, outArgs, arg ->
                 TextInputWidget(
