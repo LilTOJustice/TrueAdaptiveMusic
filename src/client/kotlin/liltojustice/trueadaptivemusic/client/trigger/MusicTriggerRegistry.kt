@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import kotlin.reflect.KClass
 
 abstract class MusicTriggerRegistry<T: MusicTrigger> {

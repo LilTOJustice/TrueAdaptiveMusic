@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
+import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 
 class ErrorEvent(private val actualJson: JsonObject, val reason: String): MusicEvent() {
     val shortenedJson: JsonObject = run {

@@ -5,7 +5,6 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter

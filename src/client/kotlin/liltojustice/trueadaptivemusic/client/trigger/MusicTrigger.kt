@@ -4,7 +4,6 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 
 abstract class MusicTrigger {
