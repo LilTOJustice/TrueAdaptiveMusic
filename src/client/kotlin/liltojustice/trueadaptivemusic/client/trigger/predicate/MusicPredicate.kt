@@ -7,7 +7,7 @@ import net.minecraft.client.MinecraftClient
 abstract class MusicPredicate: MusicTrigger() {
     abstract fun test(client: MinecraftClient): Boolean
 
-    override fun getTypeName(): String {
+    final override fun getTypeName(): String {
         return if (this is ErrorPredicate)
             ErrorPredicate.NAME
         else

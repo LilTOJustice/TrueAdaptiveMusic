@@ -9,7 +9,7 @@ abstract class MusicEvent: MusicTrigger() {
         return true
     }
 
-    override fun getTypeName(): String {
+    final override fun getTypeName(): String {
         return if (this is ErrorEvent)
             ErrorEvent.NAME
         else
