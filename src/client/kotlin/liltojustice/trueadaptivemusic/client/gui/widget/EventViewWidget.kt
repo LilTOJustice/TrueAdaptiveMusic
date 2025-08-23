@@ -22,7 +22,7 @@ class EventViewWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Event View", true, false, true, true, x, y) {
-    private val eventTypeNameOptions = MusicEvent.getTypeNames()
+    private val eventTypeNameOptions = TAMClient.eventRegistry.getAllNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
     private var requiredEventArgs = listOf<KParameter>()
     private var eventArgs = mutableListOf<Any?>()
@@ -132,9 +132,12 @@ class EventViewWidget(
                     "Save",
                     onClick = {
                         assets = musicPack.getEditPackAssets()
-                        val newEvent = MusicEvent.initializeFromArgs(selectedEventTypeName, *eventArgs.filterNotNull().toTypedArray())
-                        newEvent.playableSounds =
-                            selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
+                        val newEvent = TAMClient.eventFactory
+                            .fromArgs(
+                                selectedEventTypeName,
+                                selectedMusicPaths
+                                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                                *eventArgs.filterNotNull().toTypedArray())
 
                         exit(newEvent)
                     })
@@ -171,7 +174,7 @@ class EventViewWidget(
         }
 
         selectedEventTypeName = typeName
-        requiredEventArgs = MusicEvent.getRequiredArgsFromTypeName(typeName)
+        requiredEventArgs = TAMClient.eventFactory.getRequiredArgs(typeName)
         eventArgs = requiredEventArgs.map { null }.toMutableList()
         clearWidgetsFromRender()
     }

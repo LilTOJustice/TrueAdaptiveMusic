@@ -17,15 +17,13 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty(FIELD_NAME, weather.name)
 
         return result
     }
 
     companion object: MusicPredicateCompanion<WeatherPredicate> {
-        override fun getTypeName(): String { return "weather" }
-
         override fun fromJson(json: JsonObject): WeatherPredicate {
             return WeatherPredicate(Weather.valueOf(JsonHelper.getString(json, FIELD_NAME)))
         }

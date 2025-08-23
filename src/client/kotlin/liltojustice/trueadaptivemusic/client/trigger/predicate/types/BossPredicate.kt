@@ -17,7 +17,7 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonBosses = JsonArray()
         bosses.forEach { boss -> jsonBosses.add(boss.toString()) }
         result.add("id", jsonBosses)
@@ -26,8 +26,6 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     }
 
     companion object: MusicPredicateCompanion<BossPredicate> {
-        override fun getTypeName(): String { return "boss" }
-
         override fun fromJson(json: JsonObject): BossPredicate {
             return BossPredicate(
                 if (JsonHelper.hasArray(json, "id"))

@@ -14,8 +14,6 @@ class PillagerRaidPredicate(): MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<PillagerRaidPredicate> {
-        override fun getTypeName(): String { return "pillager_raid"}
-
         override fun fromJson(json: JsonObject): PillagerRaidPredicate {
             return PillagerRaidPredicate()
         }

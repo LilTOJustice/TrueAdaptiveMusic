@@ -15,7 +15,7 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonDimensions = JsonArray()
         dimensions.forEach { dimension -> jsonDimensions.add(dimension.toString()) }
         result.add("id", jsonDimensions)
@@ -24,8 +24,6 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     }
 
     companion object: MusicPredicateCompanion<DimensionPredicate> {
-        override fun getTypeName(): String { return "dimension" }
-
         override fun fromJson(json: JsonObject): DimensionPredicate {
             return DimensionPredicate(
                 if (JsonHelper.hasArray(json, "id"))

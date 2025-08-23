@@ -1,19 +1,11 @@
 package liltojustice.trueadaptivemusic
 
-import org.reflections.Reflections
-import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
 class ReflectionHelper {
     companion object {
-        private val reflections = Reflections()
-
-        fun <T: Any> getSubclassesOf(parentClass: KClass<T>): List<KClass<out T>> {
-            return reflections.getSubTypesOf(parentClass.java).map { childClass -> childClass.kotlin }
-        }
-
         fun getConstructorParameterValues(instance: Any): List<ParameterValue> {
             val constructor = instance::class.primaryConstructor
                 ?: throw ReflectionHelperException("No constructor found for ${instance::class.simpleName}." +

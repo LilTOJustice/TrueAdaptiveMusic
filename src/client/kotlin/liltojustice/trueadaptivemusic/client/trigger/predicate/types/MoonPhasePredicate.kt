@@ -19,15 +19,13 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty(FIELD_NAME, moonPhase.name)
 
         return result
     }
 
     companion object: MusicPredicateCompanion<MoonPhasePredicate> {
-        override fun getTypeName(): String { return "moon_phase" }
-
         override fun fromJson(json: JsonObject): MoonPhasePredicate {
             return MoonPhasePredicate(MoonPhase.valueOf(JsonHelper.getString(json, FIELD_NAME)))
         }

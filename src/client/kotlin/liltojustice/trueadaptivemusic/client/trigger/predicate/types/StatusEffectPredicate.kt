@@ -17,7 +17,7 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonEntities = JsonArray()
         statusEffects.forEach { statusEffect -> jsonEntities.add(statusEffect.toString()) }
         result.add("statusEffects", jsonEntities)
@@ -26,8 +26,6 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
     }
 
     companion object: MusicPredicateCompanion<StatusEffectPredicate> {
-        override fun getTypeName(): String { return "status_effect" }
-
         override fun fromJson(json: JsonObject): StatusEffectPredicate {
             return StatusEffectPredicate(
                 JsonHelper.getArray(json, "statusEffects")

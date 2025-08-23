@@ -17,7 +17,7 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val bossesArray = JsonArray()
         bosses.forEach { bossesArray.add(it.toString()) }
         result.add("bosses", bossesArray)
@@ -26,10 +26,6 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
     }
 
     companion object: MusicEventCompanion<OnBossDefeatEvent> {
-        override fun getTypeName(): String {
-            return "on_boss_defeat"
-        }
-
         override fun fromJson(json: JsonObject): MusicEvent {
             return OnBossDefeatEvent(
                 JsonHelper.getArray(json, "bosses").map { element -> EntityTypeIdentifier(element.asString) })

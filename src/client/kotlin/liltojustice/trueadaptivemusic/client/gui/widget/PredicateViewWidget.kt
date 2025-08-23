@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.DrawContext
@@ -30,8 +29,8 @@ class PredicateViewWidget(
     y: Int = 0)
     : ContainerWidget(
     width, height, "Predicate View", true, false, true, true, x, y) {
-    private val predicateTypeNameOptions = MusicPredicate.getTypeNames()
-        .filter { typeName -> typeName != RootPredicate.getTypeName() }
+    private val predicateTypeNameOptions = TAMClient.predicateRegistry.getAllNames()
+        .filter { typeName -> typeName != TAMClient.predicateRegistry[RootPredicate::class] }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
@@ -77,7 +76,8 @@ class PredicateViewWidget(
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
-        selectedMusicPaths = selectedNode!!.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
+        selectedMusicPaths = selectedNode!!.predicate.playableSounds.map { sound -> sound.getSoundName() }
+            .toMutableList()
         newPredicateParent = null
         nodeArgs = node.parameters.constructorParams().toMutableList()
         events = node.events.toMutableList()
@@ -106,7 +106,7 @@ class PredicateViewWidget(
 
     private fun setSelectedPredicateTypeName(typeName: String) {
         selectedPredicateTypeName = typeName
-        requiredPredicateArgs = MusicPredicate.getRequiredArgsFromTypeName(typeName)
+        requiredPredicateArgs = TAMClient.predicateFactory.getRequiredArgs(typeName)
         predicateArgs = selectedNode?.let {
             if (it.predicate.getTypeName() == selectedPredicateTypeName)
                 it.predicate.getTriggerParams().map { param -> param.value }.toMutableList()
@@ -227,13 +227,15 @@ class PredicateViewWidget(
                         assets = musicPack.getEditPackAssets()
                         if (selectedNode != null) {
                             selectedNode!!.predicate =
-                                if (selectedNode!!.predicate.getTypeName() == RootPredicate.getTypeName())
+                                if (selectedNode!!.predicate.getTypeName()
+                                    == TAMClient.predicateRegistry[RootPredicate::class])
                                     selectedNode!!.predicate
-                                else MusicPredicate.initializeFromArgs(
-                                    selectedPredicateTypeName, *predicateArgs.filterNotNull().toTypedArray())
+                                else TAMClient.predicateFactory.fromArgs(
+                                    selectedPredicateTypeName,
+                                    selectedMusicPaths
+                                        .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                                    *predicateArgs.filterNotNull().toTypedArray())
                             selectedNode!!.events = events
-                            selectedNode!!.playableSounds = selectedMusicPaths
-                                .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) }
                             selectedNode!!.parameters =
                                 MusicPredicateTree.Node.Parameters.initializeFromArgs(
                                     *nodeArgs.filterNotNull().toTypedArray())

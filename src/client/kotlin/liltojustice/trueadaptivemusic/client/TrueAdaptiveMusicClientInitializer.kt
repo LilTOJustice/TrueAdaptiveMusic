@@ -18,6 +18,37 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
+        TAMClient.registerPredicate("biome", BiomePredicate::class)
+        TAMClient.registerPredicate("boss", BossPredicate::class)
+        TAMClient.registerPredicate("combat", CombatPredicate::class)
+        TAMClient.registerPredicate("day", DayTimePredicate::class)
+        TAMClient.registerPredicate("dimension", DimensionPredicate::class)
+        TAMClient.registerPredicate("first_day", FirstDayPredicate::class)
+        TAMClient.registerPredicate("game_mode", GameModePredicate::class)
+        TAMClient.registerPredicate("health", HealthPredicate::class)
+        TAMClient.registerPredicate("height", HeightPredicate::class)
+        TAMClient.registerPredicate("moon_phase", MoonPhasePredicate::class)
+        TAMClient.registerPredicate("night", NightTimePredicate::class)
+        TAMClient.registerPredicate("pillager_raid", PillagerRaidPredicate::class)
+        TAMClient.registerPredicate("riding", RidingPredicate::class)
+        TAMClient.registerPredicate("root", RootPredicate::class)
+        TAMClient.registerPredicate("status_effect", StatusEffectPredicate::class)
+        TAMClient.registerPredicate("structure", StructurePredicate::class)
+        TAMClient.registerPredicate("structure_set", StructureSetPredicate::class)
+        TAMClient.registerPredicate("title_screen", TitleScreenPredicate::class)
+        TAMClient.registerPredicate("weather", WeatherPredicate::class)
+
+        TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
+        TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
+        TAMClient.registerEvent("on_day_start", OnDayStartEvent::class)
+        TAMClient.registerEvent("on_death", OnDeathEvent::class)
+        TAMClient.registerEvent("on_enter_predicate", OnEnterPredicateEvent::class)
+        TAMClient.registerEvent("on_join_world", OnJoinWorldEvent::class)
+        TAMClient.registerEvent("on_night_start", OnNightStartEvent::class)
+        TAMClient.registerEvent("on_recipe_unlock", OnRecipeUnlockEvent::class)
+        TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
+        TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
+
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             TAMClient.tick(client)
         }

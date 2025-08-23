@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -27,7 +27,7 @@ class MusicPredicateTree private constructor(
         val result = root.getSatisfiedNode(client)
         return Result(
             result.second.joinToString(PATH_SEPARATOR),
-            result.first.playableSounds,
+            result.first.predicate.playableSounds,
             result.first.parameters,
             result.third.values.toList())
     }
@@ -37,7 +37,11 @@ class MusicPredicateTree private constructor(
         preorderVisitor: NodeVisitor? = null,
         postorderVisitor: NodeVisitor? = null,
         path: List<String> = emptyList()) {
-        val newPath = path + root.predicate.getTriggerId()
+        var newPath = emptyList<String>()
+        try {
+            newPath = path + root.predicate.getTriggerId()
+        }
+        catch (_: Exception) {}
         preorderVisitor?.invoke(root, newPath)
         root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, newPath) }
         postorderVisitor?.invoke(root, newPath)
@@ -49,10 +53,6 @@ class MusicPredicateTree private constructor(
 
     fun preorderTraverse(preorderVisitor: NodeVisitor) {
         traverseRecursive(root, preorderVisitor = preorderVisitor)
-    }
-
-    fun postorderTraverse(postorderVisitor: NodeVisitor) {
-        traverseRecursive(root, postorderVisitor = postorderVisitor)
     }
 
     companion object {
@@ -73,7 +73,6 @@ class MusicPredicateTree private constructor(
 
     class Node private constructor(
         var predicate: MusicPredicate,
-        var playableSounds: List<PlayableSound>,
         var events: List<MusicEvent>,
         var parameters: Parameters = Parameters(),
         val children: MutableList<Node> = mutableListOf()
@@ -90,13 +89,13 @@ class MusicPredicateTree private constructor(
         }
 
         fun toJson(): JsonObject {
-            val result = predicate.toJson()
-            val jsonMusicPath = JsonArray(playableSounds.size)
-            playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
+            val result = predicate.toJsonFull()
+            val jsonMusicPath = JsonArray(predicate.playableSounds.size)
+            predicate.playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
             val jsonChildren = JsonArray(children.size)
             children.forEach { child -> jsonChildren.add(child.toJson()) }
             val jsonEvents = JsonArray(events.size)
-            events.forEach { event -> jsonEvents.add(event.toJson()) }
+            events.forEach { event -> jsonEvents.add(event.toJsonFull()) }
             result.add("musicPath", jsonMusicPath)
             result.add("events", jsonEvents)
             result.add("parameters", parameters.toJson())
@@ -148,12 +147,10 @@ class MusicPredicateTree private constructor(
             nodeArgs: List<Any>,
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
-            sounds: List<PlayableSound>) {
-            val child = Node(
-                MusicPredicate.initializeFromArgs(predicateType, *predicateArgs.toTypedArray()),
-                sounds,
-                events,
-                Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
+            playableSounds: List<PlayableSound>) {
+            val predicate = TAMClient.predicateFactory.fromArgs(
+                predicateType, playableSounds, *predicateArgs.toTypedArray())
+            val child = Node(predicate, events, Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
             child.parent = this
             children.add(child)
         }
@@ -182,26 +179,10 @@ class MusicPredicateTree private constructor(
             return true
         }
 
-        fun adoptChildFront(child: Node): Boolean {
-            if (!isValidNewChild(child)) {
-                return false
-            }
-
-            child.orphan()
-            addChildFront(child)
-
-            return true
-        }
-
         private fun addChild(child: Node, position: Int?) {
             position?.let {
                 children.add(it, child)
             } ?: children.add(child)
-            child.parent = this
-        }
-
-        private fun addChildFront(child: Node) {
-            children.add(0, child)
             child.parent = this
         }
 
@@ -224,15 +205,14 @@ class MusicPredicateTree private constructor(
 
         companion object {
             fun makeRoot(): Node {
-                return Node(RootPredicate(), listOf(), listOf())
+                return Node(RootPredicate(), listOf())
             }
 
             fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
                 return Node(
-                    MusicPredicate.fromJson(json),
-                    MusicPack.parseMusicPath(json, soundLibrary),
-                    MusicEvent.arrayFromJsonArray(
-                        json.getAsJsonArray("events") ?: JsonArray(), soundLibrary),
+                    TAMClient.predicateFactory.fromJson(json, soundLibrary),
+                    (json.getAsJsonArray("events") ?: JsonArray())
+                        .map { element -> TAMClient.eventFactory.fromJson(element.asJsonObject, soundLibrary) },
                     json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
                         ?: Parameters(),
                     parseChildren(json, soundLibrary)
@@ -240,7 +220,7 @@ class MusicPredicateTree private constructor(
             }
 
             private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-            : MutableList<Node> {
+                    : MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")
                         .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()

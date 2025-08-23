@@ -12,8 +12,6 @@ class FirstDayPredicate(): MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<FirstDayPredicate> {
-        override fun getTypeName(): String { return "first_day" }
-
         override fun fromJson(json: JsonObject): FirstDayPredicate {
             return FirstDayPredicate()
         }

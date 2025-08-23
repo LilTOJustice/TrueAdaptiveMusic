@@ -16,7 +16,7 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         val jsonBiomes = JsonArray()
         biomes.forEach { biome -> jsonBiomes.add(biome.toString()) }
         result.add("id", jsonBiomes)
@@ -25,8 +25,6 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
     }
 
     companion object: MusicPredicateCompanion<BiomePredicate> {
-        override fun getTypeName(): String { return "biome" }
-
         override fun fromJson(json: JsonObject): BiomePredicate {
             return BiomePredicate(
                     if (JsonHelper.hasArray(json, "id"))

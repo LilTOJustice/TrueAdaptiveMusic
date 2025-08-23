@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.music
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -157,7 +158,7 @@ class MusicManager(
         }
 
         if (identifier != currentMusicPredicateId && predicateResult?.events?.any { event -> event is OnEnterPredicateEvent } ?: false) {
-            MusicEvent.invokeMusicEvent(OnEnterPredicateEvent.getTypeName())
+            MusicEvent.invokeMusicEvent(TAMClient.eventRegistry[OnEnterPredicateEvent::class])
         }
 
         shouldResume = oldMusicPredicateId == identifier

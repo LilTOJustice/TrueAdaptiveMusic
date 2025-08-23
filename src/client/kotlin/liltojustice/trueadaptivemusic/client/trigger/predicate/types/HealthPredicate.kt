@@ -19,7 +19,7 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     }
 
     override fun toJson(): JsonObject {
-        val result = super.toJson()
+        val result = JsonObject()
         result.addProperty("healthType", healthType.name)
         result.addProperty("direction", direction.name)
         result.addProperty("health", health)
@@ -28,8 +28,6 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     }
 
     companion object: MusicPredicateCompanion<HealthPredicate> {
-        override fun getTypeName(): String { return "health" }
-
         override fun fromJson(json: JsonObject): HealthPredicate {
             return HealthPredicate(
                 HealthType.valueOf(JsonHelper.getString(json, "healthType")),
