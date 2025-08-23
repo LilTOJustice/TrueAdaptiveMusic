@@ -166,14 +166,14 @@ class PredicateViewWidget(
 
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
-                { InputWidgetMaker.makeWidget(screen!!, predicateArgs, arg) },
+                { TAMClient.makeInputWidget(screen!!, predicateArgs, arg) },
                 "predicateArg: ${arg.name ?: arg.index}"
             )
         }
 
         requiredNodeArgs.forEach { arg ->
             addWidgetFromRender(
-                { InputWidgetMaker.makeWidget(screen!!, nodeArgs, arg) },
+                { TAMClient.makeInputWidget(screen!!, nodeArgs, arg) },
                 "nodeArg: ${arg.name ?: arg.index}"
             )
         }

@@ -121,7 +121,7 @@ class EventViewWidget(
 
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
-                { InputWidgetMaker.makeWidget(screen!!, eventArgs, arg) },
+                { TAMClient.makeInputWidget(screen!!, eventArgs, arg) },
                 "eventArg: ${arg.name ?: arg.index}"
             )
         }

@@ -3,19 +3,25 @@ package liltojustice.trueadaptivemusic.client
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.music.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.MusicManager
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
 import kotlin.io.path.Path
+import kotlin.reflect.KParameter
+import kotlin.reflect.KType
 
 object TAMClient {
     private var initialized = false
     private var musicManager: MusicManager? = null
+    private val inputWidgetMaker = InputWidgetMaker()
 
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -58,6 +64,22 @@ object TAMClient {
 
     fun hasSoundInstance(instance: SoundInstance): Boolean {
         return musicManager?.hasSoundInstance(instance) ?: false
+    }
+
+    fun registerInputWidget(
+        predicate: (parameterType: KType) -> Boolean,
+        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        inputWidgetMaker.register(predicate, widgetMaker)
+    }
+
+    fun registerInputWidget(
+        parameterType: KType,
+        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        registerInputWidget({ type -> type == parameterType}, widgetMaker)
+    }
+
+    fun makeInputWidget(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter): ClickableWidget {
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg)
     }
 
     private fun initialize(client: MinecraftClient) {
