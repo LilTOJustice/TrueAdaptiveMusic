@@ -108,7 +108,7 @@ class MusicPredicateTree private constructor(
             client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
                 : Triple<Node, List<String>, Map<String, MusicEvent>> {
             try {
-                if (!predicate.test(client)) {
+                if (!predicate.testPredicate(client)) {
                     return Triple(this, emptyList(), emptyMap())
                 }
             }
