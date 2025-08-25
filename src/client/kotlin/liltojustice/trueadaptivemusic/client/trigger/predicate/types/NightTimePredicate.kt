@@ -12,6 +12,10 @@ class NightTimePredicate: MusicPredicate() {
         return time in 13000..23999
     }
 
+    override fun getTickRate(): Int {
+        return 100
+    }
+
     companion object: MusicPredicateCompanion<NightTimePredicate>
     {
         override fun fromJson(json: JsonObject): NightTimePredicate {

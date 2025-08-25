@@ -36,6 +36,10 @@ class StructureSetPredicate internal constructor(private val structureSets: List
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
+    override fun getTickRate(): Int {
+        return 10
+    }
+
     override fun toJson(): JsonObject {
         val result = JsonObject()
         val jsonStructureSets = JsonArray()

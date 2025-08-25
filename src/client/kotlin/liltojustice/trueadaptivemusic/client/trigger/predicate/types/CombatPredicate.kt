@@ -63,6 +63,10 @@ class CombatPredicate: MusicPredicate() {
         return isAggro
     }
 
+    override fun getTickRate(): Int {
+        return 10
+    }
+
     companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate()

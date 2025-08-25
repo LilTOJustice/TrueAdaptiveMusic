@@ -6,19 +6,9 @@ import net.minecraft.client.MinecraftClient
 
 abstract class MusicPredicate: MusicTrigger() {
     private var lastResult = false
+    private var ticksSinceResult = getFixedTickRate()
 
     protected abstract fun test(client: MinecraftClient): Boolean
-    
-    fun testPredicate(client: MinecraftClient): Boolean {
-        val desiredTickRate = getTickRate()
-        val actualTickRate = if (desiredTickRate < 1) 0 else desiredTickRate
-        val tick = client.server?.ticks ?: 0
-        if (tick % actualTickRate == 0) {
-            lastResult = test(client)
-        }
-
-        return lastResult
-    }
 
     final override fun getTypeName(): String {
         return if (this is ErrorPredicate)
@@ -27,8 +17,25 @@ abstract class MusicPredicate: MusicTrigger() {
             TAMClient.predicateRegistry[this::class]
     }
 
-    fun getTickRate(): Int {
+    fun testPredicate(client: MinecraftClient): Boolean {
+        val tickRate = getFixedTickRate()
+        if (ticksSinceResult++ == tickRate) {
+            ticksSinceResult = 1
+
+            lastResult = test(client)
+            return lastResult
+        }
+
+        return lastResult
+    }
+
+    open fun getTickRate(): Int {
         return 2
+    }
+
+    private fun getFixedTickRate(): Int {
+        val desiredTickRate = getTickRate()
+        return if (desiredTickRate < 1) 0 else desiredTickRate
     }
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
