@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  MINECRAFT_VERSION: "${{ replace(github.ref_name, 'versions/', '') }}"
+  MINECRAFT_VERSION: ''
   JAVA_VERSION: 17
   VERSION: '1.3'
   MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
@@ -19,31 +19,39 @@ permissions:
   contents: write
   
 jobs:
+  fix_env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Replace in variable
+        run: |
+          BRANCH_NAME=${{ github.ref_name }}
+          MINECRAFT_VERSION=$(echo "$BRANCH_NAME" | sed 's/versions\///g')
+          echo "MINECRAFT_VERSION=$MINECRAFT_VERSION" >> $GITHUB_ENV
   build:
-    if: contains(github.ref_name, '.') # Is version branch
+    if: contains(github.ref_name, 'versions/') # Is version branch
     runs-on: ubuntu-latest
     steps:
       - name: Check Environment Variables
         run: env
-        
+
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           submodules: true
-          
+
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           distribution: "temurin"
           java-version: 17
-          
+
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
-        
+
       - name: Build
         run: ./gradlew clean build
-        
+
       - name: Publish (CurseForge/Modrinth/GitHub)
         uses: Kir-Antipov/mc-publish@v3.3
         with:
