@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Util
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -99,7 +100,8 @@ class MainScreen(private val parent: Screen): Screen(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         this.packListWidget.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 8, 16777215)
+        context?.drawCenteredTextWithShadow(
+            this.textRenderer, this.title, this.width / 2, 28, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
     }
 

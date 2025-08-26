@@ -139,7 +139,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         renderBackground(context)
         context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, 12, Colors.WHITE)
+            this.textRenderer, this.title, this.width / 2, 22, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
     }
 
@@ -193,7 +193,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
     companion object {
         private val CHECKMARK: Identifier = Identifier("minecraft", "textures/gui/checkmark.png")
-        private const val TOP_MARGIN = 25
+        private const val TOP_MARGIN = 32
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
         private const val LEFT_MARGIN = TOP_MARGIN / 4
         private const val RIGHT_MARGIN = LEFT_MARGIN
