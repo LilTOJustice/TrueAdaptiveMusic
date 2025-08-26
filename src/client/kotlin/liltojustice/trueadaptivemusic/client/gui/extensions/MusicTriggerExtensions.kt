@@ -6,7 +6,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import net.minecraft.text.Text
 
 fun MusicTrigger.getTriggerTooltipString(): String {
-    return getTriggerTooltipText().toString()
+    return getTriggerTooltipText().string
 }
 
 fun MusicTrigger.getTriggerTooltipText(): Text {

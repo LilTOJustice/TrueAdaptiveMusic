@@ -194,7 +194,7 @@ class PredicateViewWidget(
 
         addWidgetFromRender({
             val newWidget = ClickableTextWidget(
-                "${Text.translatableWithFallback("trueadaptivemusic.events", "Events")}:")
+                "${Text.translatableWithFallback("trueadaptivemusic.events", "Events").string}:")
             newWidget.active = false
             newWidget
         }, "events")
@@ -223,7 +223,7 @@ class PredicateViewWidget(
 
         addWidgetFromRender(
             { ClickableTextWidget(
-                "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add")}",
+                "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
                 onClick = {
                     selectedEvent = null
                     onEventClick(null) },
