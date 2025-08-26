@@ -10,5 +10,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test branch name
-        if: contains(github.head_ref, '.') # Is version branch
+        if: contains(github.head_ref, 'versions/')  # Is version branch
         run: echo "Cannot PR version branch into master"; exit 1
