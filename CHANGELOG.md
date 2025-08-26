@@ -7,30 +7,33 @@ Features and Fixes:
 - Events - Music Packs can now have events that trigger one-shot music. Check down below for the first set of vanilla types.
 - Music now fades out when a jukebox is playing nearby
 
-Editor Improvements:
-- Add delay between music played with optional additional noise to make it feel more natural
-- Move nodes in the pack editor with clicking and dragging
-- Debug hud - Go to True Adaptive Music menu -> Options and turn on useDebugHud to see a live view of what predicates/events are playing while in-game
-- Substantially improved the feel of the pack editing UI
-
 What made this update take so long?
-- Support for creating custom modded predicate and event types, check the Advanced Topics section of the wiki for more info
+- Moved into a new place and played my first full playthrough of Cyberpunk 2077 :)
 
 New Vanilla Predicate Types:
-- Nothing this time :(
+- Riding
+- MoonPhase
+- GameMode
+- Health
+- StatusEffect
+- PillagerRaid
 
 New Vanilla Event Types:
-- OnAdvancementGet
-- OnBossDefeat
-- OnDayStart
-- OnDeath
-- OnJoinWorld
-- OnNightStart
-- OnRecipeUnlock
-- OnTutorialPopup
-- OnWakeUp
+- OnEnterPredicate (Triggers whenever the node the event is in becomes the active node)
 
-Other Additions:
-- Mod Menu integration
+QoL:
+- Music now plays while the game is paused. It will also fade into a quieter volume when paused, then ramp back up after unpausing.
+- Only start combat music if the enemy is within the player's field of vision (creepers are stealthy again).
 
-What's Next? See the list of planned features/fixes for [1.3](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/4)
+Fixes:
+- Forge should now work again!
+- Vanilla music works again
+- A few UI improvements
+- Performance should be improved for more taxing predicates as they will now run on tick multiples instead of every tick.
+
+Modding Improvements
+- More of a detriment: All modded predicate/event types must now be registered during client initialization with TAMClient.registerPredicate/Event() or they will not be recognized. This was necessary to restore forge support.
+- You can now specify the tickRate of a modded predicate type to improve performance. Override the getTickRate() function.
+
+What's Next?:
+My main effort now will be porting the mod to more minecraft versions. Meanwhile I'll be collecting feedback/using the mod in my own servers to plan out more features for 1.4!
