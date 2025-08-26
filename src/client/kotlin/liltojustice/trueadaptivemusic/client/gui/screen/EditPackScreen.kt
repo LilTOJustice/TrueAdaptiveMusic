@@ -104,7 +104,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         saveButtonWidget.width = 90
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
         closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
-        closeButtonWidget.tooltip = Tooltip.of(Text.literal("Changes will be saved"))
+        closeButtonWidget.tooltip = Tooltip.of(
+            Text.translatableWithFallback(
+                "trueadaptivemusic.change_save", "Changes will be saved"))
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
 

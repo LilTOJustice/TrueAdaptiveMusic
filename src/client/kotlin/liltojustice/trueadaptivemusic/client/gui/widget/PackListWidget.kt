@@ -85,10 +85,16 @@ class PackListWidget(
 
             if (musicPack == null) {
                 context?.drawText(
-                    client.textRenderer, "Vanilla", x + 3, y + 6, Colors.WHITE, false)
+                    client.textRenderer,
+                    Text.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla"),
+                    x + 3,
+                    y + 6,
+                    Colors.WHITE,
+                    false)
                 context?.drawText(
                     client.textRenderer,
-                    "Disable TrueAdaptiveMusic",
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.disable_tam", "Disable TrueAdaptiveMusic"),
                     x + 3, y + 14 + 3,
                     Colors.GRAY,
                     false)

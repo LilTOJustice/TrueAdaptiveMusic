@@ -37,5 +37,8 @@
   "trueadaptivemusic.music_pack_name": "Имя Музыкального Пакета",
   "trueadaptivemusic.name_already_exists": "%s.zip Уже Существует",
   "trueadaptivemusic.accept": "Принять",
-  "trueadaptivemusic.playing_event": "Событие Воспроизведения"
+  "trueadaptivemusic.playing_event": "Событие Воспроизведения",
+  "trueadaptivemusic.change_save": "Изменения будут сохранены",
+  "trueadaptivemusic.vanilla": "Cтандартный",
+  "trueadaptivemusic.disable_tam": "Деактивировать TrueAdaptiveMusic"
 }
