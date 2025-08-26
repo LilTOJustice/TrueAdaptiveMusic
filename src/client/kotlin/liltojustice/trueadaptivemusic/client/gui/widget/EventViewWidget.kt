@@ -64,7 +64,7 @@ class EventViewWidget(
             addWidgetFromRender(
                 {
                     ClickableTextWidget(
-                        "Delete",
+                        Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
                         onClick = {
                             exit(null)
                         }
@@ -86,7 +86,7 @@ class EventViewWidget(
                     eventTypeNameOptions,
                     { typeName ->  setSelectedEventTypeName(typeName) },
                     width / 2,
-                    "Type",
+                    Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
                     startingOption = selectedEventTypeName)
             },
             "eventTypeChoice",
@@ -98,7 +98,8 @@ class EventViewWidget(
                     listOf(),
                     width,
                     { selected -> selectedMusicPaths = selected.toMutableList() },
-                    "Music Choice",
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.music_choice", "Music Choice").string,
                     {
                         musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
@@ -106,7 +107,8 @@ class EventViewWidget(
                                     .map { id -> id.toString() }
                                     .filter { path -> path.contains("music.") }).toList()
                     },
-                    "Select a track",
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.select_track", "Select a track").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
@@ -149,7 +151,7 @@ class EventViewWidget(
             addWidgetFromRender(
                 {
                     ClickableTextWidget(
-                        "Delete",
+                        Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
                         onClick = {
                             exit(null)
                         }
@@ -191,6 +193,9 @@ class EventViewWidget(
 
     companion object {
         private val MISSING_ARGS_TOOLTIP =
-            Tooltip.of(Text.literal("At least one required parameter for this type is missing."))
+            Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.missing_parameter",
+                    "At least one required parameter for this type is missing."))
     }
 }

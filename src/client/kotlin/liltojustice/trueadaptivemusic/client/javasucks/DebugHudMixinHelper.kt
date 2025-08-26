@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
 class DebugHudMixinHelper {
@@ -58,7 +59,9 @@ class DebugHudMixinHelper {
             playingEvent?.let {
                 context.drawText(
                     textRenderer,
-                    "Playing event: ${playingEvent.getTriggerId()}",
+                    "${Text.translatableWithFallback(
+                        "trueadaptivemusic.playing_event", "Playing event")}: " +
+                            playingEvent.getTriggerId(),
                     1,
                     1,
                     Colors.WHITE,

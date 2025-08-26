@@ -19,7 +19,9 @@ import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
 class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack)
-    : Screen(Text.literal("Create/Edit a music pack")) {
+    : Screen(
+    Text.translatableWithFallback(
+        "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")) {
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var packStructureWidget: PackStructureWidget
     private lateinit var eventViewWidget: EventViewWidget
@@ -134,7 +136,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         renderBackground(context)
-        context?.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 12, Colors.WHITE)
+        context?.drawCenteredTextWithShadow(
+            this.textRenderer, this.title, this.width / 2, 12, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
     }
 
@@ -156,7 +159,13 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
         gridWidget.refreshPositions()
         SimplePositioningWidget.setPos(
-            gridWidget, LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN, BOTTOM_MARGIN, 0f, 0f)
+            gridWidget,
+            LEFT_MARGIN,
+            TOP_MARGIN,
+            RIGHT_MARGIN,
+            BOTTOM_MARGIN,
+            0f,
+            0f)
     }
 
     private fun switchToEventView(event: MusicEvent?) {
@@ -186,8 +195,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
         private const val LEFT_MARGIN = TOP_MARGIN / 4
         private const val RIGHT_MARGIN = LEFT_MARGIN
-        private val OPEN_ASSETS_TEXT = Text.literal("Show Assets")
-        private val SAVE_BUTTON_TEXT = Text.literal("Save and Zip")
-        private val CLOSE_BUTTON_TEXT = Text.literal("Close")
+        private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.show_assets", "Show Assets")
+        private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.save_and_zip", "Save and Zip")
+        private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
     }
 }

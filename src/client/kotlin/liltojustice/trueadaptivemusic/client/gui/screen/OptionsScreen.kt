@@ -10,7 +10,8 @@ import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.text.Text
 
 @Environment(EnvType.CLIENT)
-class OptionsScreen(private val parent: Screen): Screen(Text.literal("TrueAdaptiveMusic Options")) {
+class OptionsScreen(private val parent: Screen): Screen(
+    Text.translatableWithFallback("trueadaptivemusic.options_title", "TrueAdaptiveMusic Options")) {
     private lateinit var optionsViewWidget: OptionsViewWidget
     private lateinit var doneButton: ButtonWidget
 

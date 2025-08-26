@@ -23,7 +23,15 @@ class PackStructureWidget(
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
-    width, height, "Pack Structure", true, false, true, true, x, y) {
+    width,
+    height,
+    Text.translatableWithFallback("trueadaptivemusic.pack_structure", "Pack Structure").string,
+    true,
+    false,
+    true,
+    true,
+    x,
+    y) {
     private var selectedWidget: NodeWidget? = null
     private var mouseButtonHeld = false
     private val selectedNode
@@ -72,7 +80,7 @@ class PackStructureWidget(
 
                 addWidget(
                     NodeWidget(
-                        "+ Add",
+                        "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
                         onClick = { widget ->
                             if (selectedWidget === widget) {
                                 return@NodeWidget
@@ -125,7 +133,8 @@ class PackStructureWidget(
                 targetNode.adoptChild(selectedNode!!)
             }
             else {
-                targetNode.parent!!.adoptChild(selectedNode!!, targetNode.parent!!.children.indexOf(targetNode))
+                targetNode.parent!!
+                    .adoptChild(selectedNode!!, targetNode.parent!!.children.indexOf(targetNode))
             }
 
             initPredicateWidgets()
@@ -186,7 +195,8 @@ class PackStructureWidget(
 
     companion object {
         const val INDENT = 10
-        const val MOVE_NODE_STRING = "Click and drag to move"
+        val MOVE_NODE_STRING: String = Text.translatableWithFallback(
+            "trueadaptivemusic.move_node", "Click and drag to move").string
         val ARROW_TEXT: Text = Text.literal("->")
     }
 
@@ -198,18 +208,22 @@ class PackStructureWidget(
 
         fun getBaseTooltipString(): String {
             if (targetNode.isParent) {
-                return "Create a new node"
+                return Text.translatableWithFallback("trueadaptivemusic.create_node", "Create a new node")
+                    .string
             }
 
             return targetNode.node.predicate.getTriggerTooltipString() +
                     if (targetNode.node.events.any { event -> event is ErrorEvent })
-                        "\n\nHas event errors. Click to see."
+                        "\n\n${Text.translatableWithFallback(
+                            "trueadaptivemusic.has_event_errors",
+                            "Has event errors. Click to see.").string}"
                     else
                         ""
         }
 
         fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
-            return (targetNode.node.parent != null || targetNode.isParent) && targetNode.node.isValidNewChild(selectedNode)
+            return (targetNode.node.parent != null || targetNode.isParent)
+                    && targetNode.node.isValidNewChild(selectedNode)
         }
     }
 

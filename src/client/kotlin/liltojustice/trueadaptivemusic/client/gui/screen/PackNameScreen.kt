@@ -15,7 +15,8 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 @Environment(EnvType.CLIENT)
-class PackNameScreen(private val parent: Screen): Screen(Text.literal("Name Your New Pack")) {
+class PackNameScreen(private val parent: Screen): Screen(
+    Text.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack")) {
     private var packName = ""
     private var errorText = ""
     private lateinit var packNameWidget: EditBoxWidget
@@ -28,17 +29,22 @@ class PackNameScreen(private val parent: Screen): Screen(Text.literal("Name Your
             height / 2,
             width / 3,
             (client?.textRenderer?.fontHeight ?: 0) + 5,
-            Text.literal("Pack Name"),
-            Text.literal("Music Pack Name")
+            Text.translatableWithFallback("trueadaptivemusic.pack_name", "Pack Name"),
+            Text.translatableWithFallback("trueadaptivemusic.music_pack_name", "Music Pack Name")
         )
         packNameWidget.setChangeListener { packName ->
             errorText = ""
             this.packName = packName
             if (Path(Constants.MUSIC_PACK_DIR, "$packName.zip").exists()) {
-                errorText = "$packName.zip already exists"
+                errorText = Text.translatableWithFallback(
+                    "trueadaptivemusic.name_already_exists",
+                    "%s.zip already exists",
+                    packName).toString()
             }
         }
-        acceptButtonWidget = IconButtonWidget.Builder(Text.literal("Accept"), CHECKMARK) {
+        acceptButtonWidget = IconButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"),
+            CHECKMARK) {
             if (!validPackName(packName) || errorText.isNotEmpty()) {
                 return@Builder
             }
@@ -72,7 +78,7 @@ class PackNameScreen(private val parent: Screen): Screen(Text.literal("Name Your
             false)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
-            "Name Your New Music Pack",
+            Text.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack"),
             width / 2,
             10,
             Colors.WHITE)

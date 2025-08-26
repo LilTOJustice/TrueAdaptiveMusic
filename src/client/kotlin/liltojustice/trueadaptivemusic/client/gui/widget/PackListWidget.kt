@@ -116,21 +116,30 @@ class PackListWidget(
         }
 
         companion object {
-            private val issuesText = Text.literal("Issues Found")
+            private val issuesText = Text.translatableWithFallback(
+                "trueadaptivemusic.issues_found", "Issues Found")
             private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
                 val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
                 val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
                 val result = StringBuilder()
                 if (warnings.isNotEmpty()) {
-                    result.append("${warnings.size} warning(s)")
+                    result.append(
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.warning_count",
+                            "%i warning(s)",
+                            warnings.size))
                 }
 
                 if (warnings.isNotEmpty() && errors.isNotEmpty()) {
-                    result.append(" and ")
+                    result.append(" ${Text.translatableWithFallback("trueadaptivemusic.and", "and")} ")
                 }
 
                 if (errors.isNotEmpty()) {
-                    result.append("${errors.size} error(s)")
+                    result.append(
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.error_count",
+                            "%i error(s)",
+                            errors.size))
                 }
 
                 if (warnings.isNotEmpty() || errors.isNotEmpty()) {

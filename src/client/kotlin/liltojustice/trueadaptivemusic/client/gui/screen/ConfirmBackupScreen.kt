@@ -16,17 +16,19 @@ import kotlin.io.path.*
 @Environment(EnvType.CLIENT)
 class ConfirmBackupScreen(
     private val parent: Screen, private val backupPath: Path, private val deleteDestination: Screen)
-    : Screen(Text.literal("Backup Exists")) {
+    : Screen(Text.translatableWithFallback("trueadaptivemusic.backup_exists", "Backup Exists")) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = IconButtonWidget.Builder(Text.literal("Keep"), CHECKMARK) {
+        val acceptButtonWidget = IconButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), CHECKMARK) {
             client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath)))
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
             .xyOffset(16, 6)
             .build()
-        val deleteButtonWidget = ButtonWidget.Builder(Text.literal("Delete")) {
+        val deleteButtonWidget = ButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.delete", "Delete")) {
             backupPath.deleteRecursively()
             client?.setScreen(deleteDestination)
         }
@@ -50,13 +52,16 @@ class ConfirmBackupScreen(
         renderBackground(context)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
-            "Unsaved pack edit $backupPath already exists.",
+            Text.translatableWithFallback(
+                "trueadaptivemusic.existing_edit", "Unsaved pack edit $backupPath already exists."),
             width / 2,
             height / 2,
             Colors.WHITE)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
-            "Do you want to keep and continue editing it, or delete it and continue?",
+            Text.translatableWithFallback(
+                "trueadaptivemusic.continue_edit",
+                "Do you want to keep and continue editing it, or delete it and continue?"),
             width / 2,
             height / 2 + textRenderer.fontHeight + 5,
             Colors.WHITE)

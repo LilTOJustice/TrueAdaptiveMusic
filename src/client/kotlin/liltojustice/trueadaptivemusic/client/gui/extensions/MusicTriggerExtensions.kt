@@ -6,12 +6,23 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import net.minecraft.text.Text
 
 fun MusicTrigger.getTriggerTooltipString(): String {
+    return getTriggerTooltipText().toString()
+}
+
+fun MusicTrigger.getTriggerTooltipText(): Text {
     if (this is ErrorPredicate) {
-        return "Failed to load this predicate, so it will always be false.\n\nReason: $reason\n\nJson: $shortenedJson"
+        return Text.literal(Text.translatableWithFallback(
+            "trueadaptivemusic.trigger_error_predicate_tooltip",
+            "Failed to load this predicate, so it will always be false.").string +
+                    "\n\n${Text.translatableWithFallback("trueadaptivemusic.reason", "Reason").string}" +
+                ": $reason\n\nJson: $shortenedJson")
     }
 
     if (this is ErrorEvent) {
-        return "Failed to load this event, so it will never trigger.\n\nReason: $reason\n\nJson: $shortenedJson"
+        return Text.literal(Text.translatableWithFallback(
+            "trueadaptivemusic.trigger_error_predicate_tooltip",
+            "Failed to load this event, so it will never trigger.").string + "\n\n${Text.translatableWithFallback(
+                "trueadaptivemusic.reason", "Reason")}: $reason\n\nJson: $shortenedJson")
     }
 
     val result = StringBuilder()
@@ -19,12 +30,10 @@ fun MusicTrigger.getTriggerTooltipString(): String {
     params.forEach { param -> result.appendLine(param.toString()) }
 
     if (params.isEmpty()) {
-        result.append("No parameters")
+        result.append(
+            Text.translatableWithFallback(
+                "trueadaptivemusic.trigger_no_parameters", "No Parameters").string)
     }
 
-    return result.trim().toString()
-}
-
-fun MusicTrigger.getTriggerTooltipText(): Text {
-    return Text.literal(getTriggerTooltipString())
+    return Text.literal(result.trim().toString())
 }
