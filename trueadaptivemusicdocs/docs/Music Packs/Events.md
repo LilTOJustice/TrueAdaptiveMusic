@@ -18,6 +18,7 @@ Events are tied to predicate nodes, in that each predicate node contains a list 
 | on_boss_defeat | bosses: [EntityTypeIdentifier] | A boss is defeated nearby |
 | on_day_start | None    | The ticks this day hits 0 |
 | on_death  | None       | The player encounters the death screen |
+| on_enter_predicate | None | The active predicate becomes the predicate that this event is part of |
 | on_join_world | None   | The player's world gets set |
 | on_night_start | None  | The ticks this day hits 13000 |
 | on_recipe_unlock | None | The player gets a recipe unlock toast |

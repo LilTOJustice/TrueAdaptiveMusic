@@ -18,15 +18,21 @@ Let's say you want to make a very simple music pack that adds combat music to mi
 
 | Type Name | Parameters | True When... |
 | :-------- | :--------- | :----------- |
-| biome     | id: [BiomeIdentifier] | The player is in any biome within the `id` array |
-| boss      | id: [EntityTypeIdentifier] | There is a boss bar on the player's screen for any of the entity types within the `id` array |
+| biome     | id: [BiomeIdentifier] | The player is in any biome within the `id` list |
+| boss      | id: [EntityTypeIdentifier] | There is a boss bar on the player's screen for any of the entity types within the `id` list |
 | combat    | None       | A mob is within sufficient range of the player and is attacking them |
 | day       | None       | The ticks for the day is between 0 and 12999 inclusive |
-| dimension | id: [DimensionIdentifier] | The player is in any dimension within the `id` array |
+| dimension | id: [DimensionIdentifier] | The player is in any dimension within the `id` list |
 | first_day | None       | The total world ticks is between 0 and 24000 inclusive (within one minecraft day) |
+| game_mode | gameMode: GameMode (Builtin Enum) | The player's gamemode is equal to the specified `gameMode` |
+| health    | healthType: Enum('value', 'percentage'), direction: Enum('Greater', 'GreaterOrEqual', 'Lesser', 'LesserOrEqual'), health: Int | The player's health `value` or `percentage` meets the `direction` requirements with `health` |
 | height    | above: Boolean, y: Int | The player's y coordinate is `above`/`below` the `y` value specified |
+| moon_phase   | moonPhase: Enum('New', 'Full') | The world's moon phase matches that given by `moonPhase` specfied |
 | night     | None       | The ticks for the day is between 13000 and 23999 inclusive |
-| structure | id: [StructureIdentifier] | The player is within the maximum bounds of all features assigned to any of the structure types within the `id` array |
+| pillager_raid | None   | The player is currently in a pillager raid |
+| riding    | entities: [EntityTypeIdentifier] | The entity that the player is riding is of a type within the `entities` list |
+| status    | statusEffects: [StatusEffectIdentifier] | The player currently has any status effect specified within the `statusEffects` list |
+| structure | id: [StructureIdentifier] | The player is within the maximum bounds of all features assigned to any of the structure types within the `id` list |
 | structure_set | id: [StructureSetIdentifier] | Same as `structure`, but for sets of structure types rather than individual structure types. |
 | title_screen | None    | The player is not in a world |
 | weather      | weatherType: Enum('Clear', 'Rain', 'Thunder') | The weather is the type specified by `weatherType` |

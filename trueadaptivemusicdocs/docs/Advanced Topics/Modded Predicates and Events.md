@@ -8,6 +8,10 @@ As of version 1.2, TrueAdaptiveMusic now allows the creation of custom predicate
 
 ## Creating Modded Predicates and Events
 
+!!! warning
+
+    As of mod version 1.3, modded predicate and event types must be registered during mod initialization, or they will not show up in-game or be recognized. As an additional consequence, the getTypeName functions should no longer be implemented. See [Registering Your Predicate or Event Type](#registering-your-predicate-or-event-type) for how to register a modded type.
+
 Implementing either modded predicates or events (or both) requires creating a "bridge mod". That is, a mod that "bridges" the functionalities of two mods. If you are the creator of the mod you want to make the bridge for, you could also just follow the steps below as an integration (similar to adding ModMenu support) directly into your mod.
 
 First, make a new mod (or open up your existing mod project if you are the mod owner). I personally recommend using the Minecraft Development plugin with Intellij as it makes the boilerplate steps very easy. However you do it, you'll want to make a mod for the Minecraft version you are using and for fabric.
@@ -54,21 +58,17 @@ This is the function that decides whether your predicate should evaluate as true
 
 Before implementing that though, first some extra housekeeping needs to be done. This next part is **required** or your predicate will not work.
 
-Add a companion object to your class implementing the `MusicPredicateCompanion<T>` interface, where `T` is your predicate class. You are **required** to override both `getTypeName` and `fromJson` or your predicate will not work.
+Add a companion object to your class implementing the `MusicPredicateCompanion<T>` interface, where `T` is your predicate class. You are **required** to override `fromJson` or your predicate will not work.
 
 ```kotlin
 companion object: MusicPredicateCompanion<PokeBattlePredicate> {
-    override fun getTypeName(): String {
-        return "poke_battle"
-    }
-
     override fun fromJson(json: JsonObject): MusicPredicate {
         return PokeBattlePredicate()
     }
 }
 ```
 
-For `getTypeName`, replace the name in the example with your own, following the `snake_case` convention. You can keep `fromJson` as is for now, but you'll want to revisit if you decide to add additional parameters to your type as described later.
+For You can keep `fromJson` as is for now, but you'll want to revisit if you decide to add additional parameters to your type as described later.
 
 For now, try launching the game in your dev environment. Create a new pack, click to add a new child node, and you should now see your new type in this type list!
 ![New Type](new_type.png)
@@ -99,20 +99,14 @@ class OnPokeBattleVictoryEvent: MusicEvent() {
 }
 ```
 
-Additionally we'll **need** to add a companion implementing the `MusicEventCompanion<T>` interface, where T is your event class. And it is also **required** you override both `fromJson` and `getTypeName` or your event will not work.
+Additionally we'll **need** to add a companion implementing the `MusicEventCompanion<T>` interface, where T is your event class. And it is also **required** you override `fromJson` or your event will not work.
 ```kotlin
 companion object: MusicEventCompanion<OnPokeBattleVictoryEvent> {
     override fun fromJson(json: JsonObject): MusicEvent {
         return OnPokeBattleVictoryEvent()
     }
-
-    override fun getTypeName(): String {
-        return "on_poke_battle_victory"
-    }
 }
 ```
-
-When creating the string for `getTypeName` please follow the `snake_case` and `on_` prefix conventions.
 
 Unlike predicates, we don't have a `test` function to implement. This is because events aren't evaluated every tick, instead they are manually triggered by a callback invocation. This callback can be accessed via `MusicEvent.invokeMusicEvent` as shown below.
 
@@ -132,7 +126,7 @@ class OnPokeBattleVictoryEventMixin {
             .string
 
         if (entry.line.getInternalString() == userWonString) {
-            MusicEvent.invokeMusicEvent(OnPokeBattleVictoryEvent.getTypeName())
+            MusicEvent.invokeMusicEvent(TAMClient.INSTANCE.getEventRegistry().get(OnDayStartEvent.class))
         }
     }
 }
@@ -160,7 +154,7 @@ The above code takes in some arguments from the event invoker and interprets the
 Then at the event call site:
 ```kotlin title="SomeMixin.java"
 ...
-MusicEvent.invokeMusicEvent(OnSomethingEvent.getTypeName(), someCondition, someString)
+MusicEvent.invokeMusicEvent(TAMClient.INSTANCE.getEventRegistry().get(OnDayStartEvent.class), someCondition, someString)
 ...
 ```
 We pass in the type name like usual, but then include the parameters matching the types used in the `validate` definition.
@@ -191,6 +185,21 @@ override fun fromJson(json: JsonObject): BiomePredicate {
 ```
 
 Now for predicates, the parameters you created can be used in your `test` function. For events, they can be used in the `validate` function.
+
+### Registering Your Predicate or Event Type
+Once your type is ready for use, you need to register it, or it will not be recognized in-game. To do this, you just need to call the TAMClient helper function `registerPredicate` for predicates or `registerEvent` for events. Below is an excerpt from the TrueAdaptiveMusic client initializer for the vanilla types:
+```kotlin
+...
+TAMClient.registerPredicate("boss", BossPredicate::class)
+TAMClient.registerPredicate("combat", CombatPredicate::class)
+TAMClient.registerPredicate("day", DayTimePredicate::class)
+...
+TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
+TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
+TAMClient.registerEvent("on_day_start", OnDayStartEvent::class)
+...
+```
+The first argument will determine the name of your predicate as it is serialized in the music pack rules and should conform to the *snake_case* standard, as well as the *on_* prefix for event types. The second argument is the runtime object representing the class, which can be retrieved with ::class in kotlin or .class in java.
 
 ## Additional Note
 
