@@ -60,7 +60,7 @@ class DebugHudMixinHelper {
                 context.drawText(
                     textRenderer,
                     "${Text.translatableWithFallback(
-                        "trueadaptivemusic.playing_event", "Playing event")}: " +
+                        "trueadaptivemusic.playing_event", "Playing event").string}: " +
                             playingEvent.getTriggerId(),
                     1,
                     1,
