@@ -17,7 +17,7 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
         return backingStream.format
     }
 
-    override fun getBuffer(size: Int): ByteBuffer? {
+    override fun read(size: Int): ByteBuffer? {
         var resultArray: ByteArray?
 
         do {
@@ -29,7 +29,7 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
     }
 
     private fun getTruncatedArray(size: Int): ByteArray? {
-        val buffer = backingStream.getBuffer(size)
+        val buffer = backingStream.read(size)
         val remaining = buffer.remaining()
         if (remaining == 0) {
             return null

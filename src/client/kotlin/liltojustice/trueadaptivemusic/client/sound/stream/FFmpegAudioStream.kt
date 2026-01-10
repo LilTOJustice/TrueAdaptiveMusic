@@ -38,7 +38,7 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
         return format
     }
 
-    override fun getBuffer(size: Int): ByteBuffer? {
+    override fun read(size: Int): ByteBuffer? {
         val bytes = ffmpeg.inputStream.readNBytes(size)
         val buffer = ByteBuffer.allocateDirect(bytes.size)
         buffer.order(ByteOrder.LITTLE_ENDIAN)

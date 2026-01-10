@@ -63,8 +63,8 @@ class PredicateViewWidget(
         return super.mouseClicked(mouseX, mouseY, button)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.render(context, mouseX, mouseY, delta)
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        super.renderWidget(context, mouseX, mouseY, delta)
         if (!visible) {
             return
         }
@@ -240,10 +240,7 @@ class PredicateViewWidget(
                         assets = musicPack.getEditPackAssets()
                         if (selectedNode != null) {
                             selectedNode!!.predicate =
-                                if (selectedNode!!.predicate.getTypeName()
-                                    == TAMClient.predicateRegistry[RootPredicate::class])
-                                    selectedNode!!.predicate
-                                else TAMClient.predicateFactory.fromArgs(
+                                TAMClient.predicateFactory.fromArgs(
                                     selectedPredicateTypeName,
                                     selectedMusicPaths
                                         .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },

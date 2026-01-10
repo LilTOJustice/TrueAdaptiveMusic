@@ -31,7 +31,7 @@ class TextInputWidget(
         text = placeholder
     }
 
-    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         promptWidget.x = x
         promptWidget.y = y
         fieldWidget.x = promptWidget.x + promptWidget.width + PADDING

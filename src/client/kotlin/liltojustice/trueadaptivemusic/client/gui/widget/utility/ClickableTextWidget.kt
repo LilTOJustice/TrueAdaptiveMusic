@@ -27,7 +27,7 @@ open class ClickableTextWidget(
         height = textRenderer.fontHeight
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         if (!visible) {
             return
         }
@@ -48,7 +48,7 @@ open class ClickableTextWidget(
         }
 
         drawScrollableText(context, textRenderer, message, x, y, x + width, y + height, color)
-        super.render(context, mouseX, mouseY, delta)
+        //super.renderWidget(context, mouseX, mouseY, delta)
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
@@ -58,9 +58,6 @@ open class ClickableTextWidget(
         {
             onClick(this)
         }
-    }
-
-    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {

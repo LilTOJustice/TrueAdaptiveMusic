@@ -16,7 +16,7 @@ class CheckboxWidget(
     private val onChange: (checked: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0,
-    checked: Boolean = true): CheckboxWidget(x, y, 0, 0, Text.literal(prompt), checked) {
+    checked: Boolean = true): CheckboxWidget(x, y, 0, Text.literal(prompt), MinecraftClient.getInstance().textRenderer, checked, { widget, checked -> }) {
     val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
@@ -30,23 +30,17 @@ class CheckboxWidget(
         onChange(isChecked)
     }
 
-    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         RenderSystem.enableDepthTest()
 
         context?.setShaderColor(1.0f, 1.0f, 1.0f, alpha)
         RenderSystem.enableBlend()
-        context?.drawTexture(
-            TEXTURE,
+        context?.drawGuiTexture(
+            if (isChecked) CHECKED else UNCHECKED,
             x,
             y,
             checkboxSize,
             checkboxSize,
-            if (isFocused) 20.0f else 0.0f,
-            if (isChecked) 20.0f else 0.0f,
-            20,
-            20,
-            64,
-            64
         )
         context?.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         context?.drawTextWithShadow(
@@ -59,7 +53,8 @@ class CheckboxWidget(
     }
 
     companion object {
-        private val TEXTURE = Identifier("textures/gui/checkbox.png")
+        private val UNCHECKED = Identifier.of("widget/checkbox")
+        private val CHECKED = Identifier.ofVanilla("widget/checkbox_selected")
         private const val PADDING = 5
     }
 }

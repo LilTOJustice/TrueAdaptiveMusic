@@ -72,13 +72,13 @@ class DropdownWidget(
         addWidget(dropdownResultsWidget, 2)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         val showTextInput = screen?.focused == textInputWidget
         textInputWidget.visible = showTextInput
         selectedOptionWidget.visible = !showTextInput
         dropdownResultsWidget.visible = screen?.focused == textInputWidget
         dropdownResultsWidget.width = width
-        super.render(context, mouseX, mouseY, delta)
+        super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }
 
@@ -119,7 +119,7 @@ class DropdownWidget(
             }
         }
 
-        override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
             if (!visible) {
                 return
             }
@@ -154,7 +154,7 @@ class DropdownWidget(
             }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
-            super.render(context, mouseX, mouseY, delta)
+            super.renderWidget(context, mouseX, mouseY, delta)
         }
 
         fun setSearchText(searchText: String) {

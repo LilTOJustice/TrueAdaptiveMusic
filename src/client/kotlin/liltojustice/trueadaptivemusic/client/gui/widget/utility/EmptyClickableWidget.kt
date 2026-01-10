@@ -6,7 +6,12 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
 
 class EmptyClickableWidget(): ClickableWidget(0, 0, 0, 0, Text.literal("")) {
-    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(
+        context: DrawContext?,
+        mouseX: Int,
+        mouseY: Int,
+        delta: Float
+    ) {
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {

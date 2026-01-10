@@ -32,7 +32,7 @@ class MultiSelectDropdownWidget(
         selected.addAll(alreadySelected)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
                 DropdownWidget(
@@ -80,7 +80,7 @@ class MultiSelectDropdownWidget(
             hoveredWidget = null
         }
 
-        super.render(context, mouseX, mouseY, delta)
+        super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }
 

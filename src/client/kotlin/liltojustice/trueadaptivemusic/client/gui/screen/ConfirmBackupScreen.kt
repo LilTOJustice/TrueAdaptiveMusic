@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.IconButtonWidget
+import net.minecraft.client.gui.widget.TextIconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -19,13 +19,11 @@ class ConfirmBackupScreen(
     : Screen(Text.translatableWithFallback("trueadaptivemusic.backup_exists", "Backup Exists")) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = IconButtonWidget.Builder(
-            Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), CHECKMARK) {
+        val acceptButtonWidget = TextIconButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), {
             client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath)))
-        }
-            .iconSize(9, 8)
-            .textureSize(9, 8)
-            .xyOffset(16, 6)
+        }, false)
+            .texture(CHECKMARK, 9, 8)
             .build()
         val deleteButtonWidget = ButtonWidget.Builder(
             Text.translatableWithFallback("trueadaptivemusic.delete", "Delete")) {
@@ -49,7 +47,7 @@ class ConfirmBackupScreen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context)
+        renderBackground(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
             Text.translatableWithFallback(
@@ -69,6 +67,6 @@ class ConfirmBackupScreen(
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier("minecraft", "textures/gui/checkmark.png")
+        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
     }
 }

@@ -16,10 +16,9 @@ class PackListWidget(
     width: Int,
     height: Int,
     top: Int,
-    bottom: Int,
     itemHeight: Int,
     private val onSelectPack: (selectedPack: MusicPack?) -> Unit = {})
-    : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, bottom, itemHeight) {
+    : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, itemHeight) {
     init {
         init()
     }

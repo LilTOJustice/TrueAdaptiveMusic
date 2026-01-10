@@ -40,7 +40,7 @@ class OptionsScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context)
+        renderBackground(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, TITLE_Y, 16777215)
         super.render(context, mouseX, mouseY, delta)

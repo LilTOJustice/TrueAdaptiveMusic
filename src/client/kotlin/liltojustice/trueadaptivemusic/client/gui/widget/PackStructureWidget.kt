@@ -18,6 +18,7 @@ class PackStructureWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
+    private val onChangesSaved: () -> Unit,
     private val onSelectEditExistingNode: (node: MusicPredicateTree.Node) -> Unit,
     private val onSelectCreateNewNode: (parent: MusicPredicateTree.Node) -> Unit,
     x: Int = 0,
@@ -137,6 +138,8 @@ class PackStructureWidget(
                     .adoptChild(selectedNode!!, targetNode.parent!!.children.indexOf(targetNode))
             }
 
+            musicPack.initRules()
+            onChangesSaved()
             initPredicateWidgets()
         }
 
@@ -145,7 +148,7 @@ class PackStructureWidget(
         return result
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         forEachChild { child ->
             if (child !is NodeWidget) {
                 return@forEachChild
@@ -162,7 +165,7 @@ class PackStructureWidget(
                     Tooltip.of(Text.literal(baseTooltipText))
         }
 
-        super.render(context, mouseX, mouseY, delta)
+        super.renderWidget(context, mouseX, mouseY, delta)
 
         if (!isMovingNode()) {
             return

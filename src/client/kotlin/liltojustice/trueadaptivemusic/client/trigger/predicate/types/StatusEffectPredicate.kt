@@ -13,7 +13,7 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
 
         return statusEffects.any { statusEffect ->
             playerStatusEffects.any { playerStatusEffect ->
-                statusEffect.toTranslationKey("effect") == playerStatusEffect.effectType.translationKey } }
+                playerStatusEffect.effectType.matchesId(statusEffect.identifier) } }
     }
 
     override fun toJson(): JsonObject {

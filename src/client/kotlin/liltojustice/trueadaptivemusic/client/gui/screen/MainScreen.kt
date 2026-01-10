@@ -41,7 +41,7 @@ class MainScreen(private val parent: Screen): Screen(
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width
 
-        packListWidget = PackListWidget(client!!, this.width, this.height, 48, this.height - 64, 36)
+        packListWidget = PackListWidget(client!!, this.width, this.height - 96, 48, 36)
         { musicPack ->
             TAMClient.musicPack = musicPack
             editButton.visible = musicPack != null
@@ -99,10 +99,10 @@ class MainScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        super.render(context, mouseX, mouseY, delta)
         this.packListWidget.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, 28, Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
     }
 
     fun reload() {

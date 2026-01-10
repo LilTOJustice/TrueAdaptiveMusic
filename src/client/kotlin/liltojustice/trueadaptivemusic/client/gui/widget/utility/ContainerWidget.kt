@@ -36,20 +36,17 @@ abstract class ContainerWidget(
         backButton = makeBackButton(backButtonCallback)
     }
 
-    fun setHeight(height: Int) {
+    override fun setHeight(height: Int) {
         this.height = height
     }
 
-    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-    }
-
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         renderChildren.clear()
         if (!visible) {
             return
         }
 
-        super.render(context, mouseX, mouseY, delta)
+        //super.render(context, mouseX, mouseY, delta)
 
         if (showHeader)
         {
@@ -106,7 +103,7 @@ abstract class ContainerWidget(
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
                 if (clicked) {
-                    screen?.focused = if (screen?.focused != null) screen.focused else child.widget
+                    screen?.focused = screen.focused ?: child.widget
                 }
             }
         }
@@ -114,7 +111,7 @@ abstract class ContainerWidget(
         return false
     }
 
-    override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         if (!visible || !active) {
             return false
         }
@@ -123,7 +120,7 @@ abstract class ContainerWidget(
         val children = children.toList()
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
-                child.widget.mouseScrolled(mouseX, mouseY, amount)
+                child.widget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
                 if (child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY))
                 {
                     return@mouseScrolled isMouseOver(mouseX, mouseY)
@@ -136,7 +133,7 @@ abstract class ContainerWidget(
         }
 
         if (scrollable) {
-            scrollPosition -= amount.toInt()
+            scrollPosition -= verticalAmount.toInt()
         }
 
         return true

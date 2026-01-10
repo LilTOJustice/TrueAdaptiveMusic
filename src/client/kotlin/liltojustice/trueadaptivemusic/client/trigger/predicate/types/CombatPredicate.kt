@@ -45,9 +45,9 @@ class CombatPredicate: MusicPredicate() {
                 || (mobEntity.isAttacking
                         && closeEnough(
                     relativeMobEntityPosN,
-                    Vec3d(mobEntity.boundingBox.xLength,
-                        mobEntity.boundingBox.yLength,
-                        mobEntity.boundingBox.zLength))))
+                    Vec3d(mobEntity.boundingBox.lengthX,
+                        mobEntity.boundingBox.lengthY,
+                        mobEntity.boundingBox.lengthZ))))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()

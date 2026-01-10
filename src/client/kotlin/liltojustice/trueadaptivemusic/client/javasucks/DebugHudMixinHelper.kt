@@ -22,7 +22,7 @@ class DebugHudMixinHelper {
             val musicPack = TAMClient.musicPack ?: return
 
             val client = MinecraftClient.getInstance()
-            if (client.options.debugEnabled) {
+            if (client.inGameHud.debugHud.shouldShowDebugHud()) {
                 return
             }
 

@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.EditBoxWidget
-import net.minecraft.client.gui.widget.IconButtonWidget
+import net.minecraft.client.gui.widget.TextIconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -20,7 +20,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     private var packName = ""
     private var errorText = ""
     private lateinit var packNameWidget: EditBoxWidget
-    private lateinit var acceptButtonWidget: IconButtonWidget
+    private lateinit var acceptButtonWidget: TextIconButtonWidget
 
     override fun init() {
         packNameWidget = EditBoxWidget(
@@ -42,18 +42,16 @@ class PackNameScreen(private val parent: Screen): Screen(
                     packName).toString()
             }
         }
-        acceptButtonWidget = IconButtonWidget.Builder(
+        acceptButtonWidget = TextIconButtonWidget.Builder(
             Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"),
-            CHECKMARK) {
+            {
             if (!validPackName(packName) || errorText.isNotEmpty()) {
                 return@Builder
             }
 
             client?.setScreen(EditPackScreen(parent, MusicPack.makeEmpty(packName)))
-        }
-            .iconSize(9, 8)
-            .textureSize(9, 8)
-            .xyOffset(16, 6)
+        }, false)
+            .texture(CHECKMARK, 9, 8)
             .build()
         acceptButtonWidget.width = 60
         acceptButtonWidget.x = width / 2 - width / 6
@@ -68,7 +66,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context)
+        renderBackground(context, mouseX, mouseY, delta)
         context?.drawText(
             client?.textRenderer,
             errorText,
@@ -87,7 +85,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier("minecraft", "textures/gui/checkmark.png")
+        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
 
         fun validPackName(packName: String): Boolean {
             if (packName.isEmpty()) {
