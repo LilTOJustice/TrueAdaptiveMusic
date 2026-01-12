@@ -29,6 +29,7 @@ class EventViewWidget(
     private var selectedEvent: MusicEvent? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var assets = musicPack.getEditPackAssets()
+    private var isPersistent = false
 
     init {
         addBackButton { onExitView(selectedEvent) }
@@ -36,6 +37,7 @@ class EventViewWidget(
 
     fun setEvent(event: MusicEvent?) {
         selectedEvent = event
+        isPersistent = selectedEvent?.isPersistent ?: false
         if (event != null) {
             setSelectedEventTypeName(event.getTypeName())
             eventArgs = (event.getTriggerParams().map { param -> param.value }).toMutableList()
@@ -128,6 +130,14 @@ class EventViewWidget(
             )
         }
 
+        addWidgetFromRender({
+            CheckboxWidget(
+                10,
+                "isPersistent",
+                { checked -> isPersistent = checked },
+                checked = isPersistent)
+        }, "isPersistent")
+
         val saveWidget = addWidgetFromRender(
             {
                 ClickableTextWidget(
@@ -140,6 +150,7 @@ class EventViewWidget(
                                 selectedMusicPaths
                                     .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
                                 *eventArgs.filterNotNull().toTypedArray())
+                        newEvent.isPersistent = isPersistent
 
                         exit(newEvent)
                     })

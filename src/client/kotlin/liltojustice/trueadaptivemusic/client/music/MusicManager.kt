@@ -172,6 +172,12 @@ class MusicManager(
             timedIdentifier = ""
         }
 
+        if (playingEvent != null && !playingEvent!!.isPersistent && !activeEvents.contains(playingEvent)) {
+            playingEvent = null
+            onDemandSoundInstance?.let {
+                volumeManager.startFade(it, REGULAR_FADE_TICKS, 0F) }
+        }
+
         val nextMusic =
             if (jukeboxPlaying())
                 null

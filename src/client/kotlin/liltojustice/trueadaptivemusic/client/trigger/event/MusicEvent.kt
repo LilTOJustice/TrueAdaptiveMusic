@@ -1,12 +1,28 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
+import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 
 abstract class MusicEvent: MusicTrigger() {
+    var isPersistent = false
+
     open fun validate(vararg eventArgs: Any?): Boolean {
         return true
+    }
+
+    override fun toJson(): JsonObject {
+        val result = super.toJson()
+        result.addProperty("persistent", isPersistent)
+
+        return result
+    }
+
+    final override fun initParams(json: JsonObject) {
+        if (json.has("persistent")) {
+            isPersistent = json.getAsJsonPrimitive("persistent").asBoolean
+        }
     }
 
     final override fun getTypeName(): String {
