@@ -25,6 +25,7 @@ abstract class MusicTriggerFactory<T: MusicTrigger>(
                 .call(type.companionObjectInstance, json) as? MusicTrigger
                 ?: throw MusicTriggerException("Could not instantiate music trigger from json.")
             result.playableSounds = MusicPack.parseMusicPath(json, soundLibrary)
+            result.initParams(json)
             result as? T ?: throw MusicTriggerException("Could not instantiate music trigger from json.")
         } catch (e: MusicTriggerException) {
             errorFallback(json, e)

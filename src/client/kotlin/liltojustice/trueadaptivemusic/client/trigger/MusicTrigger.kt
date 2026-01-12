@@ -38,6 +38,8 @@ abstract class MusicTrigger {
         return JsonObject()
     }
 
+    open fun initParams(json: JsonObject) {}
+
     companion object: MusicTriggerCompanion<MusicTrigger> {
         fun getTruncatedTriggerId(triggerId: String): String {
             val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
