@@ -12,6 +12,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.primaryConstructor
 
 class EventViewWidget(
     width: Int,
@@ -26,10 +27,11 @@ class EventViewWidget(
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
     private var requiredEventArgs = listOf<KParameter>()
     private var eventArgs = mutableListOf<Any?>()
+    private val requiredEventParams = MusicEvent.Parameters::class.primaryConstructor?.parameters ?: listOf()
+    private var eventParams: MutableList<Any?> = requiredEventParams.map { null }.toMutableList()
     private var selectedEvent: MusicEvent? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var assets = musicPack.getEditPackAssets()
-    private var isPersistent = false
 
     init {
         addBackButton { onExitView(selectedEvent) }
@@ -37,10 +39,11 @@ class EventViewWidget(
 
     fun setEvent(event: MusicEvent?) {
         selectedEvent = event
-        isPersistent = selectedEvent?.isPersistent ?: false
+        eventParams = selectedEvent?.parameters?.constructorParams()?.toMutableList()
+            ?: requiredEventParams.map { null }.toMutableList()
         if (event != null) {
             setSelectedEventTypeName(event.getTypeName())
-            eventArgs = (event.getTriggerParams().map { param -> param.value }).toMutableList()
+            eventArgs = (event.getTriggerArgs().map { param -> param.value }).toMutableList()
             selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
@@ -130,13 +133,12 @@ class EventViewWidget(
             )
         }
 
-        addWidgetFromRender({
-            CheckboxWidget(
-                10,
-                "isPersistent",
-                { checked -> isPersistent = checked },
-                checked = isPersistent)
-        }, "isPersistent")
+        requiredEventParams.forEach { param ->
+            addWidgetFromRender(
+                { TAMClient.makeInputWidget(screen!!, eventParams, param) },
+                "eventParam: ${param.name ?: param.index}"
+            )
+        }
 
         val saveWidget = addWidgetFromRender(
             {
@@ -149,8 +151,8 @@ class EventViewWidget(
                                 selectedEventTypeName,
                                 selectedMusicPaths
                                     .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                                *eventArgs.filterNotNull().toTypedArray())
-                        newEvent.isPersistent = isPersistent
+                                eventParams.filterNotNull(),
+                                eventArgs.filterNotNull())
 
                         exit(newEvent)
                     })

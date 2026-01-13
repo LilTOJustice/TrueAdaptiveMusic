@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger
 
 import kotlin.reflect.KClass
 
-abstract class MusicTriggerRegistry<T: MusicTrigger> {
+abstract class MusicTriggerRegistry<T: MusicTrigger<*>> {
     private val nameToClass = HashMap<String, KClass<out T>>()
     private val classNameToName = HashMap<String, String>()
 

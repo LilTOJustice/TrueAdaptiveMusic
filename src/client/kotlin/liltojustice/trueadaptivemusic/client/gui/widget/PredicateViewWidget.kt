@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.DrawContext
@@ -43,8 +44,8 @@ class PredicateViewWidget(
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
-    private val requiredNodeArgs = MusicPredicateTree.Node.Parameters::class.primaryConstructor?.parameters ?: listOf()
-    private var nodeArgs: MutableList<Any?> = requiredNodeArgs.map { null }.toMutableList()
+    private val requiredPredicateParams = MusicPredicate.Parameters::class.primaryConstructor?.parameters ?: listOf()
+    private var predicateParams: MutableList<Any?> = requiredPredicateParams.map { null }.toMutableList()
     private var events = mutableListOf<MusicEvent>()
     private var selectedEvent: MusicEvent? = null
     private var selectedNode: MusicPredicateTree.Node? = null
@@ -89,7 +90,7 @@ class PredicateViewWidget(
         selectedMusicPaths = selectedNode!!.predicate.playableSounds.map { sound -> sound.getSoundName() }
             .toMutableList()
         newPredicateParent = null
-        nodeArgs = node.parameters.constructorParams().toMutableList()
+        predicateParams = node.predicate.parameters.constructorParams().toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }
@@ -102,7 +103,7 @@ class PredicateViewWidget(
         newPredicateParent = parent
         requiredPredicateArgs = listOf()
         predicateArgs = mutableListOf()
-        nodeArgs.replaceAll { null }
+        predicateParams.replaceAll { null }
         events = mutableListOf()
         resetScrolling()
     }
@@ -119,7 +120,7 @@ class PredicateViewWidget(
         requiredPredicateArgs = TAMClient.predicateFactory.getRequiredArgs(typeName)
         predicateArgs = selectedNode?.let {
             if (it.predicate.getTypeName() == selectedPredicateTypeName)
-                it.predicate.getTriggerParams().map { param -> param.value }.toMutableList()
+                it.predicate.getTriggerArgs().map { arg -> arg.value }.toMutableList()
             else
                 null
         } ?: requiredPredicateArgs.map { null }.toMutableList()
@@ -183,10 +184,10 @@ class PredicateViewWidget(
             )
         }
 
-        requiredNodeArgs.forEach { arg ->
+        requiredPredicateParams.forEach { param ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, nodeArgs, arg) },
-                "nodeArg: ${arg.name ?: arg.index}"
+                { TAMClient.makeInputWidget(screen!!, predicateParams, param) },
+                "predicateParam: ${param.name ?: param.index}"
             )
         }
 
@@ -244,16 +245,13 @@ class PredicateViewWidget(
                                     selectedPredicateTypeName,
                                     selectedMusicPaths
                                         .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                                    *predicateArgs.filterNotNull().toTypedArray())
+                                    predicateParams.filterNotNull(), predicateArgs.filterNotNull())
                             selectedNode!!.events = events
-                            selectedNode!!.parameters =
-                                MusicPredicateTree.Node.Parameters.initializeFromArgs(
-                                    *nodeArgs.filterNotNull().toTypedArray())
                         }
                         else {
                             newPredicateParent?.newChild(
                                 selectedPredicateTypeName,
-                                nodeArgs.filterNotNull(),
+                                predicateParams.filterNotNull(),
                                 predicateArgs.filterNotNull(),
                                 events,
                                 selectedMusicPaths.mapNotNull {
