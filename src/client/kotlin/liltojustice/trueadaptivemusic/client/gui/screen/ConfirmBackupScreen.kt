@@ -48,6 +48,7 @@ class ConfirmBackupScreen(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         renderBackground(context, mouseX, mouseY, delta)
+        super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
             Text.translatableWithFallback(
@@ -63,7 +64,6 @@ class ConfirmBackupScreen(
             width / 2,
             height / 2 + textRenderer.fontHeight + 5,
             Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
     }
 
     companion object {
