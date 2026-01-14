@@ -47,6 +47,17 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
+        val ffmpegInstall = ProcessBuilder("powershell.exe", "-Command", "winget install 'FFmpeg (Essentials Build)'")
+            .redirectErrorStream(true)
+            .start()
+
+        val output = ffmpegInstall.inputStream.bufferedReader().use { it.readText() }
+        ffmpegInstall.waitFor()
+
+        if (ffmpegInstall.exitValue() != 0) {
+            println("Failed to install ffmpeg with exit code ${ffmpegInstall.exitValue()}:\n${output}")
+        }
+
         TAMClient.registerPredicate("biome", BiomePredicate::class)
         TAMClient.registerPredicate("boss", BossPredicate::class)
         TAMClient.registerPredicate("combat", CombatPredicate::class)
