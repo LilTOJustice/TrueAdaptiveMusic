@@ -171,7 +171,7 @@ class EventViewWidget(
                             }
 
                             selectedEvent = null
-                            save()
+                            exit()
                         }
                     )
                 },
