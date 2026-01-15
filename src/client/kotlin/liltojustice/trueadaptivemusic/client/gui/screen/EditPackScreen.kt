@@ -35,8 +35,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
     private fun initPack() {
         TAMClient.playSoundNow(null)
-        val newPath = musicPack.initEdit(musicPack)
-        TAMClient.musicPack = MusicPack.fromFile(newPath)
+        musicPack.initEdit(musicPack)
     }
 
     override fun init() {
@@ -65,8 +64,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            {
+            { target ->
                 initPack()
+                packStructureWidget.setNode(target)
                 packStructureWidget.initPredicateWidgets()
             },
             { event -> switchToEventView(event) },
@@ -91,9 +91,12 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            { newEvent ->
-                predicateViewWidget.onEventModeExit(newEvent)
-                switchToPredicateView() }
+            { newEvent, exit ->
+                predicateViewWidget.onEventModeSave(newEvent, exit)
+                if (exit) {
+                    switchToPredicateView()
+                }
+            }
         )
 
         addDrawableChild(saveButtonWidget)
@@ -134,7 +137,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             parent.reload()
         }
 
-        TAMClient.refreshCurrentMusicPack()
         client?.setScreen(parent)
     }
 

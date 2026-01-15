@@ -7,10 +7,11 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import java.util.Timer
+import kotlin.concurrent.schedule
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -18,7 +19,7 @@ class EventViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onExitView: (newEvent: MusicEvent?) -> Unit,
+    private val onSaveEvent: (newEvent: MusicEvent?, exit: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -34,7 +35,9 @@ class EventViewWidget(
     private var assets = musicPack.getEditPackAssets()
 
     init {
-        addBackButton { onExitView(selectedEvent) }
+        addBackButton {
+            onSaveEvent(selectedEvent, true)
+        }
     }
 
     fun setEvent(event: MusicEvent?) {
@@ -47,9 +50,9 @@ class EventViewWidget(
             selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
-            setSelectedEventTypeName(eventTypeNameOptions.firstOrNull() ?: "")
             selectedMusicPaths = mutableListOf()
         }
+        clearWidgetsFromRender { false }
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -71,7 +74,8 @@ class EventViewWidget(
                     ClickableTextWidget(
                         Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
                         onClick = {
-                            exit(null)
+                            selectedEvent = null
+                            exit()
                         }
                     )
                 },
@@ -102,7 +106,10 @@ class EventViewWidget(
                 MultiSelectDropdownWidget(
                     listOf(),
                     width,
-                    { selected -> selectedMusicPaths = selected.toMutableList() },
+                    { selected ->
+                        selectedMusicPaths = selected.toMutableList()
+                        save()
+                    },
                     Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice", "Music Choice").string,
                     {
@@ -128,59 +135,49 @@ class EventViewWidget(
 
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, eventArgs, arg) },
+                { TAMClient.makeInputWidget(screen!!, eventArgs, arg) { save() } },
                 "eventArg: ${arg.name ?: arg.index}"
             )
         }
 
         requiredEventParams.forEach { param ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, eventParams, param) },
+                { TAMClient.makeInputWidget(screen!!, eventParams, param) { save() } },
                 "eventParam: ${param.name ?: param.index}"
             )
         }
 
-        val saveWidget = addWidgetFromRender(
-            {
-                ClickableTextWidget(
-                    "Save",
-                    onClick = {
-                        assets = musicPack.getEditPackAssets()
-                        val newEvent = TAMClient.eventFactory
-                            .fromArgs(
-                                selectedEventTypeName,
-                                selectedMusicPaths
-                                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                                eventParams.filterNotNull(),
-                                eventArgs.filterNotNull())
-
-                        exit(newEvent)
-                    })
-            },
-            "Save"
-        ) as ClickableTextWidget
-
         if (selectedEvent != null) {
             addWidgetFromRender(
                 {
+                    var clicked = false
                     ClickableTextWidget(
                         Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
-                        onClick = {
-                            exit(null)
+                        onClick = { widget ->
+                            if (!clicked) {
+                                clicked = true
+                                widget.setText(widget.text + '?')
+                                widget.color = Colors.RED
+                                val timer = Timer()
+                                timer.schedule(delay = 2000) {
+                                    clicked = false
+                                    widget.setText(
+                                        Text.translatableWithFallback(
+                                            "trueadaptivemusic.delete", "Delete").string)
+                                    widget.color = Colors.WHITE
+                                }
+
+                                return@ClickableTextWidget
+                            }
+
+                            selectedEvent = null
+                            save()
                         }
                     )
                 },
                 "Delete"
             )
         }
-
-        saveWidget.active = eventArgs.filterNotNull().size == requiredEventArgs.size
-        saveWidget.color = if (saveWidget.active) Colors.WHITE else Colors.RED
-        saveWidget.tooltip =
-            if (saveWidget.active)
-                null
-            else
-                MISSING_ARGS_TOOLTIP
     }
 
     private fun setSelectedEventTypeName(typeName: String) {
@@ -194,21 +191,32 @@ class EventViewWidget(
         clearWidgetsFromRender()
     }
 
-    private fun exit(event: MusicEvent?) {
+    private fun exit() {
+        val outEvent = selectedEvent
         selectedEvent = null
         selectedMusicPaths = mutableListOf()
         selectedEventTypeName = eventTypeNameOptions.firstOrNull() ?: ""
         requiredEventArgs = emptyList()
         eventArgs = mutableListOf()
         clearWidgetsFromRender()
-        onExitView(event)
+        onSaveEvent(outEvent, true)
     }
 
-    companion object {
-        private val MISSING_ARGS_TOOLTIP =
-            Tooltip.of(
-                Text.translatableWithFallback(
-                    "trueadaptivemusic.missing_parameter",
-                    "At least one required parameter for this type is missing."))
+    private fun save() {
+        if (eventArgs.filterNotNull().size != requiredEventArgs.size
+            || eventParams.filterNotNull().size != requiredEventParams.size) {
+            return
+        }
+
+        assets = musicPack.getEditPackAssets()
+        val newEvent = TAMClient.eventFactory
+            .fromArgs(
+                selectedEventTypeName,
+                selectedMusicPaths
+                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                eventParams.filterNotNull(),
+                eventArgs.filterNotNull())
+        selectedEvent = newEvent
+        onSaveEvent(newEvent, false)
     }
 }

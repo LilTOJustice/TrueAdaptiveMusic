@@ -30,6 +30,7 @@ class MultiSelectDropdownWidget(
 
     init {
         selected.addAll(alreadySelected)
+        onChange(selected)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

@@ -139,12 +139,14 @@ class MusicPredicateTree private constructor(
             predicateParams: List<Any>,
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
-            playableSounds: List<PlayableSound>) {
+            playableSounds: List<PlayableSound>): Node {
             val predicate = TAMClient.predicateFactory.fromArgs(
                 predicateType, playableSounds, predicateParams, predicateArgs)
             val child = Node(predicate, events)
             child.parent = this
             children.add(child)
+
+            return child
         }
 
         fun isValidNewChild(child: Node): Boolean {

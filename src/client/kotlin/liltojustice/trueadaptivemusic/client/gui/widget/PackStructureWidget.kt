@@ -33,13 +33,15 @@ class PackStructureWidget(
     true,
     x,
     y) {
-    private var selectedWidget: NodeWidget? = null
     private var mouseButtonHeld = false
-    private val selectedNode
-        get() = selectedWidget?.targetNode?.let { if (it.isParent) null else it.node }
+    private var targetedNode: MusicPredicateTree.Node? = null
 
     init {
         initPredicateWidgets()
+    }
+
+    fun setNode(node: MusicPredicateTree.Node?) {
+        targetedNode = node
     }
 
     fun initPredicateWidgets() {
@@ -51,14 +53,9 @@ class PackStructureWidget(
                     NodeWidget(
                         node.predicate.getTypeName(),
                         onClick = { widget ->
-                            if (selectedWidget === widget) {
-                                return@NodeWidget
-                            }
-
                             onSelectEditExistingNode(node)
-                            selectedWidget = widget as NodeWidget
                         },
-                        isSelected = { widget -> widget === selectedWidget })
+                        isSelected = { node === targetedNode })
                         .withCustomData(TargetNode(node, false)),
                     row++,
                     (path.size - 1) * INDENT) as NodeWidget
@@ -68,10 +65,6 @@ class PackStructureWidget(
                 }
                 else if (node.events.any { event -> event is ErrorEvent }) {
                     newWidget.color = Constants.Colors.YELLOW
-                }
-
-                if (newWidget.targetNode.node === selectedNode) {
-                    selectedWidget = newWidget
                 }
             },
             { node, path ->
@@ -83,14 +76,10 @@ class PackStructureWidget(
                     NodeWidget(
                         "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
                         onClick = { widget ->
-                            if (selectedWidget === widget) {
-                                return@NodeWidget
-                            }
-
                             onSelectCreateNewNode(node)
-                            selectedWidget = widget as NodeWidget
                         },
-                        isSelected = { widget -> widget === selectedWidget })
+                        isSelected = { false }
+                    )
                         .withCustomData(TargetNode(node, true)),
                     row++,
                     path.size * INDENT)
@@ -121,21 +110,21 @@ class PackStructureWidget(
         }
 
         forEachChild { child ->
-            if (child === selectedWidget
+            if (child !is NodeWidget
                 || !child.isMouseOver(mouseX, mouseY)
-                || child !is NodeWidget
-                || selectedNode?.let { child.isValidDestination(it) } != true) {
+                || targetedNode === child.targetNode.node
+                || targetedNode?.let { child.isValidDestination(it) } != true) {
                 return@forEachChild
             }
 
             val targetNode = child.targetNode.node
 
             if (child.targetNode.isParent) {
-                targetNode.adoptChild(selectedNode!!)
+                targetNode.adoptChild(targetedNode!!)
             }
             else {
                 targetNode.parent!!
-                    .adoptChild(selectedNode!!, targetNode.parent!!.children.indexOf(targetNode))
+                    .adoptChild(targetedNode!!, targetNode.parent!!.children.indexOf(targetNode))
             }
 
             musicPack.initRules()
@@ -156,7 +145,9 @@ class PackStructureWidget(
 
             val baseTooltipText = child.getBaseTooltipString()
             child.tooltip =
-                if (selectedWidget === child && !child.targetNode.isParent && child.targetNode.node.parent != null)
+                if (targetedNode === child.targetNode.node
+                    && !child.targetNode.isParent
+                    && child.targetNode.node.parent != null)
                     if (baseTooltipText.isBlank())
                         Tooltip.of(Text.literal(MOVE_NODE_STRING))
                     else
@@ -172,14 +163,14 @@ class PackStructureWidget(
         }
 
         forEachChild { child ->
-            if (child === selectedWidget
+            if (child !is NodeWidget
                 || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-                || child !is NodeWidget
+                || child.targetNode.node === targetedNode
             ) {
                 return@forEachChild
             }
 
-            val valid = selectedNode?.let { child.isValidDestination(it) } == true
+            val valid = targetedNode?.let { child.isValidDestination(it) } == true
 
             context?.drawText(
                 textRenderer,
@@ -193,7 +184,7 @@ class PackStructureWidget(
     }
 
     private fun isMovingNode(): Boolean {
-        return mouseButtonHeld && selectedNode != null
+        return mouseButtonHeld && targetedNode != null
     }
 
     companion object {

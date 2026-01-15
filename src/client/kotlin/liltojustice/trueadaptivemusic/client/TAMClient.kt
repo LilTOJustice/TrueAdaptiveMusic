@@ -64,10 +64,6 @@ object TAMClient {
         musicManager?.playNow(sound, keepBackground)
     }
 
-    fun refreshCurrentMusicPack() {
-        musicPack = musicPack
-    }
-
     fun getPlayingEvent(): MusicEvent? {
         return musicManager?.playingEvent
     }
@@ -94,18 +90,29 @@ object TAMClient {
 
     fun registerInputWidget(
         predicate: (parameterType: KType) -> Boolean,
-        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        widgetMaker:
+            (prompt: String,
+             screen: Screen,
+             outArgs: MutableList<Any?>,
+             arg: KParameter,
+             onChange: () -> Unit) -> ClickableWidget) {
         inputWidgetMaker.register(predicate, widgetMaker)
     }
 
     fun registerInputWidget(
         parameterType: KType,
-        widgetMaker: (prompt: String, screen: Screen, outArgs: MutableList<Any?>, arg: KParameter) -> ClickableWidget) {
+        widgetMaker:
+            (prompt: String,
+             screen: Screen,
+             outArgs: MutableList<Any?>,
+             arg: KParameter,
+             onChange: () -> Unit) -> ClickableWidget) {
         registerInputWidget({ type -> type == parameterType}, widgetMaker)
     }
 
-    fun makeInputWidget(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter): ClickableWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg)
+    fun makeInputWidget(
+        screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit = {}): ClickableWidget {
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg, onChange)
     }
 
     private fun initialize(client: MinecraftClient) {
