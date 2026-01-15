@@ -83,92 +83,94 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
-            typeOf<String>(),
-            { prompt, screen, outArgs, arg ->
-                TextInputWidget(
-                    screen,
-                    prompt,
-                    30,
-                    { widget, text ->
-                        outArgs[arg.index] = text
-                    },
-                    outArgs[arg.index]?.toString() ?: ""
-                )
-            }
-        )
+            typeOf<String>()
+        ) { prompt, screen, outArgs, arg, onChange ->
+            TextInputWidget(
+                screen,
+                prompt,
+                30,
+                { widget, text ->
+                    outArgs[arg.index] = text
+                    onChange()
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+        }
 
         TAMClient.registerInputWidget(
-            typeOf<Int>(),
-            { prompt, screen, outArgs, arg ->
-                TextInputWidget(
-                    screen,
-                    prompt,
-                    30,
-                    { widget, text ->
-                        if (text == "0-") {
-                            widget.text = "-0"
-                            return@TextInputWidget
-                        }
+            typeOf<Int>()
+        ) { prompt, screen, outArgs, arg, onChange ->
+            TextInputWidget(
+                screen,
+                prompt,
+                30,
+                { widget, text ->
+                    if (text == "0-") {
+                        widget.text = "-0"
+                        return@TextInputWidget
+                    }
 
-                        val value = text.toIntOrNull()
-                        if (text != "-0" && value == null) {
-                            widget.text = "0"
-                            return@TextInputWidget
-                        }
+                    val value = text.toIntOrNull()
+                    if (text != "-0" && value == null) {
+                        widget.text = "0"
+                        return@TextInputWidget
+                    }
 
-                        if (text != "-0" && text != value.toString()) {
-                            widget.text = value.toString()
-                            return@TextInputWidget
-                        }
+                    if (text != "-0" && text != value.toString()) {
+                        widget.text = value.toString()
+                        return@TextInputWidget
+                    }
 
-                        outArgs[arg.index] = value
-                    },
-                    outArgs[arg.index]?.toString() ?: ""
-                )
-            }
-        )
-
-        TAMClient.registerInputWidget(
-            typeOf<UInt>(),
-            { prompt, screen, outArgs, arg ->
-                TextInputWidget(
-                    screen,
-                    prompt,
-                    30,
-                    { widget, text ->
-                        val value = text.toUIntOrNull()
-                        if (value == null) {
-                            widget.text = "0"
-                            return@TextInputWidget
-                        }
-
-                        if (text != value.toString()) {
-                            widget.text = value.toString()
-                            return@TextInputWidget
-                        }
-
-                        outArgs[arg.index] = value
-                    },
-                    outArgs[arg.index]?.toString() ?: ""
-                )
-            }
-        )
+                    outArgs[arg.index] = value
+                    onChange()
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+        }
 
         TAMClient.registerInputWidget(
-            typeOf<Boolean>(),
-            { prompt, screen, outArgs, arg ->
-                CheckboxWidget(
-                    10,
-                    prompt,
-                    { checked -> outArgs[arg.index] = checked },
-                    checked = outArgs[arg.index] as? Boolean ?: false
-                )
-            }
-        )
+            typeOf<UInt>()
+        ) { prompt, screen, outArgs, arg, onChange ->
+            TextInputWidget(
+                screen,
+                prompt,
+                30,
+                { widget, text ->
+                    val value = text.toUIntOrNull()
+                    if (value == null) {
+                        widget.text = "0"
+                        return@TextInputWidget
+                    }
+
+                    if (text != value.toString()) {
+                        widget.text = value.toString()
+                        return@TextInputWidget
+                    }
+
+                    outArgs[arg.index] = value
+                    onChange()
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+        }
+
+        TAMClient.registerInputWidget(
+            typeOf<Boolean>()
+        ) { prompt, screen, outArgs, arg, onChange ->
+            CheckboxWidget(
+                10,
+                prompt,
+                { checked ->
+                    outArgs[arg.index] = checked
+                    onChange()
+                },
+                checked = outArgs[arg.index] as? Boolean ?: false
+            )
+        }
 
         TAMClient.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
-            { prompt, screen, outArgs, arg ->
+            { prompt, screen, outArgs, arg, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
                 val options = enumClass.enumConstants.map { enum -> enum.toString() }
 
@@ -179,6 +181,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         options,
                         { enumOption ->
                             outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
+                            onChange()
                         },
                         0,
                         prompt,
@@ -189,7 +192,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMClient.registerInputWidget(
             { type -> isEnumList(type) },
-            { prompt, screen, outArgs, arg ->
+            { prompt, screen, outArgs, arg, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
                 val enumClass = (type.classifier as KClass<*>).java
@@ -202,6 +205,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             .map { enumOption ->
                                 enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
                             }
+                        onChange()
                     },
                     "${prompt}s",
                     notSelectedPlaceholder = "Select a value",
@@ -211,11 +215,14 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMClient.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<TypedIdentifier>()) },
-            { prompt, screen, outArgs, arg ->
+            { prompt, screen, outArgs, arg, onChange ->
                 val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
                 val result = DropdownWidget(
                     options,
-                    { id -> outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id) },
+                    { id ->
+                        outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id)
+                        onChange()
+                    },
                     0,
                     prompt,
                     startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: ""
@@ -231,7 +238,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMClient.registerInputWidget(
             { type -> isTypedIdentifierList(type) },
-            { prompt, screen, outArgs, arg ->
+            { prompt, screen, outArgs, arg, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
                 val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
@@ -241,6 +248,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     { selected ->
                         outArgs[arg.index] = selected
                             .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
+                        onChange()
                     },
                     "${prompt}s",
                     notSelectedPlaceholder = "Select an Identifier",
