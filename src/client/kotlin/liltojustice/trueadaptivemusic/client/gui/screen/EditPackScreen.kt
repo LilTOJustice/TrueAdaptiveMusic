@@ -35,7 +35,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
     private fun initPack() {
         TAMClient.playSoundNow(null)
-        musicPack.initEdit(musicPack)
+        TAMClient.musicPack = MusicPack.fromFile(musicPack.initEdit(musicPack))
     }
 
     override fun init() {
@@ -202,7 +202,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.show_assets", "Show Assets")
         private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.save_and_zip", "Save and Zip")
+            "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
     }
 }
