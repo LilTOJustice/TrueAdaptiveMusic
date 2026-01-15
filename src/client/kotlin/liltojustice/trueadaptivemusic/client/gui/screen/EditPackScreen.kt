@@ -65,7 +65,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerHeight(),
             musicPack,
             { target ->
-                initPack()
                 packStructureWidget.setNode(target)
                 packStructureWidget.initPredicateWidgets()
             },
@@ -76,7 +75,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerHeight(),
             musicPack,
             {
-                initPack()
                 packStructureWidget.initPredicateWidgets()
             },
             { node ->
@@ -133,6 +131,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
+        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
