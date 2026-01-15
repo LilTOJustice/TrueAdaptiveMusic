@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -21,7 +22,9 @@ class ConfirmBackupScreen(
     override fun init() {
         val acceptButtonWidget = TextIconButtonWidget.Builder(
             Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), {
-            client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath)))
+                val backup = MusicPack.fromFile(backupPath)
+                TAMClient.musicPack = backup
+                client?.setScreen(EditPackScreen(parent, backup))
         }, false)
             .texture(CHECKMARK, 9, 8)
             .build()
