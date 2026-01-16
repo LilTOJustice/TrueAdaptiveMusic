@@ -32,10 +32,7 @@ class CheckboxWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        RenderSystem.enableDepthTest()
-
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha)
-        RenderSystem.enableBlend()
         context?.drawGuiTexture(
             RenderLayer::getGuiTextured,
             if (isChecked) CHECKED else UNCHECKED,
