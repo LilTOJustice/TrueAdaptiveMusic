@@ -8,6 +8,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 
 @Environment(EnvType.CLIENT)
 class OptionsScreen(private val parent: Screen): Screen(
@@ -40,9 +41,8 @@ class OptionsScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, TITLE_Y, 16777215)
+            this.textRenderer, this.title, this.width / 2, TITLE_Y, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)
     }
 

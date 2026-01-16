@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.javasucks
 
-import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
@@ -36,7 +35,7 @@ object DebugHudMixinHelper {
             val text = MusicTrigger.getTruncatedTriggerId(path.last())
 
             if (currentNodePath.contains(pathString)) {
-                predicateTreeLines.add(Line(path.size - 1, pathString, text, Constants.Colors.GREEN))
+                predicateTreeLines.add(Line(path.size - 1, pathString, text, Colors.GREEN))
             }
             else if (path.size <= currentNodeDepth) {
                 predicateTreeLines.add(Line(path.size - 1, pathString, text))

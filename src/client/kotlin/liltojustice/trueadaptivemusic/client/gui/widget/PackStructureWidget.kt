@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipString
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
@@ -64,7 +63,7 @@ class PackStructureWidget(
                     newWidget.color = Colors.RED
                 }
                 else if (node.events.any { event -> event is ErrorEvent }) {
-                    newWidget.color = Constants.Colors.YELLOW
+                    newWidget.color = Colors.YELLOW
                 }
             },
             { node, path ->

@@ -12,11 +12,4 @@ class Constants {
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         val AUDIO_FILE_STREAM_ID = Identifier.of("trueadaptivemusic:audiofilestream")
     }
-
-    class Colors {
-        companion object {
-            const val GREEN = 0x00FF00
-            const val YELLOW = 0xFFFF00
-        }
-    }
 }
