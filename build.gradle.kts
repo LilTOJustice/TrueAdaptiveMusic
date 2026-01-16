@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.0.20"
     kotlin("plugin.serialization") version "2.0.20"
-    id("fabric-loom") version "1.7.1"
+    id("fabric-loom") version "1.14-SNAPSHOT"
     id("maven-publish")
 }
 
@@ -55,7 +55,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
 
@@ -75,9 +75,9 @@ tasks.processResources {
     filesMatching("fabric.mod.json") {
         expand(
             "version" to project.version,
-            "minecraft_version" to project.property("minecraft_version"),
-            "loader_version" to project.property("loader_version"),
-            "kotlin_loader_version" to project.property("kotlin_loader_version")
+            "minecraft_version" to project.property("minecraft_version")!!,
+            "loader_version" to project.property("loader_version")!!,
+            "kotlin_loader_version" to project.property("kotlin_loader_version")!!
         )
     }
 }
