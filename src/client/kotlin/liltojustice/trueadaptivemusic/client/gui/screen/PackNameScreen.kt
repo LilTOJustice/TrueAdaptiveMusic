@@ -68,7 +68,6 @@ class PackNameScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        //renderBackground(context, mouseX, mouseY, delta)
         context?.drawText(
             client?.textRenderer,
             errorText,
