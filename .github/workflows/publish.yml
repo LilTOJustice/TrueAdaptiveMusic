@@ -61,9 +61,6 @@ jobs:
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
-          github-tag: "v${{env.VERSION}}+${{env.MINECRAFT_VERSION}}"
-          github-token: "${{env.GITHUB_TOKEN}}"
-          
           name: "TrueAdaptiveMusic ${{env.VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
           version: "${{env.VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release

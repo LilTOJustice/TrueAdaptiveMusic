@@ -3,9 +3,12 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import net.minecraft.util.Identifier
 import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
@@ -46,21 +49,19 @@ abstract class ContainerWidget(
             return
         }
 
-        //super.render(context, mouseX, mouseY, delta)
-
         if (showHeader)
         {
-            context?.setShaderColor(0f, 0f, 0f, if (bordered) 1f else 0.5f)
-            context?.fill(x, y, x + this.width, y + this.height, Colors.BLACK)
-            context?.fill(x, y,  x + width, y + TOP_MARGIN, Colors.BLACK)
-            context?.setShaderColor(1f, 1f, 1f, 1f)
+            context?.let {
+                renderDarkening(it)
+                renderDarkening(it, this.width, TOP_MARGIN)
+            }
+
             drawCenteredText(context, message.string, -1, width / 2, shadow = true)
             backButton?.let {
                 it.x = x + 5
                 it.y = (y + getHeaderOffset() - getRowHeight(textRenderer.fontHeight)).toInt()
                 it.render(context, mouseX, mouseY, delta)
             }
-            context?.setShaderColor(1f, 1f, 1f, 1f)
         }
 
         if (bordered) {
@@ -268,6 +269,47 @@ abstract class ContainerWidget(
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
         children.values.map { child -> child.widget }.forEach(consumer)
+    }
+
+    protected open fun renderDarkening(context: DrawContext) {
+        this.renderDarkening(context, this.width, this.height)
+    }
+
+    protected open fun renderDarkening(context: DrawContext, width: Int, height: Int) {
+        renderBackgroundTexture(
+            context,
+            MENU_BACKGROUND_TEXTURE,
+            this.x,
+            this.y,
+            0.0f,
+            0.0f,
+            width,
+            height
+        )
+    }
+
+    fun renderBackgroundTexture(
+        context: DrawContext,
+        texture: Identifier?,
+        x: Int,
+        y: Int,
+        u: Float,
+        v: Float,
+        width: Int,
+        height: Int
+    ) {
+        context.drawTexture(
+            RenderLayer::getGuiTextured,
+            texture,
+            x,
+            y,
+            u,
+            v,
+            width,
+            height,
+            32,
+            32
+        )
     }
 
     private fun clampScrollPosition() {
