@@ -23,15 +23,17 @@ class PackNameScreen(private val parent: Screen): Screen(
     private lateinit var acceptButtonWidget: TextIconButtonWidget
 
     override fun init() {
-        packNameWidget = EditBoxWidget(
-            client?.textRenderer,
-            width / 2 - width / 6,
-            height / 2,
-            width / 3,
-            (client?.textRenderer?.fontHeight ?: 0) + 5,
-            Text.translatableWithFallback("trueadaptivemusic.pack_name", "Pack Name"),
-            Text.translatableWithFallback("trueadaptivemusic.music_pack_name", "Music Pack Name")
-        )
+        packNameWidget = EditBoxWidget.Builder()
+            .x(width / 2 - width / 6)
+            .y(height / 2)
+            .placeholder(Text.translatableWithFallback("trueadaptivemusic.pack_name", "Pack Name"),)
+            .build(
+                client!!.textRenderer,
+                width / 3,
+                (client?.textRenderer?.fontHeight ?: 0) + 5,
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.music_pack_name", "Music Pack Name"))
+
         packNameWidget.setChangeListener { packName ->
             errorText = ""
             this.packName = packName
@@ -66,7 +68,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context, mouseX, mouseY, delta)
+        //renderBackground(context, mouseX, mouseY, delta)
         context?.drawText(
             client?.textRenderer,
             errorText,

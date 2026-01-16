@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundManager.class)
 public class SoundManagerPauseAllMixin {
-    @Inject(method = "pauseAll", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "pauseAllExcept", at = @At("HEAD"), cancellable = true)
     public void stopAll(CallbackInfo ci) {
         SoundManager thisObject = (SoundManager)(Object)this;
         thisObject.soundSystem.sources.keySet().forEach(instance ->

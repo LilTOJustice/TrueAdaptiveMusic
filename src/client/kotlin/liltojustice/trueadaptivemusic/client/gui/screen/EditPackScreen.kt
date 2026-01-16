@@ -107,9 +107,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         saveButtonWidget.width = 90
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
         closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
-        closeButtonWidget.tooltip = Tooltip.of(
+        closeButtonWidget.setTooltip(Tooltip.of(
             Text.translatableWithFallback(
-                "trueadaptivemusic.change_save", "Changes will be saved"))
+                "trueadaptivemusic.change_save", "Changes will be saved")))
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
 
@@ -140,7 +140,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context, mouseX, mouseY, delta)
         super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, 22, Colors.WHITE)

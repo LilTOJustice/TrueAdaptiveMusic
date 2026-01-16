@@ -144,7 +144,7 @@ class PackStructureWidget(
             }
 
             val baseTooltipText = child.getBaseTooltipString()
-            child.tooltip =
+            child.setTooltip(
                 if (targetedNode === child.targetNode.node
                     && !child.targetNode.isParent
                     && child.targetNode.node.parent != null)
@@ -153,7 +153,7 @@ class PackStructureWidget(
                     else
                         Tooltip.of(Text.literal("$MOVE_NODE_STRING\n$baseTooltipText"))
                 else
-                    Tooltip.of(Text.literal(baseTooltipText))
+                    Tooltip.of(Text.literal(baseTooltipText)))
         }
 
         super.renderWidget(context, mouseX, mouseY, delta)

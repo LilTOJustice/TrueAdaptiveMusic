@@ -255,7 +255,7 @@ class PredicateViewWidget(
                         selectedEvent = event
                         onEventClick(event) },
                     isSelected = { selectedEvent == event })
-                    eventWidget.tooltip = Tooltip.of(event.getTriggerTooltipText())
+                    eventWidget.setTooltip(Tooltip.of(event.getTriggerTooltipText()))
                     if (event is ErrorEvent) {
                         eventWidget.color = Colors.RED
                     }
