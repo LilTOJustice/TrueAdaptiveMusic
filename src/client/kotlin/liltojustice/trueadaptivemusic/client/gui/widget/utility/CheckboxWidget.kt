@@ -1,12 +1,12 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import kotlin.math.max
@@ -32,16 +32,14 @@ class CheckboxWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha)
         context?.drawGuiTexture(
-            RenderLayer::getGuiTextured,
+            RenderPipelines.GUI_TEXTURED,
             if (isChecked) CHECKED else UNCHECKED,
             x,
             y,
             checkboxSize,
             checkboxSize,
-        )
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
+            Colors.WHITE)
         context?.drawTextWithShadow(
             textRenderer,
             message,

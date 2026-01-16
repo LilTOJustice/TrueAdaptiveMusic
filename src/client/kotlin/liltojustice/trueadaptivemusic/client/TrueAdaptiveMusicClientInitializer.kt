@@ -242,7 +242,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 )
 
                 if (options.isEmpty()) {
-                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
+                    result.setTooltip(Tooltip.of(DYNAMIC_REGISTRY_TEXT))
                 }
 
                 result
@@ -268,7 +268,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
 
                 if (options.isEmpty()) {
-                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
+                    result.setTooltip(Tooltip.of(DYNAMIC_REGISTRY_TEXT))
                 }
 
                 result

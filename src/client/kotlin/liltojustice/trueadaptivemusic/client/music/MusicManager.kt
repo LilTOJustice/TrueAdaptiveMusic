@@ -312,12 +312,14 @@ class MusicManager(
 
     private fun jukeboxPlaying(): Boolean {
         return client.soundManager.soundSystem.sources.keys.any {
-            instance -> instance.category == SoundCategory.RECORDS
-                && instance is PositionedSoundInstance
-                && client.player?.let {
-                    Vec3d(instance.x, instance.y, instance.z)
-                        .squaredDistanceTo(it.pos) < instance.sound.attenuation * instance.sound.attenuation * 4
-                } ?: false
+            instance ->
+            ((instance.category == SoundCategory.RECORDS)
+                    && (instance is PositionedSoundInstance)
+                    && (client.player?.let {
+                Vec3d(instance.x, instance.y, instance.z)
+                    .squaredDistanceTo(it.pos) <
+                        (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
+            } ?: false))
         }
     }
 
