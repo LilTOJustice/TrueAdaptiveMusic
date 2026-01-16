@@ -10,6 +10,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureSet
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
+import kotlin.jvm.optionals.getOrNull
 
 class StructureSetPredicate internal constructor(private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
@@ -20,7 +21,9 @@ class StructureSetPredicate internal constructor(private val structureSets: List
             ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
-                    structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(structureSetId) ?: return false
+                    structureAccessor.registryManager
+                        .getOptional(RegistryKeys.STRUCTURE_SET).getOrNull()?.get(structureSetId)
+                        ?: return false
 
                 structureSet.structures.any { structureWeightedEntry ->
                     StructurePredicate.testStructure(structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
@@ -34,7 +37,7 @@ class StructureSetPredicate internal constructor(private val structureSets: List
         val y: Double = client.player?.y ?: return false
         val z: Double = client.player?.z ?: return false
 
-        return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
+        return fullStructureTest(serverWorld, x, y, z)
     }
 
     override fun getTickRate(): Int {

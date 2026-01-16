@@ -5,6 +5,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
@@ -33,16 +34,17 @@ class CheckboxWidget(
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         RenderSystem.enableDepthTest()
 
-        context?.setShaderColor(1.0f, 1.0f, 1.0f, alpha)
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha)
         RenderSystem.enableBlend()
         context?.drawGuiTexture(
+            RenderLayer::getGuiTextured,
             if (isChecked) CHECKED else UNCHECKED,
             x,
             y,
             checkboxSize,
             checkboxSize,
         )
-        context?.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         context?.drawTextWithShadow(
             textRenderer,
             message,

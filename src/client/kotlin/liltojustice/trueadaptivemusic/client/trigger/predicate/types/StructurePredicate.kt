@@ -26,7 +26,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
             ?: StructureIdentifier.getRegistryIds())
             .any { structureId ->
                 val structure: Structure =
-                    structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structureId) ?: return false
+                    structureAccessor.registryManager
+                        .getOptional(RegistryKeys.STRUCTURE).get().get(structureId) ?: return false
 
                 testStructure(structureAccessor, structure, blockPos)
             }
@@ -43,7 +44,7 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         val y: Double = client.player?.y ?: return false
         val z: Double = client.player?.z ?: return false
 
-        return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
+        return fullStructureTest(serverWorld, x, y, z)
     }
 
     override fun toJson(): JsonObject {
