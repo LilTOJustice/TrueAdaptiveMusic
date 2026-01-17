@@ -20,8 +20,8 @@ jobs:
   determine-versions:
     runs-on: ubuntu-latest
     outputs:
-      MINECRAFT_VERSION: ${{ steps.minecraft.outputs.test }}
-      MOD_VERSION: ${{ steps.mod.outputs.test }}
+      minecraft_version: ${{ steps.minecraft.outputs.minecraft_version }}
+      mod_version: ${{ steps.mod.outputs.mod_version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -30,11 +30,11 @@ jobs:
       - id: minecraft
         name: Get minecraft version
         run: |
-          grep -oP 'minecraft_version=\K.*' gradle.properties >> "$GITHUB_OUTPUT"
+          grep 'minecraft_version=.*' gradle.properties >> "$GITHUB_OUTPUT"
       - id: mod
         name: Get mod version
         run: |
-          grep -oP 'mod_version=\K.*' gradle.properties >> "$GITHUB_OUTPUT"
+          grep 'mod_version=.*' gradle.properties >> "$GITHUB_OUTPUT"
   build:
     if: contains(github.ref_name, 'versions/') # Is version branch
     runs-on: ubuntu-latest
