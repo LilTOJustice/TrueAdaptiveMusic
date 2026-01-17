@@ -1,0 +1,41 @@
+name: Cherry-pick to all versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_id:
+        description: 'Commit to cherry pick'
+        required: true
+        type: string
+
+jobs:
+  apply_cherry_pick:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+      - name: Create and publish branches
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          COMMIT_ID: ${{ github.event.inputs.commit_id }}
+        run: |
+          count=0
+          regex_prefix="origin\/versions\/"
+          branches=$(git branch -r | tr -d ' '); while read -r branch; do
+                  if [[ "$branch" =~ $regex_prefix.* ]]; then
+                          version=${branch:${#regex_prefix}-2}
+                          new_branch=vcp/$version-$COMMIT_ID
+                          git switch -c $new_branch $branch
+                          (git cherry-pick $COMMIT_ID && git push -u origin $new_branch) || (echo "Failed to cherry pick into version branch $branch" && git cherry-pick --abort && continue)
+                          gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit $COMMIT_ID" --body "Cherry-pick" || (echo "Failed to create PR for $new_branch" && continue)
+                          count=$((count + 1))
+                  fi
+          done <<< "$branches"
+          echo "Created $count PRs"
