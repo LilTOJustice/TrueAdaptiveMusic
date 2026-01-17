@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -88,11 +89,12 @@ class PackStructureWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        val result = super.mouseClicked(mouseX, mouseY, button)
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        val result = super.mouseClicked(click, doubled)
+        screen?.focused = this
         mouseButtonHeld = false
         forEachChild { child ->
-            if (child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
+            if (child is ClickableTextWidget && child.isMouseOver(click.x, click.y)) {
                 mouseButtonHeld = true
                 return@forEachChild
             }
@@ -101,8 +103,8 @@ class PackStructureWidget(
         return result
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        val result = super.mouseReleased(mouseX, mouseY, button)
+    override fun mouseReleased(click: Click): Boolean {
+        val result = super.mouseReleased(click)
 
         if (!isMovingNode()) {
             return result
@@ -110,7 +112,7 @@ class PackStructureWidget(
 
         forEachChild { child ->
             if (child !is NodeWidget
-                || !child.isMouseOver(mouseX, mouseY)
+                || !child.isMouseOver(click.x, click.y)
                 || targetedNode === child.targetNode.node
                 || targetedNode?.let { child.isValidDestination(it) } != true) {
                 return@forEachChild

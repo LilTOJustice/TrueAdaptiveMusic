@@ -31,7 +31,7 @@ class CombatPredicate: MusicPredicate() {
         for (entity: Entity? in world.entities)
         {
             val mobEntity: MobEntity = entity as? MobEntity ?: continue
-            val relativeMobEntityPosN = mobEntity.pos.subtract(playerEntity.pos).normalize()
+            val relativeMobEntityPosN = mobEntity.entityPos.subtract(playerEntity.entityPos).normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
             val mobHorizontalAngle = acos(relativeMobEntityPosN.x)

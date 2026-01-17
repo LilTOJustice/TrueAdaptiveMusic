@@ -40,5 +40,6 @@
   "trueadaptivemusic.playing_event": "Событие Воспроизведения",
   "trueadaptivemusic.change_save": "Изменения будут сохранены",
   "trueadaptivemusic.vanilla": "Cтандартный",
-  "trueadaptivemusic.disable_tam": "Деактивировать TrueAdaptiveMusic"
+  "trueadaptivemusic.disable_tam": "Деактивировать TrueAdaptiveMusic",
+  "trueadaptivemusic.click_to_remove": "Нажмите, чтобы удалить"
 }

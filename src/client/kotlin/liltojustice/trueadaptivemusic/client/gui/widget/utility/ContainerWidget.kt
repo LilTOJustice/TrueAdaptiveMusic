@@ -1,8 +1,10 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -65,8 +67,7 @@ abstract class ContainerWidget(
         }
 
         if (bordered) {
-            context?.fill(x, y, x + width, y + height, Colors.BLACK)
-            context?.drawBorder(x, y, width, height, Colors.WHITE)
+            context?.drawBorder(x, y, width, height)
         }
 
         clampScrollPosition()
@@ -86,30 +87,32 @@ abstract class ContainerWidget(
         context?.disableScissor()
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (!visible || !active) {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
             return false
         }
 
+        val result = this.isMouseOver(click.x(), click.y())
+        if (result) {
+            screen?.focused = this
+            this.onClick(click, doubled)
+        }
+
         backButton?.let {
-            if (it.isMouseOver(mouseX, mouseY)) {
-                it.mouseClicked(mouseX, mouseY, button)
-                return true
+            if (it.mouseClicked(click, doubled)) {
+                return result
             }
         }
 
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.isMouseOver(mouseX, mouseY)) {
-                val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
-                if (clicked) {
-                    screen?.focused = screen.focused ?: child.widget
-                }
+            if (child.widget.mouseClicked(click, doubled)) {
+                return result
             }
         }
 
-        return false
+        return result
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {

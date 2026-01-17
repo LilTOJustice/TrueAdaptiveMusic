@@ -1,17 +1,21 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PackStructureWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
 import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.*
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.client.gui.widget.GridWidget
+import net.minecraft.client.gui.widget.SimplePositioningWidget
+import net.minecraft.client.gui.widget.TextIconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -36,6 +40,22 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private fun initPack() {
         TAMClient.playSoundNow(null)
         TAMClient.musicPack = MusicPack.fromFile(musicPack.initEdit(musicPack))
+    }
+
+    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+        val optional = this.hoveredElement(click!!.x(), click.y())
+        if (optional.isEmpty) {
+            return false
+        } else {
+            val element = optional.get()
+            if (element.mouseClicked(click, doubled) && element.isClickable) {
+                if (click.button() == 0) {
+                    this.isDragging = true
+                }
+            }
+
+            return true
+        }
     }
 
     override fun init() {

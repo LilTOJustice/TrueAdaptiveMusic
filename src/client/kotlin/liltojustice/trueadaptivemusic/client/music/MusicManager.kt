@@ -85,7 +85,10 @@ class MusicManager(
             onDemandSound = null
             onDemandSoundInstance = null
             currentSoundInstance?.let {
-                volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
+                volumeManager.startFade(
+                    it,
+                    PLAY_NOW_FADE_TICKS,
+                    if (client.isPaused) PAUSE_VOLUME else 1F)
             }
 
             return
@@ -317,7 +320,7 @@ class MusicManager(
                     && (instance is PositionedSoundInstance)
                     && (client.player?.let {
                 Vec3d(instance.x, instance.y, instance.z)
-                    .squaredDistanceTo(it.pos) <
+                    .squaredDistanceTo(it.entityPos) <
                         (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
             } ?: false))
         }

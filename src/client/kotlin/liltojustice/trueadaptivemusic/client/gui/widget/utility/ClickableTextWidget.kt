@@ -1,6 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -13,7 +15,9 @@ open class ClickableTextWidget(
     y: Int = 0,
     private val showHighlight: Boolean = true,
     private val onClick: (ClickableTextWidget) -> Unit = {},
-    private val isSelected: (ClickableTextWidget) -> Boolean = { false })
+    private val isSelected: (ClickableTextWidget) -> Boolean = { false },
+    private val onMouseOn: (ClickableTextWidget) -> Unit = {},
+    private val onMouseOff: (ClickableTextWidget) -> Unit = {})
     : ClickableWidget(x, y, 0, 0, Text.literal(text)),
     DataWrapped<ClickableTextWidget> {
     override var customData: Any? = null
@@ -21,6 +25,7 @@ open class ClickableTextWidget(
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
+    var hovering = false
 
     init {
         width = textRenderer.getWidth(message)
@@ -32,15 +37,18 @@ open class ClickableTextWidget(
             return
         }
 
+        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && !hovering) {
+            hovering = true
+            onMouseOn(this)
+        }
+        else if (!isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && hovering) {
+            hovering = false
+            onMouseOff(this)
+        }
+
         val selected = isSelected(this)
         if (selected) {
-            context?.drawBorder(
-                x - BORDER_BUFFER / 2,
-                y - BORDER_BUFFER / 2,
-                width + BORDER_BUFFER,
-                height + BORDER_BUFFER,
-                Colors.WHITE
-            )
+            context?.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
         }
 
         if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
@@ -48,11 +56,10 @@ open class ClickableTextWidget(
         }
 
         drawScrollableText(context, textRenderer, message, x, y, x + width, y + height, color)
-        //super.renderWidget(context, mouseX, mouseY, delta)
     }
 
-    override fun onClick(mouseX: Double, mouseY: Double) {
-        super.onClick(mouseX, mouseY)
+    override fun onClick(click: Click, doubled: Boolean) {
+        super.onClick(click, doubled)
 
         if (visible && active)
         {

@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -41,8 +42,8 @@ class TextInputWidget(
         fieldWidget.render(context, mouseX, mouseY, delta)
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        val clicked = fieldWidget.mouseClicked(mouseX, mouseY, button)
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        val clicked = fieldWidget.mouseClicked(click, doubled)
         if (clicked) {
             screen.focused = fieldWidget
         }

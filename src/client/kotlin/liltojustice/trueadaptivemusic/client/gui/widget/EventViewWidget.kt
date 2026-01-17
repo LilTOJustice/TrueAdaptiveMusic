@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.registry.Registries
@@ -58,12 +59,12 @@ class EventViewWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (isMouseOver(mouseX, mouseY)) {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        if (isMouseOver(click.x, click.y)) {
             screen?.focused = null
         }
 
-        return super.mouseClicked(mouseX, mouseY, button)
+        return super.mouseClicked(click, doubled)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -123,7 +124,7 @@ class EventViewWidget(
                         "trueadaptivemusic.select_track", "Select a track").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
             },
             "musicChoice"
         )
