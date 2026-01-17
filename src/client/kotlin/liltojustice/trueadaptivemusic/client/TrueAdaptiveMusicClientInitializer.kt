@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.EmptyClickableWidget
@@ -48,15 +49,21 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
-        val ffmpegInstall = ProcessBuilder("powershell.exe", "-Command", "winget install 'FFmpeg (Essentials Build)'")
-            .redirectErrorStream(true)
-            .start()
+        try {
+            val ffmpegInstall =
+                ProcessBuilder("powershell.exe", "-Command", "winget install 'FFmpeg (Essentials Build)'")
+                    .redirectErrorStream(true)
+                    .start()
 
-        val output = ffmpegInstall.inputStream.bufferedReader().use { it.readText() }
-        ffmpegInstall.waitFor()
+            val output = ffmpegInstall.inputStream.bufferedReader().use { it.readText() }
+            ffmpegInstall.waitFor()
 
-        if (ffmpegInstall.exitValue() != 0) {
-            println("Failed to install ffmpeg with exit code ${ffmpegInstall.exitValue()}:\n${output}")
+            if (ffmpegInstall.exitValue() != 0) {
+                Logger.logWarning("Failed to install ffmpeg with exit code ${ffmpegInstall.exitValue()}:\n${output}")
+            }
+        }
+        catch (e: Exception) {
+            Logger.logError("Failed to auto-install ffmpeg: ${e.message}")
         }
 
         TAMClient.registerPredicate("biome", BiomePredicate::class)
