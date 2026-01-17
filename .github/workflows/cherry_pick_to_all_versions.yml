@@ -1,0 +1,40 @@
+name: Cherry Pick commit to all version branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_id:
+        description: 'Commit to cherry pick'
+        required: true
+        type: string
+
+jobs:
+  apply_cherry_pick:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "LilTOJustice@users.noreply.github.com"
+      - name: Create and publish branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+        run: |
+          count=0
+          regex_prefix="origin\/versions\/"
+          branches=$(git branch -r | tr -d ' '); while read -r branch; do
+                  if [[ "$branch" =~ $regex_prefix.* ]]; then
+                          git checkout -b $branch
+                          new_branch="vcp/${branch:${#regex_prefix}-2}"
+                          git checkout -b $new_branch
+                          git cherry-pick ${{ github.event.inputs.commit_id }}
+                          gh pr create --base $branch || echo "Failed to create PR for $new_branch"
+                          count=$((count + 1))
+                  fi
+          done <<< "$branches"
+          echo "Created $count PRs"
