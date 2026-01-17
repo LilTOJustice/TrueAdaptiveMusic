@@ -30,10 +30,11 @@ jobs:
           regex_prefix="origin\/versions\/"
           branches=$(git branch -r | tr -d ' '); while read -r branch; do
                   if [[ "$branch" =~ $regex_prefix.* ]]; then
-                          new_branch="vcp/${branch:${#regex_prefix}-2}"
+                          version=${branch:${#regex_prefix}-2}
+                          new_branch=vcp/$version
                           git switch -c $new_branch $branch
                           (git cherry-pick ${{ github.event.inputs.commit_id }} && git push -u origin $new_branch) || (echo "Failed to cherry pick into version branch $branch" && git cherry-pick --abort && continue)
-                          gh pr create -B refs/heads/$branch --title "$branch: Cherry pick commit ${{ github.event.inputs.commit_id }}" --body "Cherry-pick" || (echo "Failed to create PR for $new_branch" && continue)
+                          gh pr create -B refs/heads/versions/$version --title "$branch: Cherry pick commit ${{ github.event.inputs.commit_id }}" --body "Cherry-pick" || (echo "Failed to create PR for $new_branch" && continue)
                           count=$((count + 1))
                   fi
           done <<< "$branches"
