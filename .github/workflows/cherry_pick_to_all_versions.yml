@@ -34,8 +34,8 @@ jobs:
                           new_branch=vcp/$version-$COMMIT_IDS
                           git switch -c $new_branch $branch
                           for COMMIT_ID in ${COMMIT_IDS//,/ }
-                          do 
-                            (git cherry-pick $COMMIT_ID && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
+                          do
+                            (git cherry-pick $COMMIT_ID --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
                           done
                           gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit" --body "Cherry-pick commits: $COMMIT_IDS" || (echo "Failed to create PR for $new_branch" && continue)
                           count=$((count + 1))
