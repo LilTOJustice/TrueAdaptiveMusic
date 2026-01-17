@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
@@ -66,8 +67,7 @@ abstract class ContainerWidget(
         }
 
         if (bordered) {
-            context?.fill(x, y, x + width, y + height, Colors.WHITE)
-            context?.fill(x + 1, y + 1, x + width - 1, y + height - 1, Colors.BLACK)
+            context?.drawBorder(x, y, width, height)
         }
 
         clampScrollPosition()
@@ -88,29 +88,31 @@ abstract class ContainerWidget(
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        if (!visible || !active) {
+        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
             return false
         }
 
+        val result = this.isMouseOver(click.x(), click.y())
+        if (result) {
+            screen?.focused = this
+            this.onClick(click, doubled)
+        }
+
         backButton?.let {
-            if (it.isMouseOver(click.x, click.y)) {
-                it.mouseClicked(click, doubled)
-                return true
+            if (it.mouseClicked(click, doubled)) {
+                return result
             }
         }
 
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.isMouseOver(click.x, click.y)) {
-                val clicked = child.widget.mouseClicked(click, doubled)
-                if (clicked) {
-                    screen?.focused = child.widget
-                }
+            if (child.widget.mouseClicked(click, doubled)) {
+                return result
             }
         }
 
-        return false
+        return result
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {

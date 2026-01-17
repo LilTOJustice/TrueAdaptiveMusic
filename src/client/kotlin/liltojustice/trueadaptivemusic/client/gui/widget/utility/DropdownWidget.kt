@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.TextFieldWidget
@@ -70,6 +71,15 @@ class DropdownWidget(
         addWidget(selectedOptionWidget, 1)
         addWidget(textInputWidget, 1)
         addWidget(dropdownResultsWidget, 2)
+    }
+
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        if (selectedOptionWidget.mouseClicked(click, doubled)) {
+            screen?.focused = textInputWidget
+            return true
+        }
+
+        return super.mouseClicked(click, doubled)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -166,7 +176,7 @@ class DropdownWidget(
         }
 
         companion object {
-            const val MAX_DISPLAYED_OPTIONS = 5
+            const val MAX_DISPLAYED_OPTIONS = 10
         }
     }
 }

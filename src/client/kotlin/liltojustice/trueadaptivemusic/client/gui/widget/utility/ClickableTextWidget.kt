@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
@@ -35,20 +36,7 @@ open class ClickableTextWidget(
 
         val selected = isSelected(this)
         if (selected) {
-            context?.fill(
-                x - BORDER_BUFFER / 2,
-                y - BORDER_BUFFER / 2 + 1,
-                x + width + BORDER_BUFFER - 2,
-                y + height + BORDER_BUFFER - 1,
-                Colors.WHITE
-            )
-            context?.fill(
-                x - BORDER_BUFFER / 2 + 1,
-                y - BORDER_BUFFER / 2 + 2,
-                x + width + BORDER_BUFFER - 3,
-                y + height + BORDER_BUFFER - 2,
-                Colors.BLACK
-            )
+            context?.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
         }
 
         if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {

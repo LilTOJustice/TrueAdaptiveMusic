@@ -1,7 +1,10 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.text.Text
 
 class MultiSelectDropdownWidget(
     private val options: List<String>,
@@ -27,14 +30,23 @@ class MultiSelectDropdownWidget(
     true) {
     private val selected = mutableListOf<String>()
     private var hoveredWidget: ClickableTextWidget? = null
+    private var dropdownWidget: DropdownWidget? = null
 
     init {
         selected.addAll(alreadySelected)
         onChange(selected)
     }
 
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        if (dropdownWidget?.mouseClicked(click, doubled) ?: false) {
+            return true
+        }
+
+        return super.mouseClicked(click, doubled)
+    }
+
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        addWidgetFromRender(
+        dropdownWidget = addWidgetFromRender(
             {
                 DropdownWidget(
                     options,
@@ -59,11 +71,13 @@ class MultiSelectDropdownWidget(
         val selectedWidgets = selected.sorted().map { option ->
             addWidgetFromRender(
                 {
-                    ClickableTextWidget(option, onClick = {
+                    val widget = ClickableTextWidget(option, onClick = {
                         selected.remove(option)
                         onChange(selected)
                         clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") }
                     })
+                    widget.setTooltip(Tooltip.of(Text.translatableWithFallback("trueadaptivemusic.click_to_remove", "Click to remove")))
+                    widget
                 },
                 "selectedOption: $option"
             ) as ClickableTextWidget

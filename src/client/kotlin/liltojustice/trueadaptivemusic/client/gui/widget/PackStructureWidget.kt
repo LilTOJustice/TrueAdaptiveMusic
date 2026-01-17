@@ -91,6 +91,7 @@ class PackStructureWidget(
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         val result = super.mouseClicked(click, doubled)
+        screen?.focused = this
         mouseButtonHeld = false
         forEachChild { child ->
             if (child is ClickableTextWidget && child.isMouseOver(click.x, click.y)) {
