@@ -3,8 +3,8 @@ name: Cherry-pick to all versions
 on:
   workflow_dispatch:
     inputs:
-      commit_id:
-        description: 'Commit to cherry pick'
+      commit_ids:
+        description: 'Commits to cherry pick (comma separated)'
         required: true
         type: string
 
@@ -24,17 +24,20 @@ jobs:
       - name: Create and publish branches
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
-          COMMIT_ID: ${{ github.event.inputs.commit_id }}
+          COMMIT_IDS: ${{ github.event.inputs.commit_ids }}
         run: |
           count=0
           regex_prefix="origin\/versions\/"
           branches=$(git branch -r | tr -d ' '); while read -r branch; do
                   if [[ "$branch" =~ $regex_prefix.* ]]; then
                           version=${branch:${#regex_prefix}-2}
-                          new_branch=vcp/$version-$COMMIT_ID
+                          new_branch=vcp/$version-$COMMIT_IDS
                           git switch -c $new_branch $branch
-                          (git cherry-pick $COMMIT_ID && git push -u origin $new_branch) || (echo "Failed to cherry pick into version branch $branch" && git cherry-pick --abort && continue)
-                          gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit $COMMIT_ID" --body "Cherry-pick" || (echo "Failed to create PR for $new_branch" && continue)
+                          for COMMIT_ID in ${COMMIT_IDS//,/ }
+                          do 
+                            (git cherry-pick $COMMIT_ID && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
+                          done
+                          gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit" --body "Cherry-pick commits: $COMMIT_IDS" || (echo "Failed to create PR for $new_branch" && continue)
                           count=$((count + 1))
                   fi
           done <<< "$branches"
