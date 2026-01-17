@@ -24,6 +24,7 @@ jobs:
       - name: Create and publish branches
         env:
           GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           count=0
           regex_prefix="origin\/versions\/"
