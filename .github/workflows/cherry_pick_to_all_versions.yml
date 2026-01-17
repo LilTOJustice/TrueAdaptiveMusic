@@ -23,8 +23,7 @@ jobs:
           git config user.email "${{ github.actor }}@users.noreply.github.com"
       - name: Create and publish branches
         env:
-          GITHUB_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
           COMMIT_ID: ${{ github.event.inputs.commit_id }}
         run: |
           count=0
