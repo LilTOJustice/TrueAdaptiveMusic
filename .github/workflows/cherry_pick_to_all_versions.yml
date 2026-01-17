@@ -32,8 +32,8 @@ jobs:
                   if [[ "$branch" =~ $regex_prefix.* ]]; then
                           new_branch="vcp/${branch:${#regex_prefix}-2}"
                           git switch -c $new_branch $branch
-                          git cherry-pick ${{ github.event.inputs.commit_id }} || (git cherry-pick --abort && continue)
-                          gh pr create --base $branch || (echo "Failed to create PR for $new_branch" && continue)
+                          git cherry-pick ${{ github.event.inputs.commit_id }} || (echo "Failed to cherry pick into version branch $branch" && git cherry-pick --abort && continue)
+                          gh pr create --base $branch --title "Cherry pick commit ${{ github.event.inputs.commit_id }} into version branch $branch" || (echo "Failed to create PR for $new_branch" && continue)
                           count=$((count + 1))
                   fi
           done <<< "$branches"
