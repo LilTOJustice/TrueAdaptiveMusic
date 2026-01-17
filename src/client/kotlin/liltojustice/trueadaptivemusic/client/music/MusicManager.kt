@@ -317,7 +317,7 @@ class MusicManager(
                     && (instance is PositionedSoundInstance)
                     && (client.player?.let {
                 Vec3d(instance.x, instance.y, instance.z)
-                    .squaredDistanceTo(it.pos) <
+                    .squaredDistanceTo(it.entityPos) <
                         (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
             } ?: false))
         }

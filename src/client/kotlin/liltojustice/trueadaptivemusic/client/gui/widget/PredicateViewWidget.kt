@@ -10,6 +10,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -59,12 +60,12 @@ class PredicateViewWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (isMouseOver(mouseX, mouseY)) {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        if (isMouseOver(click.x, click.y)) {
             screen?.focused = null
         }
 
-        return super.mouseClicked(mouseX, mouseY, button)
+        return super.mouseClicked(click, doubled)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

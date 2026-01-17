@@ -5,6 +5,7 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
+import net.minecraft.client.input.AbstractInput
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -26,8 +27,8 @@ class CheckboxWidget(
         onChange(isChecked)
     }
 
-    override fun onPress() {
-        super.onPress()
+    override fun onPress(input: AbstractInput) {
+        super.onPress(input)
         onChange(isChecked)
     }
 

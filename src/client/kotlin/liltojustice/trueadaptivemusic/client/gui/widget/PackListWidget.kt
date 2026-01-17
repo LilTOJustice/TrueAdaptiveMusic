@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.MusicPack
 import liltojustice.trueadaptivemusic.client.music.MusicPackValidation
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
@@ -54,21 +55,16 @@ class PackListWidget(
                 .build()
 
         override fun render(
-            context: DrawContext?,
-            index: Int,
-            y: Int,
-            x: Int,
-            entryWidth: Int,
-            entryHeight: Int,
+            context: DrawContext,
             mouseX: Int,
             mouseY: Int,
             hovered: Boolean,
             tickDelta: Float
         ) {
             musicPack?.let {
-                context?.drawText(
+                context.drawText(
                     client.textRenderer, it.packName, x + 3, y + 6, Colors.WHITE, false)
-                context?.drawText(
+                context.drawText(
                     client.textRenderer,
                     it.metadata.description,
                     x + 3, y + 14 + 3,
@@ -76,21 +72,21 @@ class PackListWidget(
                     false)
 
                 issuesButton?.let {
-                    issuesButton.x = x + entryWidth - issuesButton.width - 5
-                    issuesButton.y = y + entryHeight - issuesButton.height - 5
+                    issuesButton.x = x + width - issuesButton.width - 5
+                    issuesButton.y = y + height - issuesButton.height - 5
                     issuesButton.render(context, mouseX, mouseY, tickDelta)
                 }
             }
 
             if (musicPack == null) {
-                context?.drawText(
+                context.drawText(
                     client.textRenderer,
                     Text.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla"),
                     x + 3,
                     y + 6,
                     Colors.WHITE,
                     false)
-                context?.drawText(
+                context.drawText(
                     client.textRenderer,
                     Text.translatableWithFallback(
                         "trueadaptivemusic.disable_tam", "Disable TrueAdaptiveMusic"),
@@ -100,7 +96,7 @@ class PackListWidget(
             }
         }
 
-        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
             if (packListWidget.selectedOrNull == this) {
                 return true
             }

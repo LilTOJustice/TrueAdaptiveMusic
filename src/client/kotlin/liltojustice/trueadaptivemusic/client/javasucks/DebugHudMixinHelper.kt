@@ -75,12 +75,12 @@ object DebugHudMixinHelper {
             context.drawText(textRenderer, line.text, x, y, line.color, true)
 
             if (line.path == currentNodePath) {
-                context.drawBorder(
+                /*context.drawBorder(
                     x - 2,
                     y - 2,
                     textRenderer.getWidth(line.text) + 3,
                     fontHeight + 3,
-                    Colors.WHITE)
+                    Colors.WHITE)*/
             }
         }
     }

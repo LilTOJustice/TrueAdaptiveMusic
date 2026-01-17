@@ -9,7 +9,7 @@ import net.minecraft.util.JsonHelper
 
 class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        val playerDimension = client.player?.world?.dimensionEntry ?: return false
+        val playerDimension = client.player?.entityWorld?.dimensionEntry ?: return false
 
         return dimensions.isEmpty() || dimensions.any { dimension -> playerDimension.matchesId(dimension.identifier) }
     }

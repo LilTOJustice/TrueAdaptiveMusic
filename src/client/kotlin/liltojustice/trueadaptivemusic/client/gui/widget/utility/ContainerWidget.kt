@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -65,8 +66,8 @@ abstract class ContainerWidget(
         }
 
         if (bordered) {
-            context?.fill(x, y, x + width, y + height, Colors.BLACK)
-            context?.drawBorder(x, y, width, height, Colors.WHITE)
+            context?.fill(x, y, x + width, y + height, Colors.WHITE)
+            context?.fill(x + 1, y + 1, x + width - 1, y + height - 1, Colors.BLACK)
         }
 
         clampScrollPosition()
@@ -86,14 +87,14 @@ abstract class ContainerWidget(
         context?.disableScissor()
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         if (!visible || !active) {
             return false
         }
 
         backButton?.let {
-            if (it.isMouseOver(mouseX, mouseY)) {
-                it.mouseClicked(mouseX, mouseY, button)
+            if (it.isMouseOver(click.x, click.y)) {
+                it.mouseClicked(click, doubled)
                 return true
             }
         }
@@ -101,10 +102,10 @@ abstract class ContainerWidget(
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.isMouseOver(mouseX, mouseY)) {
-                val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
+            if (child.widget.isMouseOver(click.x, click.y)) {
+                val clicked = child.widget.mouseClicked(click, doubled)
                 if (clicked) {
-                    screen?.focused = screen.focused ?: child.widget
+                    screen?.focused = child.widget
                 }
             }
         }

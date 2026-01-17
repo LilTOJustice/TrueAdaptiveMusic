@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -34,12 +35,19 @@ open class ClickableTextWidget(
 
         val selected = isSelected(this)
         if (selected) {
-            context?.drawBorder(
+            context?.fill(
                 x - BORDER_BUFFER / 2,
-                y - BORDER_BUFFER / 2,
-                width + BORDER_BUFFER,
-                height + BORDER_BUFFER,
+                y - BORDER_BUFFER / 2 + 1,
+                x + width + BORDER_BUFFER - 2,
+                y + height + BORDER_BUFFER - 1,
                 Colors.WHITE
+            )
+            context?.fill(
+                x - BORDER_BUFFER / 2 + 1,
+                y - BORDER_BUFFER / 2 + 2,
+                x + width + BORDER_BUFFER - 3,
+                y + height + BORDER_BUFFER - 2,
+                Colors.BLACK
             )
         }
 
@@ -48,11 +56,10 @@ open class ClickableTextWidget(
         }
 
         drawScrollableText(context, textRenderer, message, x, y, x + width, y + height, color)
-        //super.renderWidget(context, mouseX, mouseY, delta)
     }
 
-    override fun onClick(mouseX: Double, mouseY: Double) {
-        super.onClick(mouseX, mouseY)
+    override fun onClick(click: Click, doubled: Boolean) {
+        super.onClick(click, doubled)
 
         if (visible && active)
         {
