@@ -50,7 +50,6 @@ class ConfirmBackupScreen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context, mouseX, mouseY, delta)
         super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
