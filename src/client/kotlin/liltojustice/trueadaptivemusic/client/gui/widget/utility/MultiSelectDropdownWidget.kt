@@ -14,7 +14,7 @@ class MultiSelectDropdownWidget(
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<String> = listOf(),
-    private val onHoverOption: (option: String) -> Unit = {},
+    private val onHoverOption: (option: String?) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -29,7 +29,6 @@ class MultiSelectDropdownWidget(
     y,
     true) {
     private val selected = mutableListOf<String>()
-    private var hoveredWidget: ClickableTextWidget? = null
     private var dropdownWidget: DropdownWidget? = null
 
     init {
@@ -68,31 +67,22 @@ class MultiSelectDropdownWidget(
             "dropdown"
         ) as DropdownWidget
 
-        val selectedWidgets = selected.sorted().map { option ->
+       selected.sorted().map { option ->
             addWidgetFromRender(
                 {
-                    val widget = ClickableTextWidget(option, onClick = {
-                        selected.remove(option)
-                        onChange(selected)
-                        clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") }
-                    })
+                    val widget = ClickableTextWidget(
+                        option,
+                        onClick = {
+                            selected.remove(option)
+                            onChange(selected)
+                            clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
+                        onMouseOn = { option -> onHoverOption(option.text) },
+                        onMouseOff = { option -> onHoverOption(null) })
                     widget.setTooltip(Tooltip.of(Text.translatableWithFallback("trueadaptivemusic.click_to_remove", "Click to remove")))
                     widget
                 },
                 "selectedOption: $option"
             ) as ClickableTextWidget
-        }
-
-        val newHoveredWidget = selectedWidgets.firstOrNull { widget ->
-            childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-        }
-
-        if (newHoveredWidget != null && newHoveredWidget != hoveredWidget) {
-            hoveredWidget = newHoveredWidget
-            onHoverOption(hoveredWidget!!.text)
-        }
-        else if (newHoveredWidget == null) {
-            hoveredWidget = null
         }
 
         super.renderWidget(context, mouseX, mouseY, delta)

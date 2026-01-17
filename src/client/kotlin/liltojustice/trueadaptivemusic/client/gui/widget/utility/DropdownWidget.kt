@@ -15,7 +15,7 @@ class DropdownWidget(
     getOptions: (() -> List<String>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: String = "",
-    onHoverOption: (option: String) -> Unit = {},
+    onHoverOption: (option: String?) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -106,7 +106,7 @@ class DropdownWidget(
         private val getOptions: (() -> List<String>)?,
         notSelectedPlaceholder: String?,
         startingOption: String,
-        private val onHoverOption: (option: String) -> Unit,
+        private val onHoverOption: (option: String?) -> Unit,
         x: Int = 0,
         y: Int = 0)
         : ContainerWidget(
@@ -121,7 +121,6 @@ class DropdownWidget(
         y) {
         private var selectedOption = startingOption.ifEmpty { null } ?: notSelectedPlaceholder ?: options.firstOrNull() ?: ""
         private var searchText = ""
-        private var hoveredWidget: ClickableTextWidget? = null
 
         init {
             if (selectedOption.isNotBlank() && notSelectedPlaceholder == null) {
@@ -134,7 +133,7 @@ class DropdownWidget(
                 return
             }
 
-            val optionsWidgets = (getOptions?.invoke() ?: options)
+            (getOptions?.invoke() ?: options)
                 .filter { option -> option.lowercase().contains(searchText.lowercase()) }
                 .mapIndexed { index, option ->
                     addWidgetFromRender(
@@ -144,24 +143,15 @@ class DropdownWidget(
                                 onClick = {
                                     selectedOption = option
                                     onSelectOption(option)
-                                })
+                                },
+                                onMouseOn = { option -> onHoverOption(option.text) },
+                                onMouseOff = { option -> onHoverOption(null) })
                         },
                         option,
                         index
                     ) as ClickableTextWidget
 
                 }
-
-            val newHoveredWidget = optionsWidgets
-                .firstOrNull { widget -> childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble()) }
-
-            if (newHoveredWidget != null && newHoveredWidget != hoveredWidget) {
-                hoveredWidget = newHoveredWidget
-                onHoverOption(hoveredWidget!!.text)
-            }
-            else if (newHoveredWidget == null) {
-                hoveredWidget = null
-            }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
             super.renderWidget(context, mouseX, mouseY, delta)
