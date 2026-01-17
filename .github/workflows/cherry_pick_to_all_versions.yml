@@ -33,7 +33,7 @@ jobs:
                           new_branch="vcp/${branch:${#regex_prefix}-2}"
                           git switch -c $new_branch $branch
                           (git cherry-pick ${{ github.event.inputs.commit_id }} && git push -u origin $new_branch) || (echo "Failed to cherry pick into version branch $branch" && git cherry-pick --abort && continue)
-                          gh pr create -B $branch -H origin/$new_branch --title "$branch: Cherry pick commit ${{ github.event.inputs.commit_id }}" --body "" || (echo "Failed to create PR for $new_branch" && continue)
+                          gh pr create -B refs/heads/$branch --title "$branch: Cherry pick commit ${{ github.event.inputs.commit_id }}" --body "" || (echo "Failed to create PR for $new_branch" && continue)
                           count=$((count + 1))
                   fi
           done <<< "$branches"
