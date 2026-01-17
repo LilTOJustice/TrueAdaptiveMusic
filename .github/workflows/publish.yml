@@ -76,7 +76,7 @@ jobs:
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
           name: "TrueAdaptiveMusic ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
-          version: "${{MOD_VERSION}}+${{MINECRAFT_VERSION}}"
+          version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
 
