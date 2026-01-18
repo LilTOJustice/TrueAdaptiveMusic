@@ -6,6 +6,7 @@ import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
@@ -26,6 +27,7 @@ open class ClickableTextWidget(
     val text: String
         get() = message.string
     var hovering = false
+    val textWidget = TextWidget(message, textRenderer)
 
     init {
         width = textRenderer.getWidth(message)
@@ -55,7 +57,12 @@ open class ClickableTextWidget(
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
-        drawScrollableText(context, textRenderer, message, x, y, x + width, y + height, color)
+        context?.let {
+            drawTextWithMargin(
+                context.getHoverListener(this, DrawContext.HoverType.NONE),
+                message,
+                0)
+        }
     }
 
     override fun onClick(click: Click, doubled: Boolean) {

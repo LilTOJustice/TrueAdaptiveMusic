@@ -10,3 +10,6 @@ accessible method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet
 extendable class net/minecraft/util/Identifier
 accessible method net/minecraft/util/Identifier <init> (Ljava/lang/String;Ljava/lang/String;)V
 accessible field net/minecraft/client/gui/screen/option/GameOptionsScreen body Lnet/minecraft/client/gui/widget/OptionListWidget;
+extendable method net/minecraft/client/gui/widget/PressableWidget renderWidget (Lnet/minecraft/client/gui/DrawContext;IIF)V
+accessible field net/minecraft/client/world/ClientWorld worldRenderer Lnet/minecraft/client/render/WorldRenderer;
+accessible field net/minecraft/client/render/WorldRenderer worldRenderState Lnet/minecraft/client/render/state/WorldRenderState;
