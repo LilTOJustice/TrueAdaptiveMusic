@@ -40,6 +40,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: determine-versions
     steps:
+      - env:
+          MINECRAFT_VERSION: ${{needs.determine_versions.outputs.minecraft_version}}
+          MOD_VERSION: ${{needs.determine_versions.outputs.mod_version}}
+        run: echo "$MOD_VERSION+$MINECRAFT_VERSION"
+
       - name: Check Environment Variables
         run: env
 
@@ -52,7 +57,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: "temurin"
-          java-version: 21
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
@@ -70,8 +75,8 @@ jobs:
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
-          name: "TrueAdaptiveMusic ${{ needs.determine_versions.outputs.mod_version }} for Minecraft ${{ needs.determine_versions.outputs.minecraft_version}}"
-          version: "${{ needs.determine_versions.outputs.mod_version }}+${{ needs.determine_version.outputs.minecraft_version }}"
+          name: "TrueAdaptiveMusic ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
+          version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
           
