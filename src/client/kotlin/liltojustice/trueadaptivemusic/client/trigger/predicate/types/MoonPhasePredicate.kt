@@ -4,12 +4,12 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
-import kotlin.ranges.contains
+import net.minecraft.world.attribute.EnvironmentAttributes
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         val world = client.world ?: return false
-        val currentPhase = world.worldRenderer.worldRenderState.skyRenderState.moonPhase
+        val currentPhase = world.environmentAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL)
         val time = world.timeOfDay % 24000
 
         return time in 13000..23999 && when(moonPhase) {
