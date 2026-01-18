@@ -41,8 +41,8 @@ jobs:
     needs: determine-versions
     steps:
       - env:
-          MINECRAFT_VERSION: ${{needs.determine_versions.outputs.minecraft_version}}
-          MOD_VERSION: ${{needs.determine_versions.outputs.mod_version}}
+          MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
+          MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         run: echo "$MOD_VERSION+$MINECRAFT_VERSION"
 
       - name: Check Environment Variables
