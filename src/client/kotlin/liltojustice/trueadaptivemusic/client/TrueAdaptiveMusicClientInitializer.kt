@@ -51,7 +51,12 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
         try {
             val ffmpegInstall =
-                ProcessBuilder("powershell.exe", "-Command", "winget install 'FFmpeg (Essentials Build)'")
+                ProcessBuilder(
+                    "powershell.exe",
+                    "-Command",
+                    "winget install 'FFmpeg (Essentials Build)'",
+                    "--accept-package-agreements",
+                    "--accept-source-agreements")
                     .redirectErrorStream(true)
                     .start()
 
