@@ -26,6 +26,7 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var refreshButton: ButtonWidget
     private lateinit var wikiButton: ButtonWidget
     private lateinit var optionsButton: ButtonWidget
+    private lateinit var ffmpegInstallButton: ButtonWidget
 
     override fun init() {
         TAMClient.playSoundNow(null)
@@ -84,6 +85,12 @@ class MainScreen(private val parent: Screen): Screen(
         optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
         optionsButton.x = width - optionsButton.width
 
+        ffmpegInstallButton = ButtonWidget.builder(INSTALL_FFMPEG_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(ConfirmFFmpegInstallScreen(this)) }.build()
+        ffmpegInstallButton.y = wikiButton.y
+        ffmpegInstallButton.width = textRenderer.getWidth(INSTALL_FFMPEG_TEXT) + 10
+        ffmpegInstallButton.x = wikiButton.x - ffmpegInstallButton.width - 5
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
@@ -92,6 +99,10 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(refreshButton)
         addDrawableChild(wikiButton)
         addDrawableChild(optionsButton)
+
+        if (!TAMClient.hasFFmpeg && !TAMClient.agreedToFFmpeg) {
+            addDrawableChild(ffmpegInstallButton)
+        }
     }
 
     override fun close() {
@@ -125,5 +136,7 @@ class MainScreen(private val parent: Screen): Screen(
         private val EDIT_TEXT = Text.translatableWithFallback("trueadaptivemusic.edit_pack", "Edit Pack")
         private val WIKI_TEXT = Text.translatableWithFallback("trueadaptivemusic.open_wiki", "Open Wiki")
         private val OPTIONS_TEXT = Text.translatableWithFallback("trueadaptivemusic.options", "Options")
+        private val INSTALL_FFMPEG_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.install_ffmpeg", "Install FFmpeg")
     }
 }
