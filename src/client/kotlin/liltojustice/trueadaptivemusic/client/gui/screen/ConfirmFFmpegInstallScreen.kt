@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
+import net.minecraft.client.gui.widget.IconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -18,13 +18,14 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
     : Screen(Text.translatableWithFallback("trueadaptivemusic.ffmpeg_install", "Install FFmpeg?")) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = TextIconButtonWidget.Builder(
-            Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"), {
+        val acceptButtonWidget = IconButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"), CHECKMARK, {
                 installFFmpeg()
                 TAMClient.agreedToFFmpeg = true
-                close() },
-            false)
-            .texture(CHECKMARK, 9, 8)
+                close() })
+            .iconSize(9, 8)
+            .textureSize(9, 8)
+            .xyOffset(16, 6)
             .build()
         acceptButtonWidget.width = 60
         acceptButtonWidget.x = width / 2 - 32 - acceptButtonWidget.width / 2
@@ -67,7 +68,7 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
+        private val CHECKMARK: Identifier = Identifier("minecraft", "textures/gui/checkmark.png")
         fun installFFmpeg() {
             try {
                 val ffmpegInstall =
