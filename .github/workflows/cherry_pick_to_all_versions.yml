@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
           COMMIT_IDS: ${{ github.event.inputs.commit_ids }}
-          VERSIONS: ${{ github.event.inputs.versions
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           regex_prefix="origin\/versions\/"
           all_branches=$(git branch -r | tr -d ' ')
