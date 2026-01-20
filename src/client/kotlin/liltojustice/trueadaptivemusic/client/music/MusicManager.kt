@@ -114,7 +114,7 @@ class MusicManager(
             return
         }
 
-        if (client.isPaused && !pauseDone) {
+        if (isPaused(client) && !pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
