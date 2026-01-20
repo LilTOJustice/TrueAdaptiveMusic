@@ -39,6 +39,10 @@ class MultiSelectDropdownWidget(
                 DropdownWidget(
                     options,
                     { option ->
+                        if (selected.contains(option)) {
+                            return@DropdownWidget
+                        }
+
                         selected.add(option)
                         onChange(selected)
                         clearWidgetsFromRender { widget -> widget.id != "dropdown" }
