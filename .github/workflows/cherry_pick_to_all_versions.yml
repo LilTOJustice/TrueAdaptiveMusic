@@ -1,0 +1,53 @@
+name: Cherry-pick to all versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_ids:
+        description: 'Commits to cherry pick (comma separated)'
+        required: true
+        type: string
+      versions:
+        description: 'Minecraft versions to cherry pick to (comma separated)'
+        required: false
+        type: string
+
+jobs:
+  apply_cherry_pick:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+      - name: Create and publish branches
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
+          COMMIT_IDS: ${{ github.event.inputs.commit_ids }}
+          VERSIONS: ${{ github.event.inputs.versions }}
+        run: |
+          regex_prefix="origin\/versions\/"
+          all_branches=$(git branch -r | tr -d ' ')
+          if [[ -z $VERSIONS ]]; then
+            target_branches=$all_branches
+          else
+            target_branches=$(echo "$versions" | sed 's/,/\n/g')
+          fi
+          COMMIT_TARGETS=$(echo "$COMMIT_IDS" | sed 's/,/ /g')
+          
+          branches=$target_branches; while read -r branch; do
+                  if [[ "$branch" =~ $regex_prefix.* ]]; then
+                          version=${branch:${#regex_prefix}-2}
+                          new_branch=vcp/$version-$COMMIT_IDS
+                          git switch -c $new_branch $branch
+                          git push -u origin $new_branch
+                          (git cherry-pick $COMMIT_TARGETS --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_IDS into version branch $branch" && git cherry-pick --abort && continue)
+                          gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit" --body "Cherry-pick commits: $COMMIT_IDS" || (echo "Failed to create PR for $new_branch" && continue)
+                  fi
+          done <<< "$branches"
