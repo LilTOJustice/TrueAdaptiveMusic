@@ -44,6 +44,7 @@ jobs:
                           version=${branch:${#regex_prefix}-2}
                           new_branch=vcp/$version-$COMMIT_ID
                           git switch -c $new_branch $branch
+                          git push -u origin $new_branch
                           for COMMIT_ID in ${COMMIT_IDS//,/ }
                           do
                             (git cherry-pick $COMMIT_ID --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
