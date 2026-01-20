@@ -32,6 +32,15 @@ object TAMClient {
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
     private val inputWidgetMaker = InputWidgetMaker()
+    var agreedToFFmpeg = false
+    val hasFFmpeg
+        get() =
+            try {
+                Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1)
+            } catch (_: IOException) {
+                false
+            }
+
 
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
