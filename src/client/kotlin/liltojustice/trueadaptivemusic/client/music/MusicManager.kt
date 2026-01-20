@@ -30,6 +30,8 @@ class MusicManager(
     private var oldSoundInstance: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MUSIC)
+    private var masterVolumeOption: SimpleOption<Double> =
+        client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private val volumeManager = VolumeManager(client.soundManager, musicVolumeOption)
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
@@ -109,7 +111,7 @@ class MusicManager(
             return
         }
 
-        if (isPaused(client) && !pauseDone) {
+        if (client.isPaused && !pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
