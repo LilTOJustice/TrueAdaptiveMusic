@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.TextIconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -28,8 +29,15 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
         acceptButtonWidget.width = 60
         acceptButtonWidget.x = width / 2 - 32 - acceptButtonWidget.width / 2
         acceptButtonWidget.y = height / 2 + textRenderer.fontHeight * 2 + 10
+        val backButtonWidget = ButtonWidget.Builder(
+            Text.translatableWithFallback("trueadaptivemusic.go_back", "Go Back")) { close() }
+                .build()
+        backButtonWidget.width = 60
+        backButtonWidget.x = width / 2 + 32 - backButtonWidget.width / 2
+        backButtonWidget.y = height / 2 + textRenderer.fontHeight * 2 + 10
 
         addDrawableChild(acceptButtonWidget)
+        addDrawableChild(backButtonWidget)
     }
 
     override fun close() {
@@ -51,8 +59,8 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
             client?.textRenderer,
             Text.translatableWithFallback(
                 "trueadaptivemusic.ffmpeg_agree",
-                "Do you agree to install FFmpeg and the package conditions as outlined here?" +
-                        "\nP.S. You need to restart your PC after installing."),
+                "Do you agree to install FFmpeg and the package conditions as outlined on ffmpeg.org? " +
+                        "P.S. You need to restart your PC after installing."),
             width / 2,
             height / 2 + textRenderer.fontHeight + 5,
             Colors.WHITE)
@@ -76,7 +84,8 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
                 ffmpegInstall.waitFor()
 
                 if (ffmpegInstall.exitValue() != 0) {
-                    Logger.logWarning("Failed to install ffmpeg with exit code ${ffmpegInstall.exitValue()}:\n${output}")
+                    Logger.logWarning(
+                        "Failed to install ffmpeg with exit code ${ffmpegInstall.exitValue()}:\n${output}")
                 }
             }
             catch (e: Exception) {
