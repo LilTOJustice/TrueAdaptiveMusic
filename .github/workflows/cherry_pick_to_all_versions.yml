@@ -7,6 +7,10 @@ on:
         description: 'Commits to cherry pick (comma separated)'
         required: true
         type: string
+      versions:
+        description: 'Minecraft versions to cherry pick to (comma separated)'
+        required: false
+        type: string
 
 jobs:
   apply_cherry_pick:
@@ -26,10 +30,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
           COMMIT_IDS: ${{ github.event.inputs.commit_ids }}
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
-          count=0
           regex_prefix="origin\/versions\/"
-          branches=$(git branch -r | tr -d ' '); while read -r branch; do
+          all_branches=$(git branch -r | tr -d ' ')
+          if [[ -z $VERSIONS ]]; then
+            target_branches=$all_branches
+          else
+            target_branches=$(echo "$versions" | sed 's/,/\n/g')
+          fi
+          
+          branches=$target_branches; while read -r branch; do
                   if [[ "$branch" =~ $regex_prefix.* ]]; then
                           version=${branch:${#regex_prefix}-2}
                           new_branch=vcp/$version-$COMMIT_IDS
@@ -39,7 +50,5 @@ jobs:
                             (git cherry-pick $COMMIT_ID --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
                           done
                           gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit" --body "Cherry-pick commits: $COMMIT_IDS" || (echo "Failed to create PR for $new_branch" && continue)
-                          count=$((count + 1))
                   fi
           done <<< "$branches"
-          echo "Created $count PRs"
