@@ -38,16 +38,15 @@ jobs:
           else
             target_branches=$(echo "$versions" | sed 's/,/\n/g')
           fi
+          COMMIT_TARGETS=$(echo "$COMMIT_IDS" | sed 's/,/ /g')
           
           branches=$target_branches; while read -r branch; do
                   if [[ "$branch" =~ $regex_prefix.* ]]; then
                           version=${branch:${#regex_prefix}-2}
                           new_branch=vcp/$version-$COMMIT_ID
                           git switch -c $new_branch $branch
-                          for COMMIT_ID in ${COMMIT_IDS//,/ }
-                          do
-                            (git cherry-pick $COMMIT_ID --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_ID into version branch $branch" && git cherry-pick --abort && continue)
-                          done
+                          git push -u origin $new_branch
+                          (git cherry-pick $COMMIT_TARGETS --strategy-option=theirs && git push -u origin $new_branch) || (echo "Failed to cherry pick $COMMIT_IDS into version branch $branch" && git cherry-pick --abort && continue)
                           gh pr create -B refs/heads/versions/$version --title "$version: Cherry pick commit" --body "Cherry-pick commits: $COMMIT_IDS" || (echo "Failed to create PR for $new_branch" && continue)
                   fi
           done <<< "$branches"
