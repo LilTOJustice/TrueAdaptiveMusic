@@ -6,6 +6,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -22,7 +23,6 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
-import java.io.IOException
 import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -152,21 +152,12 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
-        var hasFFmpeg = true
-        try {
-            val exitCode = Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor()
-            if (exitCode != 1 && exitCode != 0) {
-                hasFFmpeg = false
-            }
-        } catch (e: IOException) {
-            hasFFmpeg = false
-        }
-
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
-        if (!hasFFmpeg && nonOggFiles.isNotEmpty()) {
+        if (!TAMClient.hasFFmpeg && nonOggFiles.isNotEmpty()) {
             validation.addWarning(
                 "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
-                        "This music will not play unless FFmpeg is installed on your system. You may just need to restart your system."
+                        "This music will not play unless FFmpeg is installed on your system. You can install it at " +
+                        "the top right of your screen. If you already did, you may just need to restart your system."
             )
         }
 
@@ -292,7 +283,7 @@ class MusicPack private constructor(
             return assets[id] ?: try {
                 PlayableSoundEvent(SoundEvent.of(Identifier.of(id)))
             }
-            catch (e: InvalidIdentifierException) {
+            catch (_: InvalidIdentifierException) {
                 null
             }
         }
