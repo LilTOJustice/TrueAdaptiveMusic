@@ -114,14 +114,14 @@ class MusicManager(
             return
         }
 
-        if (client.isPaused && !pauseDone) {
+        if (isPaused(client) && !pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
                         it, PAUSE_FADE_TICKS, PAUSE_VOLUME) }
             pauseDone = true
         }
-        else if (!client.isPaused && pauseDone) {
+        else if (!isPaused(client) && pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
@@ -338,5 +338,9 @@ class MusicManager(
         private const val PAUSE_FADE_TICKS = 5
         private const val BACKGROUND_VOLUME = 0.2F
         private const val PAUSE_VOLUME = 0.2F
+
+        private fun isPaused(client: MinecraftClient): Boolean {
+            return client.world != null && client.currentScreen?.shouldPause() ?: false
+        }
     }
 }
