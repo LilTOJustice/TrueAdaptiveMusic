@@ -30,6 +30,8 @@ class MusicManager(
     private var oldSoundInstance: SoundInstance? = null
     private var musicVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MUSIC)
+    private var masterVolumeOption: SimpleOption<Double> =
+        client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private val volumeManager = VolumeManager(client.soundManager, musicVolumeOption)
     private var onDemandSound: PlayableSound? = null
     private var onDemandSoundInstance: SoundInstance? = null
@@ -105,14 +107,18 @@ class MusicManager(
     }
 
     fun tick() {
-        if (client.isPaused && !pauseDone) {
+        if (masterVolumeOption.value == 0.0) {
+            return
+        }
+
+        if (isPaused(client) && !pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
                         it, PAUSE_FADE_TICKS, PAUSE_VOLUME) }
             pauseDone = true
         }
-        else if (!client.isPaused && pauseDone) {
+        else if (!isPaused(client) && pauseDone) {
             currentSoundInstance
                 ?.let {
                     volumeManager.startFade(
@@ -327,5 +333,9 @@ class MusicManager(
         private const val PAUSE_FADE_TICKS = 5
         private const val BACKGROUND_VOLUME = 0.2F
         private const val PAUSE_VOLUME = 0.2F
+
+        private fun isPaused(client: MinecraftClient): Boolean {
+            return client.world != null && client.currentScreen?.shouldPause() ?: false
+        }
     }
 }
