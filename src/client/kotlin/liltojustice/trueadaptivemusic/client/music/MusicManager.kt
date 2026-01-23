@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
@@ -146,7 +147,7 @@ class MusicManager(
 
         val predicateResult: MusicPredicateTree.Result? = musicPack?.rules?.getMusicToPlay(client)
         val identifier = predicateResult?.path ?: ""
-        val parameters = predicateResult?.parameters ?: MusicPredicateTree.Node.Parameters()
+        val parameters = predicateResult?.predicate?.parameters ?: MusicPredicate.Parameters()
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         activeEvents = predicateResult?.events ?: emptyList()
@@ -172,11 +173,15 @@ class MusicManager(
             timedIdentifier = ""
         }
 
+        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
+            playNow(null)
+        }
+
         val nextMusic =
             if (jukeboxPlaying())
                 null
             else
-                predicateResult?.playableSounds?.ifEmpty { listOf(null) }?.random()
+                predicateResult?.predicate?.playableSounds?.ifEmpty { listOf(null) }?.random()
 
         if (!shouldPlay(nextMusic, identifier))
         {

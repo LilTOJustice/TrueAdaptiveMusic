@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
-data class TriggerParam(val name: String, val value: Any?) {
+data class TriggerArg(val name: String, val value: Any?) {
     override fun toString(): String {
         val valueText: String =
                 if (value is Iterable<*>)

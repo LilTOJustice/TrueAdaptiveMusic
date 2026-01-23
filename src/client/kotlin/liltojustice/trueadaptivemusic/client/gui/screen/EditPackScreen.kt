@@ -35,8 +35,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
     private fun initPack() {
         TAMClient.playSoundNow(null)
-        val newPath = musicPack.initEdit(musicPack)
-        TAMClient.musicPack = MusicPack.fromFile(newPath)
+        TAMClient.musicPack = MusicPack.fromFile(musicPack.initEdit(musicPack))
     }
 
     override fun init() {
@@ -67,8 +66,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            {
-                initPack()
+            { target ->
+                packStructureWidget.setNode(target)
                 packStructureWidget.initPredicateWidgets()
             },
             { event -> switchToEventView(event) },
@@ -89,9 +88,12 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             getContainerWidth(),
             getContainerHeight(),
             musicPack,
-            { newEvent ->
-                predicateViewWidget.onEventModeExit(newEvent)
-                switchToPredicateView() }
+            { newEvent, exit ->
+                predicateViewWidget.onEventModeSave(newEvent, exit)
+                if (exit) {
+                    switchToPredicateView()
+                }
+            }
         )
 
         addDrawableChild(saveButtonWidget)
@@ -128,11 +130,11 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
+        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
 
-        TAMClient.refreshCurrentMusicPack()
         client?.setScreen(parent)
     }
 
@@ -200,7 +202,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.show_assets", "Show Assets")
         private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.save_and_zip", "Save and Zip")
+            "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
     }
 }

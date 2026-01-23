@@ -10,8 +10,6 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.primaryConstructor
 
 typealias NodeVisitor = (node: MusicPredicateTree.Node, path: List<String>) -> Unit
 
@@ -27,8 +25,7 @@ class MusicPredicateTree private constructor(
         val result = root.getSatisfiedNode(client)
         return Result(
             result.second.joinToString(PATH_SEPARATOR),
-            result.first.predicate.playableSounds,
-            result.first.parameters,
+            result.first.predicate,
             result.third.values.toList())
     }
 
@@ -74,7 +71,6 @@ class MusicPredicateTree private constructor(
     class Node private constructor(
         var predicate: MusicPredicate,
         var events: List<MusicEvent>,
-        var parameters: Parameters = Parameters(),
         val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
@@ -90,15 +86,11 @@ class MusicPredicateTree private constructor(
 
         fun toJson(): JsonObject {
             val result = predicate.toJsonFull()
-            val jsonMusicPath = JsonArray(predicate.playableSounds.size)
-            predicate.playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
-            val jsonChildren = JsonArray(children.size)
-            children.forEach { child -> jsonChildren.add(child.toJson()) }
             val jsonEvents = JsonArray(events.size)
             events.forEach { event -> jsonEvents.add(event.toJsonFull()) }
-            result.add("musicPath", jsonMusicPath)
+            val jsonChildren = JsonArray(children.size)
+            children.forEach { child -> jsonChildren.add(child.toJson()) }
             result.add("events", jsonEvents)
-            result.add("parameters", parameters.toJson())
             result.add("children", jsonChildren)
 
             return result
@@ -144,15 +136,17 @@ class MusicPredicateTree private constructor(
 
         fun newChild(
             predicateType: String,
-            nodeArgs: List<Any>,
+            predicateParams: List<Any>,
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
-            playableSounds: List<PlayableSound>) {
+            playableSounds: List<PlayableSound>): Node {
             val predicate = TAMClient.predicateFactory.fromArgs(
-                predicateType, playableSounds, *predicateArgs.toTypedArray())
-            val child = Node(predicate, events, Parameters.initializeFromArgs(*nodeArgs.toTypedArray()))
+                predicateType, playableSounds, predicateParams, predicateArgs)
+            val child = Node(predicate, events)
             child.parent = this
             children.add(child)
+
+            return child
         }
 
         fun isValidNewChild(child: Node): Boolean {
@@ -213,8 +207,6 @@ class MusicPredicateTree private constructor(
                     TAMClient.predicateFactory.fromJson(json, soundLibrary),
                     (json.getAsJsonArray("events") ?: JsonArray())
                         .map { element -> TAMClient.eventFactory.fromJson(element.asJsonObject, soundLibrary) },
-                    json.getAsJsonObject("parameters")?.let { Parameters.fromJson(it) }
-                        ?: Parameters(),
                     parseChildren(json, soundLibrary)
                 )
             }
@@ -227,42 +219,10 @@ class MusicPredicateTree private constructor(
                 else mutableListOf()
             }
         }
-
-        data class Parameters(val trackDelay: UInt = 0U, val trackDelayNoise: UInt = 0U) {
-            fun toJson(): JsonObject {
-                val result = JsonObject()
-                result.addProperty("trackDelay", trackDelay.toInt())
-                result.addProperty("trackDelayNoise", trackDelayNoise.toInt())
-
-                return result
-            }
-
-            fun constructorParams(): List<Any?> {
-                return this::class.declaredMemberProperties
-                    .filter { property ->
-                        this::class.primaryConstructor!!.parameters.any { param -> property.name == param.name } }
-                    .map { property ->
-                        property.getter.call(this)
-                    }
-            }
-
-            companion object {
-                fun initializeFromArgs(vararg constructorArgs: Any): Parameters {
-                    return Parameters::class.primaryConstructor?.call(*constructorArgs) ?: Parameters()
-                }
-
-                fun fromJson(json: JsonObject): Parameters {
-                    return Parameters(
-                        json.getAsJsonPrimitive("trackDelay")?.asInt?.toUInt() ?: 0U,
-                        json.getAsJsonPrimitive("trackDelayNoise")?.asInt?.toUInt() ?: 0U)
-                }
-            }
-        }
     }
 
     class Result(
         val path: String,
-        val playableSounds: List<PlayableSound>,
-        val parameters: Node.Parameters,
+        val predicate: MusicPredicate,
         val events: List<MusicEvent>)
 }
