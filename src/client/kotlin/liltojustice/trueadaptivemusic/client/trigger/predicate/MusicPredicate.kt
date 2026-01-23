@@ -35,14 +35,13 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
             ticksSinceResult = 1
 
             lastResult = test(client)
-            return lastResult
         }
 
         return lastResult
     }
 
     open fun getTickRate(): Int {
-        return 2
+        return 20
     }
 
     private fun getFixedTickRate(): Int {
