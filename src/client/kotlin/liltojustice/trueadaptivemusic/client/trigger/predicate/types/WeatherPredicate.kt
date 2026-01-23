@@ -16,6 +16,10 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
         }
     }
 
+    override fun getTickRate(): Int {
+        return super.getTickRate() * 3
+    }
+
     override fun toJson(): JsonObject {
         val result = JsonObject()
         result.addProperty(FIELD_NAME, weather.name)
