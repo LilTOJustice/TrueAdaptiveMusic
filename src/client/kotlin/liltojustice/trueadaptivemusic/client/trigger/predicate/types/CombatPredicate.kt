@@ -64,7 +64,7 @@ class CombatPredicate: MusicPredicate() {
     }
 
     override fun getTickRate(): Int {
-        return 10
+        return super.getTickRate() * 2
     }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
