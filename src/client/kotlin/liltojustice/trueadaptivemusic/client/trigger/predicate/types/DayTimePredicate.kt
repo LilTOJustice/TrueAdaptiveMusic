@@ -13,7 +13,7 @@ class DayTimePredicate: MusicPredicate() {
     }
 
     override fun getTickRate(): Int {
-        return 100
+        return super.getTickRate() * 2
     }
 
     companion object: MusicPredicateCompanion<DayTimePredicate> {
