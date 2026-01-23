@@ -67,9 +67,9 @@ jobs:
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          curseforge-id: true-adaptive-music
-          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
-
+          #curseforge-id: true-adaptive-music
+          #curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
+          
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
