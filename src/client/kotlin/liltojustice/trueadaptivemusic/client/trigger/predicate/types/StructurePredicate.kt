@@ -33,7 +33,7 @@ class StructurePredicate internal constructor(private val structures: List<Struc
     }
 
     override fun getTickRate(): Int {
-        return 10
+        return super.getTickRate() * 4
     }
 
     override fun test(client: MinecraftClient): Boolean {
