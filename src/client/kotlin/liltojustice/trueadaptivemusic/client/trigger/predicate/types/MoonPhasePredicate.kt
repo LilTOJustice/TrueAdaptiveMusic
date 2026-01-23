@@ -18,6 +18,10 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
         }
     }
 
+    override fun getTickRate(): Int {
+        return super.getTickRate() * 10
+    }
+
     override fun toJson(): JsonObject {
         val result = JsonObject()
         result.addProperty(FIELD_NAME, moonPhase.name)
