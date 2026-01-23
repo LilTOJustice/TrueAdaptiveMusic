@@ -41,7 +41,7 @@ class StructureSetPredicate internal constructor(private val structureSets: List
     }
 
     override fun getTickRate(): Int {
-        return 10
+        return super.getTickRate() * 4
     }
 
     override fun toJson(): JsonObject {
