@@ -32,7 +32,6 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     fun testPredicate(client: MinecraftClient): Boolean {
         val tickRate = getFixedTickRate()
         if (ticksSinceResult++ == tickRate) {
-            println("Reset")
             ticksSinceResult = 1
 
             lastResult = test(client)
