@@ -49,22 +49,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         client?.setScreen(parent)
     }
 
-    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
-        val optional = this.hoveredElement(click!!.x(), click.y())
-        if (optional.isEmpty) {
-            return false
-        } else {
-            val element = optional.get()
-            if (element.mouseClicked(click, doubled) && element.isClickable) {
-                if (click.button() == 0) {
-                    this.isDragging = true
-                }
-            }
-
-            return true
-        }
-    }
-
     override fun init() {
         initPack()
 
