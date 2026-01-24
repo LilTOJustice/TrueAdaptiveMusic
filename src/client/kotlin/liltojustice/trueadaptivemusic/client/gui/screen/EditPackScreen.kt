@@ -38,18 +38,40 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         TAMClient.musicPack = MusicPack.fromFile(musicPack.initEdit(musicPack))
     }
 
+    private fun exportAndClose() {
+        TAMClient.musicPack = null
+        val path = musicPack.save()
+        TAMClient.musicPack = MusicPack.fromFile(path)
+        if (parent is MainScreen) {
+            parent.reload()
+        }
+
+        client?.setScreen(parent)
+    }
+
+    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+        val optional = this.hoveredElement(click!!.x(), click.y())
+        if (optional.isEmpty) {
+            return false
+        } else {
+            val element = optional.get()
+            if (element.mouseClicked(click, doubled) && element.isClickable) {
+                if (click.button() == 0) {
+                    this.isDragging = true
+                }
+            }
+
+            return true
+        }
+    }
+
     override fun init() {
         initPack()
 
-        saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
-            TAMClient.musicPack = null
-            val path = musicPack.save()
-            TAMClient.musicPack = MusicPack.fromFile(path)
-            close()
-        }
-            .iconSize(9, 8)
-            .textureSize(9, 8)
-            .xyOffset(32, 6)
+        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
+            exportAndClose()
+        }, false)
+            .texture(CHECKMARK, 9, 8)
             .build()
 
         closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
@@ -130,6 +152,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
+        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
