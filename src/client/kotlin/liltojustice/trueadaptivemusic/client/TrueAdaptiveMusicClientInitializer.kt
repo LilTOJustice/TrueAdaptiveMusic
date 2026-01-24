@@ -94,6 +94,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 { widget, text ->
                     outArgs[arg.index] = text
                     onChange()
+                    ""
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
@@ -108,23 +109,21 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 30,
                 { widget, text ->
                     if (text == "0-") {
-                        widget.text = "-0"
-                        return@TextInputWidget
+                        return@TextInputWidget "-0"
                     }
 
                     val value = text.toIntOrNull()
                     if (text != "-0" && value == null) {
-                        widget.text = "0"
-                        return@TextInputWidget
+                        return@TextInputWidget "0"
                     }
 
                     if (text != "-0" && text != value.toString()) {
-                        widget.text = value.toString()
-                        return@TextInputWidget
+                        return@TextInputWidget value.toString()
                     }
 
                     outArgs[arg.index] = value
                     onChange()
+                    ""
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
@@ -140,17 +139,16 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 { widget, text ->
                     val value = text.toUIntOrNull()
                     if (value == null) {
-                        widget.text = "0"
-                        return@TextInputWidget
+                        return@TextInputWidget "0"
                     }
 
                     if (text != value.toString()) {
-                        widget.text = value.toString()
-                        return@TextInputWidget
+                        return@TextInputWidget value.toString()
                     }
 
                     outArgs[arg.index] = value
                     onChange()
+                    ""
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
