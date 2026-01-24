@@ -38,14 +38,22 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         TAMClient.musicPack = MusicPack.fromFile(musicPack.initEdit(musicPack))
     }
 
+    private fun exportAndClose() {
+        TAMClient.musicPack = null
+        val path = musicPack.save()
+        TAMClient.musicPack = MusicPack.fromFile(path)
+        if (parent is MainScreen) {
+            parent.reload()
+        }
+
+        client?.setScreen(parent)
+    }
+
     override fun init() {
         initPack()
 
         saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
-            TAMClient.musicPack = null
-            val path = musicPack.save()
-            TAMClient.musicPack = MusicPack.fromFile(path)
-            close()
+            exportAndClose()
         }, false)
             .texture(CHECKMARK, 9, 8)
             .build()
@@ -131,6 +139,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
+        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
