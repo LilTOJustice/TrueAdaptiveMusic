@@ -29,7 +29,6 @@ class MultiSelectDropdownWidget(
     y,
     true) {
     private val selected = mutableListOf<String>()
-    private var dropdownWidget: DropdownWidget? = null
 
     init {
         selected.addAll(alreadySelected)
