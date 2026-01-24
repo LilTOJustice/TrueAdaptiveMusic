@@ -2,6 +2,8 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.text.Text
 
 class MultiSelectDropdownWidget(
     private val options: List<String>,
@@ -11,7 +13,7 @@ class MultiSelectDropdownWidget(
     private val getOptions: (() -> List<String>)? = null,
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<String> = listOf(),
-    private val onHoverOption: (option: String) -> Unit = {},
+    private val onHoverOption: (option: String?) -> Unit = {},
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -26,7 +28,6 @@ class MultiSelectDropdownWidget(
     y,
     true) {
     private val selected = mutableListOf<String>()
-    private var hoveredWidget: ClickableTextWidget? = null
 
     init {
         selected.addAll(alreadySelected)
@@ -60,29 +61,22 @@ class MultiSelectDropdownWidget(
             "dropdown"
         ) as DropdownWidget
 
-        val selectedWidgets = selected.sorted().map { option ->
+       selected.sorted().map { option ->
             addWidgetFromRender(
                 {
-                    ClickableTextWidget(option, onClick = {
-                        selected.remove(option)
-                        onChange(selected)
-                        clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") }
-                    })
+                    val widget = ClickableTextWidget(
+                        option,
+                        onClick = {
+                            selected.remove(option)
+                            onChange(selected)
+                            clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
+                        onMouseOn = { option -> onHoverOption(option.text) },
+                        onMouseOff = { option -> onHoverOption(null) })
+                    widget.setTooltip(Tooltip.of(Text.translatableWithFallback("trueadaptivemusic.click_to_remove", "Click to remove")))
+                    widget
                 },
                 "selectedOption: $option"
             ) as ClickableTextWidget
-        }
-
-        val newHoveredWidget = selectedWidgets.firstOrNull { widget ->
-            childVisible(widget) && widget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-        }
-
-        if (newHoveredWidget != null && newHoveredWidget != hoveredWidget) {
-            hoveredWidget = newHoveredWidget
-            onHoverOption(hoveredWidget!!.text)
-        }
-        else if (newHoveredWidget == null) {
-            hoveredWidget = null
         }
 
         super.renderWidget(context, mouseX, mouseY, delta)
