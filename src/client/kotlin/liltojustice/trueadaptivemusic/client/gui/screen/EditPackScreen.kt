@@ -46,8 +46,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             val path = musicPack.save()
             TAMClient.musicPack = MusicPack.fromFile(path)
             close()
-        }, false)
-            .texture(CHECKMARK, 9, 8)
+        }
+            .iconSize(9, 8)
+            .textureSize(9, 8)
+            .xyOffset(32, 6)
             .build()
 
         closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {

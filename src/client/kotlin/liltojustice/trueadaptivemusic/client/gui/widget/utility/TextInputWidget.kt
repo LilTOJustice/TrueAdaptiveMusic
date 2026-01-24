@@ -32,7 +32,7 @@ class TextInputWidget(
         text = placeholder
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun renderButton(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         if (updateText.isNotEmpty()) {
             text = updateText
             updateText = ""
