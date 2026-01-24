@@ -45,11 +45,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             TAMClient.musicPack = null
             val path = musicPack.save()
             TAMClient.musicPack = MusicPack.fromFile(path)
-            this.close()
-        }
-            .iconSize(9, 8)
-            .textureSize(9, 8)
-            .xyOffset(32, 6)
+            close()
+        }, false)
+            .texture(CHECKMARK, 9, 8)
             .build()
 
         closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
@@ -130,7 +128,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
-        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
