@@ -49,29 +49,15 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         client?.setScreen(parent)
     }
 
-    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
-        val optional = this.hoveredElement(click!!.x(), click.y())
-        if (optional.isEmpty) {
-            return false
-        } else {
-            val element = optional.get()
-            if (element.mouseClicked(click, doubled) && element.isClickable) {
-                if (click.button() == 0) {
-                    this.isDragging = true
-                }
-            }
-
-            return true
-        }
-    }
-
     override fun init() {
         initPack()
 
-        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
+        saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
             exportAndClose()
-        }, false)
-            .texture(CHECKMARK, 9, 8)
+        }
+            .iconSize(9, 8)
+            .textureSize(9, 8)
+            .xyOffset(32, 6)
             .build()
 
         closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
