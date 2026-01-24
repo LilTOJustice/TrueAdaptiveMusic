@@ -45,7 +45,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             TAMClient.musicPack = null
             val path = musicPack.save()
             TAMClient.musicPack = MusicPack.fromFile(path)
-            this.close()
+            close()
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
@@ -130,7 +130,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     override fun close() {
-        initPack()
         if (parent is MainScreen) {
             parent.reload()
         }
