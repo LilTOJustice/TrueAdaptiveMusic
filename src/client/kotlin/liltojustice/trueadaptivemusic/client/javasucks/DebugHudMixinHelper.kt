@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.javasucks
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
@@ -80,8 +81,7 @@ object DebugHudMixinHelper {
                     x - 2,
                     y - 2,
                     textRenderer.getWidth(line.text) + 3,
-                    fontHeight + 3,
-                    Colors.WHITE)
+                    fontHeight + 3)
             }
         }
     }
