@@ -13,7 +13,7 @@ class TextInputWidget(
     private val screen: Screen,
     prompt: String,
     textFieldWidth: Int,
-    onChange: (widget: TextInputWidget, text: String) -> Unit,
+    onChange: (widget: TextInputWidget, text: String) -> String,
     placeholder: String = "",
     x: Int = 0,
     y: Int = 0)
@@ -24,14 +24,20 @@ class TextInputWidget(
     var text: String
         get() { return fieldWidget.text }
         set(value) { fieldWidget.text = value }
+    var updateText: String = ""
 
     init {
-        fieldWidget.setChangedListener { text -> onChange(this, text) }
+        fieldWidget.setChangedListener { text -> updateText = onChange(this, text).ifEmpty { "" } }
         width = promptWidget.width + PADDING + fieldWidget.width
         text = placeholder
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        if (updateText.isNotEmpty()) {
+            text = updateText
+            updateText = ""
+        }
+
         promptWidget.x = x
         promptWidget.y = y
         fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
