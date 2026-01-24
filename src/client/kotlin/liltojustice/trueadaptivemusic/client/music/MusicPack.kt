@@ -126,7 +126,8 @@ class MusicPack private constructor(
 
     @OptIn(ExperimentalPathApi::class)
     fun save(): Path {
-        val packOngoingDir = Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
+        val packOngoingDir = Path(
+            Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
         val packDir = Path(Constants.MUSIC_PACK_DIR, Path(packName).nameWithoutExtension)
         val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
