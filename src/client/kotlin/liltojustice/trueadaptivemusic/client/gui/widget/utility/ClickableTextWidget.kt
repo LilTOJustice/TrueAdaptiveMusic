@@ -13,7 +13,9 @@ open class ClickableTextWidget(
     y: Int = 0,
     private val showHighlight: Boolean = true,
     private val onClick: (ClickableTextWidget) -> Unit = {},
-    private val isSelected: (ClickableTextWidget) -> Boolean = { false })
+    private val isSelected: (ClickableTextWidget) -> Boolean = { false },
+    private val onMouseOn: (ClickableTextWidget) -> Unit = {},
+    private val onMouseOff: (ClickableTextWidget) -> Unit = {})
     : ClickableWidget(x, y, 0, 0, Text.literal(text)),
     DataWrapped<ClickableTextWidget> {
     override var customData: Any? = null
@@ -21,6 +23,7 @@ open class ClickableTextWidget(
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
+    var hovering = false
 
     init {
         width = textRenderer.getWidth(message)
@@ -30,6 +33,15 @@ open class ClickableTextWidget(
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         if (!visible) {
             return
+        }
+
+        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && !hovering) {
+            hovering = true
+            onMouseOn(this)
+        }
+        else if (!isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && hovering) {
+            hovering = false
+            onMouseOff(this)
         }
 
         val selected = isSelected(this)
