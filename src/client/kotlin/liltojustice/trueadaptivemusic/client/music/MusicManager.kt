@@ -87,7 +87,10 @@ class MusicManager(
             onDemandSound = null
             onDemandSoundInstance = null
             currentSoundInstance?.let {
-                volumeManager.startFade(it, PLAY_NOW_FADE_TICKS, 1F)
+                volumeManager.startFade(
+                    it,
+                    PLAY_NOW_FADE_TICKS,
+                    if (client.isPaused) PAUSE_VOLUME else 1F)
             }
 
             return
