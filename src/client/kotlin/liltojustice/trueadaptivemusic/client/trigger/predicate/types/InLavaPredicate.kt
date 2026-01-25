@@ -4,11 +4,11 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
-class InFluidPredicate: MusicPredicate() {
+class InLavaPredicate: MusicPredicate() {
     private var tickBuffer = 0
 
     override fun test(client: MinecraftClient): Boolean {
-        val result = client.player?.isInFluid ?: false
+        val result = client.player?.isInLava ?: false
         if (result) {
             tickBuffer = GRACE_PERIOD_TICKS
         }
@@ -19,9 +19,9 @@ class InFluidPredicate: MusicPredicate() {
         return result
     }
 
-    companion object: MusicPredicateCompanion<InFluidPredicate> {
-        override fun fromJson(json: JsonObject): InFluidPredicate {
-            return InFluidPredicate()
+    companion object: MusicPredicateCompanion<InLavaPredicate> {
+        override fun fromJson(json: JsonObject): InLavaPredicate {
+            return InLavaPredicate()
         }
 
         private const val GRACE_PERIOD_TICKS = 5
