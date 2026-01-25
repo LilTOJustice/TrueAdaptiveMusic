@@ -17,6 +17,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockE
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
@@ -82,6 +83,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("in_bed", InBedPredicate::class)
         TAMClient.registerPredicate("in_water", InWaterPredicate::class)
         TAMClient.registerPredicate("in_lava", InLavaPredicate::class)
+        TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
