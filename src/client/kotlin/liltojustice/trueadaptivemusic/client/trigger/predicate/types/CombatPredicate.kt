@@ -78,21 +78,21 @@ class CombatPredicate(
         return isAggro
     }
 
-        override fun getTickRate(): Int {
-            return super.getTickRate() * 2
-        }
+    override fun getTickRate(): Int {
+        return super.getTickRate() * 2
+    }
 
-        override fun toJson(): JsonObject {
-            val result = JsonObject()
-            result.addProperty("blacklist", blacklist)
-            val mobEntities = JsonArray()
-            this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
-            result.add("mobEntities", mobEntities)
+    override fun toJson(): JsonObject {
+        val result = JsonObject()
+        result.addProperty("blacklist", blacklist)
+        val mobEntities = JsonArray()
+        this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
+        result.add("mobEntities", mobEntities)
 
-            return result
-        }
+        return result
+    }
 
-        companion object: MusicPredicateCompanion<CombatPredicate> {
+    companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate(
                 if (json.has("blacklist")) {
@@ -125,4 +125,4 @@ class CombatPredicate(
                     && axialDistance.z < scaledAttackerMinDistance.z
         }
     }
-    }
+}
