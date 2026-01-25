@@ -336,7 +336,7 @@ class MusicManager(private val client: MinecraftClient) {
         private const val PLAY_NOW_FADE_TICKS = 10
         private const val PAUSE_FADE_TICKS = 5
         private const val BACKGROUND_VOLUME = 0.2F
-        private const val PAUSE_VOLUME = 0.2F
+        private const val PAUSE_VOLUME = 0.4F
 
         private fun isPaused(client: MinecraftClient): Boolean {
             return client.world != null && client.currentScreen?.shouldPause() ?: false

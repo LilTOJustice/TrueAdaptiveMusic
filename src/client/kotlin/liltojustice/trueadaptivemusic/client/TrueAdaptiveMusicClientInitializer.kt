@@ -30,6 +30,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
@@ -72,6 +73,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("death_screen", DeathScreenPredicate::class)
         TAMClient.registerPredicate("fishing", FishingPredicate::class)
         TAMClient.registerPredicate("flying", FlyingPredicate::class)
+        TAMClient.registerPredicate("paused", PausedPredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
