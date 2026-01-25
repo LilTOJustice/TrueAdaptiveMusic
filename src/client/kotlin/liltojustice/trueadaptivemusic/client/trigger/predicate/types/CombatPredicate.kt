@@ -1,10 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.entity.Entity
-import net.minecraft.entity.mob.MobEntity
+import net.minecraft.entity.mob.HostileEntity
 import net.minecraft.util.math.Vec3d
 import java.util.*
 import kotlin.concurrent.schedule
@@ -15,7 +16,7 @@ import kotlin.math.atan
 import kotlin.math.cbrt
 import kotlin.math.tan
 
-class CombatPredicate: MusicPredicate() {
+class CombatPredicate(private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
@@ -28,9 +29,16 @@ class CombatPredicate: MusicPredicate() {
         val verticalAngle = acos(playerEntity.rotationVecClient.y)
         val horizontalAngle = acos(playerEntity.rotationVecClient.x)
 
-        for (entity: Entity? in world.entities)
+        val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
+        val validEntities = world.entities
+            .mapNotNull { it as? HostileEntity }
+            .filter { entity ->
+                mobEntityTranslationKeys
+                    .takeIf { it.isNotEmpty() }
+                    ?.any { mobEntity ->
+                        mobEntity == entity.type.translationKey } ?: true }
+        for (mobEntity: HostileEntity in validEntities)
         {
-            val mobEntity: MobEntity = entity as? MobEntity ?: continue
             val relativeMobEntityPosN = mobEntity.entityPos.subtract(playerEntity.entityPos).normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
@@ -67,9 +75,26 @@ class CombatPredicate: MusicPredicate() {
         return super.getTickRate() * 2
     }
 
+    override fun toJson(): JsonObject {
+        val result = JsonObject()
+        val mobEntities = JsonArray()
+        this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
+        result.add("mobEntities", mobEntities)
+
+        return result
+    }
+
     companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun fromJson(json: JsonObject): CombatPredicate {
-            return CombatPredicate()
+            return CombatPredicate(
+                if (json.has("mobEntities")) {
+                    json.getAsJsonArray("mobEntities").map {
+                        element -> EntityTypeIdentifier(element.asString) }
+                }
+                else {
+                    listOf()
+                }
+            )
         }
 
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
