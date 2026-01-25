@@ -30,6 +30,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FlyingPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.GameModePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InLavaPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InWaterPredicate
@@ -84,6 +85,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("in_water", InWaterPredicate::class)
         TAMClient.registerPredicate("in_lava", InLavaPredicate::class)
         TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
+        TAMClient.registerPredicate("hunger", HungerPredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
