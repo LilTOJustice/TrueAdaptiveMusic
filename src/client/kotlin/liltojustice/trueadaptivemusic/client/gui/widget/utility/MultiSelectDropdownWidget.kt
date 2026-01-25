@@ -79,7 +79,7 @@ class MultiSelectDropdownWidget(
             ) as ClickableTextWidget
         }
 
-        super.renderWidget(context, mouseX, mouseY, delta)
+        super.render(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }
 
