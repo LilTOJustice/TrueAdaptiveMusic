@@ -123,7 +123,7 @@ class EventViewWidget(
                         "trueadaptivemusic.select_track", "Select a track").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
             },
             "musicChoice"
         )
