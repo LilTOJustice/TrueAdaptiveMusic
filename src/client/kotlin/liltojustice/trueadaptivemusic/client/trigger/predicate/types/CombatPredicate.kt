@@ -16,10 +16,12 @@ import kotlin.math.atan
 import kotlin.math.cbrt
 import kotlin.math.tan
 
-class CombatPredicate(private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
+class CombatPredicate(
+    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
+    private val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
 
     override fun test(client: MinecraftClient): Boolean {
         val playerEntity = client.player ?: return false
@@ -29,14 +31,19 @@ class CombatPredicate(private val mobEntities: List<EntityTypeIdentifier>): Musi
         val verticalAngle = acos(playerEntity.rotationVecClient.y)
         val horizontalAngle = acos(playerEntity.rotationVecClient.x)
 
-        val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
         val validEntities = world.entities
             .mapNotNull { it as? HostileEntity }
             .filter { entity ->
                 mobEntityTranslationKeys
                     .takeIf { it.isNotEmpty() }
-                    ?.any { mobEntity ->
-                        mobEntity == entity.type.translationKey } ?: true }
+                    ?.let {
+                        if (blacklist)
+                            it.none { mobEntity -> mobEntity == entity.type.translationKey }
+                        else
+                            it.any { mobEntity -> mobEntity == entity.type.translationKey }
+                    }
+                    ?: true }
+
         for (mobEntity: HostileEntity in validEntities)
         {
             val relativeMobEntityPosN = mobEntity.entityPos.subtract(playerEntity.entityPos).normalize()
@@ -71,25 +78,32 @@ class CombatPredicate(private val mobEntities: List<EntityTypeIdentifier>): Musi
         return isAggro
     }
 
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 2
-    }
+        override fun getTickRate(): Int {
+            return super.getTickRate() * 2
+        }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        val mobEntities = JsonArray()
-        this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
-        result.add("mobEntities", mobEntities)
+        override fun toJson(): JsonObject {
+            val result = JsonObject()
+            result.addProperty("blacklist", blacklist)
+            val mobEntities = JsonArray()
+            this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
+            result.add("mobEntities", mobEntities)
 
-        return result
-    }
+            return result
+        }
 
-    companion object: MusicPredicateCompanion<CombatPredicate> {
+        companion object: MusicPredicateCompanion<CombatPredicate> {
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate(
+                if (json.has("blacklist")) {
+                    json.getAsJsonPrimitive("blacklist").asBoolean
+                }
+                else {
+                    false
+                },
                 if (json.has("mobEntities")) {
                     json.getAsJsonArray("mobEntities").map {
-                        element -> EntityTypeIdentifier(element.asString) }
+                            element -> EntityTypeIdentifier(element.asString) }
                 }
                 else {
                     listOf()
@@ -111,4 +125,4 @@ class CombatPredicate(private val mobEntities: List<EntityTypeIdentifier>): Musi
                     && axialDistance.z < scaledAttackerMinDistance.z
         }
     }
-}
+    }
