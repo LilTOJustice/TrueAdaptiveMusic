@@ -21,8 +21,7 @@ import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.max
 
-class MusicManager(
-    private val client: MinecraftClient) {
+class MusicManager(private val client: MinecraftClient) {
     private var musicPack: MusicPack? = null
     private var currentMusicPredicateId: String = ""
     private var oldMusicPredicateId: String = ""
