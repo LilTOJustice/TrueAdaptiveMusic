@@ -52,7 +52,9 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     companion object: MusicPredicateCompanion<MusicPredicate> {
     }
 
-    data class Parameters(var trackDelay: UInt = 0U, var trackDelayNoise: UInt = 0U): MusicTrigger.Parameters() {
+    data class Parameters(
+        var trackDelay: UInt = 0U, var trackDelayNoise: UInt = 0U, var enterDelay: UInt = 0U)
+        : MusicTrigger.Parameters() {
         companion object: ParametersCompanion<MusicEvent.Parameters> {
             override fun default(): Parameters {
                 return Parameters()

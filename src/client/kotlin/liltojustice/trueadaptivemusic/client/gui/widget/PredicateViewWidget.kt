@@ -94,7 +94,7 @@ class PredicateViewWidget(
         selectedMusicPaths = selectedNode!!.predicate.playableSounds.map { sound -> sound.getSoundName() }
             .toMutableList()
         newPredicateParent = null
-        predicateParams = node.predicate.parameters.constructorParams().toMutableList()
+        predicateParams = node.predicate.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }

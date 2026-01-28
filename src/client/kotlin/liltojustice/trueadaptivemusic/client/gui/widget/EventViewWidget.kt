@@ -43,11 +43,11 @@ class EventViewWidget(
 
     fun setEvent(event: MusicEvent?) {
         selectedEvent = event
-        eventParams = selectedEvent?.parameters?.constructorParams()?.toMutableList()
+        eventParams = selectedEvent?.parameters?.getTriggerParams()?.map { param -> param.value }?.toMutableList()
             ?: requiredEventParams.map { null }.toMutableList()
         if (event != null) {
             setSelectedEventTypeName(event.getTypeName())
-            eventArgs = (event.getTriggerArgs().map { param -> param.value }).toMutableList()
+            eventArgs = (event.getTriggerArgs().map { arg -> arg.value }).toMutableList()
             selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
