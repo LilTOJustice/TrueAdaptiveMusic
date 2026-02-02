@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.music
+package liltojustice.trueadaptivemusic.client.music.pack
 
 class MusicPackValidation(preValidation: MusicPackValidation? = null)
     : ArrayList<MusicPackValidation.ValidationMessage>() {
