@@ -16,7 +16,7 @@ class Constants {
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val FFMPEG_DOWNLOAD_LINK = "https://www.gyan.dev/ffmpeg/builds/"
-        val AUDIO_FILE_STREAM_ID: Identifier = Identifier.of("trueadaptivemusic:audiofilestream")
+        val AUDIO_FILE_STREAM_ID: Identifier = Identifier("trueadaptivemusic:audiofilestream")
     }
 
     class Colors {
