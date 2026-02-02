@@ -6,7 +6,7 @@ import net.minecraft.client.MinecraftClient
 
 class FlyingPredicate: MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        return client.player?.isGliding ?: false
+        return client.player?.isFallFlying ?: false
     }
 
     companion object: MusicPredicateCompanion<FlyingPredicate> {
