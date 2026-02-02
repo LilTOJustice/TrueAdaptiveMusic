@@ -5,7 +5,9 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.mob.GuardianEntity
 import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.entity.player.PlayerEntity
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.PI
@@ -54,7 +56,7 @@ class CombatPredicate(
                 continue
             }
 
-            if (mobEntity.attacking?.id == playerEntity.id)
+            if (isValidAttacker(mobEntity, playerEntity))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
@@ -101,6 +103,11 @@ class CombatPredicate(
                     listOf()
                 }
             )
+        }
+
+        private fun isValidAttacker(mobEntity: HostileEntity, playerEntity: PlayerEntity): Boolean {
+            return mobEntity.attacking?.id == playerEntity.id
+                    || ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
         }
 
         private const val AGGRO_TIMER_SECONDS = 2L
