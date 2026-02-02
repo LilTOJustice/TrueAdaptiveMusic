@@ -1,16 +1,22 @@
 package liltojustice.trueadaptivemusic
 
 import net.minecraft.util.Identifier
+import kotlin.io.path.Path
+import kotlin.io.path.pathString
 
 class Constants {
     companion object {
-        const val MUSIC_PACK_DIR = "trueadaptivemusicpacks"
-        const val OPTIONS_FILENAME = ".trueadaptivemusic.json"
+        val MUSIC_PACK_DIR = Path("trueadaptivemusicpacks")
+        val OPTIONS_DIR = Path("config", "trueadaptivemusic")
+        val OPTIONS_PATH = Path(OPTIONS_DIR.pathString, "trueadaptivemusic.json")
+        val FFMPEG_PATH = Path(OPTIONS_DIR.pathString, "ffmpeg.exe")
+        val FFPROBE_PATH = Path(OPTIONS_DIR.pathString, "ffprobe.exe")
         const val RULES_FILENAME = "rules.json"
         const val META_FILENAME = "meta.json"
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
-        val AUDIO_FILE_STREAM_ID = Identifier("trueadaptivemusic:audiofilestream")
+        const val FFMPEG_DOWNLOAD_LINK = "https://www.gyan.dev/ffmpeg/builds/"
+        val AUDIO_FILE_STREAM_ID: Identifier = Identifier.of("trueadaptivemusic:audiofilestream")
     }
 
     class Colors {

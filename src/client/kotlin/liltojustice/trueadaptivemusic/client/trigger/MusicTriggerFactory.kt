@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
