@@ -8,12 +8,11 @@ import kotlin.io.path.*
 class TrueAdaptiveMusic: ModInitializer {
     @OptIn(ExperimentalPathApi::class)
     override fun onInitialize() {
-        Files.createDirectories(Path(Constants.MUSIC_PACK_DIR))
+        Files.createDirectories(Constants.MUSIC_PACK_DIR)
+        Files.createDirectories(Constants.OPTIONS_DIR)
 
-        val optionsFilePath = Path(Constants.OPTIONS_FILENAME)
-
-        if (!optionsFilePath.exists()) {
-            Files.createFile(optionsFilePath)
+        if (!Constants.OPTIONS_PATH.exists()) {
+            Files.createFile(Constants.OPTIONS_PATH)
         }
     }
 
