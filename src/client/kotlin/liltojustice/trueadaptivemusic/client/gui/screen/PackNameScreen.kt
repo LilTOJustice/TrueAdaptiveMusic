@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
@@ -13,6 +13,7 @@ import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.pathString
 
 @Environment(EnvType.CLIENT)
 class PackNameScreen(private val parent: Screen): Screen(
@@ -35,7 +36,7 @@ class PackNameScreen(private val parent: Screen): Screen(
         packNameWidget.setChangeListener { packName ->
             errorText = ""
             this.packName = packName
-            if (Path(Constants.MUSIC_PACK_DIR, "$packName.zip").exists()) {
+            if (Path(Constants.MUSIC_PACK_DIR.pathString, "$packName.zip").exists()) {
                 errorText = Text.translatableWithFallback(
                     "trueadaptivemusic.name_already_exists",
                     "%s.zip already exists",
@@ -95,7 +96,7 @@ class PackNameScreen(private val parent: Screen): Screen(
             }
 
             try {
-                Path(Constants.MUSIC_PACK_DIR, "$packName.zip")
+                Path(Constants.MUSIC_PACK_DIR.pathString, "$packName.zip")
             } catch (_: Exception) {
                 return false
             }
