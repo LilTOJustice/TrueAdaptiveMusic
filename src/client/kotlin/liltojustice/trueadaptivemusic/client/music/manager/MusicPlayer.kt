@@ -21,8 +21,8 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
     private val tracks = mutableMapOf<String, Track>()
 
-    fun createTrack(trackName: String, allowResume: Boolean, fadeTicks: Int, priority: UInt) {
-        tracks[trackName] = Track(soundManager, allowResume, fadeTicks, priority)
+    fun createTrack(trackName: String, allowResume: Boolean, crossFadeTicks: Int) {
+        tracks[trackName] = Track(soundManager, allowResume, crossFadeTicks)
     }
 
     fun hasSoundInstance(instance: SoundInstance): Boolean {
@@ -69,19 +69,13 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     fun startNew(trackName: String, newMusic: PlayableSound, delayMillis: Long = 0L) {
         val track = getTrack(trackName)
-        tracks.values
-            .filter { it.priority > track.priority && isTrackPlaying(it) }
-            .forEach {
-                startFade(it, track.fadeTicks, BACKGROUND_VOLUME, false)
-            }
-
         if (!isPlaying(track.currentSoundInstance)) {
             track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
 
             return
         }
         else if (delayMillis != 0L) {
-            startFade(track, track.fadeTicks, 0F, false)
+            startFade(track, track.crossFadeTicks, 0F, false)
             track.updateSound(newMusic, newMusic.makeSoundInstance())
             track.startDelay(delayMillis) {
                 track.desiredVolume = 1F
@@ -100,12 +94,8 @@ internal class MusicPlayer(client: MinecraftClient) {
         val track = getTrack(trackName)
 
         if (isTrackPlaying(track)) {
-            startFade(track, track.fadeTicks, 0F, true)
+            startFade(track, track.crossFadeTicks, 0F, true)
             track.resetSounds()
-        }
-
-        tracks.values.filter { isTrackPlaying(it) }.minByOrNull { it.priority }?.let {
-            startFade(it, track.fadeTicks, 1F, false)
         }
     }
 
@@ -122,9 +112,7 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     private fun startNewInstance(track: Track, newMusic: PlayableSound) {
         track.updateSound(newMusic, newMusic.makeSoundInstance())
-        playInstance(
-            track.currentSoundInstance,
-            tracks.values.filter { it.priority < track.priority }.any { isTrackPlaying(it) })
+        playInstance(track.currentSoundInstance)
         track.desiredVolume = 1F
     }
 
@@ -156,12 +144,9 @@ internal class MusicPlayer(client: MinecraftClient) {
                 (soundInstance?.volume ?: 0F) != 0F
     }
 
-    private fun playInstance(soundInstance: SoundInstance?, background: Boolean = false) {
+    private fun playInstance(soundInstance: SoundInstance?) {
         try {
             soundManager.play(soundInstance)
-            if (background) {
-                soundInstance?.let { volumeManager.setInstanceVolume(it, BACKGROUND_VOLUME) }
-            }
         }
         catch (e: MusicLoadException) {
             Logger.logError("Error: Failed to play sound instance - ${e.message}")
@@ -181,12 +166,12 @@ internal class MusicPlayer(client: MinecraftClient) {
             playInstance(track.currentSoundInstance)
         }
 
-        startFade(track, track.fadeTicks, 1F, false)
+        startFade(track, track.crossFadeTicks, 1F, false)
 
         track.oldSoundInstance?.let {
             volumeManager.startFade(
                 it,
-                track.fadeTicks,
+                track.crossFadeTicks,
                 0F,
                 !track.allowResume)
         }
@@ -197,12 +182,11 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     companion object {
-        private const val BACKGROUND_VOLUME = 0.1F
         private const val CLAMP_TICKS = 5
     }
 
     private class Track(
-        private val soundManager: SoundManager, val allowResume: Boolean, val fadeTicks: Int, val priority: UInt) {
+        private val soundManager: SoundManager, val allowResume: Boolean, val crossFadeTicks: Int) {
         var currentSound: PlayableSound? = null
             private set
         var oldSound: PlayableSound? = null

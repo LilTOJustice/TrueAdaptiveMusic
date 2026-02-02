@@ -29,24 +29,20 @@ class MusicManager(private val client: MinecraftClient) {
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var activeEvents: List<MusicEvent> = emptyList()
-    private var pauseDone = false
 
     init {
         musicPlayer.createTrack(
             MAIN_TRACK,
             allowResume = true,
-            fadeTicks = MAIN_FADE_TICKS,
-            priority = 2U)
+            crossFadeTicks = MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(
             EVENT_TRACK,
             allowResume = false,
-            fadeTicks = ON_DEMAND_FADE_TICKS,
-            priority = 1U)
+            crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
         musicPlayer.createTrack(
             ON_DEMAND_TRACK,
             allowResume = false,
-            fadeTicks = ON_DEMAND_FADE_TICKS,
-            priority = 0U)
+            crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
 
         InvokeMusicEventCallback.EVENT.register { eventType, args ->
             activeEvents.firstOrNull { event ->
@@ -78,14 +74,27 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        if (isPaused(client) && !pauseDone) {
-            musicPlayer.clampTrackVolume(MAIN_TRACK, PAUSE_VOLUME)
-            pauseDone = true
-        }
-        else if (!isPaused(client) && pauseDone) {
-            musicPlayer.clampTrackVolume(MAIN_TRACK, 1F)
-            pauseDone = false
-        }
+        musicPlayer.clampTrackVolume(EVENT_TRACK,
+            if (isPaused(client)) {
+                PAUSE_VOLUME
+            }
+            else {
+                1F
+            })
+
+        musicPlayer.clampTrackVolume(MAIN_TRACK,
+            if (musicPlayer.isTrackPlaying(EVENT_TRACK)) {
+                BACKGROUND_VOLUME
+            }
+            else if (musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)) {
+                0F
+            }
+            else if (isPaused(client)) {
+                PAUSE_VOLUME
+            }
+            else {
+                1F
+            })
 
         musicPlayer.tick()
 
@@ -185,9 +194,10 @@ private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
         private const val MAIN_TRACK = "main"
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
-        private const val MAIN_FADE_TICKS = 50
-        private const val ON_DEMAND_FADE_TICKS = 10
+        private const val MAIN_CROSSFADE_TICKS = 50
+        private const val ON_DEMAND_CROSSFADE_TICKS = 10
         private const val PAUSE_VOLUME = 0.3F
+        private const val BACKGROUND_VOLUME = 0.1F
 
         private fun isPaused(client: MinecraftClient): Boolean {
             return client.world != null && client.currentScreen?.shouldPause() ?: false
