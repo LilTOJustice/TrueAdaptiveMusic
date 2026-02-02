@@ -54,6 +54,7 @@ internal class MusicPlayer(client: MinecraftClient) {
                     track, CLAMP_TICKS, track.desiredVolume, stopWhenDone = false, isClamp = true)
             }
         }
+
         volumeManager.tick()
     }
 
@@ -182,7 +183,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     companion object {
-        private const val CLAMP_TICKS = 5
+        private const val CLAMP_TICKS = 10
     }
 
     private class Track(
