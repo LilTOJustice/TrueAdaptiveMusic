@@ -1,17 +1,21 @@
 package liltojustice.trueadaptivemusic.client.sound
 
+import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import net.minecraft.util.JsonHelper
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.sound.sampled.AudioFormat
+import kotlin.io.path.pathString
 
 class FFmpeg {
     companion object {
         fun makeStream(soundFile: SoundFile): FFmpegAudioStream {
+            val command = if (TAMClient.hasFFmpegGlobal) "ffprobe" else Constants.FFPROBE_PATH.pathString
             val ffprobe = ProcessBuilder(
-                "ffprobe",
+                command,
                 "-hide_banner",
                 "-i", "pipe:0",
                 "-v", "panic",
