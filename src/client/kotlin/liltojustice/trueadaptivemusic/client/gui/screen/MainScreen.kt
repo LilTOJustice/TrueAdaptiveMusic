@@ -29,7 +29,6 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var ffmpegInstallButton: ButtonWidget
 
     override fun init() {
-        TAMClient.playSoundNow(null)
         createNewPackButton = ButtonWidget.Builder(CREATE_PACK_TEXT)
         {
             client?.setScreen(PackNameScreen(this))

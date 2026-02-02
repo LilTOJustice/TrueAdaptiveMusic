@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext

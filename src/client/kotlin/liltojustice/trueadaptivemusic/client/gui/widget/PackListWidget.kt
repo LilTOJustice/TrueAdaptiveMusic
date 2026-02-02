@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.music.MusicPack
-import liltojustice.trueadaptivemusic.client.music.MusicPackValidation
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext

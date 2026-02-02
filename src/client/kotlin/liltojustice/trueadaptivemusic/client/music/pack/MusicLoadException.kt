@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.music
+package liltojustice.trueadaptivemusic.client.music.pack
 
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicException
 

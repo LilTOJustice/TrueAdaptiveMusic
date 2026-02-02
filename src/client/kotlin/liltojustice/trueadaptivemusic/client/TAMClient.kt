@@ -4,9 +4,9 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
-import liltojustice.trueadaptivemusic.client.music.MusicLoadException
-import liltojustice.trueadaptivemusic.client.music.MusicManager
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
+import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -25,13 +25,10 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 object TAMClient {
-    private var initialized = false
-    private var musicManager: MusicManager? = null
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    private val inputWidgetMaker = InputWidgetMaker()
     var agreedToFFmpeg = false
     val hasFFmpeg
         get() =
@@ -49,7 +46,7 @@ object TAMClient {
         }
 
     var musicPack: MusicPack?
-        get() = musicManager?.getMusicPack()
+        get() = musicManager?.musicPack
         set(value) {
             musicManager?.selectMusicPack(value)
 
@@ -61,6 +58,14 @@ object TAMClient {
             }
         }
 
+    private val inputWidgetMaker = InputWidgetMaker()
+    private var initialized = false
+    private var musicManager: MusicManager? = null
+
+    fun resetCache() {
+        musicPack?.rules?.resetCache()
+    }
+
     fun tick(client: MinecraftClient) {
         if (!initialized) {
             initialize(client)
@@ -69,8 +74,8 @@ object TAMClient {
         musicManager!!.tick()
     }
 
-    fun playSoundNow(sound: PlayableSound?, keepBackground: Boolean = false) {
-        musicManager?.playNow(sound, keepBackground)
+    fun playSoundNow(sound: PlayableSound?) {
+        musicManager?.playNow(sound)
     }
 
     fun getPlayingEvent(): MusicEvent? {

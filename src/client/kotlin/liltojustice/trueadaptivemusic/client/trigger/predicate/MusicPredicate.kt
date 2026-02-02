@@ -29,6 +29,11 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
             ?.let { Gson().fromJson<Parameters>(it, Parameters::class.java) } ?: Parameters()
     }
 
+    fun resetTicks() {
+        lastResult = false
+        ticksSinceResult = getFixedTickRate()
+    }
+
     fun testPredicate(client: MinecraftClient): Boolean {
         val tickRate = getFixedTickRate()
         if (ticksSinceResult++ == tickRate) {
