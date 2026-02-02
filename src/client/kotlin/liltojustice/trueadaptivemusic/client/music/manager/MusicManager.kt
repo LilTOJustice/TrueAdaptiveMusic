@@ -102,7 +102,7 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        val predicateResult = musicPack?.rules?.getMusicToPlay(client) ?: return
+        val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
         val parameters = predicateResult.predicate.parameters
         val trackDelayNoise = parameters.trackDelayNoise
@@ -111,8 +111,11 @@ class MusicManager(private val client: MinecraftClient) {
 
         activeEvents = predicateResult.events
 
-        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
+        if (playingEvent != null && !musicPlayer.isTrackPlaying(EVENT_TRACK)) {
             playingEvent = null
+        }
+
+        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
