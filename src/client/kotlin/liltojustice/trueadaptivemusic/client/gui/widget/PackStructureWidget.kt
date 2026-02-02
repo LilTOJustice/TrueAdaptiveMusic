@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipString
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
