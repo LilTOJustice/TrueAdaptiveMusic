@@ -35,7 +35,7 @@ class MusicPack private constructor(
     val rules: MusicPredicateTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
-    private val packPath = Path(Constants.MUSIC_PACK_DIR, packName)
+    private val packPath = Path(Constants.MUSIC_PACK_DIR.pathString, packName)
     private val validation = MusicPackValidation(preValidation)
 
     val validationMessages
@@ -54,7 +54,9 @@ class MusicPack private constructor(
         if (!assetsDir.exists()) {
             assetsDir.createDirectory()
             if (packWithAssets?.isZipped() == true) {
-                ZipFile(Path(Constants.MUSIC_PACK_DIR, packWithAssets.packName).pathString)
+                ZipFile(
+                    Path(
+                        Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString)
                     .use { zipFile ->
                     zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
                         .forEach { entry ->
@@ -67,7 +69,9 @@ class MusicPack private constructor(
                     }
             } else if (packWithAssets != null) {
                 val existingAssets = Path(
-                    Constants.MUSIC_PACK_DIR, packWithAssets.packName, Constants.ASSETS_DIRNAME)
+                    Constants.MUSIC_PACK_DIR.pathString,
+                    packWithAssets.packName,
+                    Constants.ASSETS_DIRNAME)
 
                 if (existingAssets.exists()) {
                     existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
@@ -139,8 +143,9 @@ class MusicPack private constructor(
     @OptIn(ExperimentalPathApi::class)
     fun save(): Path {
         val packOngoingDir = Path(
-            Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
-        val packDir = Path(Constants.MUSIC_PACK_DIR, Path(packName).nameWithoutExtension)
+            Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
+        val packDir = Path(
+            Constants.MUSIC_PACK_DIR.pathString, Path(packName).nameWithoutExtension)
         val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
         val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
@@ -231,7 +236,8 @@ class MusicPack private constructor(
     }*/
 
     private fun getEditPackDir(): Path {
-        return Path(Constants.MUSIC_PACK_DIR, "${Path(packName).nameWithoutExtension}.new")
+        return Path(
+            Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
     }
 
     private fun isZipped(): Boolean {
@@ -240,7 +246,7 @@ class MusicPack private constructor(
 
     companion object {
         fun loadAllPacks(): List<MusicPack> {
-            return Path(Constants.MUSIC_PACK_DIR).listDirectoryEntries().mapNotNull { path ->
+            return Constants.MUSIC_PACK_DIR.listDirectoryEntries().mapNotNull { path ->
                 try {
                     return@mapNotNull fromFile(path)
                 }

@@ -36,7 +36,7 @@ class MainScreen(private val parent: Screen): Screen(
         createNewPackButton.width = textRenderer.getWidth(CREATE_PACK_TEXT) + 10
 
         openMusicPacksButton = ButtonWidget.Builder(OPEN_MUSIC_PACKS_TEXT) {
-            Util.getOperatingSystem().open(Path(Constants.MUSIC_PACK_DIR).toUri())
+            Util.getOperatingSystem().open(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width
@@ -99,7 +99,7 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(wikiButton)
         addDrawableChild(optionsButton)
 
-        if (!TAMClient.hasFFmpeg && !TAMClient.agreedToFFmpeg) {
+        if (!TAMClient.hasFFmpeg) {
             addDrawableChild(ffmpegInstallButton)
         }
     }
@@ -121,10 +121,8 @@ class MainScreen(private val parent: Screen): Screen(
 
     companion object {
         fun getOngoingEdit(packName: Path): Path? {
-            return Path(Constants.MUSIC_PACK_DIR)
-                .listDirectoryEntries()
-                .firstOrNull() { file ->
-                    packName.nameWithoutExtension == file.nameWithoutExtension && file.extension == "new" }
+            return Constants.MUSIC_PACK_DIR.listDirectoryEntries().firstOrNull() { file ->
+                packName.nameWithoutExtension == file.nameWithoutExtension && file.extension == "new" }
         }
 
         private val OPEN_MUSIC_PACKS_TEXT = Text.translatableWithFallback(

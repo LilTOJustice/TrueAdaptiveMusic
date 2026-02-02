@@ -20,6 +20,7 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
 import kotlin.io.path.Path
+import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
@@ -29,14 +30,22 @@ object TAMClient {
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    var agreedToFFmpeg = false
-    val hasFFmpeg
+    val hasFFmpegGlobal
+        get() =
+            try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
+            catch (_: IOException) { false }
+    val hasFFmpegLocal
         get() =
             try {
-                Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1)
+                Runtime.getRuntime()
+                    .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
+                        Runtime.getRuntime()
+                            .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
             } catch (_: IOException) {
                 false
             }
+    val hasFFmpeg
+        get() = hasFFmpegLocal || hasFFmpegGlobal
 
 
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
@@ -138,7 +147,7 @@ object TAMClient {
 
         options =
             try {
-                TrueAdaptiveMusicOptions.jsonDecode(Path(Constants.OPTIONS_FILENAME).toFile().readText())
+                TrueAdaptiveMusicOptions.jsonDecode(Constants.OPTIONS_PATH.toFile().readText())
             }
             catch (_: Exception) {
                 Logger.logError("Failed to load TrueAdaptiveMusic settings. Resetting...")
@@ -150,7 +159,8 @@ object TAMClient {
                 if (options.selectedPack.isBlank())
                     null
                 else
-                    MusicPack.fromFile(Path(Constants.MUSIC_PACK_DIR, options.selectedPack))
+                    MusicPack.fromFile(
+                        Path(Constants.MUSIC_PACK_DIR.pathString, options.selectedPack))
         }
         catch (e: MusicLoadException) {
             Logger.logError("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e")
