@@ -4,11 +4,10 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
-import net.minecraft.world.GameMode
 
 class HungerPredicate(private val direction: Direction, private val hungerPercentage: Int): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
-        if (client.player?.gameMode in listOf(GameMode.CREATIVE, GameMode.SPECTATOR)) {
+        if (client.player?.isCreative == true || client.player?.isSpectator == true) {
             return false
         }
 
