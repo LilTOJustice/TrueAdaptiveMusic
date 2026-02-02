@@ -1,11 +1,10 @@
 package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
-import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
 
-class VolumeManager(private val soundManager: SoundManager, private val musicVolumeOption: SimpleOption<Double>) {
+class VolumeManager(private val soundManager: SoundManager, private val getSoundVolume: () -> Float) {
     private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
 
     fun startFade(
@@ -15,8 +14,13 @@ class VolumeManager(private val soundManager: SoundManager, private val musicVol
         if (existingFade != null) {
             existingFade.redirect(targetVolume, ticksToComplete, stopWhenDone)
         } else {
-            fades[soundInstance] = Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone)
+            fades[soundInstance] =
+                Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone, soundManager)
         }
+    }
+
+    fun hasFade(soundInstance: SoundInstance): Boolean {
+        return fades.values.any { it.soundInstance == soundInstance }
     }
 
     fun tick() {
@@ -40,10 +44,10 @@ class VolumeManager(private val soundManager: SoundManager, private val musicVol
         }
     }
 
-    fun setInstanceVolume(soundInstance: SoundInstance, volume: Float) {
-        soundManager.setInstanceVolume(soundInstance, volume, musicVolumeOption)
+    fun setInstanceVolume(soundInstance: SoundInstance, volume: Float, allowPause: Boolean = true) {
+        soundManager.setInstanceVolume(soundInstance, volume, getSoundVolume())
 
-        if (volume == 0F) {
+        if (allowPause && volume == 0F) {
             soundManager.pauseInstance(soundInstance)
         }
     }
@@ -52,9 +56,13 @@ class VolumeManager(private val soundManager: SoundManager, private val musicVol
         val soundInstance: SoundInstance,
         private var totalTicks: Int,
         private var targetVolume: Float,
-        var stopWhenDone: Boolean) {
+        var stopWhenDone: Boolean,
+        soundManager: SoundManager) {
         private var fadeTicks: Int = 0
-        private var currentVolume: Float = getInstanceVolume(soundInstance)
+        private var currentVolume: Float =
+            if (soundManager.isInstancePaused(soundInstance))
+                0F
+            else getInstanceVolume(soundInstance)
 
         fun tick(): Float {
             fadeTicks++
