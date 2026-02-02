@@ -6,7 +6,7 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
-import kotlin.reflect.full.declaredMemberProperties
+import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import kotlin.reflect.full.primaryConstructor
 
 abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
@@ -33,8 +33,8 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
     }
 
     fun getTriggerId(): String {
-        val params = getTriggerArgs()
-        return getTypeName()  + if (params.isEmpty()) "" else "{${params.joinToString(",")}}"
+        val args = getTriggerArgs()
+        return getTypeName()  + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
     }
 
     private fun paramsJson(): JsonObject {
@@ -68,13 +68,9 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
     }
 
     abstract class Parameters {
-        fun constructorParams(): List<Any?> {
-            return this::class.declaredMemberProperties
-                .filter { property ->
-                    this::class.primaryConstructor!!.parameters.any { param -> property.name == param.name } }
-                .map { property ->
-                    property.getter.call(this)
-                }
+        fun getTriggerParams(): List<TriggerParam> {
+            return ReflectionHelper.getConstructorParameterValues(this)
+                .map { arg -> TriggerParam(arg.name, arg.value) }
         }
 
         fun initializeCopyFromArgs(vararg constructorArgs: Any): Parameters {
