@@ -17,17 +17,27 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockE
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DayTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DeathScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DimensionPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.EntityNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FirstDayPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FishingPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FlyingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.GameModePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InLavaPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InWaterPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
@@ -68,6 +78,16 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("title_screen", TitleScreenPredicate::class)
         TAMClient.registerPredicate("weather", WeatherPredicate::class)
         TAMClient.registerPredicate("death_screen", DeathScreenPredicate::class)
+        TAMClient.registerPredicate("fishing", FishingPredicate::class)
+        TAMClient.registerPredicate("flying", FlyingPredicate::class)
+        TAMClient.registerPredicate("paused", PausedPredicate::class)
+        TAMClient.registerPredicate("credits_screen", CreditsScreenPredicate::class)
+        TAMClient.registerPredicate("in_bed", InBedPredicate::class)
+        TAMClient.registerPredicate("in_water", InWaterPredicate::class)
+        TAMClient.registerPredicate("in_lava", InLavaPredicate::class)
+        TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
+        TAMClient.registerPredicate("hunger", HungerPredicate::class)
+        TAMClient.registerPredicate("entity_nearby", EntityNearbyPredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)

@@ -4,7 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PackStructureWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
