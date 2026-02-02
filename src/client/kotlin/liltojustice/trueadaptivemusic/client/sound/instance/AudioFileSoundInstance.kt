@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.music.MusicLoadException
+import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
@@ -23,7 +23,7 @@ class AudioFileSoundInstance(private val soundFile: SoundFile)
                 CompletableFuture.completedFuture(TruncatedAudioStream(FFmpeg.makeStream(soundFile)))
             }
         }
-        catch (e: Exception) {
+        catch (_: Exception) {
             throw MusicLoadException("Failed to play sound file '${soundFile.getName()}'")
         }
     }

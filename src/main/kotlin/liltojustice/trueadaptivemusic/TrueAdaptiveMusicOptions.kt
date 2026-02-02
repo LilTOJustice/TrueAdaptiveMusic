@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.io.path.Path
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -12,7 +11,7 @@ data class TrueAdaptiveMusicOptions(
     val useDebugHud: Boolean = false) {
 
     fun save() {
-        Path(Constants.OPTIONS_FILENAME).toFile().writeText(jsonEncode())
+        Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
     }
 
     fun getArgs(): List<Any?> {
