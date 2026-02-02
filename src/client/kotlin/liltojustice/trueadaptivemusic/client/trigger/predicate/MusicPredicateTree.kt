@@ -17,6 +17,10 @@ class MusicPredicateTree private constructor(
     json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
     private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
 
+    fun resetCache() {
+        preorderTraverse { node, _ -> node.predicate.resetTicks() }
+    }
+
     fun toJson(): JsonObject {
         return root.toJson()
     }
