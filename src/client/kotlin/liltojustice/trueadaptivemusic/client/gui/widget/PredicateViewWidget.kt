@@ -4,7 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.music.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
@@ -94,7 +94,7 @@ class PredicateViewWidget(
         selectedMusicPaths = selectedNode!!.predicate.playableSounds.map { sound -> sound.getSoundName() }
             .toMutableList()
         newPredicateParent = null
-        predicateParams = node.predicate.parameters.constructorParams().toMutableList()
+        predicateParams = node.predicate.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }
