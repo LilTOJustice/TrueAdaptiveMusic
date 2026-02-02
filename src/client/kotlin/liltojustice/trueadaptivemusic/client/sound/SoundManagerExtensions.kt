@@ -1,15 +1,15 @@
 package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
-import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.client.sound.Source
 
 fun SoundManager.setInstanceVolume(
-    soundInstance: SoundInstance?, volume: Float, volumeOption: SimpleOption<Double>): Boolean {
+    soundInstance: SoundInstance?, volume: Float, musicVolume: Float): Boolean {
     (soundInstance as? VolumeControlled)?.setVolume(volume)
-    return runOnSource(soundInstance) { source -> source.setVolume(volume * volumeOption.value.toFloat()) }
+
+    return runOnSource(soundInstance) { source -> source.setVolume(volume * musicVolume) }
 }
 
 fun SoundManager.resumeInstance(soundInstance: SoundInstance?): Boolean {
@@ -20,6 +20,17 @@ fun SoundManager.pauseInstance(soundInstance: SoundInstance?): Boolean {
     return runOnSource(soundInstance, Source::pause)
 }
 
+fun SoundManager.isInstancePaused(soundInstance: SoundInstance?): Boolean {
+    return getFromSource(soundInstance, Source::isPaused) ?: false
+}
+
 private fun SoundManager.runOnSource(soundInstance: SoundInstance?, sourceConsumer: (source: Source) -> Unit): Boolean {
     return soundSystem.sources[soundInstance]?.run(sourceConsumer) == null
+}
+
+private fun <T> SoundManager.getFromSource(soundInstance: SoundInstance?, sourceGetter: (source: Source) -> T): T? {
+    var result: T? = null
+    soundSystem.sources[soundInstance]?.run { result = (sourceGetter)(it) }
+
+    return result
 }
