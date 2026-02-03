@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.sound
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
+import kotlin.math.sin
 
 class VolumeManager(private val soundManager: SoundManager, private val getSoundVolume: () -> Float) {
     private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
@@ -59,22 +60,19 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
         var stopWhenDone: Boolean,
         soundManager: SoundManager) {
         private var fadeTicks: Int = 0
-        private var currentVolume: Float =
+        private val currentVolume: Float =
             if (soundManager.isInstancePaused(soundInstance))
                 0F
             else getInstanceVolume(soundInstance)
 
         fun tick(): Float {
-            fadeTicks++
-
             if (done()) {
                 return targetVolume
             }
 
-            val x = (fadeTicks * 1F / totalTicks)
-            currentVolume += (targetVolume - currentVolume) / (totalTicks - fadeTicks) * x
+            val sin = sin(Math.PI.toFloat() / 2 * fadeTicks++.toFloat() / totalTicks)
 
-            return currentVolume
+            return (targetVolume - currentVolume) * sin * sin + currentVolume
         }
 
         fun redirect(targetVolume: Float, totalTicks: Int, stopWhenDone: Boolean) {
