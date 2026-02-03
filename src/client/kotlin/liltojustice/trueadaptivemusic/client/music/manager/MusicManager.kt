@@ -153,6 +153,11 @@ class MusicManager(private val client: MinecraftClient) {
                 predicateResult.predicate.playableSounds.random(),
                 delay.toLong() * 1000L)
         }
+
+        musicPlayer.getTrackInstance(MAIN_TRACK)?.let {
+            client.musicTracker.setCurrent(it)
+            client.toastManager.onMusicTrackStart()
+        }
     }
 
     fun hasSoundInstance(soundInstance: SoundInstance): Boolean {
@@ -186,12 +191,12 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
-private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
-    return max(
-        0,
-        (trackDelay.toInt() - trackDelayNoise.toInt()..trackDelay.toInt() + trackDelayNoise.toInt()).random())
-        .toUInt()
-}
+    private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
+        return max(
+            0,
+            (trackDelay.toInt() - trackDelayNoise.toInt()..trackDelay.toInt() + trackDelayNoise.toInt()).random())
+            .toUInt()
+    }
 
     companion object {
         private const val MAIN_TRACK = "main"

@@ -21,6 +21,10 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
     private val tracks = mutableMapOf<String, Track>()
 
+    fun getTrackInstance(trackName: String): SoundInstance? {
+        return getTrack(trackName).currentSoundInstance
+    }
+
     fun createTrack(trackName: String, allowResume: Boolean, crossFadeTicks: Int) {
         tracks[trackName] = Track(soundManager, allowResume, crossFadeTicks)
     }

@@ -6,6 +6,7 @@
   "client": [
     "DebugHudMixin",
     "GameOptionsScreenMixin",
+    "MusicTrackerMixin",
     "SoundManagerMixin",
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",

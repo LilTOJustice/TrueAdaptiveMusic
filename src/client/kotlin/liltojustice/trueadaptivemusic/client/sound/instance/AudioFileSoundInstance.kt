@@ -11,8 +11,12 @@ import net.minecraft.util.Identifier
 import java.util.concurrent.CompletableFuture
 
 class AudioFileSoundInstance(private val soundFile: SoundFile)
-    : AbstractSoundInstance(Constants.AUDIO_FILE_STREAM_ID, SoundCategory.MUSIC, SoundInstance.createRandom()),
+    : AbstractSoundInstance(
+    Constants.AUDIO_FILE_STREAM_ID, SoundCategory.MUSIC, SoundInstance.createRandom()),
     VolumeControlled {
+    val fileName
+        get() = soundFile.getName().split('.').dropLast(1).joinToString(".")
+
     override fun getAudioStream(loader: SoundLoader, id: Identifier, repeatInstantly: Boolean):
             CompletableFuture<AudioStream> {
         val extension = soundFile.getExtension()
