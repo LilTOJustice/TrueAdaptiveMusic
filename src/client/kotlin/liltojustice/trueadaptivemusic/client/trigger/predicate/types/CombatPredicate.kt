@@ -89,7 +89,7 @@ class CombatPredicate(
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
-        private const val AGGRO_TIMER_SECONDS = 2L
+        private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI
 
         override fun fromJson(json: JsonObject): CombatPredicate {
