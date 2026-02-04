@@ -6,12 +6,14 @@ import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.util.math.Vec3d
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan
+import kotlin.math.cbrt
 import kotlin.math.tan
 
 class CombatPredicate(
@@ -54,7 +56,12 @@ class CombatPredicate(
                 continue
             }
 
-            if (mobEntity.attacking?.id == playerEntity.id)
+            if (mobEntity.isAttacking
+                        && closeEnough(
+                    relativeMobEntityPosN,
+                    Vec3d(mobEntity.boundingBox.lengthX,
+                        mobEntity.boundingBox.lengthY,
+                        mobEntity.boundingBox.lengthZ)))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
@@ -85,6 +92,10 @@ class CombatPredicate(
     }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
+        private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
+        private const val AGGRO_TIMER_SECONDS = 2L
+        private const val DEG_PER_RAD = 180.0 / PI
+
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate(
                 if (json.has("blacklist")) {
@@ -103,7 +114,14 @@ class CombatPredicate(
             )
         }
 
-        private const val AGGRO_TIMER_SECONDS = 2L
-        private const val DEG_PER_RAD = 180.0 / PI
+        fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
+        {
+            val axialDistance = Vec3d(abs(displacement.x), abs(displacement.y), abs(displacement.z))
+            val scaledAttackerMinDistance = baseAxialDistance
+                .multiply(Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
+            return axialDistance.x < scaledAttackerMinDistance.x
+                    && axialDistance.y < scaledAttackerMinDistance.y
+                    && axialDistance.z < scaledAttackerMinDistance.z
+        }
     }
 }
