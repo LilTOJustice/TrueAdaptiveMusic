@@ -46,9 +46,9 @@ class CombatPredicate(
                     }
                     ?: true }
 
-        for (mobEntity: HostileEntity in validEntities)
-        {
-            val relativeMobEntityPosN = mobEntity.entityPos.subtract(playerEntity.entityPos).normalize()
+        for (mobEntity: HostileEntity in validEntities) {
+            val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
+            val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
             val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
@@ -58,8 +58,7 @@ class CombatPredicate(
                 continue
             }
 
-            if (isValidAttacker(mobEntity, playerEntity))
-            {
+            if (isValidAttacker(mobEntity, playerEntity, relativeMobEntityPos)) {
                 isAggro = true
                 aggroTimerTask?.cancel()
                 aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
@@ -111,22 +110,25 @@ class CombatPredicate(
             )
         }
 
-        fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
+        private fun isValidAttacker(
+            mobEntity: HostileEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
+            return (mobEntity.isAttacking && closeEnough(
+                    displacement,
+                    Vec3d(mobEntity.boundingBox.lengthX,
+                        mobEntity.boundingBox.lengthY,
+                        mobEntity.boundingBox.lengthZ))) ||
+                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
+        }
+
+        private fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
         {
-            val axialDistance = Vec3d(abs(displacement.x), abs(displacement.y), abs(displacement.z))
+            val axialDistance = Vec3d(
+                abs(displacement.x), abs(displacement.y), abs(displacement.z))
             val scaledAttackerMinDistance = baseAxialDistance
                 .multiply(Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
             return axialDistance.x < scaledAttackerMinDistance.x
                     && axialDistance.y < scaledAttackerMinDistance.y
                     && axialDistance.z < scaledAttackerMinDistance.z
-        }
-        private fun isValidAttacker(mobEntity: HostileEntity, playerEntity: PlayerEntity): Boolean {
-            return (mobEntity.isAttacking && closeEnough(
-                    relativeMobEntityPosN,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ))) ||
-                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
         }
     }
 }
