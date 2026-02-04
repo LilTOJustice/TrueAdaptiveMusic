@@ -104,7 +104,8 @@ class MusicManager(private val client: MinecraftClient) {
 
         val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
-        val parameters = predicateResult.predicate.parameters
+        val parameters = predicateResult.predicateParameters
+        val musicToPlay = predicateResult.music
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
@@ -119,7 +120,7 @@ class MusicManager(private val client: MinecraftClient) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
-        if (predicateResult.predicate.playableSounds.isEmpty() || jukeboxPlaying()) {
+        if (musicToPlay.isEmpty() || jukeboxPlaying()) {
             musicPlayer.stop(MAIN_TRACK)
             return
         }
@@ -150,7 +151,7 @@ class MusicManager(private val client: MinecraftClient) {
             val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
             musicPlayer.startNew(
                 MAIN_TRACK,
-                predicateResult.predicate.playableSounds.random(),
+                musicToPlay.random(),
                 delay.toLong() * 1000L)
         }
 
