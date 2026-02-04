@@ -59,9 +59,9 @@ class CombatPredicate(
             if (mobEntity.isAttacking
                         && closeEnough(
                     relativeMobEntityPosN,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ)))
+                    Vec3d(mobEntity.boundingBox.xLength,
+                        mobEntity.boundingBox.yLength,
+                        mobEntity.boundingBox.zLength)))
             {
                 isAggro = true
                 aggroTimerTask?.cancel()
