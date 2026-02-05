@@ -17,6 +17,8 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
             "-v", "panic",
             "-i", "pipe:0",
             "-f", "s16le",
+            "-af", "loudnorm=I=-14",
+            "-ar", "${format.sampleRate.toInt()}",
             "-acodec", "pcm_s16le",
             "-")
             .start()

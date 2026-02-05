@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
@@ -21,10 +22,12 @@ class AudioFileSoundInstance(private val soundFile: SoundFile)
             CompletableFuture<AudioStream> {
         val extension = soundFile.getExtension()
         try {
-            return if (extension == "ogg") {
-                CompletableFuture.completedFuture(TruncatedAudioStream(OggAudioStream(soundFile.getInputStream())))
+            return if (!TAMClient.hasFFmpeg && extension == "ogg") {
+                CompletableFuture.supplyAsync {
+                    TruncatedAudioStream(OggAudioStream(soundFile.getInputStream())) }
             } else {
-                CompletableFuture.completedFuture(TruncatedAudioStream(FFmpeg.makeStream(soundFile)))
+                CompletableFuture.supplyAsync {
+                    TruncatedAudioStream(FFmpeg.makeStream(soundFile)) }
             }
         }
         catch (_: Exception) {
