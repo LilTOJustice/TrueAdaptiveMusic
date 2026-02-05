@@ -29,6 +29,7 @@ class MusicManager(private val client: MinecraftClient) {
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var activeEvents: List<MusicEvent> = emptyList()
+    private var lastMusic: PlayableSound? = null
 
     init {
         musicPlayer.createTrack(
@@ -149,10 +150,12 @@ class MusicManager(private val client: MinecraftClient) {
         }
         else {
             val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
+            val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
             musicPlayer.startNew(
                 MAIN_TRACK,
-                musicToPlay.random(),
+                newMusic,
                 delay.toLong() * 1000L)
+            lastMusic = newMusic
         }
 
         musicPlayer.getTrackInstance(MAIN_TRACK)?.let {
@@ -177,6 +180,7 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
         activeEvents = emptyList()
+        lastMusic = null
     }
 
     private fun jukeboxPlaying(): Boolean {
@@ -210,6 +214,17 @@ class MusicManager(private val client: MinecraftClient) {
 
         private fun isPaused(client: MinecraftClient): Boolean {
             return client.world != null && client.currentScreen?.shouldPause() ?: false
+        }
+
+        private fun getPseudoRandomTrack(
+            musicToPlay: List<PlayableSound>, lastMusic: PlayableSound? = null): PlayableSound {
+            if (musicToPlay.size == 1) {
+                return musicToPlay.first()
+            }
+
+            val remainingMusic = lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay
+
+            return remainingMusic.random()
         }
     }
 }
