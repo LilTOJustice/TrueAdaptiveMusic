@@ -36,13 +36,15 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
 
     private fun processFade(fade: Fade) {
         setInstanceVolume(fade.soundInstance, fade.tick())
-        if (fade.done()) {
-            if (fade.stopWhenDone) {
-                soundManager.stop(fade.soundInstance)
-            }
-
-            fades.remove(fade.soundInstance)
+        if (!fade.done()) {
+            return
         }
+
+        if (fade.stopWhenDone) {
+            soundManager.stop(fade.soundInstance)
+        }
+
+        fades.remove(fade.soundInstance)
     }
 
     fun setInstanceVolume(soundInstance: SoundInstance, volume: Float, allowPause: Boolean = true) {

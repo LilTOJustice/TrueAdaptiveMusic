@@ -75,8 +75,9 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
+        val isPaused = isPaused(client)
         musicPlayer.clampTrackVolume(EVENT_TRACK,
-            if (isPaused(client)) {
+            if (isPaused) {
                 PAUSE_VOLUME
             }
             else {
@@ -90,7 +91,7 @@ class MusicManager(private val client: MinecraftClient) {
             else if (musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)) {
                 0F
             }
-            else if (isPaused(client)) {
+            else if (isPaused) {
                 PAUSE_VOLUME
             }
             else {

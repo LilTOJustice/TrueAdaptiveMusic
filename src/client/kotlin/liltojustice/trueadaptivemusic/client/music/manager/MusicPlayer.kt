@@ -150,8 +150,7 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
         return soundManager.isPlaying(soundInstance) &&
-                !(soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true) &&
-                (soundInstance?.volume ?: 0F) != 0F
+                !(soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
     }
 
     private fun playInstance(soundInstance: SoundInstance?) {
