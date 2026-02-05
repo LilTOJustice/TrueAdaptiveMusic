@@ -60,22 +60,25 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
         var stopWhenDone: Boolean,
         soundManager: SoundManager) {
         private var fadeTicks: Int = 0
-        private val currentVolume: Float =
+        private var startingVolume: Float =
             if (soundManager.isInstancePaused(soundInstance))
                 0F
             else getInstanceVolume(soundInstance)
 
         fun tick(): Float {
+            fadeTicks++
+
             if (done()) {
                 return targetVolume
             }
 
-            val sin = sin(Math.PI.toFloat() / 2 * fadeTicks++.toFloat() / totalTicks)
+            val sin = sin(Math.PI.toFloat() / 2 * fadeTicks.toFloat() / totalTicks)
 
-            return (targetVolume - currentVolume) * sin * sin + currentVolume
+            return (targetVolume - startingVolume) * sin * sin + startingVolume
         }
 
         fun redirect(targetVolume: Float, totalTicks: Int, stopWhenDone: Boolean) {
+            this.startingVolume = getInstanceVolume(soundInstance)
             this.targetVolume = targetVolume
             this.totalTicks = totalTicks
             this.stopWhenDone = stopWhenDone
