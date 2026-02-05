@@ -13,6 +13,7 @@ import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
+import kotlin.math.min
 
 internal class MusicPlayer(client: MinecraftClient) {
     private val soundManager = client.soundManager
@@ -55,7 +56,11 @@ internal class MusicPlayer(client: MinecraftClient) {
                 track.currentSoundInstance?.let {
                     !volumeManager.hasFade(it) } == true) {
                 startFade(
-                    track, CLAMP_TICKS, track.desiredVolume, stopWhenDone = false, isClamp = true)
+                    track,
+                    CLAMP_TICKS,
+                    min(track.clampedVolume, track.desiredVolume),
+                    stopWhenDone = false,
+                    isClamp = true)
             }
         }
 
