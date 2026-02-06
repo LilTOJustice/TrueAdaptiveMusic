@@ -28,9 +28,10 @@ class MusicPredicateTree private constructor(
     fun getMusicToPlay(client: MinecraftClient): Result {
         val result = root.getSatisfiedNode(client)
         return Result(
-            result.second.joinToString(PATH_SEPARATOR),
-            result.first.predicate,
-            result.third.values.toList())
+            result.path.joinToString(PATH_SEPARATOR),
+            result.node.predicate.parameters,
+            result.music,
+            result.events.values.toList())
     }
 
     private fun traverseRecursive(
@@ -101,11 +102,13 @@ class MusicPredicateTree private constructor(
         }
 
         fun getSatisfiedNode(
-            client: MinecraftClient, path: List<String> = emptyList(), events: Map<String, MusicEvent> = emptyMap())
-                : Triple<Node, List<String>, Map<String, MusicEvent>> {
+            client: MinecraftClient,
+            path: List<String> = emptyList(),
+            events: Map<String, MusicEvent> = emptyMap(),
+            music: Set<PlayableSound> = emptySet()): Result {
             try {
                 if (!predicate.testPredicate(client)) {
-                    return Triple(this, emptyList(), emptyMap())
+                    return Result(this, emptyList(), emptyMap(), emptyList())
                 }
             }
             catch (e: NoClassDefFoundError) {
@@ -114,28 +117,33 @@ class MusicPredicateTree private constructor(
                             "Are you missing a mod?\nError: $e",
                     true)
 
-                return Triple(this, emptyList(), emptyMap())
+                return Result(this, emptyList(), emptyMap(), emptyList())
             }
             catch (e: Exception) {
                 Logger.logError(
                     "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: $e",
                     true)
 
-                return Triple(this, emptyList(), emptyMap())
+                return Result(this, emptyList(), emptyMap(), emptyList())
             }
 
             val newPath = path + predicate.getTriggerId()
             val newEvents = events + this.events.map { event -> Pair(event.getTriggerId(), event) }
+            val newMusic = predicate.playableSounds.toSet() +
+                    if (predicate.parameters.inheritMusic)
+                        music
+                    else
+                        emptySet()
 
             for (child in children) {
-                val result = child.getSatisfiedNode(client, newPath, newEvents)
+                val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic)
 
-                if (result.second.isNotEmpty()) {
+                if (result.path.isNotEmpty()) {
                     return result
                 }
             }
 
-            return Triple(this, newPath, newEvents)
+            return Result(this, newPath, newEvents, newMusic.toList())
         }
 
         fun newChild(
@@ -223,10 +231,17 @@ class MusicPredicateTree private constructor(
                 else mutableListOf()
             }
         }
+
+        class Result(
+            val node: Node,
+            val path: List<String>,
+            val events: Map<String, MusicEvent>,
+            val music: List<PlayableSound>)
     }
 
     class Result(
         val path: String,
-        val predicate: MusicPredicate,
+        val predicateParameters: MusicPredicate.Parameters,
+        val music: List<PlayableSound>,
         val events: List<MusicEvent>)
 }
