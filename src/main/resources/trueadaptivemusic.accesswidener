@@ -9,7 +9,5 @@ accessible class net/minecraft/client/option/SimpleOption$Callbacks
 accessible field net/minecraft/client/gui/screen/option/SoundOptionsScreen optionButtons Lnet/minecraft/client/gui/widget/OptionListWidget;
 extendable class net/minecraft/util/Identifier
 accessible method net/minecraft/util/Identifier <init> (Ljava/lang/String;Ljava/lang/String;)V
-accessible field net/minecraft/client/gui/screen/option/GameOptionsScreen body Lnet/minecraft/client/gui/widget/OptionListWidget;
-extendable method net/minecraft/client/gui/widget/PressableWidget renderWidget (Lnet/minecraft/client/gui/DrawContext;IIF)V
 accessible method net/minecraft/client/sound/Source getSourceState ()I
 accessible field net/minecraft/client/sound/MusicTracker current Lnet/minecraft/client/sound/SoundInstance;
