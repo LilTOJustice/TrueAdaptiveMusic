@@ -13,6 +13,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDeathEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnJoinWorldEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnNightStartEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnPauseEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
@@ -99,6 +100,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerEvent("on_recipe_unlock", OnRecipeUnlockEvent::class)
         TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
         TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
+        TAMClient.registerEvent("on_pause", OnPauseEvent::class)
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             TAMClient.tick(client)
@@ -110,7 +112,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             TextInputWidget(
                 screen,
                 prompt,
-                30,
                 { widget, text ->
                     outArgs[arg.index] = text
                     onChange()
@@ -126,7 +127,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             TextInputWidget(
                 screen,
                 prompt,
-                30,
                 { widget, text ->
                     if (text == "0-") {
                         return@TextInputWidget "-0"
@@ -155,7 +155,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             TextInputWidget(
                 screen,
                 prompt,
-                30,
                 { widget, text ->
                     val value = text.toUIntOrNull()
                     if (value == null) {
