@@ -47,7 +47,7 @@ class CombatPredicate(
                     ?: true }
 
         for (mobEntity: HostileEntity in validEntities) {
-            val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
+            val relativeMobEntityPos = mobEntity.pos.subtract(playerEntity.pos)
             val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
