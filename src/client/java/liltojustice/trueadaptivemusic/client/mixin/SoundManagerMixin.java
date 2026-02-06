@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundManager.class)
 public class SoundManagerMixin {
-    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("HEAD"), cancellable = true)
-    public void play(SoundInstance sound, CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
+    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)V", at = @At("HEAD"), cancellable = true)
+    public void play(SoundInstance sound, CallbackInfo ci) {
         if (SoundManagerMixinHelper.shouldIgnore(sound)) {
-            cir.setReturnValue(SoundSystem.PlayResult.STARTED);
+            ci.cancel();
         }
     }
 
