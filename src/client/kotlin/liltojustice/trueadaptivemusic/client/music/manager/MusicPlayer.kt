@@ -13,6 +13,7 @@ import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
+import kotlin.math.min
 
 internal class MusicPlayer(client: MinecraftClient) {
     private val soundManager = client.soundManager
@@ -20,6 +21,10 @@ internal class MusicPlayer(client: MinecraftClient) {
         client.options.getSoundVolume(SoundCategory.MUSIC)
     }
     private val tracks = mutableMapOf<String, Track>()
+
+    fun getTrackInstance(trackName: String): SoundInstance? {
+        return getTrack(trackName).currentSoundInstance
+    }
 
     fun createTrack(trackName: String, allowResume: Boolean, crossFadeTicks: Int) {
         tracks[trackName] = Track(soundManager, allowResume, crossFadeTicks)
@@ -51,9 +56,14 @@ internal class MusicPlayer(client: MinecraftClient) {
                 track.currentSoundInstance?.let {
                     !volumeManager.hasFade(it) } == true) {
                 startFade(
-                    track, CLAMP_TICKS, track.desiredVolume, stopWhenDone = false, isClamp = true)
+                    track,
+                    CLAMP_TICKS,
+                    min(track.clampedVolume, track.desiredVolume),
+                    stopWhenDone = false,
+                    isClamp = true)
             }
         }
+
         volumeManager.tick()
     }
 
@@ -140,8 +150,7 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     private fun isPlaying(soundInstance: SoundInstance?): Boolean {
         return soundManager.isPlaying(soundInstance) &&
-                !(soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true) &&
-                (soundInstance?.volume ?: 0F) != 0F
+                !(soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
     }
 
     private fun playInstance(soundInstance: SoundInstance?) {
@@ -182,7 +191,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     companion object {
-        private const val CLAMP_TICKS = 5
+        private const val CLAMP_TICKS = 10
     }
 
     private class Track(
