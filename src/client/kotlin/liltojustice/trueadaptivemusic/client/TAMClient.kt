@@ -14,6 +14,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -26,6 +27,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 object TAMClient {
+    val minecraftClient: MinecraftClient = MinecraftClient.getInstance()
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
@@ -46,6 +48,7 @@ object TAMClient {
             }
     val hasFFmpeg
         get() = hasFFmpegLocal || hasFFmpegGlobal
+    var currentPredicateResult: MusicPredicateTree.Result? = null
 
 
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
@@ -80,6 +83,7 @@ object TAMClient {
             initialize(client)
         }
 
+        currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
         musicManager!!.tick()
     }
 
