@@ -7,6 +7,6 @@ import net.minecraft.sound.MusicSound
 object MusicTrackerMixinHelper {
     @JvmStatic
     fun shouldIgnore(sound: MusicSound): Boolean {
-        return PositionedSoundInstance.music(sound.sound.value()).shouldIgnore()
+        return PositionedSoundInstance.music(sound.sound.value(), 1F).shouldIgnore()
     }
 }

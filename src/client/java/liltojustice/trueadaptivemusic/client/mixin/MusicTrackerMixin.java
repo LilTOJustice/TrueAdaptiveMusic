@@ -4,7 +4,6 @@ import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.javasucks.MusicTrackerMixinHelper;
 import liltojustice.trueadaptivemusic.client.sound.instance.AudioFileSoundInstance;
 import net.minecraft.client.sound.*;
-import net.minecraft.sound.MusicSound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,8 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MusicTracker.class)
 public class MusicTrackerMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
-    public void play(MusicSound sound, CallbackInfo ci) {
-        if (MusicTrackerMixinHelper.shouldIgnore(sound)) {
+    public void play(MusicInstance instance, CallbackInfo ci) {
+        var music = instance.music();
+        if (music != null && MusicTrackerMixinHelper.shouldIgnore(music)) {
             ci.cancel();
         }
     }
