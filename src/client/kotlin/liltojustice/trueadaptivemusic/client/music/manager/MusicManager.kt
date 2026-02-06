@@ -158,11 +158,6 @@ class MusicManager(private val client: MinecraftClient) {
                 delay.toLong() * 1000L)
             lastMusic = newMusic
         }
-
-        musicPlayer.getTrackInstance(MAIN_TRACK)?.let {
-            client.musicTracker.setCurrent(it)
-            client.toastManager.onMusicTrackStart()
-        }
     }
 
     fun hasSoundInstance(soundInstance: SoundInstance): Boolean {

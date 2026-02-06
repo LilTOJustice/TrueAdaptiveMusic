@@ -20,4 +20,4 @@ private fun uiToastCheck(sound: SoundInstance): Boolean {
             && events.stream().anyMatch { event: MusicEvent? -> event is OnAdvancementGetEvent }
 }
 
-private val CHALLENGE_COMPLETE = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.id().toString()
+private val CHALLENGE_COMPLETE = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.id.toString()
