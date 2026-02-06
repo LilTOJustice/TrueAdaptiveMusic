@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.sound
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
+import kotlin.math.sin
 
 class VolumeManager(private val soundManager: SoundManager, private val getSoundVolume: () -> Float) {
     private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
@@ -35,13 +36,15 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
 
     private fun processFade(fade: Fade) {
         setInstanceVolume(fade.soundInstance, fade.tick())
-        if (fade.done()) {
-            if (fade.stopWhenDone) {
-                soundManager.stop(fade.soundInstance)
-            }
-
-            fades.remove(fade.soundInstance)
+        if (!fade.done()) {
+            return
         }
+
+        if (fade.stopWhenDone) {
+            soundManager.stop(fade.soundInstance)
+        }
+
+        fades.remove(fade.soundInstance)
     }
 
     fun setInstanceVolume(soundInstance: SoundInstance, volume: Float, allowPause: Boolean = true) {
@@ -59,7 +62,7 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
         var stopWhenDone: Boolean,
         soundManager: SoundManager) {
         private var fadeTicks: Int = 0
-        private var currentVolume: Float =
+        private var startingVolume: Float =
             if (soundManager.isInstancePaused(soundInstance))
                 0F
             else getInstanceVolume(soundInstance)
@@ -71,13 +74,13 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
                 return targetVolume
             }
 
-            val x = (fadeTicks * 1F / totalTicks)
-            currentVolume += (targetVolume - currentVolume) / (totalTicks - fadeTicks) * x
+            val sin = sin(Math.PI.toFloat() / 2 * fadeTicks.toFloat() / totalTicks)
 
-            return currentVolume
+            return (targetVolume - startingVolume) * sin * sin + startingVolume
         }
 
         fun redirect(targetVolume: Float, totalTicks: Int, stopWhenDone: Boolean) {
+            this.startingVolume = getInstanceVolume(soundInstance)
             this.targetVolume = targetVolume
             this.totalTicks = totalTicks
             this.stopWhenDone = stopWhenDone
