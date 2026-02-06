@@ -32,6 +32,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var saveButtonWidget: TextIconButtonWidget
     private lateinit var closeButtonWidget: ButtonWidget
     private lateinit var openAssetsFolderButtonWidget: ButtonWidget
+    private lateinit var metaButtonWidget: ButtonWidget
     private var selectedEvent: MusicEvent? = null
 
     private val eventView: Boolean
@@ -88,6 +89,11 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
+        metaButtonWidget = ButtonWidget.Builder(META_BUTTON_TEXT) {
+            client.setScreen(MetaScreen(this, musicPack))
+        }
+            .build()
+
         predicateViewWidget = PredicateViewWidget(
             getContainerWidth(),
             getContainerHeight(),
@@ -131,6 +137,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         addDrawableChild(predicateViewWidget)
         addDrawableChild(packStructureWidget)
         addDrawableChild(eventViewWidget)
+        addDrawableChild(metaButtonWidget)
 
         saveButtonWidget.width = 90
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
@@ -140,6 +147,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                 "trueadaptivemusic.change_save", "Changes will be saved")))
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
+        metaButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        metaButtonWidget.x = openAssetsFolderButtonWidget.x - metaButtonWidget.width - 5
 
         val containerWidth = getContainerWidth()
         val containerHeight = getContainerHeight()
@@ -232,5 +241,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
+        private val META_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.meta", "Meta")
     }
 }
