@@ -70,7 +70,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             .build()
 
         metaButtonWidget = ButtonWidget.Builder(META_BUTTON_TEXT) {
-            client.setScreen(MetaScreen(this, musicPack))
+            client?.setScreen(MetaScreen(this, musicPack))
         }
             .build()
 
