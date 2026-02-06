@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftClient.class)
 public class OnPauseMixin {
     @Inject(
-            method = "openGameMenu",
+            method = "openPauseMenu",
             at = @At("HEAD"))
     public void openGameMenu(boolean pauseOnly, CallbackInfo ci) {
         if (MinecraftClient.getInstance().currentScreen == null) {

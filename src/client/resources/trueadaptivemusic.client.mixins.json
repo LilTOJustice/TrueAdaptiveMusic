@@ -5,9 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "DebugHudMixin",
-    "GameOptionsScreenMixin",
-    "MusicTrackerMixin",
     "SoundManagerMixin",
+    "SoundOptionsScreenMixin",
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",
     "event.OnDeathEventMixin",

@@ -6,8 +6,8 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.widget.IconButtonWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -21,7 +21,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     private var packName = ""
     private var errorText = ""
     private lateinit var packNameWidget: TextFieldWidget
-    private lateinit var acceptButtonWidget: TextIconButtonWidget
+    private lateinit var acceptButtonWidget: IconButtonWidget
 
     override fun init() {
         packNameWidget = TextFieldWidget(

@@ -47,7 +47,7 @@ class CombatPredicate(
                     ?: true }
 
         for (mobEntity: HostileEntity in validEntities) {
-            val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
+            val relativeMobEntityPos = mobEntity.pos.subtract(playerEntity.pos)
             val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
@@ -114,9 +114,9 @@ class CombatPredicate(
             mobEntity: HostileEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
             return (mobEntity.isAttacking && closeEnough(
                     displacement,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ))) ||
+                    Vec3d(mobEntity.boundingBox.xLength,
+                        mobEntity.boundingBox.yLength,
+                        mobEntity.boundingBox.zLength))) ||
                     ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
         }
 
