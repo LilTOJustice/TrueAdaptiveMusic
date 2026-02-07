@@ -4,8 +4,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
@@ -29,9 +32,11 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.primaryConstructor
 
 class MusicPack private constructor(
-    val metadata: Metadata,
+    var metadata: Metadata,
     val rules: MusicPredicateTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
@@ -133,11 +138,12 @@ class MusicPack private constructor(
 
     fun initMeta() {
         val metaFile = Path(getEditPackDir().pathString, Constants.META_FILENAME)
+
         if (!metaFile.exists()) {
             metaFile.createFile()
         }
 
-        metaFile.writeText(getGson().toJson(metadata.toJson()))
+        metaFile.writeText(metadata.jsonEncode())
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -151,7 +157,7 @@ class MusicPack private constructor(
         val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
-        metaFile.toFile().writeText(gson.toJson(metadata.toJson()))
+        metaFile.toFile().writeText(metadata.jsonEncode())
         val outputPath = Path(packDir.pathString + ".zip")
         outputPath.deleteIfExists()
         ZipOutputStream(FileOutputStream(outputPath.createFile().pathString)).use { out ->
@@ -329,7 +335,7 @@ class MusicPack private constructor(
 
             if (metaFile != null)
             {
-                metadata = Metadata.fromJson(JsonHelper.deserialize(metaFile.inputStream().reader()))
+                metadata = Metadata.jsonDecode(metaFile.inputStream().reader().readText())
             }
 
             if (rulesFile == null)
@@ -372,8 +378,8 @@ class MusicPack private constructor(
 
                 if (metaFile != null)
                 {
-                    metadata = Metadata.fromJson(
-                        JsonHelper.deserialize(zipFile.getInputStream(metaFile).reader()))
+                    metadata = Metadata.jsonDecode(
+                        zipFile.getInputStream(metaFile).reader().readText())
                 }
 
                 if (rulesFile == null)
@@ -408,7 +414,7 @@ class MusicPack private constructor(
             return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
         }
 
-        private fun packageNameOf(qualifiedClassName: String): String {
+        /*private fun packageNameOf(qualifiedClassName: String): String {
             return qualifiedClassName.split(".").dropLast(1).joinToString(".")
         }
 
@@ -420,21 +426,32 @@ class MusicPack private constructor(
 
         private fun relatedPackages(first: String, second: String): Boolean {
             return commonPackage(first, second) != null
-        }
+        }*/
     }
 
-    data class Metadata(var description: String = "") {
-        fun toJson(): JsonObject {
-            val result = JsonObject()
-            result.addProperty("description", description)
+    @Serializable
+    data class Metadata(val description: String = "") {
+        fun getArgs(): List<Any?> {
+            return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
+        }
 
-            return result
+        fun jsonEncode(): String {
+            return json.encodeToString(this)
         }
 
         companion object {
-            fun fromJson(json: JsonObject): Metadata {
-                return Metadata(
-                    json.getAsJsonPrimitive("description")?.asString ?: "")
+            private val json = Json {
+                encodeDefaults = true
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+
+            fun jsonDecode(string: String): Metadata {
+                return json.decodeFromString(string)
+            }
+
+            fun getRequiredArgs(): List<KParameter> {
+                return Metadata::class.primaryConstructor?.parameters ?: emptyList()
             }
         }
     }

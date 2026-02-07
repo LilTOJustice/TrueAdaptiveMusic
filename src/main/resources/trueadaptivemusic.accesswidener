@@ -10,3 +10,4 @@ accessible field net/minecraft/client/gui/screen/option/SoundOptionsScreen optio
 extendable class net/minecraft/util/Identifier
 accessible method net/minecraft/util/Identifier <init> (Ljava/lang/String;Ljava/lang/String;)V
 accessible method net/minecraft/client/sound/Source getSourceState ()I
+accessible field net/minecraft/client/sound/MusicTracker current Lnet/minecraft/client/sound/SoundInstance;
