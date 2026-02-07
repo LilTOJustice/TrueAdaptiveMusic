@@ -163,7 +163,7 @@ internal class MusicPlayer(client: MinecraftClient) {
         track: Track, newSound: PlayableSound, newSoundInstance: SoundInstance, resume: Boolean) {
         track.updateSound(newSound, newSoundInstance)
 
-        volumeManager.setInstanceVolume(track.currentSoundInstance!!, Float.MIN_VALUE)
+        volumeManager.setInstanceVolume(track.currentSoundInstance!!, 0.01F)
 
         if (resume) {
             soundManager.resumeInstance(track.currentSoundInstance)
