@@ -81,8 +81,6 @@ internal class MusicPlayer(client: MinecraftClient) {
         val track = getTrack(trackName)
         if (!isPlaying(track.currentSoundInstance)) {
             track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
-
-            return
         }
         else if (delayMillis != 0L) {
             startFade(track, track.crossFadeTicks, 0F, false)
@@ -91,12 +89,11 @@ internal class MusicPlayer(client: MinecraftClient) {
                 track.desiredVolume = 1F
                 soundManager.play(track.currentSoundInstance)
             }
-
-            return
         }
-
-        track.startDelay(delayMillis) {
-            beginCrossfade(track, newMusic, newMusic.makeSoundInstance(), false)
+        else {
+            track.startDelay(delayMillis) {
+                beginCrossfade(track, newMusic, newMusic.makeSoundInstance(), false)
+            }
         }
     }
 
@@ -166,7 +163,7 @@ internal class MusicPlayer(client: MinecraftClient) {
         track: Track, newSound: PlayableSound, newSoundInstance: SoundInstance, resume: Boolean) {
         track.updateSound(newSound, newSoundInstance)
 
-        volumeManager.setInstanceVolume(track.currentSoundInstance!!, 0F)
+        volumeManager.setInstanceVolume(track.currentSoundInstance!!, 0.01F)
 
         if (resume) {
             soundManager.resumeInstance(track.currentSoundInstance)
@@ -191,7 +188,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     companion object {
-        private const val CLAMP_TICKS = 10
+        private const val CLAMP_TICKS = 20
     }
 
     private class Track(
