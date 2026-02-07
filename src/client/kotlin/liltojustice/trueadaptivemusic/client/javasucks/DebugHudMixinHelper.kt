@@ -28,7 +28,7 @@ object DebugHudMixinHelper {
         val textRenderer = client.textRenderer
         val predicateTreeLines = mutableListOf<Line>()
         val rules = musicPack.rules
-        val currentNodePath = rules.getMusicToPlay(client).path
+        val currentNodePath = TAMClient.currentPredicateResult?.path ?: return
         val currentNodeDepth = currentNodePath.split(MusicPredicateTree.PATH_SEPARATOR).size
 
         rules.preorderTraverse { _, path ->
