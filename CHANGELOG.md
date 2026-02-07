@@ -1,28 +1,21 @@
-True Adaptive Music v1.4
+True Adaptive Music v1.5
 
 Features and Fixes:
-- (Hopefully) back up on Curseforge!
-- Per-mob combat music
-- Mob blacklisting for combat music
-- Improved combat predicate logic
-- In-game installation instructions for FFmpeg with support for local or global installs
-- OnJoinWorld event now works again
-- enterDelay predicate parameter for having delay before music starts when the predicate becomes true
+- All external audio is now normalized, so all tracks will follow the same loudness standard (-16 LUFS)
+- New inheritMusic node parameter (if turned on, the node will include the music from its parent in addition to its own)
+- You can now add descriptions for your packs in the UI (go to "Edit Pack" -> "Meta")
+- Smoother sigmoid curve fading for crossfades (fading should feel smoother)
+- "Music Toast" support for minecraft versions that have that feature
+- The same track will no longer play twice in a row (if possible)
+- Guardians now trigger the combat predicate
+- Fixed a crash when hitting enter on the pack naming screen
+- Vanilla advancement toast will no longer play if advancement event is set
+- Improved performance for ffmpeg streaming
+- Improved performance with debug hud on
+- And some small other fixes...
 
-New Vanilla Predicate Types:
-- InWater
-- InLava
-- Fishing
-- Flying (eyltra)
-- Paused
-- Credits
-- InBed
-- BossHealth
-- Hunger
-- Nearby (true when an entity is within a certain range)
-
-QoL:
-- No need to hit "save" all the time when working on a music pack. The UI now constantly saves as you work.
+New Vanilla Event Types:
+- OnPause
 
 What's Next?:
 1.5 of course :) See current planned features here https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/6
