@@ -8,7 +8,6 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.client.sound.SoundManager
 import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
@@ -27,7 +26,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     fun createTrack(trackName: String, allowResume: Boolean, crossFadeTicks: Int) {
-        tracks[trackName] = Track(soundManager, allowResume, crossFadeTicks)
+        tracks[trackName] = Track(this, allowResume, crossFadeTicks)
     }
 
     fun hasSoundInstance(instance: SoundInstance): Boolean {
@@ -192,7 +191,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     private class Track(
-        private val soundManager: SoundManager, val allowResume: Boolean, val crossFadeTicks: Int) {
+        private val musicPlayer: MusicPlayer, val allowResume: Boolean, val crossFadeTicks: Int) {
         var currentSound: PlayableSound? = null
             private set
         var oldSound: PlayableSound? = null
@@ -236,7 +235,10 @@ internal class MusicPlayer(client: MinecraftClient) {
 
         fun updateSound(newSound: PlayableSound, newSoundInstance: SoundInstance) {
             if (oldSound != newSound) {
-                soundManager.stop(oldSoundInstance)
+                oldSoundInstance?.let {
+                    musicPlayer.volumeManager.startFade(
+                        it, crossFadeTicks, 0F, true)
+                }
             }
 
             oldSound = currentSound
