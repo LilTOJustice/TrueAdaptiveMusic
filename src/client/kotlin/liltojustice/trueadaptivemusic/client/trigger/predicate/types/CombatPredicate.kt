@@ -5,7 +5,9 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.mob.GuardianEntity
 import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.Vec3d
 import java.util.*
 import kotlin.concurrent.schedule
@@ -44,9 +46,9 @@ class CombatPredicate(
                     }
                     ?: true }
 
-        for (mobEntity: HostileEntity in validEntities)
-        {
-            val relativeMobEntityPosN = mobEntity.pos.subtract(playerEntity.pos).normalize()
+        for (mobEntity: HostileEntity in validEntities) {
+            val relativeMobEntityPos = mobEntity.pos.subtract(playerEntity.pos)
+            val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
             val mobVerticalAngle = acos(relativeMobEntityPosN.y)
             val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
@@ -56,13 +58,7 @@ class CombatPredicate(
                 continue
             }
 
-            if (mobEntity.isAttacking
-                        && closeEnough(
-                    relativeMobEntityPosN,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ)))
-            {
+            if (isValidAttacker(mobEntity, playerEntity, relativeMobEntityPos)) {
                 isAggro = true
                 aggroTimerTask?.cancel()
                 aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
@@ -93,7 +89,7 @@ class CombatPredicate(
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
-        private const val AGGRO_TIMER_SECONDS = 2L
+        private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI
 
         override fun fromJson(json: JsonObject): CombatPredicate {
@@ -114,9 +110,20 @@ class CombatPredicate(
             )
         }
 
-        fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
+        private fun isValidAttacker(
+            mobEntity: HostileEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
+            return (mobEntity.isAttacking && closeEnough(
+                    displacement,
+                    Vec3d(mobEntity.boundingBox.lengthX,
+                        mobEntity.boundingBox.lengthY,
+                        mobEntity.boundingBox.lengthZ))) ||
+                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
+        }
+
+        private fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
         {
-            val axialDistance = Vec3d(abs(displacement.x), abs(displacement.y), abs(displacement.z))
+            val axialDistance = Vec3d(
+                abs(displacement.x), abs(displacement.y), abs(displacement.z))
             val scaledAttackerMinDistance = baseAxialDistance
                 .multiply(Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
             return axialDistance.x < scaledAttackerMinDistance.x
