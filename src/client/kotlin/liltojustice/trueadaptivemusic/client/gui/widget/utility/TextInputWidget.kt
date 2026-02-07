@@ -9,19 +9,20 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.Text
+import kotlin.math.min
 
 class TextInputWidget(
     private val screen: Screen,
     prompt: String,
-    textFieldWidth: Int,
     onChange: (widget: TextInputWidget, text: String) -> String,
     placeholder: String = "",
     x: Int = 0,
     y: Int = 0)
-    : ClickableWidget(x, y, 0, HEIGHT, Text.literal(prompt)) {
+    : ClickableWidget(x, y, Int.MAX_VALUE, HEIGHT, Text.literal(prompt)) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     private val promptWidget = TextWidget(Text.literal(prompt), textRenderer)
-    private val fieldWidget = TextFieldWidget(textRenderer, 0, 0, textFieldWidth, HEIGHT, Text.literal(placeholder))
+    private val fieldWidget = TextFieldWidget(
+        textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Text.literal(placeholder))
     var text: String
         get() { return fieldWidget.text }
         set(value) { fieldWidget.text = value }
@@ -29,7 +30,6 @@ class TextInputWidget(
 
     init {
         fieldWidget.setChangedListener { text -> updateText = onChange(this, text).ifEmpty { "" } }
-        width = promptWidget.width + PADDING + fieldWidget.width
         text = placeholder
     }
 
@@ -43,6 +43,7 @@ class TextInputWidget(
         promptWidget.y = y
         fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
         fieldWidget.y = y
+        fieldWidget.width = min(textRenderer.getWidth(text) + 30, width - (fieldWidget.x - x))
 
         promptWidget.render(context, mouseX, mouseY, delta)
         fieldWidget.render(context, mouseX, mouseY, delta)

@@ -26,6 +26,7 @@ data class TrueAdaptiveMusicOptions(
         private val json = Json {
             encodeDefaults = true
             prettyPrint = true
+            ignoreUnknownKeys = true
         }
 
         fun jsonDecode(string: String): TrueAdaptiveMusicOptions {
