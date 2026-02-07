@@ -75,35 +75,6 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        val isPaused = isPaused(client)
-        musicPlayer.clampTrackVolume(EVENT_TRACK,
-            if (isPaused) {
-                PAUSE_VOLUME
-            }
-            else {
-                1F
-            })
-
-        musicPlayer.clampTrackVolume(MAIN_TRACK,
-            if (musicPlayer.isTrackPlaying(EVENT_TRACK)) {
-                BACKGROUND_VOLUME
-            }
-            else if (musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)) {
-                0F
-            }
-            else if (isPaused) {
-                PAUSE_VOLUME
-            }
-            else {
-                1F
-            })
-
-        musicPlayer.tick()
-
-        if (musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)) {
-            return
-        }
-
         val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
         val parameters = predicateResult.predicateParameters
@@ -114,17 +85,43 @@ class MusicManager(private val client: MinecraftClient) {
 
         activeEvents = predicateResult.events
 
+        val isPaused = isPaused(client)
+        val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
+
+        musicPlayer.clampTrackVolume(EVENT_TRACK,
+            if (isPaused) {
+                PAUSE_VOLUME
+            }
+            else {
+                1F
+            })
+
+        musicPlayer.clampTrackVolume(MAIN_TRACK,
+            if (shouldStop) {
+                0F
+            }
+            else if (musicPlayer.isTrackPlaying(EVENT_TRACK)) {
+                BACKGROUND_VOLUME
+            }
+            else if (isPaused) {
+                PAUSE_VOLUME
+            }
+            else {
+                1F
+            })
+
+        musicPlayer.tick()
+
+        if (shouldStop) {
+            return
+        }
+
         if (playingEvent != null && !musicPlayer.isTrackPlaying(EVENT_TRACK)) {
             playingEvent = null
         }
 
         if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
             musicPlayer.stop(EVENT_TRACK)
-        }
-
-        if (musicToPlay.isEmpty() || jukeboxPlaying()) {
-            musicPlayer.stop(MAIN_TRACK)
-            return
         }
 
         if (!shouldPlay(identifier)) {
@@ -139,12 +136,7 @@ class MusicManager(private val client: MinecraftClient) {
             MusicEvent.invokeMusicEvent(TAMClient.eventRegistry[OnEnterPredicateEvent::class])
         }
 
-        oldMusicPredicateId =
-            if (identifier != currentMusicPredicateId)
-                currentMusicPredicateId
-            else
-                oldMusicPredicateId
-        currentMusicPredicateId = identifier
+        updatePredicateId(identifier)
 
         if (shouldResume) {
             musicPlayer.resumeOld(MAIN_TRACK)
@@ -179,24 +171,20 @@ class MusicManager(private val client: MinecraftClient) {
         lastMusic = null
     }
 
-    private fun jukeboxPlaying(): Boolean {
-        return client.soundManager.soundSystem.sources.keys.any {
-                instance ->
-            ((instance.category == SoundCategory.RECORDS)
-                    && (instance is PositionedSoundInstance)
-                    && (client.player?.let {
-                Vec3d(instance.x, instance.y, instance.z)
-                    .squaredDistanceTo(it.pos) <
-                        (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
-            } ?: false))
-        }
-    }
-
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
         return max(
             0,
             (trackDelay.toInt() - trackDelayNoise.toInt()..trackDelay.toInt() + trackDelayNoise.toInt()).random())
             .toUInt()
+    }
+
+    private fun updatePredicateId(newIdentifier: String) {
+        oldMusicPredicateId =
+            if (newIdentifier != currentMusicPredicateId)
+                currentMusicPredicateId
+            else
+                oldMusicPredicateId
+        currentMusicPredicateId = newIdentifier
     }
 
     companion object {
@@ -210,6 +198,24 @@ class MusicManager(private val client: MinecraftClient) {
 
         private fun isPaused(client: MinecraftClient): Boolean {
             return client.world != null && client.currentScreen?.shouldPause() ?: false
+        }
+
+        private fun shouldStopMain(
+            client: MinecraftClient, musicPlayer: MusicPlayer, musicToPlay: List<PlayableSound>): Boolean {
+            return musicToPlay.isEmpty() || jukeboxPlaying(client) || musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
+        }
+
+        private fun jukeboxPlaying(client: MinecraftClient): Boolean {
+            return client.soundManager.soundSystem.sources.keys.any {
+                    instance ->
+                ((instance.category == SoundCategory.RECORDS)
+                        && (instance is PositionedSoundInstance)
+                        && (client.player?.let {
+                    Vec3d(instance.x, instance.y, instance.z)
+                        .squaredDistanceTo(it.pos) <
+                            (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
+                } ?: false))
+            }
         }
 
         private fun getPseudoRandomTrack(
