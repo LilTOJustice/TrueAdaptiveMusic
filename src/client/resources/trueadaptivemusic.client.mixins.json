@@ -12,6 +12,7 @@
     "event.OnDeathEventMixin",
     "event.OnJoinWorldEventMixin",
     "event.OnNightStartMixin",
+    "event.OnPauseMixin",
     "event.OnToastMixin",
     "event.OnWakeUpEventMixin"
   ],
