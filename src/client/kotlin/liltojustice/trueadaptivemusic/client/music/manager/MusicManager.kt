@@ -30,20 +30,13 @@ class MusicManager(private val client: MinecraftClient) {
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var activeEvents: List<MusicEvent> = emptyList()
     private var lastMusic: PlayableSound? = null
+    private var mainTrack = MAIN_TRACK_1
 
     init {
-        musicPlayer.createTrack(
-            MAIN_TRACK,
-            allowResume = true,
-            crossFadeTicks = MAIN_CROSSFADE_TICKS)
-        musicPlayer.createTrack(
-            EVENT_TRACK,
-            allowResume = false,
-            crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
-        musicPlayer.createTrack(
-            ON_DEMAND_TRACK,
-            allowResume = false,
-            crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
+        musicPlayer.createTrack(MAIN_TRACK_1, crossFadeTicks = MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(MAIN_TRACK_2, crossFadeTicks = MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(EVENT_TRACK, crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
+        musicPlayer.createTrack(ON_DEMAND_TRACK, crossFadeTicks = ON_DEMAND_CROSSFADE_TICKS)
 
         InvokeMusicEventCallback.EVENT.register { eventType, args ->
             activeEvents.firstOrNull { event ->
@@ -96,7 +89,7 @@ class MusicManager(private val client: MinecraftClient) {
                 1F
             })
 
-        musicPlayer.clampTrackVolume(MAIN_TRACK,
+        val mainTrackClamp =
             if (shouldStop) {
                 0F
             }
@@ -108,7 +101,10 @@ class MusicManager(private val client: MinecraftClient) {
             }
             else {
                 1F
-            })
+            }
+
+        musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
+        musicPlayer.clampTrackVolume(getOldTrack(), mainTrackClamp)
 
         musicPlayer.tick()
 
@@ -138,18 +134,9 @@ class MusicManager(private val client: MinecraftClient) {
 
         updatePredicateId(identifier)
 
-        if (shouldResume) {
-            musicPlayer.resumeOld(MAIN_TRACK)
-        }
-        else {
-            val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-            val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
-            musicPlayer.startNew(
-                MAIN_TRACK,
-                newMusic,
-                delay.toLong() * 1000L)
-            lastMusic = newMusic
-        }
+        val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
+        val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
+        playNextMusic(newMusic, delay, shouldResume, !isEnter)
     }
 
     fun hasSoundInstance(soundInstance: SoundInstance): Boolean {
@@ -157,9 +144,9 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     private fun shouldPlay(identifier: String): Boolean {
-        return (identifier != currentMusicPredicateId ||
-                (!musicPlayer.isTrackPlaying(MAIN_TRACK) &&
-                        !musicPlayer.isTrackDelayed(MAIN_TRACK)))
+        return (identifier != currentMusicPredicateId
+                || (!musicPlayer.isTrackPlaying(mainTrack)
+                        && !musicPlayer.isTrackDelayed(mainTrack)))
                 && musicVolumeOption.value > 0
     }
 
@@ -174,7 +161,8 @@ class MusicManager(private val client: MinecraftClient) {
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
         return max(
             0,
-            (trackDelay.toInt() - trackDelayNoise.toInt()..trackDelay.toInt() + trackDelayNoise.toInt()).random())
+            (trackDelay.toInt() - trackDelayNoise.toInt()..trackDelay.toInt() + trackDelayNoise.toInt())
+                .random())
             .toUInt()
     }
 
@@ -187,8 +175,42 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = newIdentifier
     }
 
+    private fun playNextMusic(newMusic: PlayableSound, delay: UInt, resume: Boolean, keepTrack: Boolean) {
+        if (keepTrack) {
+            musicPlayer.startNew(mainTrack, newMusic, delay.toLong() * 1000L)
+            return
+        }
+
+        val oldTrack = mainTrack
+        swapTracks()
+        if (resume && musicPlayer.isTrackPlaying(mainTrack)) {
+            musicPlayer.crossfadeTracks(oldTrack, mainTrack)
+            return
+        }
+
+        musicPlayer.startNew(mainTrack, newMusic, delay.toLong() * 1000L)
+        musicPlayer.crossfadeTracks(oldTrack, mainTrack)
+
+        lastMusic = newMusic
+    }
+
+    private fun swapTracks() {
+        musicPlayer.cancelDelayedMusic(mainTrack)
+        mainTrack = getOldTrack()
+    }
+
+    private fun getOldTrack(): String {
+        return if (mainTrack == MAIN_TRACK_1) {
+            MAIN_TRACK_2
+        }
+        else {
+            MAIN_TRACK_1
+        }
+    }
+
     companion object {
-        private const val MAIN_TRACK = "main"
+        private const val MAIN_TRACK_1 = "main1"
+        private const val MAIN_TRACK_2 = "main2"
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
         private const val MAIN_CROSSFADE_TICKS = 50
@@ -202,7 +224,9 @@ class MusicManager(private val client: MinecraftClient) {
 
         private fun shouldStopMain(
             client: MinecraftClient, musicPlayer: MusicPlayer, musicToPlay: List<PlayableSound>): Boolean {
-            return musicToPlay.isEmpty() || jukeboxPlaying(client) || musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
+            return musicToPlay.isEmpty() ||
+                    jukeboxPlaying(client) ||
+                    musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
         }
 
         private fun jukeboxPlaying(client: MinecraftClient): Boolean {
@@ -224,9 +248,7 @@ class MusicManager(private val client: MinecraftClient) {
                 return musicToPlay.first()
             }
 
-            val remainingMusic = lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay
-
-            return remainingMusic.random()
+            return (lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay).random()
         }
     }
 }
