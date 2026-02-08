@@ -229,7 +229,9 @@ class MusicManager(private val client: MinecraftClient) {
 
         private fun shouldStopMain(
             client: MinecraftClient, musicPlayer: MusicPlayer, musicToPlay: List<PlayableSound>): Boolean {
-            return musicToPlay.isEmpty() || jukeboxPlaying(client) || musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
+            return musicToPlay.isEmpty() ||
+                    jukeboxPlaying(client) ||
+                    musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
         }
 
         private fun jukeboxPlaying(client: MinecraftClient): Boolean {
