@@ -137,11 +137,6 @@ class MusicManager(private val client: MinecraftClient) {
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
         val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
         playNextMusic(newMusic, delay, shouldResume, !isEnter)
-
-        musicPlayer.getTrackInstance(mainTrack)?.let {
-            client.musicTracker.setCurrent(it)
-            client.toastManager.onMusicTrackStart()
-        }
     }
 
     fun hasSoundInstance(soundInstance: SoundInstance): Boolean {
