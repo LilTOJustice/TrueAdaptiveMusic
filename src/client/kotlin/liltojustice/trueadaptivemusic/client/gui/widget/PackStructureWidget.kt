@@ -90,7 +90,11 @@ class PackStructureWidget(
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        val result = super.mouseClicked(mouseX, mouseY, button)
+        super.mouseClicked(mouseX, mouseY, button)
+        if (!isMouseOver(mouseX, mouseY)) {
+            return false
+        }
+
         mouseButtonHeld = false
         forEachChild { child ->
             if (child is ClickableTextWidget && child.isMouseOver(mouseX, mouseY)) {
@@ -99,7 +103,7 @@ class PackStructureWidget(
             }
         }
 
-        return result
+        return true
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
