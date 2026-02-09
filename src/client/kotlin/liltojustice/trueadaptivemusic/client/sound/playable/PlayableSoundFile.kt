@@ -5,8 +5,8 @@ import liltojustice.trueadaptivemusic.client.sound.instance.AudioFileSoundInstan
 import net.minecraft.client.sound.SoundInstance
 
 class PlayableSoundFile(private val file: SoundFile): PlayableSound {
-    override fun makeSoundInstance(): SoundInstance {
-        return AudioFileSoundInstance(file)
+    override fun makeSoundInstance(isAmbient: Boolean): SoundInstance {
+        return AudioFileSoundInstance(file, isAmbient)
     }
 
     override fun getSoundName(): String {

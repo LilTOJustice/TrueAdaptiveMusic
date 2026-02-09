@@ -48,13 +48,15 @@ class PredicateViewWidget(
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
     private var requiredPredicateArgs = listOf<KParameter>()
     private var predicateArgs = mutableListOf<Any?>()
+    private val defaultPredicateParams = MusicPredicate.Parameters.default().getTriggerParams().map { it.value }
     private val requiredPredicateParams = MusicPredicate.Parameters::class.primaryConstructor?.parameters ?: listOf()
-    private var predicateParams: MutableList<Any?> = requiredPredicateParams.map { null }.toMutableList()
+    private var predicateParams: MutableList<Any?> = defaultPredicateParams.toMutableList()
     private var events = mutableListOf<MusicEvent>()
     private var selectedEvent: MusicEvent? = null
     private var selectedNode: MusicPredicateTree.Node? = null
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
+    private var selectedAmbiencePaths = mutableListOf<String>()
     private var assets = musicPack.getEditPackAssets()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -75,7 +77,7 @@ class PredicateViewWidget(
         }
 
         if (newPredicateParent != null || selectedNode != null) {
-            renderEditMode(mouseX, mouseY)
+            renderEditMode()
         }
         else {
             drawCenteredText(
@@ -91,7 +93,9 @@ class PredicateViewWidget(
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
-        selectedMusicPaths = selectedNode!!.predicate.playableSounds.map { sound -> sound.getSoundName() }
+        selectedMusicPaths = selectedNode!!.predicate.music.map { sound -> sound.getSoundName() }
+            .toMutableList()
+        selectedAmbiencePaths = selectedNode!!.predicate.ambience.map { sound -> sound.getSoundName() }
             .toMutableList()
         newPredicateParent = null
         predicateParams = node.predicate.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
@@ -104,10 +108,11 @@ class PredicateViewWidget(
         selectedPredicateTypeName = ""
         selectedNode = null
         selectedMusicPaths = mutableListOf()
+        selectedAmbiencePaths = mutableListOf()
         newPredicateParent = parent
         requiredPredicateArgs = listOf()
         predicateArgs = mutableListOf()
-        predicateParams.replaceAll { null }
+        predicateParams = defaultPredicateParams.toMutableList()
         events = mutableListOf()
         resetScrolling()
     }
@@ -146,7 +151,7 @@ class PredicateViewWidget(
         clearWidgetsFromRender { childWidget -> childWidget.id in arrayOf("predicateTypeChoice", "musicChoice") }
     }
 
-    private fun renderEditMode(mouseX: Int, mouseY: Int) {
+    private fun renderEditMode() {
         if (selectedNode?.predicate is ErrorPredicate) {
             renderErrorMode()
             return
@@ -168,7 +173,10 @@ class PredicateViewWidget(
                                     predicateArgs.filterNotNull(),
                                     events,
                                     selectedMusicPaths.mapNotNull {
-                                        path -> MusicPack.toPlayableSound(assets, path) })
+                                        path -> MusicPack.toPlayableSound(assets, path) },
+                                    selectedAmbiencePaths.mapNotNull {
+                                        path -> MusicPack.toPlayableSound(assets, path)
+                                    })
                             }
                         },
                         width,
@@ -183,7 +191,7 @@ class PredicateViewWidget(
                 { TextWidget(Text.literal("root"), textRenderer) }, "root", row = 1)
         }
 
-        val musicDropdownWidget = addWidgetFromRender(
+        addWidgetFromRender(
             {
                 MultiSelectDropdownWidget(
                     listOf(),
@@ -210,10 +218,32 @@ class PredicateViewWidget(
             "musicChoice"
         )
 
-        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-            && !musicDropdownWidget.isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
-            TAMClient.playSoundNow(null)
-        }
+        addWidgetFromRender(
+            {
+                MultiSelectDropdownWidget(
+                    listOf(),
+                    width,
+                    { selected ->
+                        selectedAmbiencePaths = selected.toMutableList()
+                        onChange()
+                    },
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.ambience_choice", "Ambience Choice").string,
+                    {
+                        musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
+                            .union(
+                                Registries.SOUND_EVENT.ids
+                                    .map { id -> id.toString() }
+                                    .filter { path -> path.contains("music.") }).toList()
+                    },
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.select_track", "Select a track").string,
+                    selectedAmbiencePaths,
+                    onHoverOption = { option ->
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
+            },
+            "ambienceChoice"
+        )
 
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
@@ -343,7 +373,8 @@ class PredicateViewWidget(
                 predicateParams.filterNotNull(),
                 predicateArgs.filterNotNull(),
                 events,
-                selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) })
+                selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                selectedAmbiencePaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) })
         }
 
         if (predicateArgs.filterNotNull().size != requiredPredicateArgs.size
@@ -356,6 +387,8 @@ class PredicateViewWidget(
             TAMClient.predicateFactory.fromArgs(
                 selectedPredicateTypeName,
                 selectedMusicPaths
+                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                selectedAmbiencePaths
                     .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
                 predicateParams.filterNotNull(), predicateArgs.filterNotNull())
         selectedNode!!.events = events

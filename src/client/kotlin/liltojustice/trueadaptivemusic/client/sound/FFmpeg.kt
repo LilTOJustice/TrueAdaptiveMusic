@@ -11,7 +11,7 @@ import javax.sound.sampled.AudioFormat
 import kotlin.io.path.pathString
 
 object FFmpeg {
-    fun makeStream(soundFile: SoundFile): FFmpegAudioStream {
+    fun makeStream(soundFile: SoundFile, loudnessUnits: Int): FFmpegAudioStream {
         val command = if (TAMClient.hasFFmpegGlobal) "ffprobe" else Constants.FFPROBE_PATH.pathString
         val ffprobe = ProcessBuilder(
             command,
@@ -52,6 +52,7 @@ object FFmpeg {
                 16,
                 channels,
                 true,
-                false))
+                false),
+            loudnessUnits)
     }
 }

@@ -9,7 +9,7 @@ import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 import kotlin.io.path.pathString
 
-class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): AudioStream {
+class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat, loudnessUnits: Int): AudioStream {
     private val ffmpeg = run {
         val command = if (TAMClient.hasFFmpegGlobal) "ffmpeg" else Constants.FFMPEG_PATH.pathString
         val ffmpeg = ProcessBuilder(
@@ -17,7 +17,7 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
             "-v", "panic",
             "-i", "pipe:0",
             "-f", "s16le",
-            "-af", "loudnorm=I=-16",
+            "-af", "loudnorm=I=${loudnessUnits}",
             "-ar", "${format.sampleRate.toInt()}",
             "-acodec", "pcm_s16le",
             "-")

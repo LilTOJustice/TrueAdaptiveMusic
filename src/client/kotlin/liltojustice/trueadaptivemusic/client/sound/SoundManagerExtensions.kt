@@ -6,10 +6,10 @@ import net.minecraft.client.sound.SoundManager
 import net.minecraft.client.sound.Source
 
 fun SoundManager.setInstanceVolume(
-    soundInstance: SoundInstance?, volume: Float, musicVolume: Float): Boolean {
+    soundInstance: SoundInstance?, volume: Float, categoryVolume: Float): Boolean {
     (soundInstance as? VolumeControlled)?.setVolume(volume)
 
-    return runOnSource(soundInstance) { source -> source.setVolume(volume * musicVolume) }
+    return runOnSource(soundInstance) { source -> source.setVolume(volume * categoryVolume) }
 }
 
 fun SoundManager.resumeInstance(soundInstance: SoundInstance?): Boolean {

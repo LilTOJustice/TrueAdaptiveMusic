@@ -285,12 +285,13 @@ class MusicPack private constructor(
             }
         }
 
-        fun parseMusicPath(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
+        fun parseAudio(audioMemberName: String, json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
                 : List<PlayableSound> {
-            return (if (JsonHelper.hasString(json, "musicPath"))
-                listOf(JsonHelper.getString(json, "musicPath"))
-            else
-                JsonHelper.getArray(json, "musicPath").map { element -> element.asString })
+            return (if (JsonHelper.hasString(json, audioMemberName))
+                listOf(JsonHelper.getString(json, audioMemberName))
+            else if (JsonHelper.hasArray(json, audioMemberName))
+                JsonHelper.getArray(json, audioMemberName).map { element -> element.asString }
+                    else emptyList())
                 .map { path ->
                     try {
                         return@map soundLibrary[path]
@@ -298,7 +299,8 @@ class MusicPack private constructor(
                                 Registries.SOUND_EVENT[Identifier.of(path)]
                                     ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
                             )
-                    } catch (_: InvalidIdentifierException) {}
+                    }
+                    catch (_: InvalidIdentifierException) {}
 
                     Logger.logWarning("Could not find \"$path\", skipping...")
                     return@map null

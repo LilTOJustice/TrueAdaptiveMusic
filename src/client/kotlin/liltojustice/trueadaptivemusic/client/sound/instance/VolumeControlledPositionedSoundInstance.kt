@@ -5,11 +5,11 @@ import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 
-class VolumeControlledPositionedSoundInstance(sound: SoundEvent)
+class VolumeControlledPositionedSoundInstance(sound: SoundEvent, isAmbient: Boolean)
     : VolumeControlled,
     PositionedSoundInstance(
         sound.id,
-        SoundCategory.MUSIC,
+        if (isAmbient) SoundCategory.AMBIENT else SoundCategory.MUSIC,
         1.0f,
         1.0f,
         SoundInstance.createRandom(),

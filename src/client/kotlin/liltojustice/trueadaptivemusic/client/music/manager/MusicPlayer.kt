@@ -8,7 +8,6 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.SoundInstance
-import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -16,8 +15,8 @@ import kotlin.math.min
 
 internal class MusicPlayer(client: MinecraftClient) {
     private val soundManager = client.soundManager
-    private val volumeManager = VolumeManager(soundManager) {
-        client.options.getSoundVolume(SoundCategory.MUSIC)
+    private val volumeManager = VolumeManager(soundManager) { category ->
+        client.options.getSoundVolume(category)
     }
     private val tracks = mutableMapOf<String, Track>()
 
@@ -25,8 +24,8 @@ internal class MusicPlayer(client: MinecraftClient) {
         return getTrack(trackName).currentSoundInstance
     }
 
-    fun createTrack(trackName: String, crossFadeTicks: Int) {
-        tracks[trackName] = Track(crossFadeTicks)
+    fun createTrack(trackName: String, isAmbient: Boolean, crossFadeTicks: Int) {
+        tracks[trackName] = Track(isAmbient, crossFadeTicks)
     }
 
     fun hasSoundInstance(instance: SoundInstance): Boolean {
@@ -83,7 +82,7 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     fun startNew(trackName: String, newMusic: PlayableSound, delayMillis: Long = 0L) {
         val track = getTrack(trackName)
-        val newInstance = newMusic.makeSoundInstance()
+        val newInstance = newMusic.makeSoundInstance(track.isAmbient)
         soundManager.stop(track.currentSoundInstance)
         track.updateSound(newMusic, newInstance)
         track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
@@ -117,7 +116,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     private fun startNewInstance(track: Track, newMusic: PlayableSound) {
-        val newInstance = newMusic.makeSoundInstance()
+        val newInstance = newMusic.makeSoundInstance(track.isAmbient)
         soundManager.stop(track.currentSoundInstance)
         track.updateSound(newMusic, newInstance)
         playInstance(newInstance)
@@ -171,7 +170,7 @@ internal class MusicPlayer(client: MinecraftClient) {
         private const val CLAMP_TICKS = 20
     }
 
-    private class Track(val crossFadeTicks: Int) {
+    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int) {
         var currentSound: PlayableSound? = null
             private set
         var currentSoundInstance: SoundInstance? = null

@@ -11,9 +11,11 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import java.util.concurrent.CompletableFuture
 
-class AudioFileSoundInstance(private val soundFile: SoundFile)
+class AudioFileSoundInstance(private val soundFile: SoundFile, private val isAmbient: Boolean)
     : AbstractSoundInstance(
-    Constants.AUDIO_FILE_STREAM_ID, SoundCategory.MUSIC, SoundInstance.createRandom()),
+    Constants.AUDIO_FILE_STREAM_ID,
+    if (isAmbient) SoundCategory.AMBIENT else SoundCategory.MUSIC,
+    SoundInstance.createRandom()),
     VolumeControlled {
     val fileName
         get() = soundFile.getName().split('.').dropLast(1).joinToString(".")
@@ -27,7 +29,11 @@ class AudioFileSoundInstance(private val soundFile: SoundFile)
                     TruncatedAudioStream(OggAudioStream(soundFile.getInputStream())) }
             } else {
                 CompletableFuture.supplyAsync {
-                    TruncatedAudioStream(FFmpeg.makeStream(soundFile)) }
+                    TruncatedAudioStream(
+                        FFmpeg.makeStream(
+                            soundFile,
+                            if (isAmbient) AMBIENT_LUFS else MUSIC_LUFS))
+                }
             }
         }
         catch (_: Exception) {
@@ -41,5 +47,10 @@ class AudioFileSoundInstance(private val soundFile: SoundFile)
 
     override fun setVolume(volume: Float) {
         this.volume = volume
+    }
+
+    companion object {
+        private const val AMBIENT_LUFS = -36
+        private const val MUSIC_LUFS = -26
     }
 }

@@ -16,8 +16,18 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
     }
 
     final override fun initParams(json: JsonObject) {
-        parameters = json.get("parameters")
-            ?.let { Gson().fromJson<Parameters>(it, Parameters::class.java) } ?: Parameters()
+        val gson = Gson()
+        val default = Parameters.default()
+        val parametersJson = json.get("parameters").asJsonObject
+        default.getTriggerParams().forEach {
+            if (!parametersJson.has(it.name)) {
+                val jsonRep = gson.toJsonTree(it.value)
+                parametersJson.add(
+                    it.name,
+                    if (jsonRep.isJsonObject) jsonRep.asJsonObject.getAsJsonPrimitive("data") else jsonRep.asJsonPrimitive)
+            }
+        }
+        parameters = gson.fromJson<Parameters>(parametersJson, Parameters::class.java)
     }
 
     final override fun getTypeName(): String {
@@ -25,6 +35,10 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             ErrorEvent.NAME
         else
             TAMClient.eventRegistry[this::class]
+    }
+
+    final override fun toJsonFull(): JsonObject {
+        return super.toJsonFull()
     }
 
     companion object: MusicEventCompanion<MusicEvent> {

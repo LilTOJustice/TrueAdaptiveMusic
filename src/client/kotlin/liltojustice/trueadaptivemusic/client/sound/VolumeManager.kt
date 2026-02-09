@@ -3,9 +3,11 @@ package liltojustice.trueadaptivemusic.client.sound
 import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
+import net.minecraft.sound.SoundCategory
 import kotlin.math.sin
 
-class VolumeManager(private val soundManager: SoundManager, private val getSoundVolume: () -> Float) {
+class VolumeManager(
+    private val soundManager: SoundManager, private val getSoundVolume: (category: SoundCategory) -> Float) {
     private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
 
     fun startFade(
@@ -48,7 +50,7 @@ class VolumeManager(private val soundManager: SoundManager, private val getSound
     }
 
     fun setInstanceVolume(soundInstance: SoundInstance, volume: Float, allowPause: Boolean = true) {
-        soundManager.setInstanceVolume(soundInstance, volume, getSoundVolume())
+        soundManager.setInstanceVolume(soundInstance, volume, getSoundVolume(soundInstance.category))
 
         if (allowPause && volume == 0F) {
             soundManager.pauseInstance(soundInstance)

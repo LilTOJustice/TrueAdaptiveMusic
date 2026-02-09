@@ -31,6 +31,7 @@ class MusicPredicateTree private constructor(
             result.path.joinToString(PATH_SEPARATOR),
             result.node.predicate.parameters,
             result.music,
+            result.ambience,
             result.events.values.toList())
     }
 
@@ -105,10 +106,12 @@ class MusicPredicateTree private constructor(
             client: MinecraftClient,
             path: List<String> = emptyList(),
             events: Map<String, MusicEvent> = emptyMap(),
-            music: Set<PlayableSound> = emptySet()): Result {
+            music: Set<PlayableSound> = emptySet(),
+            ambience: Set<PlayableSound> = emptySet()): Result {
             try {
                 if (!predicate.testPredicate(client)) {
-                    return Result(this, emptyList(), emptyMap(), emptyList())
+                    return Result(
+                        this, emptyList(), emptyMap(), emptyList(), emptyList())
                 }
             }
             catch (e: NoClassDefFoundError) {
@@ -117,33 +120,40 @@ class MusicPredicateTree private constructor(
                             "Are you missing a mod?\nError: $e",
                     true)
 
-                return Result(this, emptyList(), emptyMap(), emptyList())
+                return Result(
+                    this, emptyList(), emptyMap(), emptyList(), emptyList())
             }
             catch (e: Exception) {
                 Logger.logError(
                     "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: $e",
                     true)
 
-                return Result(this, emptyList(), emptyMap(), emptyList())
+                return Result(
+                    this, emptyList(), emptyMap(), emptyList(), emptyList())
             }
 
             val newPath = path + predicate.getTriggerId()
             val newEvents = events + this.events.map { event -> Pair(event.getTriggerId(), event) }
-            val newMusic = predicate.playableSounds.toSet() +
+            val newMusic = predicate.music.toSet() +
                     if (predicate.parameters.inheritMusic)
                         music
                     else
                         emptySet()
+            val newAmbience = predicate.ambience.toSet() +
+                    if (predicate.parameters.inheritAmbience)
+                        ambience
+                    else
+                        emptySet()
 
             for (child in children) {
-                val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic)
+                val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic, newAmbience)
 
                 if (result.path.isNotEmpty()) {
                     return result
                 }
             }
 
-            return Result(this, newPath, newEvents, newMusic.toList())
+            return Result(this, newPath, newEvents, newMusic.toList(), newAmbience.toList())
         }
 
         fun newChild(
@@ -151,9 +161,10 @@ class MusicPredicateTree private constructor(
             predicateParams: List<Any>,
             predicateArgs: List<Any>,
             events: List<MusicEvent>,
-            playableSounds: List<PlayableSound>): Node {
+            music: List<PlayableSound>,
+            ambience: List<PlayableSound>): Node {
             val predicate = TAMClient.predicateFactory.fromArgs(
-                predicateType, playableSounds, predicateParams, predicateArgs)
+                predicateType, music, ambience, predicateParams, predicateArgs)
             val child = Node(predicate, events)
             child.parent = this
             children.add(child)
@@ -236,12 +247,14 @@ class MusicPredicateTree private constructor(
             val node: Node,
             val path: List<String>,
             val events: Map<String, MusicEvent>,
-            val music: List<PlayableSound>)
+            val music: List<PlayableSound>,
+            val ambience: List<PlayableSound>)
     }
 
     class Result(
         val path: String,
         val predicateParameters: MusicPredicate.Parameters,
         val music: List<PlayableSound>,
+        val ambience: List<PlayableSound>,
         val events: List<MusicEvent>)
 }

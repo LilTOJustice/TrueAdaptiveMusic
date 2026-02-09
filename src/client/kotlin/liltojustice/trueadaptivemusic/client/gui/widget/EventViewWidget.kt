@@ -48,7 +48,7 @@ class EventViewWidget(
         if (event != null) {
             setSelectedEventTypeName(event.getTypeName())
             eventArgs = (event.getTriggerArgs().map { arg -> arg.value }).toMutableList()
-            selectedMusicPaths = event.playableSounds.map { sound -> sound.getSoundName() }.toMutableList()
+            selectedMusicPaths = event.music.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
             selectedMusicPaths = mutableListOf()

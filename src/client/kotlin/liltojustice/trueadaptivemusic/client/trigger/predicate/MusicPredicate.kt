@@ -1,10 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.minecraft.client.MinecraftClient
 
 abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
@@ -14,6 +15,7 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
 
     private var lastResult = false
     private var ticksSinceResult = getFixedTickRate()
+    var ambience = listOf<PlayableSound>()
 
     protected abstract fun test(client: MinecraftClient): Boolean
 
@@ -25,8 +27,27 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     }
 
     final override fun initParams(json: JsonObject) {
-        parameters = json.get("parameters")
-            ?.let { Gson().fromJson<Parameters>(it, Parameters::class.java) } ?: Parameters()
+        val gson = Gson()
+        val default = Parameters.default()
+        val parametersJson = json.get("parameters").asJsonObject
+        default.getTriggerParams().forEach {
+            if (!parametersJson.has(it.name)) {
+                val jsonRep = gson.toJsonTree(it.value)
+                parametersJson.add(
+                    it.name,
+                    if (jsonRep.isJsonObject) jsonRep.asJsonObject.getAsJsonPrimitive("data") else jsonRep.asJsonPrimitive)
+            }
+        }
+        parameters = gson.fromJson<Parameters>(parametersJson, Parameters::class.java)
+    }
+
+    final override fun toJsonFull(): JsonObject {
+        val result = super.toJsonFull()
+        val jsonMusicPath = JsonArray(music.size)
+        ambience.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
+        result.add("ambiencePath", jsonMusicPath)
+
+        return result
     }
 
     fun resetTicks() {
@@ -61,9 +82,10 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
         var trackDelay: UInt = 0U,
         var trackDelayNoise: UInt = 0U,
         var enterDelay: UInt = 0U,
-        var inheritMusic: Boolean = false)
+        var inheritMusic: Boolean = false,
+        var inheritAmbience: Boolean = true)
         : MusicTrigger.Parameters() {
-        companion object: ParametersCompanion<MusicEvent.Parameters> {
+        companion object: ParametersCompanion<Parameters> {
             override fun default(): Parameters {
                 return Parameters()
             }

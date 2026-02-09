@@ -10,7 +10,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import kotlin.reflect.full.primaryConstructor
 
 abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
-    var playableSounds: List<PlayableSound> = emptyList()
+    var music: List<PlayableSound> = emptyList()
     lateinit var parameters: TParameters
 
     fun getTriggerArgs(): List<TriggerArg> {
@@ -18,12 +18,12 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
             .map { arg -> TriggerArg(arg.name, arg.value) }
     }
 
-    fun toJsonFull(): JsonObject {
+    open fun toJsonFull(): JsonObject {
         val result = JsonObject()
         result.addProperty("type", getTypeName())
 
-        val jsonMusicPath = JsonArray(playableSounds.size)
-        playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
+        val jsonMusicPath = JsonArray(music.size)
+        music.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
         result.add("musicPath", jsonMusicPath)
         result.add("parameters", paramsJson())
 
