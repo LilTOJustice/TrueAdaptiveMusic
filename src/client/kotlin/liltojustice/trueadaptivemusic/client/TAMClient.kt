@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -20,7 +21,12 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
+import java.nio.file.Path
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import javax.sound.sampled.AudioFormat
 import kotlin.io.path.Path
+import kotlin.io.path.inputStream
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -48,15 +54,13 @@ object TAMClient {
             }
     val hasFFmpeg
         get() = hasFFmpegLocal || hasFFmpegGlobal
+
     var currentPredicateResult: MusicPredicateTree.Result? = null
-
-
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
             field = value
             options.save()
         }
-
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
@@ -71,6 +75,8 @@ object TAMClient {
         }
 
     private val inputWidgetMaker = InputWidgetMaker()
+    private val audioFormatCache: MutableMap<String, AudioFormat> = mutableMapOf()
+
     private var initialized = false
     private var musicManager: MusicManager? = null
 
@@ -140,6 +146,24 @@ object TAMClient {
     fun makeInputWidget(
         screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit = {}): ClickableWidget {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, onChange)
+    }
+
+    fun getAudioFileFormat(zipFile: ZipFile, zipEntry: ZipEntry): AudioFormat {
+        val key = "${zipFile.name}|${zipEntry.name}"
+        return audioFormatCache.getOrElse(key) {
+            val result = FFmpeg.getFileAudioFormat(zipFile.getInputStream(zipEntry))
+            audioFormatCache[key] = result
+            result
+        }
+    }
+
+    fun getAudioFileFormat(filePath: Path): AudioFormat {
+        val key = filePath.pathString
+        return audioFormatCache.getOrElse(key) {
+            val result = FFmpeg.getFileAudioFormat(filePath.inputStream())
+            audioFormatCache[key] = result
+            result
+        }
     }
 
     private fun initialize(client: MinecraftClient) {

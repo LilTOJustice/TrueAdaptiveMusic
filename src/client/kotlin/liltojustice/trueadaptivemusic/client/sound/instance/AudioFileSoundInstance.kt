@@ -3,8 +3,8 @@ package liltojustice.trueadaptivemusic.client.sound.instance
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
-import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
+import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.sound.*
 import net.minecraft.sound.SoundCategory
@@ -29,10 +29,9 @@ class AudioFileSoundInstance(private val soundFile: SoundFile, private val isAmb
                     TruncatedAudioStream(OggAudioStream(soundFile.getInputStream())) }
             } else {
                 CompletableFuture.supplyAsync {
+                    val loudnessUnits = if (isAmbient) AMBIENT_LUFS else MUSIC_LUFS
                     TruncatedAudioStream(
-                        FFmpeg.makeStream(
-                            soundFile,
-                            if (isAmbient) AMBIENT_LUFS else MUSIC_LUFS))
+                        FFmpegAudioStream(soundFile, soundFile.getAudioFormat(), loudnessUnits))
                 }
             }
         }
