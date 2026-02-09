@@ -156,7 +156,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         updatePredicateId(identifier)
 
-        if (musicPlayer.isTrackPlaying(mainTrack) && musicToPlay.contains(lastMusic)) {
+        if (musicPlayer.isTrackPlaying(mainTrack) && musicToPlay.contains(lastMusic) && enterDelay != 0U) {
             return
         }
 
@@ -207,8 +207,9 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     private fun playNextMusic(newMusic: PlayableSound, delay: UInt, resume: Boolean, keepTrack: Boolean) {
+        val delayMillis = delay.toLong() * 1000L
         if (keepTrack) {
-            musicPlayer.startNew(mainTrack, newMusic, delay.toLong() * 1000L)
+            musicPlayer.startNew(mainTrack, newMusic, delayMillis)
             return
         }
 
@@ -219,7 +220,7 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        musicPlayer.startNew(mainTrack, newMusic, delay.toLong() * 1000L)
+        musicPlayer.startNew(mainTrack, newMusic, delayMillis)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
 
         lastMusic = newMusic
