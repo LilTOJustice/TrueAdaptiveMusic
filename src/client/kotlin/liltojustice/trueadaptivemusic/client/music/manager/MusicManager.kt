@@ -121,11 +121,12 @@ class MusicManager(private val client: MinecraftClient) {
 
         musicPlayer.tick()
 
-        if (ambienceToPlay.isEmpty()) {
+        val isAmbiencePlaying = musicPlayer.isTrackPlaying(AMBIENCE_TRACK)
+        if (ambienceToPlay.isEmpty() && isAmbiencePlaying) {
             musicPlayer.stop(AMBIENCE_TRACK)
         }
-        else if (!musicPlayer.isTrackPlaying(AMBIENCE_TRACK) ||
-            (isEnter && !ambienceToPlay.contains(lastAmbience))) {
+
+        if (!ambienceToPlay.isEmpty() && (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience))) {
             val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
             musicPlayer.startNew(
                 AMBIENCE_TRACK,
