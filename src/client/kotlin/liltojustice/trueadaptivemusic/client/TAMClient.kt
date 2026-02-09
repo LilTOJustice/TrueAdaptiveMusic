@@ -52,8 +52,8 @@ object TAMClient {
             } catch (_: IOException) {
                 false
             }
-    val hasFFmpeg
-        get() = hasFFmpegLocal || hasFFmpegGlobal
+    var hasFFmpeg = false
+        private set
 
     var currentPredicateResult: MusicPredicateTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
@@ -64,6 +64,7 @@ object TAMClient {
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
+            hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.selectMusicPack(value)
 
             val packName = value?.packName ?: ""
