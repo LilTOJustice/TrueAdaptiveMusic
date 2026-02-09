@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioFormat
 import kotlin.io.path.pathString
 
 class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat, loudnessUnits: Int): AudioStream {
+    private lateinit var thread: Thread
     private val ffmpeg = run {
         val command = if (TAMClient.hasFFmpegGlobal) "ffmpeg" else Constants.FFMPEG_PATH.pathString
         val ffmpeg = ProcessBuilder(
@@ -23,7 +24,7 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat, l
             "-")
             .start()
 
-        Thread() {
+        thread = Thread() {
             try {
                 soundFile.getInputStream().use {
                     it.copyTo(ffmpeg.outputStream)
@@ -31,13 +32,15 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat, l
                 ffmpeg.outputStream.close()
             }
             catch (_: Exception) {}
-        }.start()
+        }
+        thread.start()
 
         ffmpeg
     }
 
     override fun close() {
         ffmpeg.destroy()
+        thread.interrupt()
     }
 
     override fun getFormat(): AudioFormat {
