@@ -37,11 +37,13 @@ open class ClickableTextWidget(
             return
         }
 
-        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && !hovering) {
+        val isMouseOver = isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+
+        if (isMouseOver && !hovering) {
             hovering = true
             onMouseOn(this)
         }
-        else if (!isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && hovering) {
+        else if (!isMouseOver && hovering) {
             hovering = false
             onMouseOff(this)
         }
@@ -51,7 +53,7 @@ open class ClickableTextWidget(
             context?.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
         }
 
-        if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+        if (!selected && showHighlight && isMouseOver) {
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
