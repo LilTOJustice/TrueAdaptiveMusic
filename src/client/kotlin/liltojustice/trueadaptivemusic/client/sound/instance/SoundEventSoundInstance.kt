@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.Sound
+import net.minecraft.client.sound.SoundManager
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
@@ -22,9 +23,9 @@ class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean) : TAMS
     override fun getAudioStream(): AudioStream? {
         val soundManager = MinecraftClient.getInstance().soundManager
         instance.getSoundSet(soundManager)?.getSound(random)
-        return instance.sound?.let {
+        return instance.sound?.takeIf { it != SoundManager.MISSING_SOUND }?.let {
             soundManager.soundSystem.soundLoader
-                .loadStreamed(instance.sound?.location, false)
+                .loadStreamed(it.location, false)
                 .join()
         }
     }
