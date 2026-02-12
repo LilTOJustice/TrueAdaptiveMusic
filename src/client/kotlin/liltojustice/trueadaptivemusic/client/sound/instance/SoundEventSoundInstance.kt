@@ -29,8 +29,8 @@ class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean) : TAMS
         }
     }
 
-    override fun getSound(): Sound {
-        return instance.sound!!
+    override fun getSound(): Sound? {
+        return instance.sound
     }
 
     companion object {
