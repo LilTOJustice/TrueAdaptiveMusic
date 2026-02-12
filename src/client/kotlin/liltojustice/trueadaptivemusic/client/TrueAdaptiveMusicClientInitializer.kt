@@ -6,7 +6,6 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.EmptyClickableWi
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent
@@ -281,8 +280,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 result
             }
         )
-
-        MusicPack.loadAllPacks()
     }
 
     companion object {
