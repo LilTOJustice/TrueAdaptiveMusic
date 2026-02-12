@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -19,14 +18,8 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTre
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.sound.SoundInstance
 import java.io.IOException
-import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import javax.sound.sampled.AudioFormat
 import kotlin.io.path.Path
-import kotlin.io.path.inputStream
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -64,6 +57,7 @@ object TAMClient {
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
+            minecraftClient.soundManager.stopAll()
             hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.selectMusicPack(value)
 
@@ -76,14 +70,9 @@ object TAMClient {
         }
 
     private val inputWidgetMaker = InputWidgetMaker()
-    private val audioFormatCache: MutableMap<String, AudioFormat> = mutableMapOf()
 
     private var initialized = false
     private var musicManager: MusicManager? = null
-
-    fun resetCache() {
-        musicPack?.rules?.resetCache()
-    }
 
     fun tick(client: MinecraftClient) {
         if (!initialized) {
@@ -91,7 +80,11 @@ object TAMClient {
         }
 
         currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
-        musicManager!!.tick()
+        musicManager?.tick()
+    }
+
+    fun resetSound() {
+        musicManager?.stop()
     }
 
     fun playSoundNow(sound: PlayableSound?) {
@@ -100,10 +93,6 @@ object TAMClient {
 
     fun getPlayingEvent(): MusicEvent? {
         return musicManager?.playingEvent
-    }
-
-    fun hasSoundInstance(instance: SoundInstance): Boolean {
-        return musicManager?.hasSoundInstance(instance) ?: false
     }
 
     fun registerPredicate(name: String, triggerType: KClass<out MusicPredicate>) {
@@ -147,24 +136,6 @@ object TAMClient {
     fun makeInputWidget(
         screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit = {}): ClickableWidget {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, onChange)
-    }
-
-    fun getAudioFileFormat(zipFile: ZipFile, zipEntry: ZipEntry): AudioFormat {
-        val key = "${zipFile.name}|${zipEntry.name}"
-        return audioFormatCache.getOrElse(key) {
-            val result = FFmpeg.getFileAudioFormat(zipFile.getInputStream(zipEntry))
-            audioFormatCache[key] = result
-            result
-        }
-    }
-
-    fun getAudioFileFormat(filePath: Path): AudioFormat {
-        val key = filePath.pathString
-        return audioFormatCache.getOrElse(key) {
-            val result = FFmpeg.getFileAudioFormat(filePath.inputStream())
-            audioFormatCache[key] = result
-            result
-        }
     }
 
     private fun initialize(client: MinecraftClient) {

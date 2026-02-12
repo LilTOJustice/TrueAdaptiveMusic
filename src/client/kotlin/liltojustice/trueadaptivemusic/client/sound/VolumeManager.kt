@@ -1,28 +1,25 @@
 package liltojustice.trueadaptivemusic.client.sound
 
-import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
-import net.minecraft.client.sound.SoundInstance
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.sound.SoundCategory
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
+import liltojustice.trueadaptivemusic.client.sound.system.SoundSystem
 import kotlin.math.sin
 
-class VolumeManager(
-    private val soundManager: SoundManager, private val getSoundVolume: (category: SoundCategory) -> Float) {
-    private val fades: MutableMap<SoundInstance, Fade> = mutableMapOf()
+class VolumeManager(private val soundSystem: SoundSystem) {
+    private val fades: MutableMap<TAMSoundInstance, Fade> = mutableMapOf()
 
     fun startFade(
-        soundInstance: SoundInstance, ticksToComplete: Int, targetVolume: Float, stopWhenDone: Boolean = false) {
-        soundManager.resumeInstance(soundInstance)
+        soundInstance: TAMSoundInstance, ticksToComplete: Int, targetVolume: Float, stopWhenDone: Boolean = false) {
+        soundSystem.resumeInstance(soundInstance)
         val existingFade = fades[soundInstance]
         if (existingFade != null) {
             existingFade.redirect(targetVolume, ticksToComplete, stopWhenDone)
         } else {
             fades[soundInstance] =
-                Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone, soundManager)
+                Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone, soundSystem)
         }
     }
 
-    fun hasFade(soundInstance: SoundInstance): Boolean {
+    fun hasFade(soundInstance: TAMSoundInstance): Boolean {
         return fades.values.any { it.soundInstance == soundInstance }
     }
 
@@ -43,31 +40,31 @@ class VolumeManager(
         }
 
         if (fade.stopWhenDone) {
-            soundManager.stop(fade.soundInstance)
+            soundSystem.stop(fade.soundInstance)
         }
 
         fades.remove(fade.soundInstance)
     }
 
-    fun setInstanceVolume(soundInstance: SoundInstance, volume: Float, allowPause: Boolean = true) {
-        soundManager.setInstanceVolume(soundInstance, volume, getSoundVolume(soundInstance.category))
+    fun setInstanceVolume(soundInstance: TAMSoundInstance, volume: Float, allowPause: Boolean = true) {
+        soundSystem.setInstanceVolume(soundInstance, volume)
 
         if (allowPause && volume == 0F) {
-            soundManager.pauseInstance(soundInstance)
+            soundSystem.pauseInstance(soundInstance)
         }
     }
 
     private class Fade(
-        val soundInstance: SoundInstance,
+        val soundInstance: TAMSoundInstance,
         private var totalTicks: Int,
         private var targetVolume: Float,
         var stopWhenDone: Boolean,
-        soundManager: SoundManager) {
+        soundSystem: SoundSystem) {
         private var fadeTicks: Int = 0
         private var startingVolume: Float =
-            if (soundManager.isInstancePaused(soundInstance))
+            if (soundSystem.isInstancePaused(soundInstance))
                 0F
-            else getInstanceVolume(soundInstance)
+            else soundInstance.desiredVolume
 
         fun tick(): Float {
             fadeTicks++
@@ -82,7 +79,7 @@ class VolumeManager(
         }
 
         fun redirect(targetVolume: Float, totalTicks: Int, stopWhenDone: Boolean) {
-            this.startingVolume = getInstanceVolume(soundInstance)
+            this.startingVolume = soundInstance.desiredVolume
             this.targetVolume = targetVolume
             this.totalTicks = totalTicks
             this.stopWhenDone = stopWhenDone
@@ -91,12 +88,6 @@ class VolumeManager(
 
         fun done(): Boolean {
             return fadeTicks == totalTicks
-        }
-    }
-
-    companion object {
-        fun getInstanceVolume(soundInstance: SoundInstance?): Float {
-            return (soundInstance as? VolumeControlled)?.getVolume() ?: 1F
         }
     }
 }

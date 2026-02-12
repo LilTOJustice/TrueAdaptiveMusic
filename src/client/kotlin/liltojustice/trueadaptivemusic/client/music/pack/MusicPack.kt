@@ -20,8 +20,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
-import net.minecraft.registry.Registries
-import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
@@ -296,8 +294,8 @@ class MusicPack private constructor(
                     try {
                         return@map soundLibrary[path]
                             ?: PlayableSoundEvent(
-                                Registries.SOUND_EVENT[Identifier.of(path)]
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
+                                Identifier.of(path)
+                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"),
                             )
                     }
                     catch (_: InvalidIdentifierException) {}
@@ -309,7 +307,7 @@ class MusicPack private constructor(
 
         fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
             return assets[id] ?: try {
-                PlayableSoundEvent(SoundEvent.of(Identifier.of(id)))
+                PlayableSoundEvent(Identifier.of(id))
             }
             catch (_: InvalidIdentifierException) {
                 null

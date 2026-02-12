@@ -9,7 +9,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicat
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
-import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.ActionResult
 import net.minecraft.util.math.Vec3d
@@ -171,10 +170,6 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
-    fun hasSoundInstance(soundInstance: SoundInstance): Boolean {
-        return musicPlayer.hasSoundInstance(soundInstance)
-    }
-
     private fun shouldPlay(identifier: String): Boolean {
         return (identifier != currentMusicPredicateId
                 || (!musicPlayer.isTrackPlaying(mainTrack)
@@ -182,7 +177,7 @@ class MusicManager(private val client: MinecraftClient) {
                 && musicVolumeOption.value > 0
     }
 
-    private fun stop() {
+    fun stop() {
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""

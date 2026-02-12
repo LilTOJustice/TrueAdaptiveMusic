@@ -29,10 +29,15 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat, l
                 soundFile.getInputStream().use {
                     it.copyTo(ffmpeg.outputStream)
                 }
+            }
+            catch (_: Exception) {
+                ffmpeg.destroy()
+            }
+            finally {
                 ffmpeg.outputStream.close()
             }
-            catch (_: Exception) {}
         }
+        thread.name = "FFmpeg stream handler"
         thread.start()
 
         ffmpeg
