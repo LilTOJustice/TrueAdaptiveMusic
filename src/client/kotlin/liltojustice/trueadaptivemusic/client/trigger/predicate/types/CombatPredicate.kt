@@ -5,8 +5,11 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.Entity
 import net.minecraft.entity.mob.GuardianEntity
 import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.entity.mob.MobEntity
+import net.minecraft.entity.mob.PhantomEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.Vec3d
 import java.util.*
@@ -33,40 +36,16 @@ class CombatPredicate(
         val verticalAngle = acos(playerEntity.rotationVecClient.y)
         val horizontalAngle = acos(playerEntity.rotationVecClient.x)
 
-        val validEntities = world.entities
-            .mapNotNull { it as? HostileEntity }
-            .filter { entity ->
-                mobEntityTranslationKeys
-                    .takeIf { it.isNotEmpty() }
-                    ?.let {
-                        if (blacklist)
-                            it.none { mobEntity -> mobEntity == entity.type.translationKey }
-                        else
-                            it.any { mobEntity -> mobEntity == entity.type.translationKey }
-                    }
-                    ?: true }
+        val entityGroups = mutableListOf<List<MobEntity>>()
 
-        for (mobEntity: HostileEntity in validEntities) {
-            val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
-            val relativeMobEntityPosN = relativeMobEntityPos.normalize()
+        entityGroups.add(world.entities.mapNotNull { it as? HostileEntity }.filter { filterEntity(it) })
+        entityGroups.add(world.entities.mapNotNull { it as? PhantomEntity }.filter { filterEntity(it) })
 
-            val mobVerticalAngle = acos(relativeMobEntityPosN.y)
-            val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
-
-            if (!isAggro && (abs(mobVerticalAngle - verticalAngle) > verticalFov / 2
-                        || abs(mobHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
-                continue
-            }
-
-            if (isValidAttacker(mobEntity, playerEntity, relativeMobEntityPos)) {
-                isAggro = true
-                aggroTimerTask?.cancel()
-                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
-                    isAggro = false
-                    aggroTimerTask = null
+        for (validEntities in entityGroups) {
+            for (mobEntity: MobEntity in validEntities) {
+                if (processMob(mobEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
+                    return true
                 }
-
-                return true
             }
         }
 
@@ -85,6 +64,44 @@ class CombatPredicate(
         result.add("mobEntities", mobEntities)
 
         return result
+    }
+
+    private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
+        val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
+        val relativeMobEntityPosN = relativeMobEntityPos.normalize()
+
+        val mobVerticalAngle = acos(relativeMobEntityPosN.y)
+        val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
+
+        if (!isAggro && (abs(mobVerticalAngle - verticalAngle) > verticalFov / 2
+                    || abs(mobHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
+            return false
+        }
+
+        if (isValidAttacker(mobEntity, playerEntity, relativeMobEntityPos)) {
+            isAggro = true
+            aggroTimerTask?.cancel()
+            aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
+                isAggro = false
+                aggroTimerTask = null
+            }
+
+            return true
+        }
+
+        return false
+    }
+
+    private fun filterEntity(entity: Entity): Boolean {
+        return mobEntityTranslationKeys
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                if (blacklist)
+                    it.none { mobEntity -> mobEntity == entity.type.translationKey }
+                else
+                    it.any { mobEntity -> mobEntity == entity.type.translationKey }
+            }
+            ?: true
     }
 
     companion object: MusicPredicateCompanion<CombatPredicate> {
@@ -111,13 +128,15 @@ class CombatPredicate(
         }
 
         private fun isValidAttacker(
-            mobEntity: HostileEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
-            return (mobEntity.isAttacking && closeEnough(
+            mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
+            val closeEnough = closeEnough(
                     displacement,
                     Vec3d(mobEntity.boundingBox.lengthX,
                         mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ))) ||
-                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true )
+                        mobEntity.boundingBox.lengthZ))
+            return (mobEntity.isAttacking && closeEnough) ||
+                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true) ||
+                    ((mobEntity is PhantomEntity) && closeEnough)
         }
 
         private fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
