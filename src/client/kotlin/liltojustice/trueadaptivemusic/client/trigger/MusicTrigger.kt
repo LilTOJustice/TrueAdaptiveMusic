@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
+import net.minecraft.text.Text
 import kotlin.reflect.full.primaryConstructor
 
 abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
@@ -61,6 +62,9 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
     }
 
     interface MusicTriggerCompanion<TSelf: MusicTrigger<*>> {
+        val descriptions: Map<String, String>
+            get() = mapOf()
+
         fun fromJson(json: JsonObject): TSelf {
             throw MusicTriggerException(
                 "Type \"${this::class.qualifiedName}\" must define a fromJson function.")
@@ -84,7 +88,15 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         }
 
         interface ParametersCompanion<TSelf: Parameters> {
+            val descriptions: Map<String, String>
+                get() = mapOf()
+
             fun default(): Parameters
+
+            fun getParamDescription(paramName: String): Text {
+                return Text.translatableWithFallback(
+                    "trueadaptivemusic:trigger_param_${paramName}_description", descriptions[paramName])
+            }
         }
     }
 }

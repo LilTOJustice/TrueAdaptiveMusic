@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import net.minecraft.text.Text
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -23,6 +24,10 @@ data class TrueAdaptiveMusicOptions(
     }
 
     companion object {
+        private val descriptions = mapOf(
+            "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music pack."
+        )
+
         private val json = Json {
             encodeDefaults = true
             prettyPrint = true
@@ -35,6 +40,11 @@ data class TrueAdaptiveMusicOptions(
 
         fun getRequiredArgs(): List<KParameter> {
             return TrueAdaptiveMusicOptions::class.primaryConstructor?.parameters ?: emptyList()
+        }
+
+        fun getArgDescription(argName: String): Text {
+            return Text.translatableWithFallback(
+                "trueadaptivemusic:options_${argName}_description", descriptions[argName])
         }
     }
 }

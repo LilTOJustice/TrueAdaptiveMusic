@@ -5,6 +5,8 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
+import liltojustice.trueadaptivemusic.client.trigger.ReflectionHelper
+import net.minecraft.text.Text
 
 abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
     init {
@@ -42,10 +44,20 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
     }
 
     companion object: MusicEventCompanion<MusicEvent> {
+        fun getArgDescription(eventTypeName: String, argName: String): Text {
+            return Text.translatableWithFallback(
+                "trueadaptivemusic:event_arg_${eventTypeName}_${argName}_description",
+                ReflectionHelper.getMusicTriggerArgDescriptions(
+                    TAMClient.eventRegistry[eventTypeName])[argName])
+        }
     }
 
     data class Parameters(var isPersistent: Boolean = false): MusicTrigger.Parameters() {
         companion object: ParametersCompanion<Parameters> {
+            override val descriptions: Map<String, String>
+                get() = super.descriptions + mapOf(
+                    "isPersistent" to "Don't stop this event's music after leaving this predicate.")
+
             override fun default(): Parameters {
                 return Parameters()
             }

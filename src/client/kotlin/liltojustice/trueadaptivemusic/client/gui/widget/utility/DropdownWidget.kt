@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.text.Text
 import kotlin.math.max
@@ -16,8 +17,10 @@ class DropdownWidget(
     notSelectedPlaceholder: String? = null,
     startingOption: String = "",
     onHoverOption: (option: String?) -> Unit = {},
+    tooltipText: Text? = null,
     x: Int = 0,
-    y: Int = 0)
+    y: Int = 0
+)
     : ContainerWidget(
     width,
     0,
@@ -50,6 +53,10 @@ class DropdownWidget(
     private val titleTextWidget = ClickableTextWidget(titleText.string)
 
     init {
+        tooltipText?.let {
+            titleTextWidget.setTooltip(Tooltip.of(it))
+            selectedOptionWidget.setTooltip(Tooltip.of(it))
+        }
         titleTextWidget.active = false
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(

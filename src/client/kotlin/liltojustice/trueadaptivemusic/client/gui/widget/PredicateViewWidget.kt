@@ -181,7 +181,10 @@ class PredicateViewWidget(
                         },
                         width,
                         Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
-                        startingOption = selectedPredicateTypeName)
+                        startingOption = selectedPredicateTypeName,
+                        tooltipText = Text.translatableWithFallback(
+                            "trueadaptivemusic.predicateType_description",
+                            "Select under what circumstances the music should play"))
                 },
                 "predicateTypeChoice",
                 row = 1)
@@ -213,7 +216,10 @@ class PredicateViewWidget(
                         "trueadaptivemusic.select_track", "Select a track").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
+                    tooltipText = Text.translatableWithFallback(
+                        "trueadaptivemusic.musicChoice_description",
+                        "Select any amount of music to be chosen randomly to play"))
             },
             "musicChoice"
         )
@@ -240,7 +246,10 @@ class PredicateViewWidget(
                         "trueadaptivemusic.select_track", "Select a track").string,
                     selectedAmbiencePaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
+                    tooltipText = Text.translatableWithFallback(
+                        "trueadaptivemusic.ambienceChoice_description",
+                        "Select any amount of ambience to be chosen randomly to play"))
             },
             "ambienceChoice"
         )
@@ -248,7 +257,12 @@ class PredicateViewWidget(
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(screen!!, predicateArgs, arg) { onChange() }
+                    TAMClient.makeInputWidget(
+                        screen!!,
+                        predicateArgs,
+                        arg,
+                        arg.name?.let { MusicPredicate.getArgDescription(selectedPredicateTypeName, it) }
+                    ) { onChange() }
                 },
                 "predicateArg: ${arg.name ?: arg.index}"
             )
@@ -258,7 +272,10 @@ class PredicateViewWidget(
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
-                        screen!!, predicateParams, param
+                        screen!!,
+                        predicateParams,
+                        param,
+                        param.name?.let { MusicPredicate.Parameters.getParamDescription(it) }
                     ) { onChange() }
                 },
                 "predicateParam: ${param.name ?: param.index}"
@@ -297,16 +314,26 @@ class PredicateViewWidget(
         }
 
         addWidgetFromRender(
-            { ClickableTextWidget(
-                "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
-                onClick = {
-                    selectedEvent = null
-                    onEventClick(null) },
-                isSelected = { selectedEvent == null && inEventView() }) },
+            {
+                val result = ClickableTextWidget(
+                    "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
+                    onClick = {
+                        selectedEvent = null
+                        onEventClick(null) },
+                    isSelected = { selectedEvent == null && inEventView() }
+                )
+                result.setTooltip(
+                    Tooltip.of(
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.create_event", "Create a new event")
+                    )
+                )
+                result
+            },
             "Add Event")
 
         if (selectedNode?.parent != null) {
-            addWidgetFromRender(
+            val result = addWidgetFromRender(
                 {
                     var clicked = false
                     ClickableTextWidget(
@@ -335,11 +362,17 @@ class PredicateViewWidget(
                 },
                 "Delete"
             )
+            result.setTooltip(
+                Tooltip.of(
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
+                )
+            )
         }
     }
 
     private fun renderErrorMode() {
-        addWidgetFromRender(
+        val result = addWidgetFromRender(
             {
                 ClickableTextWidget(
                     Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
@@ -350,6 +383,12 @@ class PredicateViewWidget(
                 )
             },
             "Delete"
+        )
+        result.setTooltip(
+            Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
+            )
         )
     }
 

@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -18,6 +19,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTre
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
@@ -111,31 +113,18 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
-    fun registerInputWidget(
-        predicate: (parameterType: KType) -> Boolean,
-        widgetMaker:
-            (prompt: String,
-             screen: Screen,
-             outArgs: MutableList<Any?>,
-             arg: KParameter,
-             onChange: () -> Unit) -> ClickableWidget) {
+    fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
         inputWidgetMaker.register(predicate, widgetMaker)
     }
 
-    fun registerInputWidget(
-        parameterType: KType,
-        widgetMaker:
-            (prompt: String,
-             screen: Screen,
-             outArgs: MutableList<Any?>,
-             arg: KParameter,
-             onChange: () -> Unit) -> ClickableWidget) {
+    fun registerInputWidget(parameterType: KType, widgetMaker: WidgetMaker) {
         registerInputWidget({ type -> type == parameterType}, widgetMaker)
     }
 
     fun makeInputWidget(
-        screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit = {}): ClickableWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg, onChange)
+        screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, tooltipText: Text?, onChange: () -> Unit = {})
+    : ClickableWidget {
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg, tooltipText, onChange)
     }
 
     private fun initialize(client: MinecraftClient) {

@@ -20,6 +20,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
@@ -440,6 +441,10 @@ class MusicPack private constructor(
         }
 
         companion object {
+            private val descriptions = mapOf(
+                "description" to "Description of the Music Pack."
+            )
+
             private val json = Json {
                 encodeDefaults = true
                 prettyPrint = true
@@ -452,6 +457,11 @@ class MusicPack private constructor(
 
             fun getRequiredArgs(): List<KParameter> {
                 return Metadata::class.primaryConstructor?.parameters ?: emptyList()
+            }
+
+            fun getArgDescription(argName: String): Text {
+                return Text.translatableWithFallback(
+                    "trueadaptivemusic:metadata_${argName}_description", descriptions[argName])
             }
         }
     }

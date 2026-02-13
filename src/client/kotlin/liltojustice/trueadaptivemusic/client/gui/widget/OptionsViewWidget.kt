@@ -30,7 +30,14 @@ class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, he
 
         modifiedRequiredOptionsArgs.forEach { required ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, optionsArgs, required) },
+                {
+                    TAMClient.makeInputWidget(
+                        screen!!,
+                        optionsArgs,
+                        required,
+                        required.name?.let { TrueAdaptiveMusicOptions.getArgDescription(it) }
+                    )
+                },
                 "${required.name}: ${required.type}")
         }
     }

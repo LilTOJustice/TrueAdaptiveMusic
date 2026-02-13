@@ -22,7 +22,7 @@ import kotlin.math.cbrt
 import kotlin.math.tan
 
 class CombatPredicate(
-    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
+    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>) : MusicPredicate() {
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
@@ -108,6 +108,13 @@ class CombatPredicate(
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI
+
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "blacklist" to "Whether the list of mob entities attacking should not (if checked) or should " +
+                        "(if not checked) make the music play.",
+                "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
+            )
 
         override fun fromJson(json: JsonObject): CombatPredicate {
             return CombatPredicate(

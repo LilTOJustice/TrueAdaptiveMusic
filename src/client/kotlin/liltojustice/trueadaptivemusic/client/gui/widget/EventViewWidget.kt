@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -70,7 +71,7 @@ class EventViewWidget(
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.renderWidget(context, mouseX, mouseY, delta)
         if (selectedEvent is ErrorEvent) {
-            addWidgetFromRender(
+            val result = addWidgetFromRender(
                 {
                     ClickableTextWidget(
                         Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
@@ -81,6 +82,12 @@ class EventViewWidget(
                     )
                 },
                 "Delete"
+            )
+            result.setTooltip(
+                Tooltip.of(
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.delete_event_description", "Delete this event")
+                )
             )
 
             return
@@ -97,7 +104,10 @@ class EventViewWidget(
                     { typeName ->  setSelectedEventTypeName(typeName) },
                     width / 2,
                     Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
-                    startingOption = selectedEventTypeName)
+                    startingOption = selectedEventTypeName,
+                    tooltipText = Text.translatableWithFallback(
+                            "trueadaptivemusic.eventType_description",
+                    "Select what should trigger the music to play"))
             },
             "eventTypeChoice",
             row = 1)
@@ -124,7 +134,12 @@ class EventViewWidget(
                         "trueadaptivemusic.select_track", "Select a track").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) })
+                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) })
+                    },
+                    tooltipText = Text.translatableWithFallback(
+                        "trueadaptivemusic.musicChoice_description",
+                        "Select any amount of music to be chosen randomly to play")
+                )
             },
             "musicChoice"
         )
@@ -136,20 +151,34 @@ class EventViewWidget(
 
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, eventArgs, arg) { save() } },
+                {
+                    TAMClient.makeInputWidget(
+                        screen!!,
+                        eventArgs,
+                        arg,
+                        arg.name?.let { MusicEvent.getArgDescription(selectedEventTypeName, it) }
+                    ) { save() }
+                },
                 "eventArg: ${arg.name ?: arg.index}"
             )
         }
 
         requiredEventParams.forEach { param ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, eventParams, param) { save() } },
+                {
+                    TAMClient.makeInputWidget(
+                        screen!!,
+                        eventParams,
+                        param,
+                        param.name?.let { MusicEvent.Parameters.getParamDescription(it) }
+                    ) { save() }
+                },
                 "eventParam: ${param.name ?: param.index}"
             )
         }
 
         if (selectedEvent != null) {
-            addWidgetFromRender(
+            val result = addWidgetFromRender(
                 {
                     var clicked = false
                     ClickableTextWidget(
@@ -177,6 +206,12 @@ class EventViewWidget(
                     )
                 },
                 "Delete"
+            )
+            result.setTooltip(
+                Tooltip.of(
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.delete_event_description", "Delete this event")
+                )
             )
         }
     }

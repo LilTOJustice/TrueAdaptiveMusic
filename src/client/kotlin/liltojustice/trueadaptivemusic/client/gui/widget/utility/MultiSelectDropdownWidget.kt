@@ -15,6 +15,7 @@ class MultiSelectDropdownWidget(
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<String> = listOf(),
     private val onHoverOption: (option: String?) -> Unit = {},
+    private val tooltipText: Text? = null,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -64,6 +65,7 @@ class MultiSelectDropdownWidget(
                     notSelectedPlaceholder,
                     "",
                     onHoverOption,
+                    tooltipText,
                     x,
                     y
                 )
@@ -82,7 +84,12 @@ class MultiSelectDropdownWidget(
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })
-                    widget.setTooltip(Tooltip.of(Text.translatableWithFallback("trueadaptivemusic.click_to_remove", "Click to remove")))
+                    widget.setTooltip(
+                        Tooltip.of(
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.click_to_remove", "Click to remove")
+                        )
+                    )
                     widget
                 },
                 "selectedOption: $option"
