@@ -1,19 +1,18 @@
-package liltojustice.trueadaptivemusic.client.sound.system
+package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import liltojustice.trueadaptivemusic.client.sound.isPaused
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.option.GameOptions
 import net.minecraft.client.sound.Channel
-import net.minecraft.client.sound.Channel.SourceManager
 import net.minecraft.client.sound.SoundEngine
 import net.minecraft.client.sound.SoundExecutor
 import net.minecraft.client.sound.Source
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Util
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.get
 
 @Environment(EnvType.CLIENT)
 class SoundSystem(private val options: GameOptions) {
@@ -138,6 +137,14 @@ class SoundSystem(private val options: GameOptions) {
         }
     }
 
+    fun refreshSoundVolume() {
+        sources.keys.forEach { refreshSoundVolume(it) }
+    }
+
+    fun refreshSoundVolume(soundInstance: TAMSoundInstance) {
+        runOnSource(soundInstance) { source -> source.setVolume(getProperSourceVolume(soundInstance)) }
+    }
+
     fun setInstanceVolume(soundInstance: TAMSoundInstance, volume: Float): Boolean {
         soundInstance.desiredVolume = volume
 
@@ -205,7 +212,8 @@ class SoundSystem(private val options: GameOptions) {
 
     @ConsistentCopyVisibility
     data class SourceContext private constructor(
-        val soundExecutor: SoundExecutor, val channel: Channel, val manager: SourceManager) {
+        val soundExecutor: SoundExecutor, val channel: Channel, val manager: Channel.SourceManager
+    ) {
         companion object {
             fun new(soundEngine: SoundEngine, ): SourceContext? {
                 val executor = SoundExecutor()

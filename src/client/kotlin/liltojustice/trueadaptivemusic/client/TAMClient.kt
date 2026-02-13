@@ -132,6 +132,10 @@ object TAMClient {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
+    fun refreshSoundVolume() {
+        musicManager?.refreshSoundVolume()
+    }
+
     private fun initialize(client: MinecraftClient) {
         if (initialized) {
             return

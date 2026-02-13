@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import liltojustice.trueadaptivemusic.client.sound.system.SoundSystem
 import kotlin.math.sin
 
 class VolumeManager(private val soundSystem: SoundSystem) {

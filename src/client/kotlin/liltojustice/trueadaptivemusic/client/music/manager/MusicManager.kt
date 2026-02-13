@@ -54,6 +54,10 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
+    fun refreshSoundVolume() {
+        musicPlayer.refreshSoundVolume()
+    }
+
     fun playNow(onDemandSound: PlayableSound?) {
         onDemandSound?.let { musicPlayer.startNew(ON_DEMAND_TRACK, onDemandSound) }
             ?: musicPlayer.stop(ON_DEMAND_TRACK)

@@ -4,7 +4,7 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import liltojustice.trueadaptivemusic.client.sound.system.SoundSystem
+import liltojustice.trueadaptivemusic.client.sound.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
 import java.util.Timer
@@ -16,6 +16,10 @@ internal class MusicPlayer(client: MinecraftClient) {
     private val soundSystem = SoundSystem(client.options)
     private val volumeManager = VolumeManager(soundSystem)
     private val tracks = mutableMapOf<String, Track>()
+
+    fun refreshSoundVolume() {
+        soundSystem.refreshSoundVolume()
+    }
 
     fun getTrackInstance(trackName: String): TAMSoundInstance? {
         return getTrack(trackName).currentSoundInstance
