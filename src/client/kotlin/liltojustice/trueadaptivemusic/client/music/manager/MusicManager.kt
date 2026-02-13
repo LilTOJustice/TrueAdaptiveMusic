@@ -134,6 +134,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (shouldStop) {
+            client.musicTracker.setCurrent(null)
             return
         }
 
@@ -178,6 +179,7 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun stop() {
+        client.musicTracker.setCurrent(null)
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
