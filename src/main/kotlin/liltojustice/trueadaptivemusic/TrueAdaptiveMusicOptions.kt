@@ -2,6 +2,8 @@ package liltojustice.trueadaptivemusic
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.text.Text
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
@@ -9,7 +11,8 @@ import kotlin.reflect.full.primaryConstructor
 @Serializable
 data class TrueAdaptiveMusicOptions(
     val selectedPack: String = "",
-    val useDebugHud: Boolean = false) {
+    val useDebugHud: Boolean = false,
+    val prettifyIdentifiers: Boolean = true) {
 
     fun save() {
         Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
@@ -24,8 +27,16 @@ data class TrueAdaptiveMusicOptions(
     }
 
     companion object {
+        private val displayNames = TrueAdaptiveMusicOptions::class
+            .primaryConstructor
+            ?.parameters
+            ?.mapNotNull { it.name }
+            ?.associateWith { it.prettify() } ?: mapOf()
+
         private val descriptions = mapOf(
-            "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music pack."
+            "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music " +
+                    "pack.",
+            "prettifyIdentifiers" to "Enable or disable \"prettified\" identifiers (makes them more human friendly)."
         )
 
         private val json = Json {
@@ -39,11 +50,16 @@ data class TrueAdaptiveMusicOptions(
         }
 
         fun getRequiredArgs(): List<KParameter> {
-            return TrueAdaptiveMusicOptions::class.primaryConstructor?.parameters ?: emptyList()
+            return TrueAdaptiveMusicOptions::class.primaryConstructor?.parameters?.drop(1) ?: emptyList()
         }
 
-        fun getArgDescription(argName: String): Text {
-            return Text.translatableWithFallback(
+        fun getArgDisplayName(argName: String): Text? {
+            return translatableWithFallbackOrNull(
+                "trueadaptivemusic:options_${argName}_display", displayNames[argName])
+        }
+
+        fun getArgDescription(argName: String): Text? {
+            return translatableWithFallbackOrNull(
                 "trueadaptivemusic:options_${argName}_description", descriptions[argName])
         }
     }

@@ -5,6 +5,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.text.Text
@@ -50,7 +51,7 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         return JsonObject()
     }
 
-    companion object: MusicTriggerCompanion<MusicTrigger<*>> {
+    companion object {
         fun getTruncatedTriggerId(triggerId: String): String {
             val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
             val text = arrays.fold(triggerId) { partial: String, array ->
@@ -62,8 +63,18 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
     }
 
     interface MusicTriggerCompanion<TSelf: MusicTrigger<*>> {
+        val displayName: String?
+            get() = null
+
+        val displayNames: Map<String, String>
+            get() = mapOf()
+
         val descriptions: Map<String, String>
             get() = mapOf()
+
+        fun getDisplayName(triggerName: String): Text
+        fun getArgDisplayName(triggerName: String, argName: String): Text?
+        fun getArgDescription(triggerName: String, argName: String): Text?
 
         fun fromJson(json: JsonObject): TSelf {
             throw MusicTriggerException(
@@ -88,12 +99,20 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         }
 
         interface ParametersCompanion<TSelf: Parameters> {
+            val displayNames: Map<String, String>
+                get() = mapOf()
+
             val descriptions: Map<String, String>
                 get() = mapOf()
 
             fun default(): Parameters
 
-            fun getParamDescription(paramName: String): Text {
+            fun getParamDisplayName(paramName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic:trigger_param_${paramName}_display", displayNames[paramName])
+            }
+
+            fun getParamDescription(paramName: String): Text? {
                 return Text.translatableWithFallback(
                     "trueadaptivemusic:trigger_param_${paramName}_description", descriptions[paramName])
             }

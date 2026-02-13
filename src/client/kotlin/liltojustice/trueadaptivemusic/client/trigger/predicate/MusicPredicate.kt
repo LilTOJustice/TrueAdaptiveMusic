@@ -3,12 +3,16 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
+import liltojustice.trueadaptivemusic.text.prettify
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
+import kotlin.reflect.full.declaredMembers
 
 abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     init {
@@ -80,6 +84,10 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
         var inheritAmbience: Boolean = true)
         : MusicTrigger.Parameters() {
         companion object: ParametersCompanion<Parameters> {
+            override val displayNames: Map<String, String>
+                get() = super.displayNames +
+                        Parameters::class.declaredMembers.map { it.name }.associateWith { it.prettify() }
+
             override val descriptions: Map<String, String>
                 get() = super.descriptions + mapOf(
                     "trackDelay" to "After a track finishes, wait this many seconds before playing the next.",
@@ -97,15 +105,33 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     }
 
     companion object: MusicPredicateCompanion<MusicPredicate> {
-        fun getArgDescription(predicateTypeName: String, argName: String): Text {
-            return Text.translatableWithFallback(
-                "trueadaptivemusic:predicate_arg_${predicateTypeName}_${argName}_description",
-                ReflectionHelper.getMusicTriggerArgDescriptions(
-                    TAMClient.predicateRegistry[predicateTypeName])[argName])
-        }
     }
 
-    interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion<MusicPredicate>
-            where TSelf: MusicPredicate {
+    interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion<MusicPredicate> where TSelf: MusicPredicate {
+        override fun getDisplayName(triggerName: String): Text {
+            return Text.translatableWithFallback(
+                "trueadaptivemusic:predicate_${triggerName}_display",
+                displayName ?: triggerName.prettify()
+            )
+        }
+
+        override fun getArgDisplayName(triggerName: String, argName: String): Text? {
+            val predicateType = TAMClient.predicateRegistry[triggerName]
+            val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
+            val combined = inferredDisplayNames.associateWith { it.prettify() } +
+                TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
+            return translatableWithFallbackOrNull(
+                "trueadaptivemusic:predicate_arg_${triggerName}_${argName}_display",
+                combined[argName]
+            )
+        }
+
+        override fun getArgDescription(triggerName: String, argName: String): Text? {
+            return translatableWithFallbackOrNull(
+                "trueadaptivemusic:predicate_arg_${triggerName}_${argName}_description",
+                TriggerReflectionHelper.getMusicTriggerArgDescriptions(
+                    TAMClient.predicateRegistry[triggerName])[argName]
+            )
+        }
     }
 }

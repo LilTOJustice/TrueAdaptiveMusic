@@ -19,13 +19,13 @@ class InputWidgetMaker {
         screen: Screen,
         outArgs: MutableList<Any?>,
         arg: KParameter,
-        tooltipText: Text? = null,
+        displayName: Text?,
+        tooltipText: Text?,
         onChange: () -> Unit
     ): ClickableWidget {
-        val prompt = (arg.name ?: "Unknown") +
-                ": ${arg.type.toString().split('.').last().replace(">", "")}"
+        val displayName = displayName?.string ?: arg.name ?: "Unknown"
         return widgetRegistry.firstOrNull { entry -> entry.predicate(arg.type) }
-            ?.widgetMaker(prompt, screen, outArgs, arg, tooltipText, onChange)
+            ?.widgetMaker(displayName, screen, outArgs, arg, tooltipText, onChange)
             ?: run {
                 Logger.logWarning("Couldn't create widget for expected type ${arg.type}.")
                 EmptyClickableWidget()

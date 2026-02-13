@@ -15,11 +15,13 @@ import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.text.prettify
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
@@ -441,6 +443,12 @@ class MusicPack private constructor(
         }
 
         companion object {
+            private val displayNames = Metadata::class
+                .primaryConstructor
+                ?.parameters
+                ?.mapNotNull { it.name }
+                ?.associateWith { it.prettify() } ?: mapOf()
+
             private val descriptions = mapOf(
                 "description" to "Description of the Music Pack."
             )
@@ -459,8 +467,13 @@ class MusicPack private constructor(
                 return Metadata::class.primaryConstructor?.parameters ?: emptyList()
             }
 
-            fun getArgDescription(argName: String): Text {
-                return Text.translatableWithFallback(
+            fun getArgDisplayName(argName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic:metadata_${argName}_display", displayNames[argName])
+            }
+
+            fun getArgDescription(argName: String): Text? {
+                return translatableWithFallbackOrNull(
                     "trueadaptivemusic:metadata_${argName}_description", descriptions[argName])
             }
         }

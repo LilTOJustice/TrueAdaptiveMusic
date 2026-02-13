@@ -100,7 +100,7 @@ class EventViewWidget(
         addWidgetFromRender(
             {
                 DropdownWidget(
-                    eventTypeNameOptions,
+                    eventTypeNameOptions.map { it to MusicEvent.getDisplayName(it).string },
                     { typeName ->  setSelectedEventTypeName(typeName) },
                     width / 2,
                     Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
@@ -128,10 +128,13 @@ class EventViewWidget(
                             .union(
                                 Registries.SOUND_EVENT.ids
                                     .map { id -> id.toString() }
-                                    .filter { path -> path.contains("music.") }).toList()
+                                    .filter { path -> path.contains("music.") }
+                            )
+                            .toList()
+                            .map { it to it }
                     },
                     Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select a track").string,
+                        "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) })
@@ -156,7 +159,10 @@ class EventViewWidget(
                         screen!!,
                         eventArgs,
                         arg,
-                        arg.name?.let { MusicEvent.getArgDescription(selectedEventTypeName, it) }
+                        arg.name
+                            ?.let { MusicEvent.getArgDisplayName(selectedEventTypeName, it) },
+                        arg.name
+                            ?.let { MusicEvent.getArgDescription(selectedEventTypeName, it) }
                     ) { save() }
                 },
                 "eventArg: ${arg.name ?: arg.index}"
@@ -170,6 +176,7 @@ class EventViewWidget(
                         screen!!,
                         eventParams,
                         param,
+                        param.name?.let { MusicEvent.Parameters.getParamDisplayName(it) },
                         param.name?.let { MusicEvent.Parameters.getParamDescription(it) }
                     ) { save() }
                 },

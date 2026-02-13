@@ -47,6 +47,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
+import liltojustice.trueadaptivemusic.text.prettify
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -199,19 +200,19 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> to enum.toString().prettify() }
 
                 if (options.isEmpty())
                     EmptyClickableWidget()
                 else
                     DropdownWidget(
                         options,
-                        { enumOption ->
-                            outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
+                        { enumKey ->
+                            outArgs[arg.index] = enumKey
                             onChange()
                         },
                         title = prompt,
-                        startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: "",
+                        startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
                     )
             }
@@ -223,20 +224,18 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
                 val enumClass = (type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> to enum.toString().prettify() }
                 MultiSelectDropdownWidget(
                     options,
                     0,
                     { selected ->
                         outArgs[arg.index] = selected
-                            .map { enumOption ->
-                                enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
-                            }
                         onChange()
                     },
-                    "${prompt}s",
-                    notSelectedPlaceholder = "Select a value",
-                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf(),
+                    prompt,
+                    notSelectedPlaceholder = "Select values",
+                    alreadySelected = (outArgs[arg.index] as? List<*>)?.mapNotNull { enum -> enum as? Enum<*> }
+                        ?: listOf(),
                     tooltipText = tooltipText
                 )
             }
@@ -245,16 +244,23 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<TypedIdentifier>()) },
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
-                val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
+                val prettify = TAMClient.options.prettifyIdentifiers
+                val options = TypedIdentifier
+                    .getRegistryIdsFromType(arg.type)
+                    .map { id ->
+                        TypedIdentifier.initializeFromIdString(arg.type, id.toString()) to
+                                (if (prettify) id.toString().prettify() else id.toString())
+                    }
+                    .sortedBy { pair -> pair.second }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
                 DropdownWidget(
                     options,
                     { id ->
-                        outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id)
+                        outArgs[arg.index] = id
                         onChange()
                     },
                     title = prompt,
-                    startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: "",
+                    startingOption = outArgs[arg.index] as? TypedIdentifier,
                     tooltipText = actualTooltipText
                 )
             }
@@ -265,19 +271,26 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
-                val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
+                val prettify = TAMClient.options.prettifyIdentifiers
+                val options = TypedIdentifier
+                    .getRegistryIdsFromType(type)
+                    .map { id ->
+                        TypedIdentifier.initializeFromIdString(type, id.toString()) to
+                                (if (prettify) id.toString().prettify() else id.toString())
+                    }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
                 MultiSelectDropdownWidget(
                     options,
                     0,
                     { selected ->
                         outArgs[arg.index] = selected
-                            .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
                         onChange()
                     },
-                    "${prompt}s",
-                    notSelectedPlaceholder = "Select an Identifier",
-                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf(),
+                    prompt,
+                    notSelectedPlaceholder = "Select identifiers",
+                    alreadySelected =
+                        (outArgs[arg.index] as? List<*>)?.mapNotNull { it as? TypedIdentifier }
+                            ?: listOf(),
                     tooltipText = actualTooltipText
                 )
             }

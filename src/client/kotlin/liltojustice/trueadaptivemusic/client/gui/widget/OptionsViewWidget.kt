@@ -12,7 +12,6 @@ class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, he
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
     private val requiredOptionsArgs = TrueAdaptiveMusicOptions.getRequiredArgs()
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
-    private val modifiedRequiredOptionsArgs = requiredOptionsArgs.drop(1)
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -28,13 +27,14 @@ class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, he
             return
         }
 
-        modifiedRequiredOptionsArgs.forEach { required ->
+        requiredOptionsArgs.forEach { required ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
                         screen!!,
                         optionsArgs,
                         required,
+                        required.name?.let { TrueAdaptiveMusicOptions.getArgDisplayName(it) },
                         required.name?.let { TrueAdaptiveMusicOptions.getArgDescription(it) }
                     )
                 },

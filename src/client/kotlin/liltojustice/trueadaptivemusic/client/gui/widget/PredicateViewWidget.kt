@@ -161,7 +161,8 @@ class PredicateViewWidget(
             addWidgetFromRender(
                 {
                     DropdownWidget(
-                        predicateTypeNameOptions,
+                        predicateTypeNameOptions.map {
+                            it to MusicPredicate.getDisplayName(it).string },
                         { typeName ->
                             setSelectedPredicateTypeName(typeName)
                             if (selectedNode == null
@@ -175,16 +176,18 @@ class PredicateViewWidget(
                                     selectedMusicPaths.mapNotNull {
                                         path -> MusicPack.toPlayableSound(assets, path) },
                                     selectedAmbiencePaths.mapNotNull {
-                                        path -> MusicPack.toPlayableSound(assets, path)
-                                    })
+                                        path -> MusicPack.toPlayableSound(assets, path) }
+                                )
                             }
                         },
                         width,
                         Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
-                        startingOption = selectedPredicateTypeName,
+                        startingOption = selectedPredicateTypeName.takeIf { it.isNotBlank() },
                         tooltipText = Text.translatableWithFallback(
                             "trueadaptivemusic.predicateType_description",
-                            "Select under what circumstances the music should play"))
+                            "Select under what circumstances the music should play"
+                        )
+                    )
                 },
                 "predicateTypeChoice",
                 row = 1)
@@ -210,10 +213,13 @@ class PredicateViewWidget(
                         .union(
                             Registries.SOUND_EVENT.ids
                                 .map { id -> id.toString() }
-                                .filter { path -> path.contains("music.") }).toList()
+                                .filter { path -> path.contains("music.") }
+                        )
+                        .toList()
+                        .map { it to it }
                     },
                     Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select a track").string,
+                        "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
@@ -240,10 +246,13 @@ class PredicateViewWidget(
                             .union(
                                 Registries.SOUND_EVENT.ids
                                     .map { id -> id.toString() }
-                                    .filter { path -> path.contains("music.") }).toList()
+                                    .filter { path -> path.contains("music.") }
+                            )
+                            .toList()
+                            .map { it to it }
                     },
                     Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select a track").string,
+                        "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedAmbiencePaths,
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
@@ -261,7 +270,12 @@ class PredicateViewWidget(
                         screen!!,
                         predicateArgs,
                         arg,
-                        arg.name?.let { MusicPredicate.getArgDescription(selectedPredicateTypeName, it) }
+                        arg.name
+                            ?.let {
+                                MusicPredicate.getArgDisplayName(selectedPredicateTypeName, it) },
+                        arg.name
+                            ?.let {
+                                MusicPredicate.getArgDescription(selectedPredicateTypeName, it) }
                     ) { onChange() }
                 },
                 "predicateArg: ${arg.name ?: arg.index}"
@@ -275,6 +289,7 @@ class PredicateViewWidget(
                         screen!!,
                         predicateParams,
                         param,
+                        param.name?.let { MusicPredicate.Parameters.getParamDisplayName(it) },
                         param.name?.let { MusicPredicate.Parameters.getParamDescription(it) }
                     ) { onChange() }
                 },

@@ -122,9 +122,14 @@ object TAMClient {
     }
 
     fun makeInputWidget(
-        screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, tooltipText: Text?, onChange: () -> Unit = {})
+        screen: Screen,
+        outArgs: MutableList<Any?>,
+        arg: KParameter,
+        displayName: Text?,
+        tooltipText: Text?,
+        onChange: () -> Unit = {})
     : ClickableWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg, tooltipText, onChange)
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
     private fun initialize(client: MinecraftClient) {

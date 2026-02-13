@@ -8,14 +8,14 @@ import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.text.Text
 import kotlin.math.max
 
-class DropdownWidget(
-    options: List<String>,
-    onSelectOption: (optionText: String) -> Unit,
+class DropdownWidget<TKey>(
+    options: List<Pair<TKey, String>>,
+    onSelectOption: (optionKey: TKey) -> Unit,
     width: Int = 0,
     title: String = "",
-    getOptions: (() -> List<String>)? = null,
+    getOptions: (() -> List<Pair<TKey, String>>)? = null,
     notSelectedPlaceholder: String? = null,
-    startingOption: String = "",
+    startingOption: TKey? = null,
     onHoverOption: (option: String?) -> Unit = {},
     tooltipText: Text? = null,
     x: Int = 0,
@@ -32,12 +32,16 @@ class DropdownWidget(
     x,
     y,
     true) {
-    private val titleText = Text.literal(if (title.isBlank()) "" else "$title: ")
-    private var dropdownResultsWidget: DropdownResultsWidget
+    private val titleText = Text.literal(title)
+    private var dropdownResultsWidget: DropdownResultsWidget<TKey>
     private val realizedWidth = width.takeUnless { width == 0 }
-        ?: (max(
-            textRenderer.getWidth(title),
-            options.maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0) + TEXT_WIDTH_BUFFER)
+        ?: (
+                max(
+                    textRenderer.getWidth(title),
+                    (options + (getOptions?.invoke() ?: listOf()))
+                        .map { it.second }
+                        .maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0
+                ) + TEXT_WIDTH_BUFFER)
     private val textInputWidget = TextFieldWidget(
         textRenderer,
         0,
@@ -46,10 +50,16 @@ class DropdownWidget(
         textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
         Text.literal("Dropdown Search")
     )
-    private val selectedOptionWidget = ClickableTextWidget(
-        notSelectedPlaceholder ?: startingOption.ifEmpty { null } ?: options.firstOrNull() ?: "",
-        onClick = { screen?.focused = textInputWidget },
-        isSelected = { true })
+    private val selectedOptionWidget = run {
+        val combinedOptions = options + (getOptions?.invoke() ?: listOf())
+        ClickableTextWidget(
+            notSelectedPlaceholder
+                ?: combinedOptions.firstOrNull { it.first == startingOption }?.second
+                ?: combinedOptions.map { it.second }.firstOrNull() ?: "",
+            onClick = { screen?.focused = textInputWidget },
+            isSelected = { true }
+        )
+    }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
 
     init {
@@ -61,8 +71,8 @@ class DropdownWidget(
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
-            { option ->
-                selectedOptionWidget.setText(option)
+            { option, text ->
+                selectedOptionWidget.setText(text)
                 onSelectOption(option)
             },
             getOptions,
@@ -86,7 +96,10 @@ class DropdownWidget(
             return true
         }
 
-        return super.mouseClicked(click, doubled)
+        val result = super.mouseClicked(click, doubled)
+        textInputWidget.text = ""
+
+        return result
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -103,16 +116,16 @@ class DropdownWidget(
     }
 
     companion object {
-        const val TEXT_WIDTH_BUFFER = 15
+        const val TEXT_WIDTH_BUFFER = 25
         const val TEXT_HEIGHT_BUFFER = 5
     }
 
-    private class DropdownResultsWidget(
-        private val options: List<String>,
-        val onSelectOption: (optionText: String) -> Unit,
-        private val getOptions: (() -> List<String>)?,
+    private class DropdownResultsWidget<TKey>(
+        private val options: List<Pair<TKey, String>>,
+        val onSelectOption: (optionKey: TKey, optionDisplay: String) -> Unit,
+        private val getOptions: (() -> List<Pair<TKey, String>>)?,
         notSelectedPlaceholder: String?,
-        startingOption: String,
+        startingOption: TKey?,
         private val onHoverOption: (option: String?) -> Unit,
         x: Int = 0,
         y: Int = 0)
@@ -126,12 +139,18 @@ class DropdownWidget(
         true,
         x,
         y) {
-        private var selectedOption = startingOption.ifEmpty { null } ?: notSelectedPlaceholder ?: options.firstOrNull() ?: ""
+        private var selectedOption = run {
+            val combinedOptions = options + (getOptions?.invoke() ?: listOf())
+            startingOption ?: combinedOptions.firstOrNull()?.first
+        }
         private var searchText = ""
 
         init {
-            if (selectedOption.isNotBlank() && notSelectedPlaceholder == null) {
-                onSelectOption(selectedOption)
+            if (notSelectedPlaceholder == null) {
+                selectedOption?.let {
+                    val option = options.firstOrNull() { optionPair -> optionPair.first == it } ?: return@let
+                    onSelectOption(it, option.second)
+                }
             }
         }
 
@@ -141,23 +160,22 @@ class DropdownWidget(
             }
 
             (getOptions?.invoke() ?: options)
-                .filter { option -> option.lowercase().contains(searchText.lowercase()) }
+                .filter { option -> option.second.lowercase().contains(searchText.lowercase()) }
                 .mapIndexed { index, option ->
                     addWidgetFromRender(
                         {
                             ClickableTextWidget(
-                                option,
+                                option.second,
                                 onClick = {
-                                    selectedOption = option
-                                    onSelectOption(option)
+                                    selectedOption = option.first
+                                    onSelectOption(option.first, option.second)
                                 },
                                 onMouseOn = { option -> onHoverOption(option.text) },
                                 onMouseOff = { option -> onHoverOption(null) })
                         },
-                        option,
+                        option.first.hashCode().toString(),
                         index
-                    ) as ClickableTextWidget
-
+                    )
                 }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)

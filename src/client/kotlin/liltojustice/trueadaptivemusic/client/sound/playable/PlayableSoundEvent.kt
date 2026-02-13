@@ -10,6 +10,6 @@ class PlayableSoundEvent(private val identifier: Identifier): PlayableSound {
     }
 
     override fun getSoundName(): String {
-        return identifier.path
+        return identifier.toString()
     }
 }

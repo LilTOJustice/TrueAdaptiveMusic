@@ -34,6 +34,7 @@ class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x
                         screen!!,
                         metaArgs,
                         required,
+                        required.name?.let { MusicPack.Metadata.getArgDisplayName(it) },
                         required.name?.let { MusicPack.Metadata.getArgDescription(it) }
                     )
                 },
