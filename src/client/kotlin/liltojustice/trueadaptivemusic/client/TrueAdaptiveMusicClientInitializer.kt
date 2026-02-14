@@ -47,6 +47,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
+import liltojustice.trueadaptivemusic.text.prettify
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -108,8 +109,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMClient.registerInputWidget(
             typeOf<String>()
-        ) { prompt, screen, outArgs, arg, onChange ->
-            TextInputWidget(
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
                 screen,
                 prompt,
                 { widget, text ->
@@ -119,22 +120,28 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
+            result.setTooltip(Tooltip.of(tooltipText))
+            result
         }
 
         TAMClient.registerInputWidget(
             typeOf<Int>()
-        ) { prompt, screen, outArgs, arg, onChange ->
-            TextInputWidget(
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
                 screen,
                 prompt,
                 { widget, text ->
+                    if (text.isBlank() || text == "-") {
+                        return@TextInputWidget "0"
+                    }
+
                     if (text == "0-") {
                         return@TextInputWidget "-0"
                     }
 
                     val value = text.toIntOrNull()
                     if (text != "-0" && value == null) {
-                        return@TextInputWidget "0"
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
                     }
 
                     if (text != "-0" && text != value.toString()) {
@@ -147,18 +154,24 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
+            result.setTooltip(Tooltip.of(tooltipText))
+            result
         }
 
         TAMClient.registerInputWidget(
             typeOf<UInt>()
-        ) { prompt, screen, outArgs, arg, onChange ->
-            TextInputWidget(
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
                 screen,
                 prompt,
                 { widget, text ->
+                    if (text.isBlank()) {
+                        return@TextInputWidget "0"
+                    }
+
                     val value = text.toUIntOrNull()
                     if (value == null) {
-                        return@TextInputWidget "0"
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
                     }
 
                     if (text != value.toString()) {
@@ -171,12 +184,14 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
+            result.setTooltip(Tooltip.of(tooltipText))
+            result
         }
 
         TAMClient.registerInputWidget(
             typeOf<Boolean>()
-        ) { prompt, screen, outArgs, arg, onChange ->
-            CheckboxWidget(
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = CheckboxWidget(
                 10,
                 prompt,
                 { checked ->
@@ -185,99 +200,106 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 checked = outArgs[arg.index] as? Boolean ?: false
             )
+            result.setTooltip(Tooltip.of(tooltipText))
+            result
         }
 
         TAMClient.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
-            { prompt, screen, outArgs, arg, onChange ->
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> to enum.toString().prettify() }
 
                 if (options.isEmpty())
                     EmptyClickableWidget()
                 else
                     DropdownWidget(
                         options,
-                        { enumOption ->
-                            outArgs[arg.index] = enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
+                        { enumKey ->
+                            outArgs[arg.index] = enumKey
                             onChange()
                         },
-                        0,
-                        prompt,
-                        startingOption = (outArgs[arg.index] as? Enum<*>)?.name ?: ""
+                        title = prompt,
+                        startingOption = (outArgs[arg.index] as? Enum<*>),
+                        tooltipText = tooltipText
                     )
             }
         )
 
         TAMClient.registerInputWidget(
             { type -> isEnumList(type) },
-            { prompt, screen, outArgs, arg, onChange ->
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
                 val enumClass = (type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum.toString() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
                 MultiSelectDropdownWidget(
                     options,
                     0,
+                    { it.toString().prettify() },
                     { selected ->
                         outArgs[arg.index] = selected
-                            .map { enumOption ->
-                                enumClass.enumConstants.first { enum -> enum.toString() == enumOption }
-                            }
                         onChange()
                     },
-                    "${prompt}s",
-                    notSelectedPlaceholder = "Select a value",
-                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { enum -> enum.toString() } ?: listOf())
+                    prompt,
+                    notSelectedPlaceholder = "Select values",
+                    alreadySelected = (outArgs[arg.index] as? List<*>)?.mapNotNull { enum -> enum as? Enum<*> }
+                        ?: listOf(),
+                    tooltipText = tooltipText
+                )
             }
         )
 
         TAMClient.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<TypedIdentifier>()) },
-            { prompt, screen, outArgs, arg, onChange ->
-                val options = TypedIdentifier.getRegistryIdsFromType(arg.type).map { id -> id.toString() }.sorted()
-                val result = DropdownWidget(
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+                val prettify = TAMClient.options.prettifyIdentifiers
+                val options = TypedIdentifier
+                    .getRegistryIdsFromType(arg.type)
+                    .map { id ->
+                        TypedIdentifier.initializeFromIdString(arg.type, id.toString()) to
+                                (if (prettify) id.toString().prettify() else id.toString())
+                    }
+                    .sortedBy { pair -> pair.second }
+                val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
+                DropdownWidget(
                     options,
                     { id ->
-                        outArgs[arg.index] = TypedIdentifier.initializeFromIdString(arg.type, id)
+                        outArgs[arg.index] = id
                         onChange()
                     },
-                    0,
-                    prompt,
-                    startingOption = (outArgs[arg.index] as? TypedIdentifier)?.toString() ?: ""
+                    title = prompt,
+                    startingOption = outArgs[arg.index] as? TypedIdentifier,
+                    tooltipText = actualTooltipText
                 )
-
-                if (options.isEmpty()) {
-                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
-                }
-
-                result
             }
         )
 
         TAMClient.registerInputWidget(
             { type -> isTypedIdentifierList(type) },
-            { prompt, screen, outArgs, arg, onChange ->
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
-                val options = TypedIdentifier.getRegistryIdsFromType(type).map { id -> id.toString() }.sorted()
-                val result = MultiSelectDropdownWidget(
+                val prettify = TAMClient.options.prettifyIdentifiers
+                val options = TypedIdentifier
+                    .getRegistryIdsFromType(type)
+                    .map { id -> TypedIdentifier.initializeFromIdString(type, id.toString()) }
+                val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
+                MultiSelectDropdownWidget(
                     options,
                     0,
+                    { if (prettify) it.toString().prettify() else it.toString() },
                     { selected ->
                         outArgs[arg.index] = selected
-                            .map { id -> TypedIdentifier.initializeFromIdString(type, id) }
                         onChange()
                     },
-                    "${prompt}s",
-                    notSelectedPlaceholder = "Select an Identifier",
-                    alreadySelected = (outArgs[arg.index] as? List<*>)?.map { id -> id.toString() } ?: listOf())
-
-                if (options.isEmpty()) {
-                    result.tooltip = Tooltip.of(DYNAMIC_REGISTRY_TEXT)
-                }
-
-                result
+                    prompt,
+                    notSelectedPlaceholder = "Select identifiers",
+                    alreadySelected =
+                        (outArgs[arg.index] as? List<*>)?.mapNotNull { it as? TypedIdentifier }
+                            ?: listOf(),
+                    tooltipText = actualTooltipText
+                )
             }
         )
     }
