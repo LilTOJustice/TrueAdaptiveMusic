@@ -9,11 +9,12 @@ import net.minecraft.text.Text
 import kotlin.math.max
 
 class DropdownWidget<TKey>(
-    options: List<Pair<TKey, String>>,
+    options: List<TKey>,
     onSelectOption: (optionKey: TKey) -> Unit,
     width: Int = 0,
     title: String = "",
-    getOptions: (() -> List<Pair<TKey, String>>)? = null,
+    getDisplay: ((TKey) -> String)? = null,
+    getOptions: (() -> List<TKey>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: TKey? = null,
     onHoverOption: (option: String?) -> Unit = {},
@@ -39,7 +40,7 @@ class DropdownWidget<TKey>(
                 max(
                     textRenderer.getWidth(title),
                     (options + (getOptions?.invoke() ?: listOf()))
-                        .map { it.second }
+                        .map { getDisplay?.invoke(it) ?: it.toString() }
                         .maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0
                 ) + TEXT_WIDTH_BUFFER)
     private val textInputWidget = TextFieldWidget(
@@ -54,8 +55,8 @@ class DropdownWidget<TKey>(
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
         ClickableTextWidget(
             notSelectedPlaceholder
-                ?: combinedOptions.firstOrNull { it.first == startingOption }?.second
-                ?: combinedOptions.map { it.second }.firstOrNull() ?: "",
+                ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
+                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "",
             onClick = { screen?.focused = textInputWidget },
             isSelected = { true }
         )
@@ -71,10 +72,11 @@ class DropdownWidget<TKey>(
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
-            { option, text ->
-                selectedOptionWidget.setText(text)
+            { option ->
+                selectedOptionWidget.setText(getDisplay?.invoke(option) ?: option.toString())
                 onSelectOption(option)
             },
+            getDisplay,
             getOptions,
             notSelectedPlaceholder,
             startingOption,
@@ -121,9 +123,10 @@ class DropdownWidget<TKey>(
     }
 
     private class DropdownResultsWidget<TKey>(
-        private val options: List<Pair<TKey, String>>,
-        val onSelectOption: (optionKey: TKey, optionDisplay: String) -> Unit,
-        private val getOptions: (() -> List<Pair<TKey, String>>)?,
+        private val options: List<TKey>,
+        val onSelectOption: (optionKey: TKey) -> Unit,
+        private val getDisplay: ((TKey) -> String)?,
+        private val getOptions: (() -> List<TKey>)?,
         notSelectedPlaceholder: String?,
         startingOption: TKey?,
         private val onHoverOption: (option: String?) -> Unit,
@@ -141,16 +144,13 @@ class DropdownWidget<TKey>(
         y) {
         private var selectedOption = run {
             val combinedOptions = options + (getOptions?.invoke() ?: listOf())
-            startingOption ?: combinedOptions.firstOrNull()?.first
+            startingOption ?: combinedOptions.firstOrNull()
         }
         private var searchText = ""
 
         init {
             if (notSelectedPlaceholder == null) {
-                selectedOption?.let {
-                    val option = options.firstOrNull() { optionPair -> optionPair.first == it } ?: return@let
-                    onSelectOption(it, option.second)
-                }
+                selectedOption?.let { onSelectOption(it) }
             }
         }
 
@@ -159,7 +159,8 @@ class DropdownWidget<TKey>(
                 return
             }
 
-            (getOptions?.invoke() ?: options)
+            ((getOptions?.invoke() ?: listOf()) + options)
+                .map { it to (getDisplay?.invoke(it) ?: it.toString()) }
                 .filter { option -> option.second.lowercase().contains(searchText.lowercase()) }
                 .mapIndexed { index, option ->
                     addWidgetFromRender(
@@ -168,7 +169,7 @@ class DropdownWidget<TKey>(
                                 option.second,
                                 onClick = {
                                     selectedOption = option.first
-                                    onSelectOption(option.first, option.second)
+                                    onSelectOption(option.first)
                                 },
                                 onMouseOn = { option -> onHoverOption(option.text) },
                                 onMouseOff = { option -> onHoverOption(null) })
