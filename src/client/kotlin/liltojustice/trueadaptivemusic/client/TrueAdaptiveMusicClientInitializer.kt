@@ -131,13 +131,17 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 screen,
                 prompt,
                 { widget, text ->
+                    if (text.isBlank() || text == "-") {
+                        return@TextInputWidget "0"
+                    }
+
                     if (text == "0-") {
                         return@TextInputWidget "-0"
                     }
 
                     val value = text.toIntOrNull()
                     if (text != "-0" && value == null) {
-                        return@TextInputWidget "0"
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
                     }
 
                     if (text != "-0" && text != value.toString()) {
@@ -161,9 +165,13 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 screen,
                 prompt,
                 { widget, text ->
+                    if (text.isBlank()) {
+                        return@TextInputWidget "0"
+                    }
+
                     val value = text.toUIntOrNull()
                     if (value == null) {
-                        return@TextInputWidget "0"
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
                     }
 
                     if (text != value.toString()) {
