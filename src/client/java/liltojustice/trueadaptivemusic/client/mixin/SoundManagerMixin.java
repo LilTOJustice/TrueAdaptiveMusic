@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.mixin;
 import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.javasucks.SoundManagerMixinHelper;
 import net.minecraft.client.sound.*;
+import net.minecraft.sound.SoundCategory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,23 +18,8 @@ public class SoundManagerMixin {
         }
     }
 
-    @Inject(method = "pauseAll", at = @At("HEAD"), cancellable = true)
-    public void pauseAllExcept(CallbackInfo ci) {
-        SoundManager thisObject = (SoundManager)(Object)this;
-        thisObject.soundSystem.sources.keySet().forEach(instance ->
-        {
-            if (!TAMClient.INSTANCE.hasSoundInstance(instance)) {
-                Channel.SourceManager source = thisObject.soundSystem.sources.get(instance);
-                if (source != null) {
-                    source.run(Source::pause);
-                }
-            }
-        });
-        ci.cancel();
-    }
-
-    @Inject(method = "stopAll", at = @At("HEAD"))
-    public void stopAll(CallbackInfo ci) {
-        TAMClient.INSTANCE.resetCache();
+    @Inject(method = "updateSoundVolume", at = @At("HEAD"))
+    public void updateSoundVolume(SoundCategory soundCategory, float f, CallbackInfo ci) {
+        TAMClient.INSTANCE.refreshSoundVolume();
     }
 }

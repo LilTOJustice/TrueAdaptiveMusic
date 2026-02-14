@@ -33,6 +33,13 @@ class HungerPredicate(private val direction: Direction, private val hungerPercen
     }
 
     companion object: MusicPredicateCompanion<HungerPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "direction" to "Whether the music should play when the player's hunger percentage is above or " +
+                        "below the given percentage.",
+                "hungerPercentage" to "Threshold at which the predicate should switch."
+            )
+
         override fun fromJson(json: JsonObject): HungerPredicate {
             return HungerPredicate(
                 Direction.valueOf(JsonHelper.getString(json, "direction")),
