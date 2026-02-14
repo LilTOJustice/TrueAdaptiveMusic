@@ -19,8 +19,8 @@ public class SoundManagerMixin {
         }
     }
 
-    @Inject(method = "refreshSoundVolumes", at = @At("HEAD"))
-    public void refreshSoundVolumes(SoundCategory category, CallbackInfo ci) {
+    @Inject(method = "updateSoundVolume", at = @At("HEAD"))
+    public void updateSoundVolume(SoundCategory category, CallbackInfo ci) {
         TAMClient.INSTANCE.refreshSoundVolume();
     }
 }

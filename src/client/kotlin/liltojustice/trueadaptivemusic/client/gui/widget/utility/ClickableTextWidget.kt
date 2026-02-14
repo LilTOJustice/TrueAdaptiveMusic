@@ -60,12 +60,7 @@ open class ClickableTextWidget(
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
-        context?.let {
-            drawTextWithMargin(
-                context.getHoverListener(this, DrawContext.HoverType.NONE),
-                coloredText,
-                0)
-        }
+        drawScrollableText(context, textRenderer, coloredText, x, y, x + width, y + height, color)
     }
 
     override fun onClick(click: Click, doubled: Boolean) {
