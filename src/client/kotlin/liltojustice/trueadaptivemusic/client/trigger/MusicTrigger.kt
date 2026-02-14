@@ -5,12 +5,14 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
+import net.minecraft.text.Text
 import kotlin.reflect.full.primaryConstructor
 
 abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
-    var playableSounds: List<PlayableSound> = emptyList()
+    var music: List<PlayableSound> = emptyList()
     lateinit var parameters: TParameters
 
     fun getTriggerArgs(): List<TriggerArg> {
@@ -18,12 +20,12 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
             .map { arg -> TriggerArg(arg.name, arg.value) }
     }
 
-    fun toJsonFull(): JsonObject {
+    open fun toJsonFull(): JsonObject {
         val result = JsonObject()
         result.addProperty("type", getTypeName())
 
-        val jsonMusicPath = JsonArray(playableSounds.size)
-        playableSounds.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
+        val jsonMusicPath = JsonArray(music.size)
+        music.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
         result.add("musicPath", jsonMusicPath)
         result.add("parameters", paramsJson())
 
@@ -49,7 +51,7 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         return JsonObject()
     }
 
-    companion object: MusicTriggerCompanion<MusicTrigger<*>> {
+    companion object {
         fun getTruncatedTriggerId(triggerId: String): String {
             val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
             val text = arrays.fold(triggerId) { partial: String, array ->
@@ -61,6 +63,19 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
     }
 
     interface MusicTriggerCompanion<TSelf: MusicTrigger<*>> {
+        val displayName: String?
+            get() = null
+
+        val displayNames: Map<String, String>
+            get() = mapOf()
+
+        val descriptions: Map<String, String>
+            get() = mapOf()
+
+        fun getDisplayName(triggerName: String): Text
+        fun getArgDisplayName(triggerName: String, argName: String): Text?
+        fun getArgDescription(triggerName: String, argName: String): Text?
+
         fun fromJson(json: JsonObject): TSelf {
             throw MusicTriggerException(
                 "Type \"${this::class.qualifiedName}\" must define a fromJson function.")
@@ -84,7 +99,23 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         }
 
         interface ParametersCompanion<TSelf: Parameters> {
+            val displayNames: Map<String, String>
+                get() = mapOf()
+
+            val descriptions: Map<String, String>
+                get() = mapOf()
+
             fun default(): Parameters
+
+            fun getParamDisplayName(paramName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic:trigger_param_${paramName}_display", displayNames[paramName])
+            }
+
+            fun getParamDescription(paramName: String): Text? {
+                return Text.translatableWithFallback(
+                    "trueadaptivemusic:trigger_param_${paramName}_description", descriptions[paramName])
+            }
         }
     }
 }
