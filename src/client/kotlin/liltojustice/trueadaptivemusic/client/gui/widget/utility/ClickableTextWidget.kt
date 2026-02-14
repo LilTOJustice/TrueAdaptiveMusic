@@ -5,6 +5,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
+import net.minecraft.text.TextColor
 import net.minecraft.util.Colors
 
 open class ClickableTextWidget(
@@ -23,6 +24,8 @@ open class ClickableTextWidget(
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
+    val coloredText: Text
+        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).first()
     var hovering = false
 
     init {
@@ -35,11 +38,13 @@ open class ClickableTextWidget(
             return
         }
 
-        if (isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && !hovering) {
+        val isMouseOver = isMouseOver(mouseX.toDouble(), mouseY.toDouble())
+
+        if (isMouseOver && !hovering) {
             hovering = true
             onMouseOn(this)
         }
-        else if (!isMouseOver(mouseX.toDouble(), mouseY.toDouble()) && hovering) {
+        else if (!isMouseOver && hovering) {
             hovering = false
             onMouseOff(this)
         }
@@ -55,12 +60,16 @@ open class ClickableTextWidget(
             )
         }
 
-        if (!selected && showHighlight && isMouseOver(mouseX.toDouble(), mouseY.toDouble())) {
+        if (!selected && showHighlight && isMouseOver) {
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
-        drawScrollableText(context, textRenderer, message, x, y, x + width, y + height, color)
-        //super.renderWidget(context, mouseX, mouseY, delta)
+        context?.let {
+            drawTextWithMargin(
+                context.getHoverListener(this, DrawContext.HoverType.NONE),
+                coloredText,
+                0)
+        }
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
