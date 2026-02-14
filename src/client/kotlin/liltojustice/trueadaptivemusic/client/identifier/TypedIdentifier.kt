@@ -4,7 +4,19 @@ import net.minecraft.util.Identifier
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 
-sealed class TypedIdentifier(id: String): Identifier(id) {
+sealed class TypedIdentifier(id: String) {
+    val identifier: Identifier = Identifier.of(id)
+    val path: String = identifier.path
+    val namespace: String = identifier.namespace
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) || (other as? TypedIdentifier)?.identifier == identifier
+    }
+
+    fun toTranslationKey(prefix: String): String {
+        return identifier.toTranslationKey(prefix)
+    }
+
     companion object: TypedIdentifierCompanion<TypedIdentifier>() {
         override fun getRegistryIds(): List<Identifier> {
             throw TypedIdentifierException(
@@ -35,5 +47,16 @@ sealed class TypedIdentifier(id: String): Identifier(id) {
                 ?.primaryConstructor?.call(id)
                 ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from id $id")
         }
+    }
+
+    override fun toString(): String {
+        return identifier.toString()
+    }
+
+    override fun hashCode(): Int {
+        var result = identifier.hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + namespace.hashCode()
+        return result
     }
 }

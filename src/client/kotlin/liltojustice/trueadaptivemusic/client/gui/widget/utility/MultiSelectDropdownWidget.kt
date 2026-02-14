@@ -5,15 +5,16 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 
-class MultiSelectDropdownWidget(
-    private val options: List<String>,
+class MultiSelectDropdownWidget<TKey>(
+    private val options: List<Pair<TKey, String>>,
     width: Int,
-    private val onChange: (selected: List<String>) -> Unit = {},
+    private val onChange: (selected: List<TKey>) -> Unit = {},
     private val title: String = "",
-    private val getOptions: (() -> List<String>)? = null,
+    private val getOptions: (() -> List<Pair<TKey, String>>)? = null,
     private val notSelectedPlaceholder: String? = null,
-    alreadySelected: List<String> = listOf(),
+    alreadySelected: List<TKey> = listOf(),
     private val onHoverOption: (option: String?) -> Unit = {},
+    private val tooltipText: Text? = null,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -27,56 +28,65 @@ class MultiSelectDropdownWidget(
     x,
     y,
     true) {
-    private val selected = mutableListOf<String>()
+    private val selected = mutableListOf<Pair<TKey, String>>()
+    private var dropdownWidget: DropdownWidget<Pair<TKey, String>>? = null
 
     init {
-        selected.addAll(alreadySelected)
-        onChange(selected)
+        val combinedOptions = options + (getOptions?.invoke() ?: listOf())
+        selected.addAll(
+            alreadySelected.mapNotNull { combinedOptions.firstOrNull { option -> option.first == it } })
+        onChange(selected.map { it.first })
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
-                DropdownWidget(
-                    options,
+                DropdownWidget<Pair<TKey, String>>(
+                    options.map { it to it.second },
                     { option ->
                         if (selected.contains(option)) {
                             return@DropdownWidget
                         }
 
                         selected.add(option)
-                        onChange(selected)
+                        onChange(selected.map { it.first })
                         clearWidgetsFromRender { widget -> widget.id != "dropdown" }
                     },
                     width,
                     title,
-                    getOptions,
+                    getOptions?.let { opFunc -> { opFunc().map { it to it.second } } },
                     notSelectedPlaceholder,
-                    "",
+                    null,
                     onHoverOption,
+                    tooltipText,
                     x,
                     y
                 )
             },
             "dropdown"
-        ) as DropdownWidget
+        ) as DropdownWidget<Pair<TKey, String>>
 
-       selected.sorted().map { option ->
+        selected.sortedBy { it.second }.map { option ->
             addWidgetFromRender(
                 {
                     val widget = ClickableTextWidget(
-                        option,
+                        option.second,
                         onClick = {
                             selected.remove(option)
-                            onChange(selected)
+                            onChange(selected.map { it.first })
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })
-                    widget.setTooltip(Tooltip.of(Text.translatableWithFallback("trueadaptivemusic.click_to_remove", "Click to remove")))
+                    widget.setTooltip(
+                        Tooltip.of(
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.click_to_remove", "Click to remove")
+                        )
+                    )
                     widget
                 },
                 "selectedOption: $option"
-            ) as ClickableTextWidget
+            )
         }
 
         super.render(context, mouseX, mouseY, delta)

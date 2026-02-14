@@ -26,6 +26,11 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
     }
 
     companion object: MusicPredicateCompanion<StatusEffectPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "statusEffects" to "Which status effects the player needs to have for the music to play."
+            )
+
         override fun fromJson(json: JsonObject): StatusEffectPredicate {
             return StatusEffectPredicate(
                 JsonHelper.getArray(json, "statusEffects")
