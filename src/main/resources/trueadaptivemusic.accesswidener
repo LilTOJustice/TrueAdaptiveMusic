@@ -11,3 +11,6 @@ extendable class net/minecraft/util/Identifier
 accessible method net/minecraft/util/Identifier <init> (Ljava/lang/String;Ljava/lang/String;)V
 accessible method net/minecraft/client/sound/Source getSourceState ()I
 accessible field net/minecraft/client/sound/MusicTracker current Lnet/minecraft/client/sound/SoundInstance;
+accessible field net/minecraft/client/sound/SoundSystem soundEngine Lnet/minecraft/client/sound/SoundEngine;
+accessible field net/minecraft/client/sound/SoundSystem soundLoader Lnet/minecraft/client/sound/SoundLoader;
+accessible field net/minecraft/client/sound/SoundLoader resourceFactory Lnet/minecraft/resource/ResourceFactory;

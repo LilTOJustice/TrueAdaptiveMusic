@@ -5,6 +5,10 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.*
 
 sealed class TypedIdentifier(id: String): Identifier(id) {
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) || (other as? TypedIdentifier)?.toString() == toString()
+    }
+
     companion object: TypedIdentifierCompanion<TypedIdentifier>() {
         override fun getRegistryIds(): List<Identifier> {
             throw TypedIdentifierException(
@@ -35,5 +39,12 @@ sealed class TypedIdentifier(id: String): Identifier(id) {
                 ?.primaryConstructor?.call(id)
                 ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from id $id")
         }
+    }
+
+    override fun hashCode(): Int {
+        var result = toString().hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + namespace.hashCode()
+        return result
     }
 }

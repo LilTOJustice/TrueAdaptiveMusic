@@ -3,34 +3,30 @@ package liltojustice.trueadaptivemusic.client.music.manager
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.VolumeManager
-import liltojustice.trueadaptivemusic.client.sound.instance.VolumeControlled
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
+import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.resumeInstance
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.sound.SoundInstance
-import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
 import kotlin.math.min
 
 internal class MusicPlayer(client: MinecraftClient) {
-    private val soundManager = client.soundManager
-    private val volumeManager = VolumeManager(soundManager) {
-        client.options.getSoundVolume(SoundCategory.MUSIC)
-    }
+    private val soundSystem = SoundSystem(client.options)
+    private val volumeManager = VolumeManager(soundSystem)
     private val tracks = mutableMapOf<String, Track>()
 
-    fun getTrackInstance(trackName: String): SoundInstance? {
-        return getTrack(trackName).currentSoundInstance
+    fun refreshSoundVolume() {
+        soundSystem.refreshSoundVolume()
     }
 
-    fun createTrack(trackName: String, crossFadeTicks: Int) {
-        tracks[trackName] = Track(crossFadeTicks)
+    fun getPlayingInstance(trackName: String): TAMSoundInstance? {
+        return getTrack(trackName).takeUnless { it.isDelayed() || !isTrackPlaying(it) }?.currentSoundInstance
     }
 
-    fun hasSoundInstance(instance: SoundInstance): Boolean {
-        return tracks.values.any { track -> track.hasSoundInstance(instance) }
+    fun createTrack(trackName: String, isAmbient: Boolean, crossFadeTicks: Int) {
+        tracks[trackName] = Track(isAmbient, crossFadeTicks)
     }
 
     fun isTrackPlaying(trackName: String): Boolean {
@@ -44,7 +40,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     fun tick() {
         tracks.values.forEach { track ->
             val currentSoundInstance = track.currentSoundInstance ?: return@forEach
-            val currentVolume = (track.currentSoundInstance as? VolumeControlled ?: return@forEach).getVolume()
+            val currentVolume = currentSoundInstance.desiredVolume
             if (currentVolume > track.clampedVolume && !volumeManager.hasFade(currentSoundInstance) ) {
                 volumeManager.startFade(
                     currentSoundInstance,
@@ -64,6 +60,7 @@ internal class MusicPlayer(client: MinecraftClient) {
         }
 
         volumeManager.tick()
+        soundSystem.tick()
     }
 
     fun crossfadeTracks(fadeOutTrackName: String, fadeInTrackName: String) {
@@ -83,8 +80,8 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     fun startNew(trackName: String, newMusic: PlayableSound, delayMillis: Long = 0L) {
         val track = getTrack(trackName)
-        val newInstance = newMusic.makeSoundInstance()
-        soundManager.stop(track.currentSoundInstance)
+        val newInstance = newMusic.makeSoundInstance(track.isAmbient)
+        soundSystem.stop(track.currentSoundInstance)
         track.updateSound(newMusic, newInstance)
         track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
     }
@@ -103,8 +100,7 @@ internal class MusicPlayer(client: MinecraftClient) {
 
     fun stopAll() {
         volumeManager.clearFades()
-        soundManager.stopAll()
-        soundManager.close()
+        soundSystem.stopAll()
         tracks.values.forEach { track -> track.resetSounds() }
     }
 
@@ -117,8 +113,8 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     private fun startNewInstance(track: Track, newMusic: PlayableSound) {
-        val newInstance = newMusic.makeSoundInstance()
-        soundManager.stop(track.currentSoundInstance)
+        val newInstance = newMusic.makeSoundInstance(track.isAmbient)
+        soundSystem.stop(track.currentSoundInstance)
         track.updateSound(newMusic, newInstance)
         playInstance(newInstance)
         volumeManager.setInstanceVolume(newInstance, track.clampedVolume)
@@ -130,21 +126,16 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     private fun isTrackPlaying(track: Track): Boolean {
-        return isPlaying(track.currentSoundInstance)
+        return soundSystem.isPlaying(track.currentSoundInstance)
     }
 
     private fun isTrackDelayed(track: Track): Boolean {
         return track.isDelayed()
     }
 
-    private fun isPlaying(soundInstance: SoundInstance?): Boolean {
-        return soundManager.isPlaying(soundInstance) &&
-                !(soundManager.soundSystem.sources[soundInstance]?.isStopped ?: true)
-    }
-
-    private fun playInstance(soundInstance: SoundInstance?) {
+    private fun playInstance(soundInstance: TAMSoundInstance) {
         try {
-            soundManager.play(soundInstance)
+            soundSystem.play(soundInstance)
         }
         catch (e: MusicLoadException) {
             Logger.logError("Error: Failed to play sound instance - ${e.message}")
@@ -152,13 +143,13 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     private fun beginCrossfade(
-        outSoundInstance: SoundInstance,
-        inSoundInstance: SoundInstance,
+        outSoundInstance: TAMSoundInstance,
+        inSoundInstance: TAMSoundInstance,
         outFadeTicks: Int,
         inFadeTicks: Int,
         inVolume: Float) {
         volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
-        soundManager.resumeInstance(inSoundInstance)
+        soundSystem.resumeInstance(inSoundInstance)
         volumeManager.startFade(inSoundInstance, inFadeTicks, inVolume, false)
         volumeManager.startFade(outSoundInstance, outFadeTicks, 0F, false)
     }
@@ -171,10 +162,10 @@ internal class MusicPlayer(client: MinecraftClient) {
         private const val CLAMP_TICKS = 20
     }
 
-    private class Track(val crossFadeTicks: Int) {
+    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int) {
         var currentSound: PlayableSound? = null
             private set
-        var currentSoundInstance: SoundInstance? = null
+        var currentSoundInstance: TAMSoundInstance? = null
             private set
         var clampedVolume: Float = 1F
         var desiredVolume: Float = 1F
@@ -205,11 +196,7 @@ internal class MusicPlayer(client: MinecraftClient) {
             delayTimerTask = null
         }
 
-        fun hasSoundInstance(soundInstance: SoundInstance): Boolean {
-            return currentSoundInstance == soundInstance
-        }
-
-        fun updateSound(newSound: PlayableSound, newSoundInstance: SoundInstance) {
+        fun updateSound(newSound: PlayableSound, newSoundInstance: TAMSoundInstance) {
             currentSound = newSound
             currentSoundInstance = newSoundInstance
         }

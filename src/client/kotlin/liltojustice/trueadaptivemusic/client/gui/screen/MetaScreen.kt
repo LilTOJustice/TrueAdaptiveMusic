@@ -42,6 +42,7 @@ class MetaScreen(private val parent: Screen, private val musicPack: MusicPack): 
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        renderBackground(context)
         context?.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, TITLE_Y, Colors.WHITE)
         super.render(context, mouseX, mouseY, delta)

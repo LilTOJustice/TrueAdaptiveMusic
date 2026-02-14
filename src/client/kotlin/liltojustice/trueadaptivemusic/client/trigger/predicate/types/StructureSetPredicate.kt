@@ -10,22 +10,10 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureSet
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
+import kotlin.jvm.optionals.getOrNull
 
-class StructureSetPredicate internal constructor(private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
-    private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
-        val blockPos = BlockPos.ofFloored(x, y, z)
-        val structureAccessor = world.structureAccessor
-
-        return (structureSets.takeIf { structureSets.isNotEmpty() } ?: StructureSetIdentifier.getRegistryIds())
-            .any { structureSetId ->
-                val structureSet: StructureSet =
-                    structureAccessor.registryManager.get(RegistryKeys.STRUCTURE_SET).get(structureSetId) ?: return false
-
-                structureSet.structures.any { structureWeightedEntry ->
-                    StructurePredicate.testStructure(structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
-            }
-    }
-
+class StructureSetPredicate internal constructor(
+    private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         val serverWorld = client.server?.worlds?.firstOrNull { world ->
             world.registryKey == client.world?.registryKey } ?: return false
@@ -49,11 +37,36 @@ class StructureSetPredicate internal constructor(private val structureSets: List
         return result
     }
 
+    private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
+        val blockPos = BlockPos.ofFloored(x, y, z)
+        val structureAccessor = world.structureAccessor
+
+        return (structureSets.takeIf { structureSets.isNotEmpty() } ?: StructureSetIdentifier.getRegistryIds())
+            .any { structureSetId ->
+                val structureSet: StructureSet =
+                    structureAccessor.registryManager
+                        .getOptional(RegistryKeys.STRUCTURE_SET).getOrNull()?.get(structureSetId)
+                        ?: return false
+
+                structureSet.structures.any { structureWeightedEntry ->
+                    StructurePredicate.testStructure(
+                        structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
+            }
+    }
+
     companion object: MusicPredicateCompanion<StructureSetPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "structureSets" to "Which structure sets the player must be in for the music should play. If none, " +
+                        "any structure set will trigger the music."
+            )
+
         override fun fromJson(json: JsonObject): StructureSetPredicate {
             return StructureSetPredicate(
                 if (JsonHelper.hasArray(json, "id"))
-                    JsonHelper.getArray(json, "id").map { element -> StructureSetIdentifier(element.asString) }
+                    JsonHelper
+                        .getArray(json, "id")
+                        .map { element -> StructureSetIdentifier(element.asString) }
                 else
                     listOf(StructureSetIdentifier(JsonHelper.getString(json, "id"))))
         }
