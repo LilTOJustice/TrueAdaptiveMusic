@@ -37,7 +37,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
                 ffmpeg.outputStream.close()
             }
         }
-        thread.name = "FFmpeg stream handler"
+        thread.name = "FFmpeg stream handler: ${inputStream.hashCode()}"
         thread.start()
 
         ffmpeg
@@ -46,6 +46,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
     override fun close() {
         ffmpeg.destroy()
         thread.interrupt()
+        thread.join()
     }
 
     override fun getFormat(): AudioFormat {

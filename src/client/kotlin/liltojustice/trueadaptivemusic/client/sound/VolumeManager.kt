@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound
 
+import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import kotlin.math.sin
 
@@ -58,7 +59,8 @@ class VolumeManager(private val soundSystem: SoundSystem) {
         private var totalTicks: Int,
         private var targetVolume: Float,
         var stopWhenDone: Boolean,
-        soundSystem: SoundSystem) {
+        soundSystem: SoundSystem
+    ) {
         private var fadeTicks: Int = 0
         private var startingVolume: Float =
             if (soundSystem.isInstancePaused(soundInstance))

@@ -1,13 +1,12 @@
-package liltojustice.trueadaptivemusic.client.sound
+package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
+import liltojustice.trueadaptivemusic.client.sound.isPaused
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.option.GameOptions
-import net.minecraft.client.sound.Channel
 import net.minecraft.client.sound.SoundEngine
-import net.minecraft.client.sound.SoundExecutor
 import net.minecraft.client.sound.Source
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Util
@@ -20,7 +19,7 @@ class SoundSystem(private val options: GameOptions) {
     private val soundEngine = SoundEngine()
     private var lastSoundDeviceCheckTime: Long = 0
     private val deviceChangeStatus = AtomicReference(DeviceChangeStatus.NO_CHANGE)
-    val sources = mutableMapOf<TAMSoundInstance, SourceContext>()
+    val sources = mutableMapOf<TAMSoundInstance, Channel>()
 
     fun stop() {
         if (!started) {
@@ -37,7 +36,7 @@ class SoundSystem(private val options: GameOptions) {
             return
         }
 
-        sources[soundInstance]?.manager?.run(Source::stop)
+        sources[soundInstance]?.run(Source::stop)
     }
 
     fun stopAll() {
@@ -45,10 +44,7 @@ class SoundSystem(private val options: GameOptions) {
             return
         }
 
-        sources.values.forEach { context ->
-            context.soundExecutor.stop()
-            context.channel.close()
-        }
+        sources.values.forEach { it.close() }
         sources.clear()
     }
 
@@ -73,14 +69,15 @@ class SoundSystem(private val options: GameOptions) {
                                     DeviceChangeStatus.ONGOING,
                                     DeviceChangeStatus.CHANGE_DETECTED)
                             }
-                        } else if (
-                            soundEngine.getCurrentDeviceName() != soundDeviceName &&
+                        }
+                        else if (soundEngine.getCurrentDeviceName() != soundDeviceName &&
                             soundEngine.getSoundDevices().contains(soundDeviceName)) {
                             Logger.logInfo("Preferred audio device has become available!")
                             deviceChangeStatus.compareAndSet(
                                 DeviceChangeStatus.ONGOING,
                                 DeviceChangeStatus.CHANGE_DETECTED)
                         }
+
                         deviceChangeStatus.compareAndSet(
                             DeviceChangeStatus.ONGOING,
                             DeviceChangeStatus.NO_CHANGE)
@@ -105,19 +102,15 @@ class SoundSystem(private val options: GameOptions) {
         }
 
         sources
-            .filter { it.value.manager.isStopped }
+            .filter { it.value.isStopped }
             .forEach {
-                it.value.soundExecutor.stop()
-                it.value.channel.close()
+                it.value.close()
                 sources.remove(it.key)
             }
-        sources.values.forEach {
-            it.channel.tick()
-        }
     }
 
     fun isPlaying(soundInstance: TAMSoundInstance?): Boolean {
-        return !(sources[soundInstance]?.manager?.isStopped ?: true)
+        return !(sources[soundInstance]?.isStopped ?: true)
     }
 
     fun play(soundInstance: TAMSoundInstance) {
@@ -125,16 +118,8 @@ class SoundSystem(private val options: GameOptions) {
             return
         }
 
-        val volume = soundInstance.desiredVolume
-        val sourceContext = SourceContext.new(soundEngine) ?: return
-        sources[soundInstance] = sourceContext
-        sourceContext.manager.run { source: Source ->
-            soundInstance.getAudioStream()?.let {
-                source.setVolume(volume)
-                source.setStream(it)
-                source.play()
-            }
-        }
+        sources[soundInstance] = Channel.new(
+            soundEngine, soundInstance, getProperSourceVolume(soundInstance)) ?: return
     }
 
     fun refreshSoundVolume() {
@@ -164,12 +149,12 @@ class SoundSystem(private val options: GameOptions) {
     }
 
     private fun runOnSource(soundInstance: TAMSoundInstance?, sourceConsumer: (source: Source) -> Unit): Boolean {
-        return sources[soundInstance]?.manager?.run(sourceConsumer) == null
+        return sources[soundInstance]?.run(sourceConsumer) == null
     }
 
     private fun <T> getFromSource(soundInstance: TAMSoundInstance?, sourceGetter: (source: Source) -> T): T? {
         var result: T? = null
-        sources[soundInstance]?.manager?.run { result = (sourceGetter)(it) }
+        sources[soundInstance]?.run { result = (sourceGetter)(it) }
 
         return result
     }
@@ -208,19 +193,5 @@ class SoundSystem(private val options: GameOptions) {
         ONGOING,
         CHANGE_DETECTED,
         NO_CHANGE
-    }
-
-    @ConsistentCopyVisibility
-    data class SourceContext private constructor(
-        val soundExecutor: SoundExecutor, val channel: Channel, val manager: Channel.SourceManager
-    ) {
-        companion object {
-            fun new(soundEngine: SoundEngine, ): SourceContext? {
-                val executor = SoundExecutor()
-                val channel = Channel(soundEngine, executor)
-                val source = channel.createSource(SoundEngine.RunMode.STREAMING).join() ?: return null
-                return SourceContext(executor, channel, source)
-            }
-        }
     }
 }
