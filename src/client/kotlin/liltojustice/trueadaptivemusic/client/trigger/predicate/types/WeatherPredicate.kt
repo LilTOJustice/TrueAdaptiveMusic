@@ -28,6 +28,11 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
     }
 
     companion object: MusicPredicateCompanion<WeatherPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "weather" to "Which weather the music should play for."
+            )
+
         override fun fromJson(json: JsonObject): WeatherPredicate {
             return WeatherPredicate(Weather.valueOf(JsonHelper.getString(json, FIELD_NAME)))
         }
