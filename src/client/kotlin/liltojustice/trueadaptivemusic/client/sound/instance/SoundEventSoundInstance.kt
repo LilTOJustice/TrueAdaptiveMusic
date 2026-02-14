@@ -10,7 +10,8 @@ import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.random.Random
 
-class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean) : TAMSoundInstance(isAmbient) {
+class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean): TAMSoundInstance(isAmbient) {
+    private val soundManager: SoundManager = MinecraftClient.getInstance().soundManager
     private val instance = PositionedSoundInstance(
         SoundEvent.of(identifier),
         SoundCategory.MUSIC,
@@ -20,18 +21,22 @@ class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean) : TAMS
         0.0,
         0.0,
         0.0)
-    override fun getAudioStream(): AudioStream? {
-        val soundManager = MinecraftClient.getInstance().soundManager
+    private var sound: Sound? = null
+
+    init {
         instance.getSoundSet(soundManager)?.getSound(random)
-        return instance.sound?.takeIf { it != SoundManager.MISSING_SOUND }?.let {
-            soundManager.soundSystem.soundLoader
-                .loadStreamed(it.location, false)
-                .join()
-        }
+        sound = instance.sound?.takeIf { it != SoundManager.MISSING_SOUND }
+    }
+
+    override fun getAudioStream(): AudioStream? {
+        val sound = sound ?: return null
+        val inputStreamGetter = { soundManager.soundSystem.soundLoader.resourceFactory.open(sound.location) }
+
+        return getAudioStream(sound.location.toString(), "ogg", inputStreamGetter, isAmbient)
     }
 
     override fun getSound(): Sound? {
-        return instance.sound
+        return sound
     }
 
     companion object {
