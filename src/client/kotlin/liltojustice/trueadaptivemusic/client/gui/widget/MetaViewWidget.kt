@@ -29,7 +29,15 @@ class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x
 
         requiredMetaArgs.forEach { required ->
             addWidgetFromRender(
-                { TAMClient.makeInputWidget(screen!!, metaArgs, required) },
+                {
+                    TAMClient.makeInputWidget(
+                        screen!!,
+                        metaArgs,
+                        required,
+                        required.name?.let { MusicPack.Metadata.getArgDisplayName(it) },
+                        required.name?.let { MusicPack.Metadata.getArgDescription(it) }
+                    )
+                },
                 "${required.name}: ${required.type}")
         }
     }

@@ -8,9 +8,7 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 
 fun SoundInstance.shouldIgnore(): Boolean {
-    return TAMClient.musicPack != null &&
-            !TAMClient.hasSoundInstance(this) &&
-            (category == SoundCategory.MUSIC || uiToastCheck(this))
+    return TAMClient.musicPack != null && (category == SoundCategory.MUSIC || uiToastCheck(this))
 }
 
 private fun uiToastCheck(sound: SoundInstance): Boolean {
