@@ -15,13 +15,14 @@ import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
-import net.minecraft.registry.Registries
-import net.minecraft.sound.SoundEvent
+import liltojustice.trueadaptivemusic.text.prettify
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
@@ -285,20 +286,22 @@ class MusicPack private constructor(
             }
         }
 
-        fun parseMusicPath(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
+        fun parseAudio(audioMemberName: String, json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
                 : List<PlayableSound> {
-            return (if (JsonHelper.hasString(json, "musicPath"))
-                listOf(JsonHelper.getString(json, "musicPath"))
-            else
-                JsonHelper.getArray(json, "musicPath").map { element -> element.asString })
+            return (if (JsonHelper.hasString(json, audioMemberName))
+                listOf(JsonHelper.getString(json, audioMemberName))
+            else if (JsonHelper.hasArray(json, audioMemberName))
+                JsonHelper.getArray(json, audioMemberName).map { element -> element.asString }
+                    else emptyList())
                 .map { path ->
                     try {
                         return@map soundLibrary[path]
                             ?: PlayableSoundEvent(
-                                Registries.SOUND_EVENT[Identifier.of(path)]
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path")
+                                Identifier.of(path)
+                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"),
                             )
-                    } catch (_: InvalidIdentifierException) {}
+                    }
+                    catch (_: InvalidIdentifierException) {}
 
                     Logger.logWarning("Could not find \"$path\", skipping...")
                     return@map null
@@ -307,7 +310,7 @@ class MusicPack private constructor(
 
         fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
             return assets[id] ?: try {
-                PlayableSoundEvent(SoundEvent.of(Identifier.of(id)))
+                PlayableSoundEvent(Identifier.of(id))
             }
             catch (_: InvalidIdentifierException) {
                 null
@@ -440,6 +443,16 @@ class MusicPack private constructor(
         }
 
         companion object {
+            private val displayNames = Metadata::class
+                .primaryConstructor
+                ?.parameters
+                ?.mapNotNull { it.name }
+                ?.associateWith { it.prettify() } ?: mapOf()
+
+            private val descriptions = mapOf(
+                "description" to "Description of the Music Pack."
+            )
+
             private val json = Json {
                 encodeDefaults = true
                 prettyPrint = true
@@ -452,6 +465,16 @@ class MusicPack private constructor(
 
             fun getRequiredArgs(): List<KParameter> {
                 return Metadata::class.primaryConstructor?.parameters ?: emptyList()
+            }
+
+            fun getArgDisplayName(argName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic:metadata_${argName}_display", displayNames[argName])
+            }
+
+            fun getArgDescription(argName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic:metadata_${argName}_description", descriptions[argName])
             }
         }
     }

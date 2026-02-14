@@ -26,6 +26,12 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     }
 
     companion object: MusicPredicateCompanion<BossPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "bosses" to "List of entities that the music should play for. If none, any entity will trigger the " +
+                        "music."
+            )
+
         override fun fromJson(json: JsonObject): BossPredicate {
             return BossPredicate(
                 if (JsonHelper.hasArray(json, "id"))
