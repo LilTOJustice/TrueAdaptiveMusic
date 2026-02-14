@@ -21,8 +21,8 @@ internal class MusicPlayer(client: MinecraftClient) {
         soundSystem.refreshSoundVolume()
     }
 
-    fun getTrackInstance(trackName: String): TAMSoundInstance? {
-        return getTrack(trackName).takeUnless { it.isDelayed() }?.currentSoundInstance
+    fun getPlayingInstance(trackName: String): TAMSoundInstance? {
+        return getTrack(trackName).takeUnless { it.isDelayed() || !isTrackPlaying(it) }?.currentSoundInstance
     }
 
     fun createTrack(trackName: String, isAmbient: Boolean, crossFadeTicks: Int) {
