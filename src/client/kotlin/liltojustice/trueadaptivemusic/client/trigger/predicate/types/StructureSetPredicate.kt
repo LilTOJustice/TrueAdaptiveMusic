@@ -10,6 +10,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureSet
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
+import kotlin.jvm.optionals.getOrNull
 
 class StructureSetPredicate internal constructor(
     private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
