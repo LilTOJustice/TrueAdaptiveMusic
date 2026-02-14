@@ -336,11 +336,9 @@ class PredicateViewWidget(
                         onEventClick(null) },
                     isSelected = { selectedEvent == null && inEventView() }
                 )
-                result.setTooltip(
-                    Tooltip.of(
-                        Text.translatableWithFallback(
-                            "trueadaptivemusic.create_event", "Create a new event")
-                    )
+                result.tooltip = Tooltip.of(
+                    Text.translatableWithFallback(
+                        "trueadaptivemusic.create_event", "Create a new event")
                 )
                 result
             },
@@ -376,11 +374,9 @@ class PredicateViewWidget(
                 },
                 "Delete"
             )
-            result.setTooltip(
-                Tooltip.of(
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
-                )
+            result.tooltip = Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
             )
         }
     }
@@ -398,11 +394,9 @@ class PredicateViewWidget(
             },
             "Delete"
         )
-        result.setTooltip(
-            Tooltip.of(
-                Text.translatableWithFallback(
-                    "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
-            )
+        result.tooltip = Tooltip.of(
+            Text.translatableWithFallback(
+                "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
         )
     }
 

@@ -67,7 +67,7 @@ class CombatPredicate(
     }
 
     private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
-        val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
+        val relativeMobEntityPos = mobEntity.pos.subtract(playerEntity.pos)
         val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
         val mobVerticalAngle = acos(relativeMobEntityPosN.y)
@@ -138,9 +138,9 @@ class CombatPredicate(
             mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
             val closeEnough = closeEnough(
                     displacement,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ))
+                    Vec3d(mobEntity.boundingBox.xLength,
+                        mobEntity.boundingBox.yLength,
+                        mobEntity.boundingBox.zLength))
             return (mobEntity.isAttacking && closeEnough) ||
                     ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true) ||
                     ((mobEntity is PhantomEntity) && closeEnough)

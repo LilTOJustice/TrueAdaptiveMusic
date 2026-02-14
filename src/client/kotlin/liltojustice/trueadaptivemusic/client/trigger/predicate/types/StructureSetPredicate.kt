@@ -10,6 +10,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureSet
 import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockPos
+import kotlin.jvm.optionals.getOrNull
 
 class StructureSetPredicate internal constructor(
     private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
@@ -40,8 +41,7 @@ class StructureSetPredicate internal constructor(
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return (structureSets.takeIf { structureSets.isNotEmpty() }?.map { structureSet -> structureSet.identifier }
-            ?: StructureSetIdentifier.getRegistryIds())
+        return (structureSets.takeIf { structureSets.isNotEmpty() } ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
                     structureAccessor.registryManager

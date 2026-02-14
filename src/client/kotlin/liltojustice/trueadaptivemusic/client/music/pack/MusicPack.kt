@@ -295,11 +295,7 @@ class MusicPack private constructor(
                     else emptyList())
                 .map { path ->
                     try {
-                        return@map soundLibrary[path]
-                            ?: PlayableSoundEvent(
-                                Identifier.of(path)
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"),
-                            )
+                        return@map soundLibrary[path] ?: PlayableSoundEvent(Identifier(path))
                     }
                     catch (_: InvalidIdentifierException) {}
 
@@ -310,7 +306,7 @@ class MusicPack private constructor(
 
         fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
             return assets[id] ?: try {
-                PlayableSoundEvent(Identifier.of(id))
+                PlayableSoundEvent(Identifier(id))
             }
             catch (_: InvalidIdentifierException) {
                 null

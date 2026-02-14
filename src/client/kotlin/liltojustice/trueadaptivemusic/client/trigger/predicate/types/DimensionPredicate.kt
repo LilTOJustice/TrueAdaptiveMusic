@@ -12,7 +12,7 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
         val playerDimension = client.player?.world?.dimensionEntry ?: return false
 
         return dimensions.isEmpty() ||
-                dimensions.any { dimension -> playerDimension.matchesId(dimension.identifier) }
+                dimensions.any { dimension -> playerDimension.matchesId(dimension) }
     }
 
     override fun toJson(): JsonObject {

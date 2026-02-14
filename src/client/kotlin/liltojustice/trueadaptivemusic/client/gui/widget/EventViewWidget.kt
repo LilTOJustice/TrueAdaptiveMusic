@@ -82,11 +82,9 @@ class EventViewWidget(
                 },
                 "Delete"
             )
-            result.setTooltip(
-                Tooltip.of(
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.delete_event_description", "Delete this event")
-                )
+            result.tooltip = Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.delete_event_description", "Delete this event")
             )
 
             return
@@ -213,11 +211,9 @@ class EventViewWidget(
                 },
                 "Delete"
             )
-            result.setTooltip(
-                Tooltip.of(
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.delete_event_description", "Delete this event")
-                )
+            result.tooltip = Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.delete_event_description", "Delete this event")
             )
         }
     }

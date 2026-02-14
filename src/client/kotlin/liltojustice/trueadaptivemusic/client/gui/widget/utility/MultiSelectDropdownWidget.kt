@@ -29,7 +29,6 @@ class MultiSelectDropdownWidget<TKey>(
     y,
     true) {
     private val selected = mutableListOf<Pair<TKey, String>>()
-    private var dropdownWidget: DropdownWidget<Pair<TKey, String>>? = null
 
     init {
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
@@ -77,11 +76,9 @@ class MultiSelectDropdownWidget<TKey>(
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })
-                    widget.setTooltip(
-                        Tooltip.of(
-                            Text.translatableWithFallback(
-                                "trueadaptivemusic.click_to_remove", "Click to remove")
-                        )
+                    widget.tooltip = Tooltip.of(
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.click_to_remove", "Click to remove")
                     )
                     widget
                 },

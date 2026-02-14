@@ -120,7 +120,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            result.tooltip = Tooltip.of(tooltipText)
             result
         }
 
@@ -154,7 +154,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            result.tooltip = Tooltip.of(tooltipText)
             result
         }
 
@@ -184,7 +184,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            result.tooltip = Tooltip.of(tooltipText)
             result
         }
 
@@ -200,7 +200,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 checked = outArgs[arg.index] as? Boolean ?: false
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            result.tooltip = Tooltip.of(tooltipText)
             result
         }
 

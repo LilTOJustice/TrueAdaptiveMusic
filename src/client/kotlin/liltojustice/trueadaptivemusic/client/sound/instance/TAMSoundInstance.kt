@@ -28,7 +28,7 @@ abstract class TAMSoundInstance(val isAmbient: Boolean): SoundInstance {
 
     override fun getSound(): Sound? {
         return Sound(
-            Identifier.of("trueadaptivemusic", "file"),
+            Identifier.of("trueadaptivemusic", "file")?.toString(),
             { 1F },
             { 1F },
             0,
