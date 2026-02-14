@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client.music.manager
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
@@ -32,7 +31,6 @@ class MusicManager(private val client: MinecraftClient) {
     private var lastMusic: PlayableSound? = null
     private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
-    private var lastInstance: TAMSoundInstance? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -71,15 +69,6 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun tick() {
-        musicPlayer.getPlayingInstance(mainTrack)?.let {
-            client.musicTracker.setCurrent(it)
-
-            if (it != lastInstance) {
-                client.toastManager.onMusicTrackStart()
-                lastInstance = it
-            }
-        }
-
         if (masterVolumeOption.value == 0.0) {
             return
         }
