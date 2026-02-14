@@ -24,14 +24,19 @@ class BossHealthPredicate(private val direction: Direction, private val healthPe
     }
 
     companion object: MusicPredicateCompanion<BossHealthPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "direction" to "Whether the music should play above or below the given health percentage.",
+                "healthPercentage" to "The threshold at which the predicate switches."
+            )
+
         override fun fromJson(json: JsonObject): BossHealthPredicate {
             return BossHealthPredicate(
                 Direction.valueOf(JsonHelper.getString(json, "direction")),
                 JsonHelper.getInt(json, "healthPercentage"))
         }
 
-        private fun healthTest(
-            thresholdPercentage: Float, direction: Direction, currentPercentage: Float): Boolean {
+        private fun healthTest(thresholdPercentage: Float, direction: Direction, currentPercentage: Float): Boolean {
             return when (direction) {
                 Direction.Greater -> currentPercentage > thresholdPercentage
                 Direction.Lesser -> currentPercentage < thresholdPercentage

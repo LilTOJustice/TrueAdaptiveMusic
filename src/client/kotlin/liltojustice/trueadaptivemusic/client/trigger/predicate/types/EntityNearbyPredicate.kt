@@ -40,10 +40,18 @@ class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, pr
     }
 
     companion object: MusicPredicateCompanion<EntityNearbyPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "entities" to "List of entities the music should play for. If none, any entity will trigger the music.",
+                "blockRadius" to "Minimum radius for the entity to trigger the predicate."
+            )
+
         override fun fromJson(json: JsonObject): EntityNearbyPredicate {
             return EntityNearbyPredicate(
                 if (JsonHelper.hasArray(json, "entities"))
-                    JsonHelper.getArray(json, "entities").map { element -> EntityTypeIdentifier(element.asString) }
+                    JsonHelper
+                        .getArray(json, "entities")
+                        .map { element -> EntityTypeIdentifier(element.asString) }
                 else
                     listOf(EntityTypeIdentifier(JsonHelper.getString(json, "id"))),
                 if (JsonHelper.hasNumber(json, "blockRadius"))
