@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.sound.playable
 
-import net.minecraft.client.sound.SoundInstance
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 
 interface PlayableSound {
-    fun makeSoundInstance(): SoundInstance
+    fun makeSoundInstance(isAmbient: Boolean = false): TAMSoundInstance
     fun getSoundName(): String
 }

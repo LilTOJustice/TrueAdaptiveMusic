@@ -2,14 +2,15 @@ package liltojustice.trueadaptivemusic.client.sound.stream
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import net.minecraft.client.sound.AudioStream
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 import kotlin.io.path.pathString
 
-class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): AudioStream {
+class FFmpegAudioStream(inputStream: InputStream, private val format: AudioFormat, loudnessUnits: Int): AudioStream {
+    private lateinit var thread: Thread
     private val ffmpeg = run {
         val command = if (TAMClient.hasFFmpegGlobal) "ffmpeg" else Constants.FFMPEG_PATH.pathString
         val ffmpeg = ProcessBuilder(
@@ -17,27 +18,35 @@ class FFmpegAudioStream(soundFile: SoundFile, private val format: AudioFormat): 
             "-v", "panic",
             "-i", "pipe:0",
             "-f", "s16le",
-            "-af", "loudnorm=I=-16",
+            "-af", "loudnorm=I=${loudnessUnits}",
             "-ar", "${format.sampleRate.toInt()}",
             "-acodec", "pcm_s16le",
             "-")
             .start()
 
-        Thread() {
+        thread = Thread() {
             try {
-                soundFile.getInputStream().use {
+                inputStream.use {
                     it.copyTo(ffmpeg.outputStream)
                 }
+            }
+            catch (_: Exception) {
+                ffmpeg.destroy()
+            }
+            finally {
                 ffmpeg.outputStream.close()
             }
-            catch (_: Exception) {}
-        }.start()
+        }
+        thread.name = "FFmpeg stream handler: ${inputStream.hashCode()}"
+        thread.start()
 
         ffmpeg
     }
 
     override fun close() {
         ffmpeg.destroy()
+        thread.interrupt()
+        thread.join()
     }
 
     override fun getFormat(): AudioFormat {
