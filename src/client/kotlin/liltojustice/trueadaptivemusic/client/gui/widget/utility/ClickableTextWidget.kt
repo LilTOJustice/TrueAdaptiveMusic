@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.text.Text
+import net.minecraft.text.TextColor
 import net.minecraft.util.Colors
 
 open class ClickableTextWidget(
@@ -25,6 +26,8 @@ open class ClickableTextWidget(
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
+    val coloredText: Text
+        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).first()
     var hovering = false
 
     init {
@@ -60,7 +63,7 @@ open class ClickableTextWidget(
         context?.let {
             drawTextWithMargin(
                 context.getHoverListener(this, DrawContext.HoverType.NONE),
-                message,
+                coloredText,
                 0)
         }
     }
