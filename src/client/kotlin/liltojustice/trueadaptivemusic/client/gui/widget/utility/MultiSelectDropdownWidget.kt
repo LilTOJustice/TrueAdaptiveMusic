@@ -6,11 +6,12 @@ import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 
 class MultiSelectDropdownWidget<TKey>(
-    private val options: List<Pair<TKey, String>>,
+    private val options: List<TKey>,
     width: Int,
+    private val getDisplay: ((TKey) -> String)? = null,
     private val onChange: (selected: List<TKey>) -> Unit = {},
     private val title: String = "",
-    private val getOptions: (() -> List<Pair<TKey, String>>)? = null,
+    private val getOptions: (() -> List<TKey>)? = null,
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<TKey> = listOf(),
     private val onHoverOption: (option: String?) -> Unit = {},
@@ -28,32 +29,31 @@ class MultiSelectDropdownWidget<TKey>(
     x,
     y,
     true) {
-    private val selected = mutableListOf<Pair<TKey, String>>()
+    private val selected = mutableListOf<TKey>()
 
     init {
-        val combinedOptions = options + (getOptions?.invoke() ?: listOf())
-        selected.addAll(
-            alreadySelected.mapNotNull { combinedOptions.firstOrNull { option -> option.first == it } })
-        onChange(selected.map { it.first })
+        selected.addAll(alreadySelected)
+        onChange(selected)
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
-                DropdownWidget<Pair<TKey, String>>(
-                    options.map { it to it.second },
+                DropdownWidget<TKey>(
+                    options,
                     { option ->
                         if (selected.contains(option)) {
                             return@DropdownWidget
                         }
 
                         selected.add(option)
-                        onChange(selected.map { it.first })
+                        onChange(selected)
                         clearWidgetsFromRender { widget -> widget.id != "dropdown" }
                     },
                     width,
                     title,
-                    getOptions?.let { opFunc -> { opFunc().map { it to it.second } } },
+                    getDisplay,
+                    getOptions,
                     notSelectedPlaceholder,
                     null,
                     onHoverOption,
@@ -65,14 +65,14 @@ class MultiSelectDropdownWidget<TKey>(
             "dropdown"
         ) as DropdownWidget<Pair<TKey, String>>
 
-        selected.sortedBy { it.second }.map { option ->
+        selected.map { it to (getDisplay?.invoke(it) ?: it.toString()) }.sortedBy { it.second }.map { option ->
             addWidgetFromRender(
                 {
                     val widget = ClickableTextWidget(
                         option.second,
                         onClick = {
-                            selected.remove(option)
-                            onChange(selected.map { it.first })
+                            selected.remove(option.first)
+                            onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })

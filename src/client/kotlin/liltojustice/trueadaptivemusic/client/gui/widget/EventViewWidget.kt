@@ -97,10 +97,11 @@ class EventViewWidget(
         addWidgetFromRender(
             {
                 DropdownWidget(
-                    eventTypeNameOptions.map { it to MusicEvent.getDisplayName(it).string },
+                    eventTypeNameOptions,
                     { typeName ->  setSelectedEventTypeName(typeName) },
                     width / 2,
                     Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
+                    { MusicEvent.getDisplayName(it).string },
                     startingOption = selectedEventTypeName,
                     tooltipText = Text.translatableWithFallback(
                             "trueadaptivemusic.eventType_description",
@@ -114,6 +115,7 @@ class EventViewWidget(
                 MultiSelectDropdownWidget(
                     listOf(),
                     width,
+                    null,
                     { selected ->
                         selectedMusicPaths = selected.toMutableList()
                         save()
@@ -128,7 +130,6 @@ class EventViewWidget(
                                     .filter { path -> path.contains("music.") }
                             )
                             .toList()
-                            .map { it to it }
                     },
                     Text.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,

@@ -160,8 +160,7 @@ class PredicateViewWidget(
             addWidgetFromRender(
                 {
                     DropdownWidget(
-                        predicateTypeNameOptions.map {
-                            it to MusicPredicate.getDisplayName(it).string },
+                        predicateTypeNameOptions,
                         { typeName ->
                             setSelectedPredicateTypeName(typeName)
                             if (selectedNode == null
@@ -181,6 +180,7 @@ class PredicateViewWidget(
                         },
                         width,
                         Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
+                        { MusicPredicate.getDisplayName(it).string },
                         startingOption = selectedPredicateTypeName.takeIf { it.isNotBlank() },
                         tooltipText = Text.translatableWithFallback(
                             "trueadaptivemusic.predicateType_description",
@@ -201,6 +201,7 @@ class PredicateViewWidget(
                 MultiSelectDropdownWidget(
                     listOf(),
                     width,
+                    null,
                     { selected ->
                         selectedMusicPaths = selected.toMutableList()
                         onChange()
@@ -215,7 +216,6 @@ class PredicateViewWidget(
                                 .filter { path -> path.contains("music.") }
                         )
                         .toList()
-                        .map { it to it }
                     },
                     Text.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,
@@ -234,6 +234,7 @@ class PredicateViewWidget(
                 MultiSelectDropdownWidget(
                     listOf(),
                     width,
+                    null,
                     { selected ->
                         selectedAmbiencePaths = selected.toMutableList()
                         onChange()
@@ -248,7 +249,6 @@ class PredicateViewWidget(
                                     .filter { path -> path.contains("music.") }
                             )
                             .toList()
-                            .map { it to it }
                     },
                     Text.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,

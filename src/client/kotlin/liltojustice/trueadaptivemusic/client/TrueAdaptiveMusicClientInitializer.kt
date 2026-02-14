@@ -232,10 +232,11 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
                 val enumClass = (type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> to enum.toString().prettify() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
                 MultiSelectDropdownWidget(
                     options,
                     0,
+                    { it.toString().prettify() },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
@@ -282,14 +283,12 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val prettify = TAMClient.options.prettifyIdentifiers
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(type)
-                    .map { id ->
-                        TypedIdentifier.initializeFromIdString(type, id.toString()) to
-                                (if (prettify) id.toString().prettify() else id.toString())
-                    }
+                    .map { id -> TypedIdentifier.initializeFromIdString(type, id.toString()) }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
                 MultiSelectDropdownWidget(
                     options,
                     0,
+                    { if (prettify) it.toString().prettify() else it.toString() },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
