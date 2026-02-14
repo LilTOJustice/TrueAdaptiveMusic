@@ -3,28 +3,29 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import liltojustice.trueadaptivemusic.Logger
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.text.Text
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 class InputWidgetMaker {
     private val widgetRegistry = ArrayDeque<WidgetRegistryEntry>()
 
-    fun register(
-        predicate: (parameterType: KType) -> Boolean,
-        widgetMaker:
-            (prompt: String,
-             screen: Screen,
-             outArgs: MutableList<Any?>,
-             arg: KParameter,
-             onChange: () -> Unit) -> ClickableWidget) {
+    fun register(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker)
+    {
         widgetRegistry.addFirst(WidgetRegistryEntry(predicate, widgetMaker))
     }
 
-    fun makeWidget(screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit): ClickableWidget {
-        val prompt = (arg.name ?: "Unknown") +
-                ": ${arg.type.toString().split('.').last().replace(">", "")}"
+    fun makeWidget(
+        screen: Screen,
+        outArgs: MutableList<Any?>,
+        arg: KParameter,
+        displayName: Text?,
+        tooltipText: Text?,
+        onChange: () -> Unit
+    ): ClickableWidget {
+        val displayName = displayName?.string ?: arg.name ?: "Unknown"
         return widgetRegistry.firstOrNull { entry -> entry.predicate(arg.type) }
-            ?.widgetMaker(prompt, screen, outArgs, arg, onChange)
+            ?.widgetMaker(displayName, screen, outArgs, arg, tooltipText, onChange)
             ?: run {
                 Logger.logWarning("Couldn't create widget for expected type ${arg.type}.")
                 EmptyClickableWidget()
@@ -32,12 +33,6 @@ class InputWidgetMaker {
     }
 
     private data class WidgetRegistryEntry(
-        val predicate: (parameterType: KType) -> Boolean,
-        val widgetMaker: (
-            prompt: String,
-            screen: Screen,
-            outArgs: MutableList<Any?>,
-            arg: KParameter,
-            onChange: () -> Unit) -> ClickableWidget) {
+        val predicate: (parameterType: KType) -> Boolean, val widgetMaker: WidgetMaker) {
     }
 }
