@@ -22,7 +22,7 @@ internal class MusicPlayer(client: MinecraftClient) {
     }
 
     fun getTrackInstance(trackName: String): TAMSoundInstance? {
-        return getTrack(trackName).currentSoundInstance
+        return getTrack(trackName).takeUnless { it.isDelayed() }?.currentSoundInstance
     }
 
     fun createTrack(trackName: String, isAmbient: Boolean, crossFadeTicks: Int) {
