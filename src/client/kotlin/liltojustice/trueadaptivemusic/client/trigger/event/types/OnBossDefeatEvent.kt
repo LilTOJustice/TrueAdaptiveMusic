@@ -26,9 +26,17 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
     }
 
     companion object: MusicEventCompanion<OnBossDefeatEvent> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "bosses" to "Which entities the music should play for when their boss bar hits zero."
+            )
+
         override fun fromJson(json: JsonObject): MusicEvent {
             return OnBossDefeatEvent(
-                JsonHelper.getArray(json, "bosses").map { element -> EntityTypeIdentifier(element.asString) })
+                JsonHelper
+                    .getArray(json, "bosses")
+                    .map { element -> EntityTypeIdentifier(element.asString) }
+            )
         }
     }
 }
