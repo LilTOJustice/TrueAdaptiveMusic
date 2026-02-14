@@ -11,7 +11,8 @@ import kotlin.io.path.pathString
 class ZipSoundFile(private val zipFilePath: Path, private val zipEntryPath: Path): SoundFile {
     override fun getInputStream(): InputStream {
         val zipFile = ZipFile(zipFilePath.toFile())
-        return ZipInputStream(zipFile, zipFile.getEntry(zipEntryPath.pathString))
+        val zipEntry = zipFile.getEntry(zipEntryPath.pathString)
+        return ZipInputStream(zipFile, zipEntry)
     }
 
     override fun getName(): String {
