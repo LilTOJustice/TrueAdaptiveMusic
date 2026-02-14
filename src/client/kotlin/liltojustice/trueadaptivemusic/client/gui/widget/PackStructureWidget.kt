@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -50,7 +51,7 @@ class PackStructureWidget(
             { node, path ->
                 val newWidget = addWidget(
                     NodeWidget(
-                        node.predicate.getTypeName(),
+                        MusicPredicate.getDisplayName(node.predicate.getTypeName()).string,
                         onClick = { widget ->
                             onSelectEditExistingNode(node)
                         },
