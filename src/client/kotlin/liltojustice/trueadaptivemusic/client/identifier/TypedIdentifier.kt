@@ -9,6 +9,10 @@ sealed class TypedIdentifier(id: String) {
     val path: String = identifier.path
     val namespace: String = identifier.namespace
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) || (other as? TypedIdentifier)?.identifier == identifier
+    }
+
     fun toTranslationKey(prefix: String): String {
         return identifier.toTranslationKey(prefix)
     }
@@ -47,5 +51,12 @@ sealed class TypedIdentifier(id: String) {
 
     override fun toString(): String {
         return identifier.toString()
+    }
+
+    override fun hashCode(): Int {
+        var result = identifier.hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + namespace.hashCode()
+        return result
     }
 }

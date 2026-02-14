@@ -140,22 +140,6 @@ abstract class ContainerWidget(
         return true
     }
 
-    protected fun drawText(
-        drawContext: DrawContext?,
-        text: String,
-        row: Int,
-        xOffset: Int = 0,
-        color: Int = Colors.WHITE,
-        shadow: Boolean = true) {
-        drawContext?.drawText(
-            textRenderer,
-            text,
-            X_MARGIN + xOffset + x,
-            getTranslatedY(row),
-            color,
-            shadow)
-    }
-
     protected fun drawCenteredText(
         drawContext: DrawContext?,
         text: String,
@@ -184,7 +168,8 @@ abstract class ContainerWidget(
         }
 
         if (row == null) {
-            children[widgetId] = children[widgetId]!!.copy(row = maxUsedRow(true, true) + 1)
+            children[widgetId] = children[widgetId]!!.copy(
+                row = maxUsedRow(onlyThisRender = true, countOffscreen = true) + 1)
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
@@ -242,29 +227,8 @@ abstract class ContainerWidget(
         height = (max + getRowHeight(textRenderer.fontHeight)).toInt()
     }
 
-    fun fitToChildrenWidth() {
-        var max = 0
-        children.forEach { (_, child) ->
-            val translated = child.translated(scrollPosition)
-            if (childVisible(child)) {
-                max = max(max, translated.widget.x + translated.xOffset + X_MARGIN + translated.widget.width - x)
-            }
-        }
-        width = max
-    }
-
-    fun fitToChildren() {
-        fitToChildrenHeight()
-        fitToChildrenWidth()
-    }
-
     fun resetScrolling() {
         scrollPosition = 0
-    }
-
-    fun childVisible(widget: ClickableWidget): Boolean {
-        val childWidget = children.values.firstOrNull { child -> child.widget === widget }?.translated(scrollPosition)
-        return childWidget?.let { childVisible(it) } == true
     }
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
