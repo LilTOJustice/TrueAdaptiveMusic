@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -18,7 +19,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTre
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.sound.SoundInstance
+import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
@@ -46,20 +47,20 @@ object TAMClient {
             } catch (_: IOException) {
                 false
             }
-    val hasFFmpeg
-        get() = hasFFmpegLocal || hasFFmpegGlobal
+    var hasFFmpeg = false
+        private set
+
     var currentPredicateResult: MusicPredicateTree.Result? = null
-
-
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
             field = value
             options.save()
         }
-
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
+            minecraftClient.soundManager.stopAll()
+            hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.selectMusicPack(value)
 
             val packName = value?.packName ?: ""
@@ -71,12 +72,9 @@ object TAMClient {
         }
 
     private val inputWidgetMaker = InputWidgetMaker()
+
     private var initialized = false
     private var musicManager: MusicManager? = null
-
-    fun resetCache() {
-        musicPack?.rules?.resetCache()
-    }
 
     fun tick(client: MinecraftClient) {
         if (!initialized) {
@@ -84,7 +82,11 @@ object TAMClient {
         }
 
         currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
-        musicManager!!.tick()
+        musicManager?.tick()
+    }
+
+    fun resetSound() {
+        musicManager?.stop()
     }
 
     fun playSoundNow(sound: PlayableSound?) {
@@ -93,10 +95,6 @@ object TAMClient {
 
     fun getPlayingEvent(): MusicEvent? {
         return musicManager?.playingEvent
-    }
-
-    fun hasSoundInstance(instance: SoundInstance): Boolean {
-        return musicManager?.hasSoundInstance(instance) ?: false
     }
 
     fun registerPredicate(name: String, triggerType: KClass<out MusicPredicate>) {
@@ -115,31 +113,27 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
-    fun registerInputWidget(
-        predicate: (parameterType: KType) -> Boolean,
-        widgetMaker:
-            (prompt: String,
-             screen: Screen,
-             outArgs: MutableList<Any?>,
-             arg: KParameter,
-             onChange: () -> Unit) -> ClickableWidget) {
+    fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
         inputWidgetMaker.register(predicate, widgetMaker)
     }
 
-    fun registerInputWidget(
-        parameterType: KType,
-        widgetMaker:
-            (prompt: String,
-             screen: Screen,
-             outArgs: MutableList<Any?>,
-             arg: KParameter,
-             onChange: () -> Unit) -> ClickableWidget) {
+    fun registerInputWidget(parameterType: KType, widgetMaker: WidgetMaker) {
         registerInputWidget({ type -> type == parameterType}, widgetMaker)
     }
 
     fun makeInputWidget(
-        screen: Screen, outArgs: MutableList<Any?>, arg: KParameter, onChange: () -> Unit = {}): ClickableWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg, onChange)
+        screen: Screen,
+        outArgs: MutableList<Any?>,
+        arg: KParameter,
+        displayName: Text?,
+        tooltipText: Text?,
+        onChange: () -> Unit = {})
+    : ClickableWidget {
+        return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
+    }
+
+    fun refreshSoundVolume() {
+        musicManager?.refreshSoundVolume()
     }
 
     private fun initialize(client: MinecraftClient) {

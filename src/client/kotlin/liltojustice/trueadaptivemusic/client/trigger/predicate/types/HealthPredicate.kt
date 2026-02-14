@@ -8,7 +8,10 @@ import net.minecraft.util.JsonHelper
 class HealthPredicate(private val healthType: HealthType, private val direction: Direction, private val health: Int): MusicPredicate() {
     override fun test(client: MinecraftClient): Boolean {
         val player = client.player ?: return false
-        val typeAdjusted = if (healthType == HealthType.Percentage) player.maxHealth * (health / 100F) else health.toFloat()
+        val typeAdjusted = if (healthType == HealthType.Percentage)
+            player.maxHealth * (health / 100F)
+        else
+            health.toFloat()
 
         return when (direction) {
             Direction.Greater -> player.health > typeAdjusted
@@ -28,6 +31,13 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     }
 
     companion object: MusicPredicateCompanion<HealthPredicate> {
+        override val descriptions: Map<String, String>
+            get() = super.descriptions + mapOf(
+                "healthType" to "Whether the health setting is a value or percentage.",
+                "direction" to "Whether the music should play above or below the health setting.",
+                "health" to "Threshold at which the predicate should switch."
+            )
+
         override fun fromJson(json: JsonObject): HealthPredicate {
             return HealthPredicate(
                 HealthType.valueOf(JsonHelper.getString(json, "healthType")),
