@@ -2,16 +2,15 @@ package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
-import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import net.minecraft.util.JsonHelper
 import java.io.BufferedReader
+import java.io.InputStream
 import java.io.InputStreamReader
 import javax.sound.sampled.AudioFormat
 import kotlin.io.path.pathString
 
 object FFmpeg {
-    fun makeStream(soundFile: SoundFile): FFmpegAudioStream {
+    fun getFileAudioFormat(inputStream: InputStream): AudioFormat {
         val command = if (TAMClient.hasFFmpegGlobal) "ffprobe" else Constants.FFPROBE_PATH.pathString
         val ffprobe = ProcessBuilder(
             command,
@@ -25,9 +24,7 @@ object FFmpeg {
 
         // Ignore dumb exception
         try {
-            soundFile.getInputStream().use {
-                it.copyTo(ffprobe.outputStream)
-            }
+            inputStream.use { it.copyTo(ffprobe.outputStream) }
         }
         catch (_: Exception) {}
 
@@ -45,13 +42,6 @@ object FFmpeg {
         val channels = stream["channels"].asInt
         val sampleRate = stream["sample_rate"].asInt
 
-        return FFmpegAudioStream(
-            soundFile,
-            AudioFormat(
-                sampleRate.toFloat(),
-                16,
-                channels,
-                true,
-                false))
+        return AudioFormat(sampleRate.toFloat(), 16, channels, true, false)
     }
 }

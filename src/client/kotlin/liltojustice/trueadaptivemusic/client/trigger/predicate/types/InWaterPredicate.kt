@@ -12,7 +12,7 @@ class InWaterPredicate: MusicPredicate() {
         if (result) {
             tickBuffer = GRACE_PERIOD_TICKS
         }
-        else if (tickBuffer-- >= 0) {
+        else if (tickBuffer-- > 0) {
             return true
         }
 
@@ -24,6 +24,6 @@ class InWaterPredicate: MusicPredicate() {
             return InWaterPredicate()
         }
 
-        private const val GRACE_PERIOD_TICKS = 5
+        private const val GRACE_PERIOD_TICKS = 6
     }
 }
