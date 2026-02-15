@@ -53,7 +53,7 @@ internal class MusicPlayer(client: MinecraftClient) {
                 !volumeManager.hasFade(currentSoundInstance)) {
                 volumeManager.startFade(
                     currentSoundInstance,
-                    CLAMP_TICKS,
+                    track.crossFadeTicks,
                     min(track.clampedVolume, track.desiredVolume),
                     false)
             }
