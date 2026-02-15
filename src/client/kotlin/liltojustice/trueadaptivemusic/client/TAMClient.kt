@@ -59,7 +59,7 @@ object TAMClient {
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
-            minecraftClient.soundManager.stopAll()
+            minecraftClient.soundManager.soundSystem.reloadSounds()
             hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.selectMusicPack(value)
 
