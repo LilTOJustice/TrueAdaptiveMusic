@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import net.minecraft.client.gui.Click

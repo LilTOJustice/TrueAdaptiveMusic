@@ -1,7 +1,9 @@
-package liltojustice.trueadaptivemusic
+package liltojustice.trueadaptivemusic.client
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.text.Text
@@ -15,11 +17,11 @@ data class TrueAdaptiveMusicOptions(
     val prettifyIdentifiers: Boolean = true) {
 
     fun save() {
-        Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
+        Constants.Companion.OPTIONS_PATH.toFile().writeText(jsonEncode())
     }
 
     fun getArgs(): List<Any?> {
-        return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
+        return ReflectionHelper.Companion.getConstructorParameterValues(this).map { param -> param.value }
     }
 
     private fun jsonEncode(): String {
@@ -55,12 +57,14 @@ data class TrueAdaptiveMusicOptions(
 
         fun getArgDisplayName(argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:options_${argName}_display", displayNames[argName])
+                "trueadaptivemusic:options_${argName}_display", displayNames[argName]
+            )
         }
 
         fun getArgDescription(argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:options_${argName}_description", descriptions[argName])
+                "trueadaptivemusic:options_${argName}_description", descriptions[argName]
+            )
         }
     }
 }

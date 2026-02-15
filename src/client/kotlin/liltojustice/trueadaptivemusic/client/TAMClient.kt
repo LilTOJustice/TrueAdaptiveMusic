@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException

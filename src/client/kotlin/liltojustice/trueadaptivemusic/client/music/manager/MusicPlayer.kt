@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.music.manager
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
-import liltojustice.trueadaptivemusic.client.sound.VolumeManager
+import liltojustice.trueadaptivemusic.client.sound.engine.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
