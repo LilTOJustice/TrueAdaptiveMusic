@@ -121,7 +121,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
+
             result
         }
 
@@ -155,7 +158,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -185,7 +190,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -201,7 +208,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 checked = outArgs[arg.index] as? Boolean ?: false
             )
-            result.setTooltip(Tooltip.of(tooltipText))
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -313,7 +322,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
                     prompt
                 ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
-                result.setTooltip(Tooltip.of(tooltipText))
+                tooltipText?.let {
+                    result.setTooltip(Tooltip.of(it))
+                }
                 result
             }
         )
