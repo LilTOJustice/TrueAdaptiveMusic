@@ -50,7 +50,7 @@ class MainScreen(private val parent: Screen): Screen(
         doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
         doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
         doneButton.x = width - doneButton.width
-        doneButton.y = height - doneButton.height
+        doneButton.y = height - doneButton.height - 2
 
         editButton = ButtonWidget.Builder(EDIT_TEXT)
         {
@@ -65,7 +65,7 @@ class MainScreen(private val parent: Screen): Screen(
             client?.setScreen(editScreen)
         }.build()
         editButton.width = textRenderer.getWidth(EDIT_TEXT) + 10
-        editButton.y = height - editButton.height
+        editButton.y = height - editButton.height - 2
         editButton.visible = TAMClient.musicPack != null
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> reload() }.build()
@@ -80,7 +80,7 @@ class MainScreen(private val parent: Screen): Screen(
 
         optionsButton = ButtonWidget.builder(OPTIONS_TEXT)
         { _: ButtonWidget? -> client?.setScreen(OptionsScreen(this)) }.build()
-        optionsButton.y = doneButton.y - doneButton.height - 5
+        optionsButton.y = doneButton.y - doneButton.height - 3
         optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
         optionsButton.x = width - optionsButton.width
 
