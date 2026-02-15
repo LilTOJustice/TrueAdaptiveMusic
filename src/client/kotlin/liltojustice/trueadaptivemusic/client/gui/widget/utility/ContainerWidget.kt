@@ -6,8 +6,10 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.sound.SoundManager
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -33,12 +35,16 @@ abstract class ContainerWidget(
     private val renderChildren = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
     protected val textRenderer: TextRenderer = client.textRenderer
-    protected val screen = client.currentScreen
+    protected val screen: Screen? = client.currentScreen
     private var scrollPosition = 0
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
+    private var focusedWidget: ClickableWidget? = null
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
+    }
+
+    override fun playDownSound(soundManager: SoundManager?) {
     }
 
     override fun setHeight(height: Int) {
@@ -108,11 +114,30 @@ abstract class ContainerWidget(
         val children = children.toList()
         children.forEach { (_, child) ->
             if (child.widget.mouseClicked(click, doubled)) {
+                focusedWidget = child.widget
                 return result
             }
         }
 
+        focusedWidget = null
+        
         return result
+    }
+
+    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
+        focusedWidget?.mouseDragged(click, offsetX, offsetY)
+
+        return false
+    }
+
+    override fun mouseReleased(click: Click): Boolean {
+        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+            return false
+        }
+
+        focusedWidget?.mouseReleased(click)
+
+        return false
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {

@@ -37,6 +37,7 @@ class OptionsScreen(private val parent: Screen): Screen(
 
     override fun close() {
         TAMClient.options = optionsViewWidget.getCurrentOptions()
+        TAMClient.resetSound()
         client?.setScreen(parent)
     }
 

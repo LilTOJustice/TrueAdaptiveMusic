@@ -14,8 +14,10 @@ import kotlin.reflect.full.primaryConstructor
 data class TrueAdaptiveMusicOptions(
     val selectedPack: String = "",
     val useDebugHud: Boolean = false,
-    val prettifyIdentifiers: Boolean = true) {
-
+    val prettifyIdentifiers: Boolean = true,
+    val musicLoudnessBoost: LUFBoost = LUFBoost(0U),
+    val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U)
+) {
     fun save() {
         Constants.Companion.OPTIONS_PATH.toFile().writeText(jsonEncode())
     }
@@ -38,7 +40,11 @@ data class TrueAdaptiveMusicOptions(
         private val descriptions = mapOf(
             "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music " +
                     "pack.",
-            "prettifyIdentifiers" to "Enable or disable \"prettified\" identifiers (makes them more human friendly)."
+            "prettifyIdentifiers" to "Enable or disable \"prettified\" identifiers (makes them more human friendly).",
+            "musicLoudnessBoost" to "Increase the music volume by passing a higher LUFS value to FFmpeg. " +
+                    "Requires FFmpeg.",
+            "ambienceLoudnessBoost" to "Increase the ambience volume by passing a higher LUFS value to FFmpeg. " +
+                    "Requires FFmpeg."
         )
 
         private val json = Json {
@@ -65,6 +71,13 @@ data class TrueAdaptiveMusicOptions(
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic:options_${argName}_description", descriptions[argName]
             )
+        }
+    }
+
+    @Serializable
+    class LUFBoost(val value: UInt) {
+        companion object {
+            const val MAX_VALUE = 10U
         }
     }
 }

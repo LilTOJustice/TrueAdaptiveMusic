@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.EmptyClickableWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
@@ -300,6 +301,20 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             ?: listOf(),
                     tooltipText = actualTooltipText
                 )
+            }
+        )
+
+        TAMClient.registerInputWidget(
+            typeOf<TrueAdaptiveMusicOptions.LUFBoost>(),
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+                val result = SliderWidget(
+                    0,
+                    TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),
+                    (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
+                    prompt
+                ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
+                result.setTooltip(Tooltip.of(tooltipText))
+                result
             }
         )
     }
