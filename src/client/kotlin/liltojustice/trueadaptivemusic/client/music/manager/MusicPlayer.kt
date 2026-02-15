@@ -81,7 +81,10 @@ internal class MusicPlayer(client: MinecraftClient) {
     fun startNew(trackName: String, newMusic: PlayableSound, delayMillis: Long = 0L) {
         val track = getTrack(trackName)
         val newInstance = newMusic.makeSoundInstance(track.isAmbient)
-        soundSystem.stop(track.currentSoundInstance)
+        track.currentSoundInstance?.let {
+            volumeManager.startFade(
+                it, track.crossFadeTicks, 0F, true)
+        }
         track.updateSound(newMusic, newInstance)
         track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
     }
