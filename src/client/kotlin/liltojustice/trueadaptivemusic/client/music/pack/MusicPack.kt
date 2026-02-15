@@ -73,11 +73,13 @@ class MusicPack private constructor(
                                     }
                         }
                     }
-            } else if (packWithAssets != null) {
+            }
+            else if (packWithAssets != null) {
                 val existingAssets = Path(
                     Constants.MUSIC_PACK_DIR.pathString,
                     packWithAssets.packName,
-                    Constants.ASSETS_DIRNAME)
+                    Constants.ASSETS_DIRNAME
+                )
 
                 if (existingAssets.exists()) {
                     existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
