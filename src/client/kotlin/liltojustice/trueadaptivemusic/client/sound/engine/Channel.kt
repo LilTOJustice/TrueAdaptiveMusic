@@ -44,12 +44,17 @@ class Channel private constructor(
 
     private fun createThread(): Thread {
         val thread = Thread {
-            soundInstance.getAudioStream()?.let {
-                source.setVolume(startingVolume)
-                source.setStream(it)
-                source.play()
+            try {
+                soundInstance.getAudioStream()?.let {
+                    source.setVolume(startingVolume)
+                    source.setStream(it)
+                    source.play()
+                }
+                waitForStop()
             }
-            waitForStop()
+            catch (_: Exception) {
+                close()
+            }
         }
         thread.setDaemon(true)
         thread.setName("TAM Sound Engine: ${soundInstance.hashCode()}")
