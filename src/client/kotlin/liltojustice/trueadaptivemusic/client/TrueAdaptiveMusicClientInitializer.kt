@@ -48,7 +48,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip

@@ -9,7 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
 import kotlin.reflect.full.declaredMembers

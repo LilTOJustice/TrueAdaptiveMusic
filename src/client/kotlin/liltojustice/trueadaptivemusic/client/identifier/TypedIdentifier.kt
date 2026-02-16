@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import kotlin.reflect.KType

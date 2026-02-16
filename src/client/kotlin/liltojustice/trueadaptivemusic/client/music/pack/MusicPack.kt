@@ -21,7 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException

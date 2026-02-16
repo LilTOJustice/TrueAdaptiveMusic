@@ -8,7 +8,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import kotlin.collections.plus
 import kotlin.reflect.full.declaredMembers

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.text.Text
 import kotlin.reflect.KParameter
