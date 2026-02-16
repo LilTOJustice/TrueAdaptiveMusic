@@ -208,17 +208,18 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
-                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> to enum.toString().prettify() }
+                val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
 
                 if (options.isEmpty())
                     EmptyClickableWidget()
                 else
                     DropdownWidget(
                         options,
-                        { enumKey ->
-                            outArgs[arg.index] = enumKey
+                        { enum ->
+                            outArgs[arg.index] = enum
                             onChange()
                         },
+                        getDisplay = { it.toString().prettify() },
                         title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
