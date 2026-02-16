@@ -184,7 +184,7 @@ class PredicateViewWidget(
                         { MusicPredicate.getDisplayName(it).string },
                         startingOption = selectedPredicateTypeName.takeIf { it.isNotBlank() },
                         tooltipText = Text.translatableWithFallback(
-                            "trueadaptivemusic.predicateType_description",
+                            "trueadaptivemusic.predicate_type.description",
                             "Select under what circumstances the music should play"
                         )
                     )
@@ -224,7 +224,7 @@ class PredicateViewWidget(
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
                     tooltipText = Text.translatableWithFallback(
-                        "trueadaptivemusic.musicChoice_description",
+                        "trueadaptivemusic.music_choice.description",
                         "Select any amount of music to be chosen randomly to play"))
             },
             "musicChoice"
@@ -257,7 +257,7 @@ class PredicateViewWidget(
                     onHoverOption = { option ->
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
                     tooltipText = Text.translatableWithFallback(
-                        "trueadaptivemusic.ambienceChoice_description",
+                        "trueadaptivemusic.ambience_choice.description",
                         "Select any amount of ambience to be chosen randomly to play"))
             },
             "ambienceChoice"

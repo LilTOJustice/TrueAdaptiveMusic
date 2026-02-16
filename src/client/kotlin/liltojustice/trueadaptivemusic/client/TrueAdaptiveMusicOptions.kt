@@ -63,14 +63,12 @@ data class TrueAdaptiveMusicOptions(
 
         fun getArgDisplayName(argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:options_${argName}_display", displayNames[argName]
-            )
+                "trueadaptivemusic.options.${argName}.display", displayNames[argName])
         }
 
         fun getArgDescription(argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:options_${argName}_description", descriptions[argName]
-            )
+                "trueadaptivemusic.options.${argName}.description", descriptions[argName])
         }
     }
 

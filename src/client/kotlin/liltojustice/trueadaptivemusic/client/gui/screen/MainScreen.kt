@@ -134,6 +134,6 @@ class MainScreen(private val parent: Screen): Screen(
         private val WIKI_TEXT = Text.translatableWithFallback("trueadaptivemusic.open_wiki", "Open Wiki")
         private val OPTIONS_TEXT = Text.translatableWithFallback("trueadaptivemusic.options", "Options")
         private val INSTALL_FFMPEG_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.install_ffmpeg", "Install FFmpeg")
+            "trueadaptivemusic.ffmpeg_install", "Install FFmpeg")
     }
 }

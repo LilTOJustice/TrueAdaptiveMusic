@@ -252,7 +252,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         onChange()
                     },
                     prompt,
-                    notSelectedPlaceholder = "Select values",
+                    notSelectedPlaceholder = Text.translatableWithFallback(
+                        "trueadaptivemusic.enum_placeholder", "Select values").string,
                     alreadySelected = (outArgs[arg.index] as? List<*>)?.mapNotNull { enum -> enum as? Enum<*> }
                         ?: listOf(),
                     tooltipText = tooltipText
@@ -267,8 +268,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(arg.type)
                     .map { id ->
-                        TypedIdentifier.initializeFromIdString(arg.type, id.toString()) to
-                                (if (prettify) id.toString().prettify() else id.toString())
+                        val key = TypedIdentifier.initializeFromIdString(arg.type, id.toString())
+                        key to (if (prettify) key.prettify() else id.toString())
                     }
                     .sortedBy { pair -> pair.second }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
@@ -298,13 +299,14 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 MultiSelectDropdownWidget(
                     options,
                     0,
-                    { if (prettify) it.toString().prettify() else it.toString() },
+                    { if (prettify) it.prettify() else it.toString() },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
                     },
                     prompt,
-                    notSelectedPlaceholder = "Select identifiers",
+                    notSelectedPlaceholder = Text.translatableWithFallback(
+                        "trueadaptivemusic.identifier_placeholder", "Select identifiers").string,
                     alreadySelected =
                         (outArgs[arg.index] as? List<*>)?.mapNotNull { it as? TypedIdentifier }
                             ?: listOf(),
@@ -332,8 +334,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
     companion object {
         private val DYNAMIC_REGISTRY_TEXT =
-            Text.literal(
-                "No options available to add due to a dynamic registry requirement. Try joining a world first.")
+            Text.translatableWithFallback(
+                "trueadaptivemusic.dynamic_registry_warning",
+                "No options available to add due to a dynamic registry requirement. Try joining a world first."
+            )
 
         private fun isEnumList(type: KType): Boolean {
             return type.isSubtypeOf(typeOf<List<*>>())

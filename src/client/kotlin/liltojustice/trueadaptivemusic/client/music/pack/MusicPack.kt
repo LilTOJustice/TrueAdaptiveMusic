@@ -183,9 +183,12 @@ class MusicPack private constructor(
         val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
         if (!TAMClient.hasFFmpeg && nonOggFiles.isNotEmpty()) {
             validation.addWarning(
-                "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.ogg_warning",
+                    "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
                         "This music will not play unless FFmpeg is installed on your system. You can install it at " +
                         "the top right of your screen. If you already did, you may just need to restart your system."
+                ).string
             )
         }
 
@@ -254,6 +257,12 @@ class MusicPack private constructor(
     }
 
     companion object {
+        private val jsonErrorText =
+            Text.translatableWithFallback(
+                "trueadaptivemusic.json_error",
+                "Could not load pack due to json error:"
+            ).string
+
         fun loadAllPacks(): List<MusicPack> {
             return Constants.MUSIC_PACK_DIR.listDirectoryEntries().mapNotNull { path ->
                 try {
@@ -357,7 +366,7 @@ class MusicPack private constructor(
                     JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
             }
             catch (e: JsonParseException) {
-                preValidation.addError("Could not load pack due to json error:\n$e")
+                preValidation.addError("$jsonErrorText\n$e")
                 MusicPredicateTree.makeEmpty()
             }
 
@@ -402,7 +411,7 @@ class MusicPack private constructor(
                             zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
                 }
                 catch (e: JsonParseException) {
-                    preValidation.addError("Could not load pack due to json error:\n$e")
+                    preValidation.addError("$jsonErrorText\n$e")
                     MusicPredicateTree.makeEmpty()
                 }
 
@@ -471,12 +480,12 @@ class MusicPack private constructor(
 
             fun getArgDisplayName(argName: String): Text? {
                 return translatableWithFallbackOrNull(
-                    "trueadaptivemusic:metadata_${argName}_display", displayNames[argName])
+                    "trueadaptivemusic.metadata.${argName}.display", displayNames[argName])
             }
 
             fun getArgDescription(argName: String): Text? {
                 return translatableWithFallbackOrNull(
-                    "trueadaptivemusic:metadata_${argName}_description", descriptions[argName])
+                    "trueadaptivemusic.metadata.${argName}.description", descriptions[argName])
             }
         }
     }

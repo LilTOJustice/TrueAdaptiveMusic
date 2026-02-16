@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.music.pack
 
+import net.minecraft.text.Text
+
 class MusicPackValidation(preValidation: MusicPackValidation? = null)
     : ArrayList<MusicPackValidation.ValidationMessage>() {
     init {
@@ -20,7 +22,10 @@ class MusicPackValidation(preValidation: MusicPackValidation? = null)
 
     data class ValidationMessage(val message: String, val type: Type) {
         override fun toString(): String {
-            return "$type: $message"
+            return "${
+                Text.translatableWithFallback("trueadaptivemusic.validation.$type", type.toString())
+                    .string
+            }: $message"
         }
 
         enum class Type {

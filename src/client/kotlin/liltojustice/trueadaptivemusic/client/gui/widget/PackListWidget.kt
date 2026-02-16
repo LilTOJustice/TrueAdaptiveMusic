@@ -128,7 +128,7 @@ class PackListWidget(
                         Text.translatableWithFallback(
                             "trueadaptivemusic.warning_count",
                             "${warnings.size} warning(s)",
-                            warnings.size
+                            warnings.size.toString()
                         )
                     )
                 }
@@ -142,7 +142,7 @@ class PackListWidget(
                         Text.translatableWithFallback(
                             "trueadaptivemusic.error_count",
                             "${errors.size} error(s)",
-                            errors.size
+                            errors.size.toString()
                         )
                     )
                 }

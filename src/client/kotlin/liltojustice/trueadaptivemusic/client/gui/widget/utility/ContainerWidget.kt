@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundManager
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -387,7 +388,7 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget("Back", onClick = { it() }) }
+            return backButtonCallback.let { ClickableTextWidget(ScreenTexts.BACK.string, onClick = { it() }) }
         }
     }
 
