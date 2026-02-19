@@ -23,7 +23,7 @@ class MusicPackValidation(preValidation: MusicPackValidation? = null)
     data class ValidationMessage(val message: String, val type: Type) {
         override fun toString(): String {
             return "${
-                Text.translatableWithFallback("trueadaptivemusic.validation.$type", type.toString())
+                Text.translatableWithFallback("trueadaptivemusic.enum.$type", type.toString())
                     .string
             }: $message"
         }

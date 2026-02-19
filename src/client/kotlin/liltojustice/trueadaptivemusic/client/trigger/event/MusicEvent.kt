@@ -80,7 +80,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
     interface MusicEventCompanion<TSelf>: MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
-                "trueadaptivemusic:event.name.${triggerName}",
+                "trueadaptivemusic.event.name.${triggerName}",
                 displayName ?: triggerName.prettify()
             )
         }
@@ -91,14 +91,14 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                     TriggerReflectionHelper.getMusicTriggerArgDisplayNames(eventType)
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:event.arg.${triggerName}.${argName}.display",
+                "trueadaptivemusic.event.arg.${triggerName}.${argName}.display",
                 combined[argName]
             )
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:event.arg.${triggerName}.${argName}.description",
+                "trueadaptivemusic.event.arg.${triggerName}.${argName}.description",
                 TriggerReflectionHelper.getMusicTriggerArgDescriptions(
                     TAMClient.eventRegistry[triggerName])[argName])
         }

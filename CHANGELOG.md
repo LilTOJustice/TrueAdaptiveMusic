@@ -6,7 +6,7 @@ Features:
 
 Fixes/Changes:
 - Fixed an issue where the vanilla sound engine would break if a pack was selected after launching with no pack selected
-- Filled out missing Russian translations
+- Filled out MOST missing Russian translations. More coming in the next release.
 - Improved some of the fading logic and increased how long tracks fade in/out
 - Updated the mod menu icon
 - Mod menu now points to the main True Adaptive Music screen, instead of the options screen

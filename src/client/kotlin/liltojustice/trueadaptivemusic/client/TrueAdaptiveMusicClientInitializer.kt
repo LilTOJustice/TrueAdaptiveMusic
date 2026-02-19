@@ -229,7 +229,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             outArgs[arg.index] = enum
                             onChange()
                         },
-                        getDisplay = { it.toString().prettify() },
+                        getDisplay = {
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.enum.$it", it.toString().prettify()).string },
                         title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
