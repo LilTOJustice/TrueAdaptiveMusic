@@ -254,7 +254,7 @@ class MusicManager(private val client: MinecraftClient) {
         private const val AMBIENCE_TRACK = "ambience"
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
-        private const val MAIN_CROSSFADE_TICKS = 50
+        private const val MAIN_CROSSFADE_TICKS = 75
         private const val ON_DEMAND_CROSSFADE_TICKS = 10
         private const val PAUSE_VOLUME = 0.3F
         private const val BACKGROUND_VOLUME = 0.1F

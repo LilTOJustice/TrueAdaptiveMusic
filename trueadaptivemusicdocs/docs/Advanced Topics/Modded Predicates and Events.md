@@ -68,7 +68,7 @@ companion object: MusicPredicateCompanion<PokeBattlePredicate> {
 }
 ```
 
-For You can keep `fromJson` as is for now, but you'll want to revisit if you decide to add additional parameters to your type as described later.
+You can keep `fromJson` as is for now, but you'll want to revisit if you decide to add additional parameters to your type as described later. Now we quickly need to sidestep to register the predicate type, as described [here](#registering-your-predicate-or-event-type). Once that is done, come right back!
 
 For now, try launching the game in your dev environment. Create a new pack, click to add a new child node, and you should now see your new type in this type list!
 ![New Type](new_type.png)
