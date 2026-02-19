@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import net.minecraft.client.sound.SoundEngine
 import net.minecraft.client.sound.Source
+import net.minecraft.util.math.Vec3d
 import java.util.concurrent.locks.LockSupport
 import java.util.function.Consumer
 
@@ -44,12 +45,20 @@ class Channel private constructor(
 
     private fun createThread(): Thread {
         val thread = Thread {
-            soundInstance.getAudioStream()?.let {
-                source.setVolume(startingVolume)
-                source.setStream(it)
-                source.play()
+            try {
+                soundInstance.getAudioStream()?.let {
+                    source.setVolume(startingVolume)
+                    source.setStream(it)
+                    source.setAttenuation(0F)
+                    source.setPosition(Vec3d.ZERO)
+                    source.setRelative(true)
+                    source.play()
+                }
+                waitForStop()
             }
-            waitForStop()
+            catch (_: Exception) {
+                close()
+            }
         }
         thread.setDaemon(true)
         thread.setName("TAM Sound Engine: ${soundInstance.hashCode()}")

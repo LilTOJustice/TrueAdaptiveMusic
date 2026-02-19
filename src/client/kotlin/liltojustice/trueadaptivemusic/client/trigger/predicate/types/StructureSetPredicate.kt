@@ -56,8 +56,8 @@ class StructureSetPredicate internal constructor(
     }
 
     companion object: MusicPredicateCompanion<StructureSetPredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "structureSets" to "Which structure sets the player must be in for the music should play. If none, " +
                         "any structure set will trigger the music."
             )
@@ -69,7 +69,8 @@ class StructureSetPredicate internal constructor(
                         .getArray(json, "id")
                         .map { element -> StructureSetIdentifier(element.asString) }
                 else
-                    listOf(StructureSetIdentifier(JsonHelper.getString(json, "id"))))
+                    listOf(StructureSetIdentifier(JsonHelper.getString(json, "id")))
+            )
         }
     }
 }

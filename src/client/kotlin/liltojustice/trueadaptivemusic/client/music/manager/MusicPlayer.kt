@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.music.manager
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
-import liltojustice.trueadaptivemusic.client.sound.VolumeManager
+import liltojustice.trueadaptivemusic.client.sound.engine.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -53,7 +53,7 @@ internal class MusicPlayer(client: MinecraftClient) {
                 !volumeManager.hasFade(currentSoundInstance)) {
                 volumeManager.startFade(
                     currentSoundInstance,
-                    CLAMP_TICKS,
+                    track.crossFadeTicks,
                     min(track.clampedVolume, track.desiredVolume),
                     false)
             }
@@ -81,7 +81,10 @@ internal class MusicPlayer(client: MinecraftClient) {
     fun startNew(trackName: String, newMusic: PlayableSound, delayMillis: Long = 0L) {
         val track = getTrack(trackName)
         val newInstance = newMusic.makeSoundInstance(track.isAmbient)
-        soundSystem.stop(track.currentSoundInstance)
+        track.currentSoundInstance?.let {
+            volumeManager.startFade(
+                it, track.crossFadeTicks, 0F, true)
+        }
         track.updateSound(newMusic, newInstance)
         track.startDelay(delayMillis) { startNewInstance(track, newMusic) }
     }
