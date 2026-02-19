@@ -4,7 +4,11 @@ import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 
 class StatusEffectIdentifier(id: String): TypedIdentifier(id) {
-    companion object: TypedIdentifierCompanion<StatusEffectIdentifier>() {
+    override fun toPrefixedTranslationKey(): String {
+        return identifier.toTranslationKey("effect")
+    }
+
+    companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             return Registries.STATUS_EFFECT.ids.toList()
         }
