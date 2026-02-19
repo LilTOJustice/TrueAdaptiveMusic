@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
@@ -24,8 +25,8 @@ class MetaScreen(private val parent: Screen, private val musicPack: MusicPack): 
             BUFFER / 2,
             BUFFER / 2 + TITLE_Y + textRenderer.fontHeight)
 
-        doneButton = ButtonWidget.Builder(DONE_TEXT) { close() }
-            .width(textRenderer.getWidth(DONE_TEXT) + 10)
+        doneButton = ButtonWidget.Builder(ScreenTexts.DONE) { close() }
+            .width(textRenderer.getWidth(ScreenTexts.DONE) + 10)
             .build()
 
         doneButton.x = width - doneButton.width
@@ -50,6 +51,5 @@ class MetaScreen(private val parent: Screen, private val musicPack: MusicPack): 
     companion object {
         private const val BUFFER = 6
         private const val TITLE_Y = 8
-        private val DONE_TEXT = Text.literal("Done")
     }
 }
