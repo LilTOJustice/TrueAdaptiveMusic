@@ -6,7 +6,11 @@ import net.minecraft.util.Identifier
 import kotlin.jvm.optionals.getOrNull
 
 class StructureIdentifier(id: String): TypedIdentifier(id) {
-    companion object: TypedIdentifierCompanion<StructureIdentifier>() {
+    override fun toPrefixedTranslationKey(): String {
+        return identifier.toTranslationKey("structure")
+    }
+
+    companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             return MinecraftClient.getInstance().server?.worlds
                 ?.flatMap { world ->

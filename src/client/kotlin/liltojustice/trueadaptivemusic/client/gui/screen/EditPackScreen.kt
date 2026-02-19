@@ -119,7 +119,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         addDrawableChild(eventViewWidget)
         addDrawableChild(metaButtonWidget)
 
-        saveButtonWidget.width = 90
+        saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
         closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
         closeButtonWidget.tooltip = Tooltip.of(
@@ -127,7 +127,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                 "trueadaptivemusic.change_save", "Changes will be saved"))
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
-        metaButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        metaButtonWidget.width = textRenderer.getWidth(META_BUTTON_TEXT) + 10
         metaButtonWidget.x = openAssetsFolderButtonWidget.x - metaButtonWidget.width - 5
 
         val containerWidth = getContainerWidth()
