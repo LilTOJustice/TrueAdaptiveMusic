@@ -122,13 +122,15 @@ class PackListWidget(
             private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
                 val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
                 val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
-                val result = StringBuilder()
+                val result = Text.empty()
                 if (warnings.isNotEmpty()) {
                     result.append(
                         Text.translatableWithFallback(
                             "trueadaptivemusic.warning_count",
-                            "%i warning(s)",
-                            warnings.size))
+                            "${warnings.size} warning(s)",
+                            warnings.size.toString()
+                        )
+                    )
                 }
 
                 if (warnings.isNotEmpty() && errors.isNotEmpty()) {
@@ -139,18 +141,19 @@ class PackListWidget(
                     result.append(
                         Text.translatableWithFallback(
                             "trueadaptivemusic.error_count",
-                            "%i error(s)",
-                            errors.size))
+                            "${errors.size} error(s)",
+                            errors.size.toString()
+                        )
+                    )
                 }
 
                 if (warnings.isNotEmpty() || errors.isNotEmpty()) {
-                    result.appendLine()
-                    result.appendLine()
+                    result.append("\n\n")
                 }
 
                 result.append(validation.joinToString("\n\n") { message -> message.toString() })
 
-                return Text.literal(result.toString())
+                return result
             }
         }
     }

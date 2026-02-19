@@ -24,8 +24,8 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
     }
 
     companion object: MusicPredicateCompanion<RidingPredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "entities" to "Which entities to ride for the music to play. If none, any entity will trigger the " +
                         "music."
             )
@@ -33,7 +33,8 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
         override fun fromJson(json: JsonObject): RidingPredicate {
             return RidingPredicate(
                 JsonHelper.getArray(json, "entities")
-                    .map { element -> EntityTypeIdentifier(element.asString) })
+                    .map { element -> EntityTypeIdentifier(element.asString) }
+            )
         }
     }
 }

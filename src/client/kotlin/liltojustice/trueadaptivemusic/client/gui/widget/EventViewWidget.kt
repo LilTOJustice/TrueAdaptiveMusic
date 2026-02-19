@@ -25,7 +25,15 @@ class EventViewWidget(
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
-    width, height, "Event View", true, false, true, true, x, y) {
+    width,
+    height,
+    Text.translatableWithFallback("trueadaptivemusic.event_view", "Event View").string,
+    true,
+    false,
+    true,
+    true,
+    x,
+    y) {
     private val eventTypeNameOptions = TAMClient.eventRegistry.getAllNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
     private var requiredEventArgs = listOf<KParameter>()
@@ -107,8 +115,10 @@ class EventViewWidget(
                     { MusicEvent.getDisplayName(it).string },
                     startingOption = selectedEventTypeName,
                     tooltipText = Text.translatableWithFallback(
-                            "trueadaptivemusic.eventType_description",
-                    "Select what should trigger the music to play"))
+                        "trueadaptivemusic.event_type.description",
+                        "Select what should trigger the music to play"
+                    )
+                )
             },
             "eventTypeChoice",
             row = 1)
@@ -141,7 +151,7 @@ class EventViewWidget(
                         TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) })
                     },
                     tooltipText = Text.translatableWithFallback(
-                        "trueadaptivemusic.musicChoice_description",
+                        "trueadaptivemusic.music_choice.description",
                         "Select any amount of music to be chosen randomly to play")
                 )
             },
