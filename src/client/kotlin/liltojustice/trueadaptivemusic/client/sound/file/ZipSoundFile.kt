@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.file
 
-import liltojustice.trueadaptivemusic.ZipInputStream
+import liltojustice.trueadaptivemusic.client.sound.stream.ZipInputStream
 import java.io.InputStream
 import java.nio.file.Path
 import java.util.zip.ZipFile

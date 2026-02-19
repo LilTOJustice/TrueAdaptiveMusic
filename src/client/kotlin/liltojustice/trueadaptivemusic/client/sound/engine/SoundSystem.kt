@@ -178,14 +178,15 @@ class SoundSystem(private val options: GameOptions) {
     }
 
     private fun getProperSourceVolume(soundInstance: TAMSoundInstance): Float {
-        return soundInstance.desiredVolume * options.getSoundVolume(SoundCategory.MASTER) * options.getSoundVolume(
-            if (soundInstance.isAmbient) {
-                SoundCategory.AMBIENT
-            }
-            else {
-                SoundCategory.MUSIC
-            }
-        )
+        return soundInstance.desiredVolume * options.getSoundVolume(SoundCategory.MASTER) *
+                options.getSoundVolume(
+                    if (soundInstance.isAmbient) {
+                        SoundCategory.AMBIENT
+                    }
+                    else {
+                        SoundCategory.MUSIC
+                    }
+                )
     }
 
     @Environment(EnvType.CLIENT)
