@@ -93,7 +93,10 @@ abstract class TAMSoundInstance(val isAmbient: Boolean): SoundInstance {
                     TruncatedAudioStream(OggAudioStream(inputStreamGetter()))
                 }
                 else {
-                    val loudnessUnits = if (isAmbient) AMBIENT_LUFS else MUSIC_LUFS
+                    val loudnessUnits = if (isAmbient)
+                        AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
+                    else
+                        MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
                     TruncatedAudioStream(
                         FFmpegAudioStream(
                             inputStreamGetter(),

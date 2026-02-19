@@ -8,7 +8,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import kotlin.collections.plus
 import kotlin.reflect.full.declaredMembers
@@ -64,13 +64,23 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             override fun default(): Parameters {
                 return Parameters()
             }
+
+            fun getParamDisplayName(paramName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic.param.event.${paramName}.display", displayNames[paramName])
+            }
+
+            fun getParamDescription(paramName: String): Text? {
+                return Text.translatableWithFallback(
+                    "trueadaptivemusic.param.event.${paramName}.description", descriptions[paramName])
+            }
         }
     }
 
     interface MusicEventCompanion<TSelf>: MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
-                "trueadaptivemusic:event_${triggerName}_display",
+                "trueadaptivemusic.event.name.${triggerName}",
                 displayName ?: triggerName.prettify()
             )
         }
@@ -81,14 +91,14 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                     TriggerReflectionHelper.getMusicTriggerArgDisplayNames(eventType)
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:predicate_arg_${triggerName}_${argName}_display",
+                "trueadaptivemusic.event.arg.${triggerName}.${argName}.display",
                 combined[argName]
             )
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:event_arg_${triggerName}_${argName}_description",
+                "trueadaptivemusic.event.arg.${triggerName}.${argName}.description",
                 TriggerReflectionHelper.getMusicTriggerArgDescriptions(
                     TAMClient.eventRegistry[triggerName])[argName])
         }
