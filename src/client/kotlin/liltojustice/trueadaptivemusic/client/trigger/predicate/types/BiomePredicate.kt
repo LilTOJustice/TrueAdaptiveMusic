@@ -25,8 +25,8 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
     }
 
     companion object: MusicPredicateCompanion<BiomePredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "biomes" to "Select all biomes the music should play for. If none, any biome will trigger the music."
             )
 
@@ -35,7 +35,8 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
                     if (JsonHelper.hasArray(json, "id"))
                         JsonHelper.getArray(json, "id").map { element -> BiomeIdentifier(element.asString) }
                     else
-                        listOf(BiomeIdentifier(JsonHelper.getString(json, "id"))))
+                        listOf(BiomeIdentifier(JsonHelper.getString(json, "id")))
+            )
         }
     }
 }

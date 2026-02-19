@@ -9,7 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
 import kotlin.reflect.full.declaredMembers
@@ -101,6 +101,16 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
             override fun default(): Parameters {
                 return Parameters()
             }
+
+            fun getParamDisplayName(paramName: String): Text? {
+                return translatableWithFallbackOrNull(
+                    "trueadaptivemusic.param.predicate.${paramName}.display", displayNames[paramName])
+            }
+
+            fun getParamDescription(paramName: String): Text? {
+                return Text.translatableWithFallback(
+                    "trueadaptivemusic.param.predicate.${paramName}.description", descriptions[paramName])
+            }
         }
     }
 
@@ -110,7 +120,7 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion<MusicPredicate> where TSelf: MusicPredicate {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
-                "trueadaptivemusic:predicate_${triggerName}_display",
+                "trueadaptivemusic.predicate.name.${triggerName}",
                 displayName ?: triggerName.prettify()
             )
         }
@@ -121,14 +131,14 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                 TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:predicate_arg_${triggerName}_${argName}_display",
+                "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.display",
                 combined[argName]
             )
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Text? {
             return translatableWithFallbackOrNull(
-                "trueadaptivemusic:predicate_arg_${triggerName}_${argName}_description",
+                "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.description",
                 TriggerReflectionHelper.getMusicTriggerArgDescriptions(
                     TAMClient.predicateRegistry[triggerName])[argName]
             )

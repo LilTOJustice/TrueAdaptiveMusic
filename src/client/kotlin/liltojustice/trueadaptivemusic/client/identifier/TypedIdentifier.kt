@@ -1,11 +1,39 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
+import kotlin.text.split
 
-sealed class TypedIdentifier(id: String): Identifier(id) {
-    companion object: TypedIdentifierCompanion<TypedIdentifier>() {
+sealed class TypedIdentifier(id: String) {
+    val identifier: Identifier = Identifier.of(id)
+    val path: String = identifier.path
+    val namespace: String = identifier.namespace
+
+    abstract fun toPrefixedTranslationKey(): String
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) || (other as? TypedIdentifier)?.identifier == identifier
+    }
+
+    fun toTranslationKey(prefix: String): String {
+        return identifier.toTranslationKey(prefix)
+    }
+
+    fun prettify(): String {
+        val translationKey = toPrefixedTranslationKey()
+        val translatedString = Text.translatable(translationKey).string
+        return if (translatedString != translationKey) {
+            "${toString().split(":")[0].replaceFirstChar { it.uppercase() }} - $translatedString"
+        }
+        else {
+            toString().prettify()
+        }
+    }
+
+    companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             throw TypedIdentifierException(
                 "Attempt to get type name from abstract ${TypedIdentifier::class.simpleName}.")
@@ -26,7 +54,7 @@ sealed class TypedIdentifier(id: String): Identifier(id) {
         }
     }
 
-    sealed class TypedIdentifierCompanion<TSelf> where TSelf: TypedIdentifier {
+    sealed class TypedIdentifierCompanion {
         abstract fun getRegistryIds(): List<Identifier>
         fun initializeFromIdString(type: KType, id: String): TypedIdentifier {
             return TypedIdentifier::class.sealedSubclasses

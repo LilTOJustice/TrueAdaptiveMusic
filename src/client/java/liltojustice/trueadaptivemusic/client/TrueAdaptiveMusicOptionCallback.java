@@ -28,9 +28,13 @@ public record TrueAdaptiveMusicOptionCallback<T>(MinecraftClient client)
             Consumer<T> changeCallback) {
         return option -> {
             assert client.currentScreen != null;
-            return new ButtonWidget.Builder(Text.literal("True Adaptive Music"),
-                    widget -> client.setScreen(new MainScreen(client.currentScreen)))
-                    .dimensions(x, y, width, 20).build();
+            return new ButtonWidget.Builder(
+                    Text.translatableWithFallback(
+                            "trueadaptivemusic.trueadaptivemusic",
+                            "True Adaptive Music"
+                    ),
+                    widget -> client.setScreen(new MainScreen(client.currentScreen))
+            ).dimensions(x, y, width, 20).build();
         };
     }
 

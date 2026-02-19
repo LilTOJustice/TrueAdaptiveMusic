@@ -18,7 +18,7 @@ public class SoundOptionsScreenMixin extends GameOptionsScreen {
     protected void init(CallbackInfo ci) {
         SoundOptionsScreen thisObject = (SoundOptionsScreen)(Object)this;
         var trueAdaptiveMusicButton = new SimpleOption<>(
-                "True Adaptive Music",
+                "trueadaptivemusic",
                 SimpleOption.emptyTooltip(),
                 (optionText, value) -> optionText,
                 new TrueAdaptiveMusicOptionCallback<>(thisObject.client),

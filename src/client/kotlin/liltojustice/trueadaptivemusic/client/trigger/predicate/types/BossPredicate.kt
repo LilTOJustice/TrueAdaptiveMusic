@@ -26,8 +26,8 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
     }
 
     companion object: MusicPredicateCompanion<BossPredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "bosses" to "List of entities that the music should play for. If none, any entity will trigger the " +
                         "music."
             )
@@ -37,7 +37,8 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
                 if (JsonHelper.hasArray(json, "id"))
                     JsonHelper.getArray(json, "id").map { element -> EntityTypeIdentifier(element.asString) }
                 else
-                    listOf(EntityTypeIdentifier(JsonHelper.getString(json, "id"))))
+                    listOf(EntityTypeIdentifier(JsonHelper.getString(json, "id")))
+            )
         }
     }
 }

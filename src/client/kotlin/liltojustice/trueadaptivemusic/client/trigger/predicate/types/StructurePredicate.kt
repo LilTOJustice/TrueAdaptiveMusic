@@ -55,8 +55,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
     }
 
     companion object: MusicPredicateCompanion<StructurePredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "structures" to "Which structures the player must be in for the music to play. If none, any " +
                         "structure will trigger the music."
             )
@@ -66,7 +66,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
                 if (JsonHelper.hasArray(json, "id"))
                     JsonHelper.getArray(json, "id").map { element -> StructureIdentifier(element.asString) }
                 else
-                    listOf(StructureIdentifier(JsonHelper.getString(json, "id"))))
+                    listOf(StructureIdentifier(JsonHelper.getString(json, "id")))
+            )
         }
 
         fun testStructure(structureAccessor: StructureAccessor, structure: Structure, blockPos: BlockPos): Boolean {
