@@ -26,8 +26,8 @@ open class ClickableTextWidget(
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
-    val coloredText: Text
-        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).first()
+    val coloredText: Text?
+        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).firstOrNull()
     var hovering = false
 
     init {
@@ -61,10 +61,13 @@ open class ClickableTextWidget(
         }
 
         context?.let {
-            drawTextWithMargin(
-                context.getHoverListener(this, DrawContext.HoverType.NONE),
-                coloredText,
-                0)
+            coloredText?.let {
+                drawTextWithMargin(
+                    context.getHoverListener(this, DrawContext.HoverType.NONE),
+                    coloredText,
+                    0
+                )
+            }
         }
     }
 

@@ -6,7 +6,11 @@ import net.minecraft.util.Identifier
 import kotlin.jvm.optionals.getOrNull
 
 class BiomeIdentifier(id: String): TypedIdentifier(id) {
-    companion object: TypedIdentifierCompanion<BiomeIdentifier>() {
+    override fun toPrefixedTranslationKey(): String {
+        return identifier.toTranslationKey("biome")
+    }
+
+    companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             return MinecraftClient
                 .getInstance().world?.registryManager
