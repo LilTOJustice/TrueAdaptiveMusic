@@ -12,7 +12,7 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
         val playerDimension = client.player?.world?.dimensionEntry ?: return false
 
         return dimensions.isEmpty() ||
-                dimensions.any { dimension -> playerDimension.matchesId(dimension) }
+                dimensions.any { dimension -> playerDimension.matchesId(dimension.identifier) }
     }
 
     override fun toJson(): JsonObject {
@@ -25,8 +25,8 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     }
 
     companion object: MusicPredicateCompanion<DimensionPredicate> {
-        override val descriptions: Map<String, String>
-        get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
             "dimensions" to "Select all dimensions the music should play for. If none, any dimension will trigger " +
                     "the music."
         )
@@ -36,7 +36,8 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
                 if (JsonHelper.hasArray(json, "id"))
                     JsonHelper.getArray(json, "id").map { element -> DimensionIdentifier(element.asString) }
                 else
-                    listOf(DimensionIdentifier(JsonHelper.getString(json, "id"))))
+                    listOf(DimensionIdentifier(JsonHelper.getString(json, "id")))
+            )
         }
     }
 }

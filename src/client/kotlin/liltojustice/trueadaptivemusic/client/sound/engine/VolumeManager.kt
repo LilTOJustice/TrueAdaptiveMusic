@@ -1,6 +1,5 @@
-package liltojustice.trueadaptivemusic.client.sound
+package liltojustice.trueadaptivemusic.client.sound.engine
 
-import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import kotlin.math.sin
 

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.IconButtonWidget
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -15,25 +16,25 @@ import kotlin.io.path.*
 
 @Environment(EnvType.CLIENT)
 class ConfirmFFmpegInstallScreen(private val parent: Screen)
-    : Screen(Text.translatableWithFallback("trueadaptivemusic.ffmpeg_install", "Install FFmpeg?")) {
+    : Screen(
+    Text.translatableWithFallback(
+        "trueadaptivemusic.ffmpeg_install", "Install FFmpeg").append("?")
+    ) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = IconButtonWidget.Builder(
-            Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"), CHECKMARK, {
+        val acceptButtonWidget = IconButtonWidget.Builder(ScreenTexts.PROCEED, CHECKMARK) {
                 Util.getOperatingSystem().open(Constants.FFMPEG_DOWNLOAD_LINK)
                 close()
-            })
+            }
             .iconSize(9, 8)
             .textureSize(9, 8)
             .xyOffset(16, 6)
             .build()
-        acceptButtonWidget.width = 60
+        val backButtonWidget = ButtonWidget.Builder(ScreenTexts.BACK) { close() }.build()
+        acceptButtonWidget.width = textRenderer.getWidth(acceptButtonWidget.message) + 20
+        backButtonWidget.width = textRenderer.getWidth(backButtonWidget.message) + 10
         acceptButtonWidget.x = width / 2 - 32 - acceptButtonWidget.width / 2
         acceptButtonWidget.y = height / 2 + textRenderer.fontHeight * 2 + 10
-        val backButtonWidget = ButtonWidget.Builder(
-            Text.translatableWithFallback("trueadaptivemusic.go_back", "Go Back")) { close() }
-                .build()
-        backButtonWidget.width = 60
         backButtonWidget.x = width / 2 + 32 - backButtonWidget.width / 2
         backButtonWidget.y = height / 2 + textRenderer.fontHeight * 2 + 10
 

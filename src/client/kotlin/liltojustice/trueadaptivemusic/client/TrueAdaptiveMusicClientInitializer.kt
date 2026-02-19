@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.EmptyClickableWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
 import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
@@ -47,7 +48,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
-import liltojustice.trueadaptivemusic.text.prettify
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -120,7 +121,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.tooltip = Tooltip.of(tooltipText)
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
+
             result
         }
 
@@ -154,7 +158,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.tooltip = Tooltip.of(tooltipText)
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -184,7 +190,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 outArgs[arg.index]?.toString() ?: ""
             )
-            result.tooltip = Tooltip.of(tooltipText)
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -200,7 +208,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 },
                 checked = outArgs[arg.index] as? Boolean ?: false
             )
-            result.tooltip = Tooltip.of(tooltipText)
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
             result
         }
 
@@ -219,7 +229,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             outArgs[arg.index] = enum
                             onChange()
                         },
-                        getDisplay = { it.toString().prettify() },
+                        getDisplay = {
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.enum.$it", it.toString().prettify()).string },
                         title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
@@ -243,7 +255,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         onChange()
                     },
                     prompt,
-                    notSelectedPlaceholder = "Select values",
+                    notSelectedPlaceholder = Text.translatableWithFallback(
+                        "trueadaptivemusic.enum_placeholder", "Select values").string,
                     alreadySelected = (outArgs[arg.index] as? List<*>)?.mapNotNull { enum -> enum as? Enum<*> }
                         ?: listOf(),
                     tooltipText = tooltipText
@@ -258,8 +271,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(arg.type)
                     .map { id ->
-                        TypedIdentifier.initializeFromIdString(arg.type, id.toString()) to
-                                (if (prettify) id.toString().prettify() else id.toString())
+                        val key = TypedIdentifier.initializeFromIdString(arg.type, id.toString())
+                        key to (if (prettify) key.prettify() else id.toString())
                     }
                     .sortedBy { pair -> pair.second }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
@@ -289,13 +302,14 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 MultiSelectDropdownWidget(
                     options,
                     0,
-                    { if (prettify) it.toString().prettify() else it.toString() },
+                    { if (prettify) it.prettify() else it.toString() },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
                     },
                     prompt,
-                    notSelectedPlaceholder = "Select identifiers",
+                    notSelectedPlaceholder = Text.translatableWithFallback(
+                        "trueadaptivemusic.identifier_placeholder", "Select identifiers").string,
                     alreadySelected =
                         (outArgs[arg.index] as? List<*>)?.mapNotNull { it as? TypedIdentifier }
                             ?: listOf(),
@@ -303,12 +317,30 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 )
             }
         )
+
+        TAMClient.registerInputWidget(
+            typeOf<TrueAdaptiveMusicOptions.LUFBoost>(),
+            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+                val result = SliderWidget(
+                    0,
+                    TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),
+                    (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
+                    prompt
+                ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
+                tooltipText?.let {
+                    result.setTooltip(Tooltip.of(it))
+                }
+                result
+            }
+        )
     }
 
     companion object {
         private val DYNAMIC_REGISTRY_TEXT =
-            Text.literal(
-                "No options available to add due to a dynamic registry requirement. Try joining a world first.")
+            Text.translatableWithFallback(
+                "trueadaptivemusic.dynamic_registry_warning",
+                "No options available to add due to a dynamic registry requirement. Try joining a world first."
+            )
 
         private fun isEnumList(type: KType): Boolean {
             return type.isSubtypeOf(typeOf<List<*>>())
