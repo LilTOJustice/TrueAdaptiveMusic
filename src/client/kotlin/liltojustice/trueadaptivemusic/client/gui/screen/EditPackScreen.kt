@@ -53,12 +53,14 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     override fun init() {
         initPack()
 
+        val saveButtonWidgetWidth = textRenderer.getWidth(SAVE_BUTTON_TEXT) + 20
+
         saveButtonWidget = IconButtonWidget.Builder(SAVE_BUTTON_TEXT, CHECKMARK) {
             exportAndClose()
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
-            .xyOffset(32, 6)
+            .xyOffset((saveButtonWidgetWidth - 20) / 2, 6)
             .build()
 
         closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
@@ -118,7 +120,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         addDrawableChild(eventViewWidget)
         addDrawableChild(metaButtonWidget)
 
-        saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
+        saveButtonWidget.width = saveButtonWidgetWidth
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
         closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
         closeButtonWidget.tooltip = Tooltip.of(
