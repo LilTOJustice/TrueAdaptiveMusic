@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic
+package liltojustice.trueadaptivemusic.client.sound.stream
 
 import java.io.InputStream
 import java.util.zip.ZipEntry

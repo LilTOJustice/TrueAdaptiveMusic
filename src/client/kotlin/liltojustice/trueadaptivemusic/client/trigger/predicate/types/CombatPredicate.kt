@@ -109,8 +109,8 @@ class CombatPredicate(
         private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI
 
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "blacklist" to "Whether the list of mob entities attacking should not (if checked) or should " +
                         "(if not checked) make the music play.",
                 "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
@@ -140,7 +140,9 @@ class CombatPredicate(
                     displacement,
                     Vec3d(mobEntity.boundingBox.lengthX,
                         mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ))
+                        mobEntity.boundingBox.lengthZ
+                    )
+            )
             return (mobEntity.isAttacking && closeEnough) ||
                     ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true) ||
                     ((mobEntity is PhantomEntity) && closeEnough)

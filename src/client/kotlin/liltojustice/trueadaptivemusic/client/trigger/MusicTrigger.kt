@@ -5,7 +5,6 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
 import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.text.Text
@@ -66,10 +65,10 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         val displayName: String?
             get() = null
 
-        val displayNames: Map<String, String>
+        val argDisplayNames: Map<String, String>
             get() = mapOf()
 
-        val descriptions: Map<String, String>
+        val argDescriptions: Map<String, String>
             get() = mapOf()
 
         fun getDisplayName(triggerName: String): Text
@@ -106,16 +105,6 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
                 get() = mapOf()
 
             fun default(): Parameters
-
-            fun getParamDisplayName(paramName: String): Text? {
-                return translatableWithFallbackOrNull(
-                    "trueadaptivemusic:trigger_param_${paramName}_display", displayNames[paramName])
-            }
-
-            fun getParamDescription(paramName: String): Text? {
-                return Text.translatableWithFallback(
-                    "trueadaptivemusic:trigger_param_${paramName}_description", descriptions[paramName])
-            }
         }
     }
 }
