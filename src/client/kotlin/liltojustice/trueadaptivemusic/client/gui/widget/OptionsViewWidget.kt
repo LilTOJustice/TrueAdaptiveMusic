@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import net.minecraft.client.gui.DrawContext
@@ -13,11 +13,6 @@ class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, he
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
-    }
-
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        super.mouseClicked(mouseX, mouseY, button)
-        return false
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

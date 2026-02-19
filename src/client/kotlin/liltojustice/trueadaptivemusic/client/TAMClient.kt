@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
@@ -59,7 +58,7 @@ object TAMClient {
     var musicPack: MusicPack?
         get() = musicManager?.musicPack
         set(value) {
-            minecraftClient.soundManager.stopAll()
+            minecraftClient.soundManager.soundSystem.reloadSounds()
             hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.selectMusicPack(value)
 
