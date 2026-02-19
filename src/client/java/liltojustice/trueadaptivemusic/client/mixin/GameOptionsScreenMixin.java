@@ -20,7 +20,7 @@ public class GameOptionsScreenMixin {
         }
 
         var trueAdaptiveMusicButton = new SimpleOption<>(
-                "True Adaptive Music",
+                "trueadaptivemusic",
                 SimpleOption.emptyTooltip(),
                 (optionText, value) -> optionText,
                 new TrueAdaptiveMusicOptionCallback<>(MinecraftClient.getInstance()),
