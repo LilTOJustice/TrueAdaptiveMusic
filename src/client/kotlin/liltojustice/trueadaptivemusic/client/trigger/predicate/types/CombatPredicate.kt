@@ -138,9 +138,9 @@ class CombatPredicate(
             mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
             val closeEnough = closeEnough(
                     displacement,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ
+                    Vec3d(mobEntity.boundingBox.xLength,
+                        mobEntity.boundingBox.yLength,
+                        mobEntity.boundingBox.zLength
                     )
             )
             return (mobEntity.isAttacking && closeEnough) ||

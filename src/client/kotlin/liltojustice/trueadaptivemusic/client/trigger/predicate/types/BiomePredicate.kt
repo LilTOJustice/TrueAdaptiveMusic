@@ -12,7 +12,7 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
         val player = client.player ?: return false
         val playerBiome = client.world?.getBiome(player.blockPos) ?: return false
 
-        return biomes.isEmpty() || biomes.any { biome -> playerBiome.matchesId(biome) }
+        return biomes.isEmpty() || biomes.any { biome -> playerBiome.matchesId(biome.identifier) }
     }
 
     override fun toJson(): JsonObject {

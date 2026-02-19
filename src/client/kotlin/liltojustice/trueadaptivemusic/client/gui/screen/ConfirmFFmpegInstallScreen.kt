@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
+import net.minecraft.client.gui.widget.IconButtonWidget
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -22,12 +22,10 @@ class ConfirmFFmpegInstallScreen(private val parent: Screen)
     ) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = TextIconButtonWidget.Builder(
-            ScreenTexts.PROCEED,
-            {
+        val acceptButtonWidget = IconButtonWidget.Builder(ScreenTexts.PROCEED, CHECKMARK) {
                 Util.getOperatingSystem().open(Constants.FFMPEG_DOWNLOAD_LINK)
                 close()
-            })
+            }
             .iconSize(9, 8)
             .textureSize(9, 8)
             .xyOffset(16, 6)

@@ -41,7 +41,8 @@ class StructureSetPredicate internal constructor(
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return (structureSets.takeIf { structureSets.isNotEmpty() } ?: StructureSetIdentifier.getRegistryIds())
+        return (structureSets.takeIf { structureSets.isNotEmpty() }?.map { structureSet -> structureSet.identifier }
+            ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
                     structureAccessor.registryManager

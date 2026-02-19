@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.screen.ScreenTexts
@@ -44,7 +43,7 @@ abstract class ContainerWidget(
     override fun playDownSound(soundManager: SoundManager?) {
     }
 
-    override fun setHeight(height: Int) {
+    fun setHeight(height: Int) {
         this.height = height
     }
 
@@ -111,34 +110,34 @@ abstract class ContainerWidget(
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.mouseClicked(click, doubled)) {
+            if (child.widget.mouseClicked(mouseX, mouseY, button)) {
                 focusedWidget = child.widget
-                return result
+                return false
             }
         }
 
         focusedWidget = null
         
-        return result
+        return false
     }
 
-    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
-        focusedWidget?.mouseDragged(click, offsetX, offsetY)
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+        focusedWidget?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
 
         return false
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (!visible || !active || !this.isValidClickButton(button)) {
             return false
         }
 
-        focusedWidget?.mouseReleased(click)
+        focusedWidget?.mouseReleased(mouseX, mouseY, button)
 
         return false
     }
 
-    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
         if (!visible || !active) {
             return false
         }

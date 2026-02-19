@@ -12,4 +12,8 @@ Fixes/Changes:
 - Mod menu options now points to the main True Adaptive Music screen, instead of the options screen
 - Mono audio files will now properly play in your ears rather than at the world origin
 
+Known Issues:
+- 1.20.8 and below
+  - Music/ambience loudness sliders don't slide
+
 [1.7](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/8) is starting development soon

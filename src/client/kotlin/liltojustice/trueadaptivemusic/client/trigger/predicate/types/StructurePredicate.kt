@@ -22,7 +22,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return (structures.takeIf { structures.isNotEmpty() } ?: StructureIdentifier.getRegistryIds())
+        return (structures.takeIf { structures.isNotEmpty() }?.map { structure -> structure.identifier }
+            ?: StructureIdentifier.getRegistryIds())
             .any { structureId ->
                 val structure: Structure =
                     structureAccessor.registryManager.get(RegistryKeys.STRUCTURE).get(structureId) ?: return false
