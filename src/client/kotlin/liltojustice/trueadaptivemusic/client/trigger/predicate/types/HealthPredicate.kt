@@ -31,8 +31,8 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     }
 
     companion object: MusicPredicateCompanion<HealthPredicate> {
-        override val descriptions: Map<String, String>
-            get() = super.descriptions + mapOf(
+        override val argDescriptions: Map<String, String>
+            get() = super.argDescriptions + mapOf(
                 "healthType" to "Whether the health setting is a value or percentage.",
                 "direction" to "Whether the music should play above or below the health setting.",
                 "health" to "Threshold at which the predicate should switch."
@@ -42,7 +42,8 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
             return HealthPredicate(
                 HealthType.valueOf(JsonHelper.getString(json, "healthType")),
                 Direction.valueOf(JsonHelper.getString(json, "direction")),
-                JsonHelper.getInt(json, "health"))
+                JsonHelper.getInt(json, "health")
+            )
         }
     }
 
