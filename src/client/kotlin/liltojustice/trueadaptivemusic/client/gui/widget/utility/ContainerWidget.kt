@@ -3,7 +3,11 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.sound.SoundManager
+import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.function.Consumer
@@ -28,12 +32,16 @@ abstract class ContainerWidget(
     private val renderChildren = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
     protected val textRenderer: TextRenderer = client.textRenderer
-    protected val screen = client.currentScreen
+    protected val screen: Screen? = client.currentScreen
     private var scrollPosition = 0
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
+    private var focusedWidget: ClickableWidget? = null
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
+    }
+
+    override fun playDownSound(soundManager: SoundManager?) {
     }
 
     override fun setHeight(height: Int) {
@@ -100,13 +108,29 @@ abstract class ContainerWidget(
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.isMouseOver(mouseX, mouseY)) {
-                val clicked = child.widget.mouseClicked(mouseX, mouseY, button)
-                if (clicked) {
-                    screen?.focused = screen.focused ?: child.widget
-                }
+            if (child.widget.mouseClicked(click, doubled)) {
+                focusedWidget = child.widget
+                return result
             }
         }
+
+        focusedWidget = null
+        
+        return result
+    }
+
+    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
+        focusedWidget?.mouseDragged(click, offsetX, offsetY)
+
+        return false
+    }
+
+    override fun mouseReleased(click: Click): Boolean {
+        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+            return false
+        }
+
+        focusedWidget?.mouseReleased(click)
 
         return false
     }
@@ -317,7 +341,7 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget("Back", onClick = { it() }) }
+            return backButtonCallback.let { ClickableTextWidget(ScreenTexts.BACK.string, onClick = { it() }) }
         }
     }
 
