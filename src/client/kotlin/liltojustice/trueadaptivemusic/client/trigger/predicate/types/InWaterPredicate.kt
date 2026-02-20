@@ -7,7 +7,8 @@ import net.minecraft.client.MinecraftClient
 class InWaterPredicate: MusicPredicate() {
     private var tickBuffer = 0
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val result = client.player?.isTouchingWater ?: false
         if (result) {
             tickBuffer = GRACE_PERIOD_TICKS

@@ -8,7 +8,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
 class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifier>): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerStatusEffects = client.player?.statusEffects ?: return false
 
         return statusEffects.any { statusEffect ->

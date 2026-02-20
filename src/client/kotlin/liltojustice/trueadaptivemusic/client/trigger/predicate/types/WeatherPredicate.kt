@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
 class WeatherPredicate(private val weather: Weather): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val properties = client.world?.levelProperties ?: return false
 
         return when(weather) {

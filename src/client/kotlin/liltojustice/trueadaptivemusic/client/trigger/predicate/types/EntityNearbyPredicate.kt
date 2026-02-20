@@ -10,7 +10,8 @@ import net.minecraft.util.JsonHelper
 class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, private val blockRadius: UInt): MusicPredicate() {
     private val entityTranslationKeys = entities.map { entity -> entity.toTranslationKey("entity") }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerEntity = client.player ?: return false
         val world = client.world ?: return false
         val validEntities =

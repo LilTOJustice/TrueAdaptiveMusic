@@ -7,7 +7,8 @@ import net.minecraft.util.JsonHelper
 import net.minecraft.world.GameMode
 
 class GameModePredicate(private val gameMode: GameMode): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val currentGameMode = client.networkHandler?.getPlayerListEntry(client.player?.uuid ?: return false)?.gameMode
 
         return currentGameMode == gameMode

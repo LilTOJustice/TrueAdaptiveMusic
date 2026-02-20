@@ -7,7 +7,8 @@ import net.minecraft.util.JsonHelper
 import net.minecraft.world.attribute.EnvironmentAttributes
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val world = client.world ?: return false
         val currentPhase = world.environmentAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL)
         val time = world.timeOfDay % 24000

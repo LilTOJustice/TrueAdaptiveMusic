@@ -37,7 +37,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         return super.getTickRate() * 2
     }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val serverWorld = client.server?.worlds?.firstOrNull { world ->
             world.registryKey == client.world?.registryKey } ?: return false
         val x: Double = client.player?.x ?: return false

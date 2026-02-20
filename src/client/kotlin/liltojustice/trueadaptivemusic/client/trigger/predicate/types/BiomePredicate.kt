@@ -8,7 +8,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
 class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val player = client.player ?: return false
         val playerBiome = client.world?.getBiome(player.blockPos) ?: return false
 

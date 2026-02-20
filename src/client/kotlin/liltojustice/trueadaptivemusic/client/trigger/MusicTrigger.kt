@@ -10,7 +10,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.text.Text
 import kotlin.reflect.full.primaryConstructor
 
-abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
+abstract class MusicTrigger<TParameters: MusicTrigger.Parameters>: java.io.Serializable {
     var music: List<PlayableSound> = emptyList()
     lateinit var parameters: TParameters
 

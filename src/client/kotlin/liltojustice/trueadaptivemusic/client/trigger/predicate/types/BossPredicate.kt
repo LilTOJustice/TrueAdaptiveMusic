@@ -9,7 +9,8 @@ import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.JsonHelper
 
 class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
             val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
             bosses.isEmpty() || bosses.any { boss -> bossName == boss.toTranslationKey("entity") }

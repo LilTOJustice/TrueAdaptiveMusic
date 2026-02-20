@@ -10,7 +10,6 @@ import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
-import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
 import kotlin.reflect.full.declaredMembers
 
@@ -23,7 +22,7 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     private var ticksSinceResult = getFixedTickRate()
     var ambience = listOf<PlayableSound>()
 
-    protected abstract fun test(client: MinecraftClient): Boolean
+    protected abstract fun test(): Boolean
 
     final override fun getTypeName(): String {
         return if (this is ErrorPredicate)
@@ -56,12 +55,12 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
         return result
     }
 
-    fun testPredicate(client: MinecraftClient): Boolean {
+    fun testPredicate(): Boolean {
         val tickRate = getFixedTickRate()
         if (ticksSinceResult++ == tickRate) {
             ticksSinceResult = 1
 
-            lastResult = test(client)
+            lastResult = test()
         }
 
         return lastResult

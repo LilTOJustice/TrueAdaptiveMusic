@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
 class BossHealthPredicate(private val direction: Direction, private val healthPercentage: Int): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         return client.inGameHud.bossBarHud.bossBars.any { bossBar ->
             healthTest((healthPercentage / 100F), direction, bossBar.value.percent) }
     }

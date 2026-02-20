@@ -105,7 +105,7 @@ class MusicPredicateTree private constructor(
             music: Set<PlayableSound> = emptySet(),
             ambience: Set<PlayableSound> = emptySet()): Result {
             try {
-                if (!predicate.testPredicate(client)) {
+                if (!predicate.testPredicate()) {
                     return Result(
                         this, emptyList(), emptyMap(), emptyList(), emptyList())
                 }

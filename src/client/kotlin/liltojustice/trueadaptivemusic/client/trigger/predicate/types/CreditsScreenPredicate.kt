@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.CreditsScreen
 
 class CreditsScreenPredicate: MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         return client.currentScreen is CreditsScreen
     }
 

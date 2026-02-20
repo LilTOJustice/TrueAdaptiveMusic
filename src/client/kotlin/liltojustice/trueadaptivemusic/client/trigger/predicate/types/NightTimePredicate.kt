@@ -5,7 +5,8 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
 class NightTimePredicate: MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val world = client.world ?: return false
         val time = world.timeOfDay % 24000
 

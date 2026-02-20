@@ -7,7 +7,8 @@ import net.minecraft.client.MinecraftClient
 class InLavaPredicate: MusicPredicate() {
     private var tickBuffer = 0
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val result = client.player?.isInLava ?: false
         if (result) {
             tickBuffer = GRACE_PERIOD_TICKS

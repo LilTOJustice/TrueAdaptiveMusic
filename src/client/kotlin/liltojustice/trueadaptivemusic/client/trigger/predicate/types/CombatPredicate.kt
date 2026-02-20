@@ -28,7 +28,8 @@ class CombatPredicate(
     private var isAggro: Boolean = false
     private val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerEntity = client.player ?: return false
         val world = client.world ?: return false
         val verticalFov = client.options.fov.value.toDouble() / DEG_PER_RAD

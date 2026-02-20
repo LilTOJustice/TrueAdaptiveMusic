@@ -7,7 +7,8 @@ import net.minecraft.util.JsonHelper
 import net.minecraft.world.GameMode
 
 class HungerPredicate(private val direction: Direction, private val hungerPercentage: Int): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         if (client.player?.gameMode in listOf(GameMode.CREATIVE, GameMode.SPECTATOR)) {
             return false
         }

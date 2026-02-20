@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.DeathScreen
 
 class DeathScreenPredicate(): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         return client.currentScreen is DeathScreen
     }
 

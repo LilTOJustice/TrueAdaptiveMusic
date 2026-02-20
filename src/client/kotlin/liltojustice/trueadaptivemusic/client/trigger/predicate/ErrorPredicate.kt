@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
-import net.minecraft.client.MinecraftClient
 
 class ErrorPredicate(private val actualJson: JsonObject, val reason: String): MusicPredicate() {
     val shortenedJson: JsonObject = run {
@@ -15,7 +14,7 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
         shortened
     }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
         return false
     }
 

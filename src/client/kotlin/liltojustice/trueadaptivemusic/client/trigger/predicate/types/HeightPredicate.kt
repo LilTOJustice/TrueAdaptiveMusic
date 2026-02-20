@@ -6,7 +6,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
 
 class HeightPredicate(private val above: Boolean, private val y: Int): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerHeight = client.player?.blockPos?.y ?: return false
 
         return if (above) playerHeight >= y else playerHeight <= y
