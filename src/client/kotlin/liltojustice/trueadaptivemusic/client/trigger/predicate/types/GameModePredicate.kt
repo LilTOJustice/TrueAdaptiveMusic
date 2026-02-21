@@ -12,7 +12,7 @@ class GameModePredicate(private val gameMode: GameMode): MusicPredicate() {
         return currentGameMode == gameMode
     }
 
-    companion object: MusicPredicateCompanion<GameModePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "gameMode" to "Which game mode to be in for the music to play."

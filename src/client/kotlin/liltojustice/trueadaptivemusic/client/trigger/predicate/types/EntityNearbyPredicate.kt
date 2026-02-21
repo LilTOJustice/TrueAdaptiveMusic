@@ -27,7 +27,7 @@ class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, pr
         return super.getTickRate() * 2
     }
 
-    companion object: MusicPredicateCompanion<EntityNearbyPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "entities" to "List of entities the music should play for. If none, any entity will trigger the music.",

@@ -11,7 +11,7 @@ class HeightPredicate(private val above: Boolean, private val y: Int): MusicPred
         return if (above) playerHeight >= y else playerHeight <= y
     }
 
-    companion object: MusicPredicateCompanion<HeightPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "above" to "Whether the music should play when the player is above or below the y value.",

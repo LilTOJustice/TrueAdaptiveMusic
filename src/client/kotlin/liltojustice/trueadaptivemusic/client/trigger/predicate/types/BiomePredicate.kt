@@ -13,7 +13,7 @@ class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate(
         return biomes.isEmpty() || biomes.any { biome -> playerBiome.matchesId(biome.id) }
     }
 
-    companion object: MusicPredicateCompanion<BiomePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "biomes" to "Select all biomes the music should play for. If none, any biome will trigger the music."

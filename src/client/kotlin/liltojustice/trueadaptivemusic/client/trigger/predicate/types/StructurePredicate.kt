@@ -45,7 +45,7 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         return fullStructureTest(serverWorld, x, y, z)
     }
 
-    companion object: MusicPredicateCompanion<StructurePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "structures" to "Which structures the player must be in for the music to play. If none, any " +

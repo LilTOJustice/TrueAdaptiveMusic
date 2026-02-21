@@ -19,7 +19,7 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
         return super.getTickRate() * 3
     }
 
-    companion object: MusicPredicateCompanion<WeatherPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "weather" to "Which weather the music should play for."

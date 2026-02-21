@@ -14,7 +14,7 @@ class BossHealthPredicate(private val direction: Direction, private val healthPe
         return super.getTickRate() * 4
     }
 
-    companion object: MusicPredicateCompanion<BossHealthPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "direction" to "Whether the music should play above or below the given health percentage.",

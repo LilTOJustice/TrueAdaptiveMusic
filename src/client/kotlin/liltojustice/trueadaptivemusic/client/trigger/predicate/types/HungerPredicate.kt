@@ -24,7 +24,7 @@ class HungerPredicate(private val direction: Direction, private val hungerPercen
         return super.getTickRate() * 4
     }
 
-    companion object: MusicPredicateCompanion<HungerPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "direction" to "Whether the music should play when the player's hunger percentage is above or " +

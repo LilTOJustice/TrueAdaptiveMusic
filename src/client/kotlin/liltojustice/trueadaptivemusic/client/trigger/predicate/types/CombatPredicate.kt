@@ -93,7 +93,7 @@ class CombatPredicate(
             ?: true
     }
 
-    companion object: MusicPredicateCompanion<CombatPredicate> {
+    companion object: MusicPredicateCompanion {
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI

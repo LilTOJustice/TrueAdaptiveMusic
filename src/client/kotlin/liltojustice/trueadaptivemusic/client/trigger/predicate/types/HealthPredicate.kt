@@ -20,7 +20,7 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
         }
     }
 
-    companion object: MusicPredicateCompanion<HealthPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "healthType" to "Whether the health setting is a value or percentage.",

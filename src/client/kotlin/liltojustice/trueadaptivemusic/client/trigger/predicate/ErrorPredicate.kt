@@ -21,7 +21,7 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
         return actualJson
     }
 
-    companion object: MusicPredicateCompanion<ErrorPredicate> {
+    companion object: MusicPredicateCompanion {
         const val NAME = "error_predicate"
     }
 }
