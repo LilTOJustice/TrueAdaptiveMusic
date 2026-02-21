@@ -89,10 +89,10 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
         }
     }
 
-    companion object: MusicPredicateCompanion<MusicPredicate> {
+    companion object: MusicPredicateCompanion {
     }
 
-    interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion where TSelf: MusicPredicate {
+    interface MusicPredicateCompanion: MusicTriggerCompanion {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",

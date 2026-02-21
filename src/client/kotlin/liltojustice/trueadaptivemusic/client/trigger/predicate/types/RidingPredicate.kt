@@ -12,7 +12,7 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
         return entities.isEmpty() || entities.any { entity -> entity.toTranslationKey("entity") == vehicleKey }
     }
 
-    companion object: MusicPredicateCompanion<RidingPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "entities" to "Which entities to ride for the music to play. If none, any entity will trigger the " +

@@ -21,7 +21,7 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
         return super.getTickRate() * 10
     }
 
-    companion object: MusicPredicateCompanion<MoonPhasePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "moonPhase" to "What phase of the moon the music should play for."

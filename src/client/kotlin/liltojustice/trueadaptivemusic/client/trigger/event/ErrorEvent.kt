@@ -14,7 +14,7 @@ class ErrorEvent(private val actualJson: JsonObject, val reason: String): MusicE
         return actualJson
     }
 
-    companion object: MusicEventCompanion<ErrorEvent> {
+    companion object: MusicEventCompanion {
         const val NAME = "error_predicate"
     }
 }

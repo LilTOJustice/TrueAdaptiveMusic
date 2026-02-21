@@ -27,7 +27,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             TAMClient.eventRegistry[this::class]
     }
 
-    companion object: MusicEventCompanion<MusicEvent> {
+    companion object: MusicEventCompanion {
     }
 
     data class Parameters(var isPersistent: Boolean = false): MusicTrigger.Parameters() {
@@ -56,7 +56,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
         }
     }
 
-    interface MusicEventCompanion<TSelf>: MusicTriggerCompanion where TSelf: MusicEvent {
+    interface MusicEventCompanion: MusicTriggerCompanion {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",

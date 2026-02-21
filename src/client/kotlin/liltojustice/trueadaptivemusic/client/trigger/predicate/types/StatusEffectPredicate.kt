@@ -14,7 +14,7 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
                 playerStatusEffect.effectType.matchesId(statusEffect.id) } }
     }
 
-    companion object: MusicPredicateCompanion<StatusEffectPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "statusEffects" to "Which status effects the player needs to have for the music to play."
