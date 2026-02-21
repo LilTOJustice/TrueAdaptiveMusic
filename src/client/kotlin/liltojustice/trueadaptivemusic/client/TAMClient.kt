@@ -136,7 +136,7 @@ object TAMClient {
     }
 
     private fun initialize(client: MinecraftClient) {
-        if (initialized) {
+        if (initialized || !client.soundManager.soundSystem.started) {
             return
         }
 

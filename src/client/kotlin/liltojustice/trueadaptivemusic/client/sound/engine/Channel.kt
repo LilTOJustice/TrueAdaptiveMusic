@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.client.sound.SoundEngine
 import net.minecraft.client.sound.Source
 import net.minecraft.util.math.Vec3d
 import java.util.concurrent.locks.LockSupport
@@ -25,7 +24,6 @@ class Channel private constructor(
 
         isStopped = true
         soundEngine.release(source)
-        source.close()
         thread.interrupt()
 
         try {
@@ -84,7 +82,7 @@ class Channel private constructor(
 
     companion object {
         fun new(soundEngine: SoundEngine, soundInstance: TAMSoundInstance, startingVolume: Float): Channel? {
-            val source = soundEngine.createSource(SoundEngine.RunMode.STREAMING) ?: return null
+            val source = soundEngine.createSource() ?: return null
 
             return Channel(soundEngine, source, soundInstance, startingVolume)
         }
