@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
@@ -42,7 +43,7 @@ class EventViewWidget(
     private var eventParams: MutableList<Any?> = requiredEventParams.map { null }.toMutableList()
     private var selectedEvent: MusicEvent? = null
     private var selectedMusicPaths = mutableListOf<String>()
-    private var assets = musicPack.getEditPackAssets()
+    private var soundLibrary = musicPack.getEditPackSoundLibrary()
 
     init {
         addBackButton {
@@ -136,7 +137,7 @@ class EventViewWidget(
                     Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice", "Music Choice").string,
                     {
-                        musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
+                        musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
                                 Registries.SOUND_EVENT.ids
                                     .map { id -> id.toString() }
@@ -148,7 +149,7 @@ class EventViewWidget(
                         "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) })
+                        TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                     },
                     tooltipText = Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice.description",
@@ -262,12 +263,11 @@ class EventViewWidget(
             return
         }
 
-        assets = musicPack.getEditPackAssets()
+        soundLibrary = musicPack.getEditPackSoundLibrary()
         val newEvent = TAMClient.eventFactory
             .fromArgs(
                 selectedEventTypeName,
-                selectedMusicPaths
-                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
+                selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
                 eventParams.filterNotNull(),
                 eventArgs.filterNotNull())
         selectedEvent = newEvent

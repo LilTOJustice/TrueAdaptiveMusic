@@ -1,9 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
 import net.minecraft.world.GameMode
 
 class HungerPredicate(private val direction: Direction, private val hungerPercentage: Int): MusicPredicate() {
@@ -26,14 +24,6 @@ class HungerPredicate(private val direction: Direction, private val hungerPercen
         return super.getTickRate() * 4
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty("direction", direction.name)
-        result.addProperty("hungerPercentage", hungerPercentage)
-
-        return result
-    }
-
     companion object: MusicPredicateCompanion<HungerPredicate> {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
@@ -41,13 +31,6 @@ class HungerPredicate(private val direction: Direction, private val hungerPercen
                         "below the given percentage.",
                 "hungerPercentage" to "Threshold at which the predicate should switch."
             )
-
-        override fun fromJson(json: JsonObject): HungerPredicate {
-            return HungerPredicate(
-                Direction.valueOf(JsonHelper.getString(json, "direction")),
-                JsonHelper.getInt(json, "hungerPercentage")
-            )
-        }
     }
 
     enum class Direction {

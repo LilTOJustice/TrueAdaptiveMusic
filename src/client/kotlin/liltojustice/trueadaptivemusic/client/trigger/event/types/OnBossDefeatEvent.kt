@@ -1,11 +1,8 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import net.minecraft.util.Identifier
-import net.minecraft.util.JsonHelper
 
 class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEvent() {
     override fun validate(vararg eventArgs: Any?): Boolean {
@@ -16,27 +13,10 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
                     bossId.namespace == it.namespace && bossId.path.split(".").lastOrNull() == it.path }
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        val bossesArray = JsonArray()
-        bosses.forEach { bossesArray.add(it.toString()) }
-        result.add("bosses", bossesArray)
-
-        return result
-    }
-
     companion object: MusicEventCompanion<OnBossDefeatEvent> {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "bosses" to "Which entities the music should play for when their boss bar hits zero."
             )
-
-        override fun fromJson(json: JsonObject): MusicEvent {
-            return OnBossDefeatEvent(
-                JsonHelper
-                    .getArray(json, "bosses")
-                    .map { element -> EntityTypeIdentifier(element.asString) }
-            )
-        }
     }
 }

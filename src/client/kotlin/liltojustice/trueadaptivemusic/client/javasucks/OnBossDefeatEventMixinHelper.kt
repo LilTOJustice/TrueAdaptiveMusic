@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEve
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.LivingEntity
 import net.minecraft.text.TranslatableTextContent
+import net.minecraft.util.Identifier
 
 object OnBossDefeatEventMixinHelper {
     @JvmStatic
@@ -15,7 +16,7 @@ object OnBossDefeatEventMixinHelper {
         {
             MusicEvent.invokeMusicEvent(
                 TAMClient.eventRegistry[OnBossDefeatEvent::class],
-                EntityTypeIdentifier(entity.type.toString())
+                EntityTypeIdentifier(Identifier.of(entity.type.toString()))
             )
         }
     }

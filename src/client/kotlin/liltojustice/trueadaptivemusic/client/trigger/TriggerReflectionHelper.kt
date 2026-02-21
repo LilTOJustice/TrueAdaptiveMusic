@@ -5,10 +5,10 @@ import kotlin.reflect.full.companionObjectInstance
 
 object TriggerReflectionHelper {
     fun getMusicTriggerArgDisplayNames(clazz: KClass<out MusicTrigger<*>>): Map<String, String> {
-        return (clazz.companionObjectInstance as? MusicTrigger.MusicTriggerCompanion<*>)?.argDisplayNames ?: mapOf()
+        return (clazz.companionObjectInstance as? MusicTrigger.MusicTriggerCompanion)?.argDisplayNames ?: mapOf()
     }
 
     fun getMusicTriggerArgDescriptions(clazz: KClass<out MusicTrigger<*>>): Map<String, String> {
-        return (clazz.companionObjectInstance as? MusicTrigger.MusicTriggerCompanion<*>)?.argDescriptions ?: mapOf()
+        return (clazz.companionObjectInstance as? MusicTrigger.MusicTriggerCompanion)?.argDescriptions ?: mapOf()
     }
 }

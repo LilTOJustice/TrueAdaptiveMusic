@@ -4,8 +4,8 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.MinecraftClient
@@ -13,8 +13,7 @@ import net.minecraft.util.JsonHelper
 
 typealias NodeVisitor = (node: MusicPredicateTree.Node, path: List<String>) -> Unit
 
-class MusicPredicateTree private constructor(
-    json: JsonObject? = null, soundLibrary: Map<String, PlayableSoundFile> = mapOf()) {
+class MusicPredicateTree private constructor(json: JsonObject? = null, soundLibrary: SoundLibrary = mapOf()) {
     private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
 
     fun toJson(): JsonObject {
@@ -28,7 +27,8 @@ class MusicPredicateTree private constructor(
             result.node.predicate.parameters,
             result.music,
             result.ambience,
-            result.events.values.toList())
+            result.events.values.toList()
+        )
     }
 
     private fun traverseRecursive(
@@ -61,7 +61,7 @@ class MusicPredicateTree private constructor(
             return MusicPredicateTree()
         }
 
-        fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): MusicPredicateTree {
+        fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): MusicPredicateTree {
             try {
                 return MusicPredicateTree(json, soundLibrary)
             } catch (e: Exception) {
@@ -87,10 +87,10 @@ class MusicPredicateTree private constructor(
         }
 
         fun toJson(): JsonObject {
-            val result = predicate.toJsonFull()
+            val result = predicate.toJson()
             val jsonEvents = JsonArray(events.size)
-            events.forEach { event -> jsonEvents.add(event.toJsonFull()) }
             val jsonChildren = JsonArray(children.size)
+            events.forEach { event -> jsonEvents.add(event.toJson()) }
             children.forEach { child -> jsonChildren.add(child.toJson()) }
             result.add("events", jsonEvents)
             result.add("children", jsonChildren)
@@ -122,7 +122,8 @@ class MusicPredicateTree private constructor(
             catch (e: Exception) {
                 Logger.logError(
                     "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: $e",
-                    true)
+                    true
+                )
 
                 return Result(
                     this, emptyList(), emptyMap(), emptyList(), emptyList())
@@ -221,7 +222,7 @@ class MusicPredicateTree private constructor(
                 return Node(RootPredicate(), listOf())
             }
 
-            fun fromJson(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>): Node {
+            fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): Node {
                 return Node(
                     TAMClient.predicateFactory.fromJson(json, soundLibrary),
                     (json.getAsJsonArray("events") ?: JsonArray())
@@ -230,7 +231,7 @@ class MusicPredicateTree private constructor(
                 )
             }
 
-            private fun parseChildren(json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
+            private fun parseChildren(json: JsonObject, soundLibrary: SoundLibrary)
                     : MutableList<Node> {
                 return if (JsonHelper.hasArray(json, "children"))
                     JsonHelper.getArray(json, "children")

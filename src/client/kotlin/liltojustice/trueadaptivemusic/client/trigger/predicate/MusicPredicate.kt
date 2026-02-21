@@ -1,9 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
@@ -20,6 +18,8 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
 
     private var lastResult = false
     private var ticksSinceResult = getFixedTickRate()
+
+    @Serialize
     var ambience = listOf<PlayableSound>()
 
     protected abstract fun test(): Boolean
@@ -29,30 +29,6 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
             ErrorPredicate.NAME
         else
             TAMClient.predicateRegistry[this::class]
-    }
-
-    final override fun initParams(json: JsonObject) {
-        val gson = Gson()
-        val default = Parameters.default()
-        val parametersJson = json.get("parameters").asJsonObject
-        default.getTriggerParams().forEach {
-            if (!parametersJson.has(it.name)) {
-                val jsonRep = gson.toJsonTree(it.value)
-                parametersJson.add(
-                    it.name,
-                    if (jsonRep.isJsonObject) jsonRep.asJsonObject.getAsJsonPrimitive("data") else jsonRep.asJsonPrimitive)
-            }
-        }
-        parameters = gson.fromJson<Parameters>(parametersJson, Parameters::class.java)
-    }
-
-    final override fun toJsonFull(): JsonObject {
-        val result = super.toJsonFull()
-        val jsonMusicPath = JsonArray(music.size)
-        ambience.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
-        result.add("ambiencePath", jsonMusicPath)
-
-        return result
     }
 
     fun testPredicate(): Boolean {
@@ -116,7 +92,7 @@ abstract class MusicPredicate: MusicTrigger<MusicPredicate.Parameters>() {
     companion object: MusicPredicateCompanion<MusicPredicate> {
     }
 
-    interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion<MusicPredicate> where TSelf: MusicPredicate {
+    interface MusicPredicateCompanion<TSelf>: MusicTriggerCompanion where TSelf: MusicPredicate {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",

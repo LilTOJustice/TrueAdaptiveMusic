@@ -2,18 +2,14 @@ package liltojustice.trueadaptivemusic.client.music.pack
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
@@ -23,8 +19,6 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
 import java.nio.file.Path
@@ -97,7 +91,7 @@ class MusicPack private constructor(
         return Path(getEditPackDir().pathString, Constants.ASSETS_DIRNAME)
     }
 
-    fun getEditPackAssets(): Map<String, PlayableSound> {
+    fun getEditPackSoundLibrary(): SoundLibrary {
         return getEditPackAssetsPath().listDirectoryEntries()
             .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
             .associateBy { file -> file.getSoundName() }
@@ -280,10 +274,11 @@ class MusicPack private constructor(
             return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), packName)
         }
 
-        fun fromFile(filePath: Path): MusicPack {
+        fun fromFile(filePath: Path): MusicPack? {
             val zip = filePath.extension == "zip"
             if (!zip && !filePath.isDirectory()) {
-                throw MusicLoadException("Given path \"$filePath\" is neither a directory nor a zip file")
+                Logger.logWarning("Could not find music pack $filePath.")
+                return null
             }
 
             try {
@@ -294,37 +289,6 @@ class MusicPack private constructor(
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to read music pack: $filePath", e)
-            }
-        }
-
-        fun parseAudio(audioMemberName: String, json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-                : List<PlayableSound> {
-            return (if (JsonHelper.hasString(json, audioMemberName))
-                listOf(JsonHelper.getString(json, audioMemberName))
-            else if (JsonHelper.hasArray(json, audioMemberName))
-                JsonHelper.getArray(json, audioMemberName).map { element -> element.asString }
-                    else emptyList())
-                .map { path ->
-                    try {
-                        return@map soundLibrary[path]
-                            ?: PlayableSoundEvent(
-                                Identifier.of(path)
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"),
-                            )
-                    }
-                    catch (_: InvalidIdentifierException) {}
-
-                    Logger.logWarning("Could not find \"$path\", skipping...")
-                    return@map null
-                }.filterNotNull()
-        }
-
-        fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
-            return assets[id] ?: try {
-                PlayableSoundEvent(Identifier.of(id))
-            }
-            catch (_: InvalidIdentifierException) {
-                null
             }
         }
 
@@ -443,14 +407,13 @@ class MusicPack private constructor(
         }*/
     }
 
-    @Serializable
     data class Metadata(val description: String = "") {
         fun getArgs(): List<Any?> {
             return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
         }
 
         fun jsonEncode(): String {
-            return json.encodeToString(this)
+            return json.toJson(this)
         }
 
         companion object {
@@ -464,14 +427,10 @@ class MusicPack private constructor(
                 "description" to "Description of the Music Pack."
             )
 
-            private val json = Json {
-                encodeDefaults = true
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
+            private val json = Gson()
 
             fun jsonDecode(string: String): Metadata {
-                return json.decodeFromString(string)
+                return json.fromJson(string, Metadata::class.java)
             }
 
             fun getRequiredArgs(): List<KParameter> {

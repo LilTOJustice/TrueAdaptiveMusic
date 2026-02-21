@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
@@ -19,12 +18,7 @@ class InLavaPredicate: MusicPredicate() {
 
         return result
     }
-
-    companion object: MusicPredicateCompanion<InLavaPredicate> {
-        override fun fromJson(json: JsonObject): InLavaPredicate {
-            return InLavaPredicate()
-        }
-
+    companion object {
         private const val GRACE_PERIOD_TICKS = 6
     }
 }

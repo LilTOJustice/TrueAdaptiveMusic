@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import com.google.gson.Gson
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
@@ -10,7 +9,6 @@ import net.minecraft.text.Text
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
-@Serializable
 data class TrueAdaptiveMusicOptions(
     val selectedPack: String = "",
     val useDebugHud: Boolean = false,
@@ -27,7 +25,7 @@ data class TrueAdaptiveMusicOptions(
     }
 
     private fun jsonEncode(): String {
-        return json.encodeToString(this)
+        return json.toJson(this)
     }
 
     companion object {
@@ -47,14 +45,10 @@ data class TrueAdaptiveMusicOptions(
                     "Requires FFmpeg."
         )
 
-        private val json = Json {
-            encodeDefaults = true
-            prettyPrint = true
-            ignoreUnknownKeys = true
-        }
+        private val json = Gson()
 
         fun jsonDecode(string: String): TrueAdaptiveMusicOptions {
-            return json.decodeFromString(string)
+            return json.fromJson(string, TrueAdaptiveMusicOptions::class.java)
         }
 
         fun getRequiredArgs(): List<KParameter> {
@@ -72,7 +66,6 @@ data class TrueAdaptiveMusicOptions(
         }
     }
 
-    @Serializable
     class LUFBoost(val value: UInt) {
         companion object {
             const val MAX_VALUE = 10U

@@ -1,7 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
@@ -57,16 +55,6 @@ class CombatPredicate(
         return super.getTickRate() * 2
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty("blacklist", blacklist)
-        val mobEntities = JsonArray()
-        this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
-        result.add("mobEntities", mobEntities)
-
-        return result
-    }
-
     private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
         val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
         val relativeMobEntityPosN = relativeMobEntityPos.normalize()
@@ -116,24 +104,6 @@ class CombatPredicate(
                         "(if not checked) make the music play.",
                 "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
             )
-
-        override fun fromJson(json: JsonObject): CombatPredicate {
-            return CombatPredicate(
-                if (json.has("blacklist")) {
-                    json.getAsJsonPrimitive("blacklist").asBoolean
-                }
-                else {
-                    false
-                },
-                if (json.has("mobEntities")) {
-                    json.getAsJsonArray("mobEntities").map {
-                            element -> EntityTypeIdentifier(element.asString) }
-                }
-                else {
-                    listOf()
-                }
-            )
-        }
 
         private fun isValidAttacker(
             mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {

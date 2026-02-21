@@ -1,12 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.TranslatableTextContent
-import net.minecraft.util.JsonHelper
 
 class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
@@ -17,29 +14,11 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
         }
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        val jsonBosses = JsonArray()
-        bosses.forEach { boss -> jsonBosses.add(boss.toString()) }
-        result.add("id", jsonBosses)
-
-        return result
-    }
-
     companion object: MusicPredicateCompanion<BossPredicate> {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "bosses" to "List of entities that the music should play for. If none, any entity will trigger the " +
                         "music."
             )
-
-        override fun fromJson(json: JsonObject): BossPredicate {
-            return BossPredicate(
-                if (JsonHelper.hasArray(json, "id"))
-                    JsonHelper.getArray(json, "id").map { element -> EntityTypeIdentifier(element.asString) }
-                else
-                    listOf(EntityTypeIdentifier(JsonHelper.getString(json, "id")))
-            )
-        }
     }
 }

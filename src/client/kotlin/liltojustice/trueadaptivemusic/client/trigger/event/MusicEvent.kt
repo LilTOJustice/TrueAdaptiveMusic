@@ -1,7 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
@@ -22,30 +20,11 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
         return true
     }
 
-    final override fun initParams(json: JsonObject) {
-        val gson = Gson()
-        val default = Parameters.default()
-        val parametersJson = json.get("parameters").asJsonObject
-        default.getTriggerParams().forEach {
-            if (!parametersJson.has(it.name)) {
-                val jsonRep = gson.toJsonTree(it.value)
-                parametersJson.add(
-                    it.name,
-                    if (jsonRep.isJsonObject) jsonRep.asJsonObject.getAsJsonPrimitive("data") else jsonRep.asJsonPrimitive)
-            }
-        }
-        parameters = gson.fromJson<Parameters>(parametersJson, Parameters::class.java)
-    }
-
     final override fun getTypeName(): String {
         return if (this is ErrorEvent)
             ErrorEvent.NAME
         else
             TAMClient.eventRegistry[this::class]
-    }
-
-    final override fun toJsonFull(): JsonObject {
-        return super.toJsonFull()
     }
 
     companion object: MusicEventCompanion<MusicEvent> {
@@ -77,7 +56,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
         }
     }
 
-    interface MusicEventCompanion<TSelf>: MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
+    interface MusicEventCompanion<TSelf>: MusicTriggerCompanion where TSelf: MusicEvent {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",

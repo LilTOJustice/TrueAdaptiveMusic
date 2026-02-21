@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 
 class ErrorPredicate(private val actualJson: JsonObject, val reason: String): MusicPredicate() {
     val shortenedJson: JsonObject = run {
@@ -23,10 +22,6 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
     }
 
     companion object: MusicPredicateCompanion<ErrorPredicate> {
-        override fun fromJson(json: JsonObject): MusicPredicate {
-            throw MusicTriggerException("'Error' predicate type is invalid and should not be used.")
-        }
-
         const val NAME = "error_predicate"
     }
 }

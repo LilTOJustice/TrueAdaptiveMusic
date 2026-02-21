@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipTex
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
@@ -57,7 +58,7 @@ class PredicateViewWidget(
     private var newPredicateParent: MusicPredicateTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
-    private var assets = musicPack.getEditPackAssets()
+    private var soundLibrary = musicPack.getEditPackSoundLibrary()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -173,9 +174,9 @@ class PredicateViewWidget(
                                     predicateArgs.filterNotNull(),
                                     events,
                                     selectedMusicPaths.mapNotNull {
-                                        path -> MusicPack.toPlayableSound(assets, path) },
+                                        path -> PlayableSound.of(path, soundLibrary) },
                                     selectedAmbiencePaths.mapNotNull {
-                                        path -> MusicPack.toPlayableSound(assets, path) }
+                                        path -> PlayableSound.of(path, soundLibrary) }
                                 )
                             }
                         },
@@ -210,7 +211,7 @@ class PredicateViewWidget(
                     Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice", "Music Choice").string,
                     {
-                        musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
+                        musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                         .union(
                             Registries.SOUND_EVENT.ids
                                 .map { id -> id.toString() }
@@ -222,7 +223,7 @@ class PredicateViewWidget(
                         "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedMusicPaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
+                        TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
                     tooltipText = Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice.description",
                         "Select any amount of music to be chosen randomly to play"))
@@ -243,7 +244,7 @@ class PredicateViewWidget(
                     Text.translatableWithFallback(
                         "trueadaptivemusic.ambience_choice", "Ambience Choice").string,
                     {
-                        musicPack.getEditPackAssets().map { (assetName, _) -> assetName }.toMutableSet()
+                        musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
                                 Registries.SOUND_EVENT.ids
                                     .map { id -> id.toString() }
@@ -255,7 +256,7 @@ class PredicateViewWidget(
                         "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedAmbiencePaths,
                     onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { MusicPack.toPlayableSound(assets, it) }) },
+                        TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
                     tooltipText = Text.translatableWithFallback(
                         "trueadaptivemusic.ambience_choice.description",
                         "Select any amount of ambience to be chosen randomly to play"))
@@ -427,8 +428,9 @@ class PredicateViewWidget(
                 predicateParams.filterNotNull(),
                 predicateArgs.filterNotNull(),
                 events,
-                selectedMusicPaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                selectedAmbiencePaths.mapNotNull { path -> MusicPack.toPlayableSound(assets, path) })
+                selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
+                selectedAmbiencePaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) }
+            )
         }
 
         if (predicateArgs.filterNotNull().size != requiredPredicateArgs.size
@@ -436,15 +438,14 @@ class PredicateViewWidget(
             return
         }
 
-        assets = musicPack.getEditPackAssets()
+        soundLibrary = musicPack.getEditPackSoundLibrary()
         selectedNode!!.predicate =
             TAMClient.predicateFactory.fromArgs(
                 selectedPredicateTypeName,
-                selectedMusicPaths
-                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                selectedAmbiencePaths
-                    .mapNotNull { path -> MusicPack.toPlayableSound(assets, path) },
-                predicateParams.filterNotNull(), predicateArgs.filterNotNull())
+                selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
+                selectedAmbiencePaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
+                predicateParams.filterNotNull(), predicateArgs.filterNotNull()
+            )
         selectedNode!!.events = events
 
         save()

@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
@@ -12,11 +11,5 @@ class PillagerRaidPredicate(): MusicPredicate() {
             ?: return false
 
         return serverWorld.hasRaidAt(client.player?.blockPos ?: return false)
-    }
-
-    companion object: MusicPredicateCompanion<PillagerRaidPredicate> {
-        override fun fromJson(json: JsonObject): PillagerRaidPredicate {
-            return PillagerRaidPredicate()
-        }
     }
 }

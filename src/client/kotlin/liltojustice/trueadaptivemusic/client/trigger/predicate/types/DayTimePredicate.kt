@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
@@ -15,11 +14,5 @@ class DayTimePredicate: MusicPredicate() {
 
     override fun getTickRate(): Int {
         return super.getTickRate() * 2
-    }
-
-    companion object: MusicPredicateCompanion<DayTimePredicate> {
-        override fun fromJson(json: JsonObject): DayTimePredicate {
-            return DayTimePredicate()
-        }
     }
 }
