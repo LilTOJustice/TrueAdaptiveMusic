@@ -49,7 +49,7 @@ class MultiSelectDropdownWidget<TKey>(
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         dropdownWidget = addWidgetFromRender(
             {
-                DropdownWidget<TKey>(
+                DropdownWidget(
                     options,
                     { option ->
                         if (selected.contains(option)) {
@@ -81,6 +81,7 @@ class MultiSelectDropdownWidget<TKey>(
                     val widget = ClickableTextWidget(
                         option.second,
                         onClick = {
+                            onHoverOption(null)
                             selected.remove(option.first)
                             onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },

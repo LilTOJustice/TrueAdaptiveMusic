@@ -112,7 +112,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             typeOf<String>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
-                screen,
                 prompt,
                 { widget, text ->
                     outArgs[arg.index] = text
@@ -132,7 +131,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             typeOf<Int>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
-                screen,
                 prompt,
                 { widget, text ->
                     if (text.isBlank() || text == "-") {
@@ -168,7 +166,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             typeOf<UInt>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
-                screen,
                 prompt,
                 { widget, text ->
                     if (text.isBlank()) {

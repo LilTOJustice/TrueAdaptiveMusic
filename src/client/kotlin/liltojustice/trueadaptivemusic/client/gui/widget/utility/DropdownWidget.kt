@@ -17,7 +17,7 @@ class DropdownWidget<TKey>(
     getOptions: (() -> List<TKey>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: TKey? = null,
-    onHoverOption: (option: String?) -> Unit = {},
+    private val onHoverOption: (option: String?) -> Unit = {},
     tooltipText: Text? = null,
     x: Int = 0,
     y: Int = 0
@@ -57,7 +57,6 @@ class DropdownWidget<TKey>(
             notSelectedPlaceholder
                 ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
                     ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "",
-            onClick = { screen?.focused = textInputWidget },
             isSelected = { true }
         )
     }
@@ -65,8 +64,7 @@ class DropdownWidget<TKey>(
 
     init {
         tooltipText?.let {
-            titleTextWidget.setTooltip(Tooltip.of(it))
-            selectedOptionWidget.setTooltip(Tooltip.of(it))
+            setTooltip(Tooltip.of(it))
         }
         titleTextWidget.active = false
         this.width = realizedWidth
@@ -93,22 +91,25 @@ class DropdownWidget<TKey>(
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        if (selectedOptionWidget.mouseClicked(click, doubled)) {
-            screen?.focused = textInputWidget
-            return true
-        }
-
         val result = super.mouseClicked(click, doubled)
         textInputWidget.text = ""
+        if (focusedWidget == selectedOptionWidget) {
+            focusedWidget = textInputWidget
+        }
 
         return result
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val showTextInput = screen?.focused == textInputWidget
+        val showTextInput = focusedWidget == textInputWidget
+        if (textInputWidget.visible != showTextInput) {
+            onHoverOption(null)
+        }
+
         textInputWidget.visible = showTextInput
+        textInputWidget.isFocused = showTextInput
         selectedOptionWidget.visible = !showTextInput
-        dropdownResultsWidget.visible = screen?.focused == textInputWidget
+        dropdownResultsWidget.visible = showTextInput
         dropdownResultsWidget.width = width
         super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
