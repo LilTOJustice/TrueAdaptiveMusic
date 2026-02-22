@@ -164,6 +164,15 @@ class EventViewWidget(
             TAMClient.playSoundNow(null)
         }
 
+        if (!requiredEventArgs.isEmpty()) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget("Event Arguments:")
+                },
+                "arguments"
+            )
+        }
+
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
                 {
@@ -178,6 +187,15 @@ class EventViewWidget(
                     ) { save() }
                 },
                 "eventArg: ${arg.name ?: arg.index}"
+            )
+        }
+
+        if (!requiredEventParams.isEmpty()) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget("Event Parameters:")
+                },
+                "parameters"
             )
         }
 

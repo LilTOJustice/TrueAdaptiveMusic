@@ -63,10 +63,10 @@ class DropdownWidget<TKey>(
     private var open = true
 
     init {
+        titleTextWidget.disableBold()
         tooltipText?.let {
             setTooltip(Tooltip.of(it))
         }
-        titleTextWidget.active = false
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,

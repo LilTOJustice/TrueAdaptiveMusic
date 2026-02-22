@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
@@ -45,7 +45,9 @@ data class TrueAdaptiveMusicOptions(
                     "Requires FFmpeg."
         )
 
-        private val json = Gson()
+        private val json = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
 
         fun jsonDecode(string: String): TrueAdaptiveMusicOptions {
             return json.fromJson(string, TrueAdaptiveMusicOptions::class.java)

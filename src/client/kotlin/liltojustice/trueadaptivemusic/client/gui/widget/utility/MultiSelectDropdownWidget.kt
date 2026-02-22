@@ -17,7 +17,8 @@ class MultiSelectDropdownWidget<TKey>(
     private val onHoverOption: (option: String?) -> Unit = {},
     private val tooltipText: Text? = null,
     x: Int = 0,
-    y: Int = 0)
+    y: Int = 0
+)
     : ContainerWidget(
     width.takeUnless { it == 0 } ?: 500,
     500,

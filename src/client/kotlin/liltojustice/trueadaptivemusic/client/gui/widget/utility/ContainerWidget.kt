@@ -76,7 +76,7 @@ abstract class ContainerWidget(
             }
         }
 
-        if (bordered) {
+       if (bordered) {
             context?.drawBorder(x, y, width, height)
         }
 
@@ -210,7 +210,7 @@ abstract class ContainerWidget(
 
         if (row == null) {
             children[widgetId] = children[widgetId]!!.copy(
-                row = maxUsedRow(onlyThisRender = true, countOffscreen = true) + 1)
+                row = maxUsedRow(onlyThisRender = true, countOffscreen = true))
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
@@ -340,7 +340,7 @@ abstract class ContainerWidget(
             .filterValues { child ->
                 if (countOffscreen) child.widget.visible else childVisible(child) }
             .maxOfOrNull { (_, child) ->
-                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 0 }
+                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 1 }
             ?: 0 else 0
     }
 

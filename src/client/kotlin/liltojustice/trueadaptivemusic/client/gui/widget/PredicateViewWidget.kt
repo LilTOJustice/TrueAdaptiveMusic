@@ -190,12 +190,12 @@ class PredicateViewWidget(
                         )
                     )
                 },
-                "predicateTypeChoice",
-                row = 1)
+                "predicateTypeChoice"
+            )
         }
         else {
             addWidgetFromRender(
-                { TextWidget(Text.literal("root"), textRenderer) }, "root", row = 1)
+                { TextWidget(Text.literal("root"), textRenderer) }, "root", 0)
         }
 
         addWidgetFromRender(
@@ -226,7 +226,9 @@ class PredicateViewWidget(
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
                     tooltipText = Text.translatableWithFallback(
                         "trueadaptivemusic.music_choice.description",
-                        "Select any amount of music to be chosen randomly to play"))
+                        "Select any amount of music to be chosen randomly to play"
+                    )
+                )
             },
             "musicChoice"
         )
@@ -264,6 +266,15 @@ class PredicateViewWidget(
             "ambienceChoice"
         )
 
+        if (!requiredPredicateArgs.isEmpty()) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget("Predicate Arguments:")
+                },
+                "arguments"
+            )
+        }
+
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
                 {
@@ -283,6 +294,15 @@ class PredicateViewWidget(
             )
         }
 
+        if (!requiredPredicateParams.isEmpty()) {
+            addWidgetFromRender(
+                {
+                    ClickableTextWidget("Node Parameters:")
+                },
+                "parameters"
+            )
+        }
+
         requiredPredicateParams.forEach { param ->
             addWidgetFromRender(
                 {
@@ -298,14 +318,16 @@ class PredicateViewWidget(
             )
         }
 
-        addWidgetFromRender({ EmptyClickableWidget() }, "empty")
+        addWidgetFromRender({ EmptyClickableWidget() }, "eventsSpacer")
 
-        addWidgetFromRender({
-            val newWidget = ClickableTextWidget(
-                "${Text.translatableWithFallback("trueadaptivemusic.events", "Events").string}:")
-            newWidget.active = false
-            newWidget
-        }, "events")
+        addWidgetFromRender(
+            {
+                val newWidget = ClickableTextWidget(
+                    "${Text.translatableWithFallback("trueadaptivemusic.events", "Events").string}:")
+                newWidget.active = false
+                newWidget
+            }, "events"
+        )
 
         events.forEach { event ->
             addWidgetFromRender(
@@ -347,6 +369,13 @@ class PredicateViewWidget(
                 result
             },
             "Add Event")
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "deleteSpacer"
+        )
 
         if (selectedNode?.parent != null) {
             val result = addWidgetFromRender(

@@ -197,7 +197,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             typeOf<Boolean>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = CheckboxWidget(
-                10,
                 prompt,
                 { checked ->
                     outArgs[arg.index] = checked

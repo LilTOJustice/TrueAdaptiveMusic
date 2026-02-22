@@ -502,7 +502,9 @@ class MusicPack private constructor(
                 "description" to "Description of the Music Pack."
             )
 
-            private val json = Gson()
+            private val json = GsonBuilder()
+                .setPrettyPrinting()
+                .create()
 
             fun jsonDecode(string: String): Metadata {
                 return json.fromJson(string, Metadata::class.java)
