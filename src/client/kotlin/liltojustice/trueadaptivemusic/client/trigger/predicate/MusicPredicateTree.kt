@@ -169,6 +169,17 @@ class MusicPredicateTree private constructor(json: JsonObject? = null, soundLibr
             return child
         }
 
+        fun copy(withChildren: Boolean): Node {
+            return Node(
+                TAMClient.predicateFactory.makeCopy(predicate),
+                events.map { TAMClient.eventFactory.makeCopy(it) },
+                if (withChildren)
+                    children.map { it.copy(true) }.toMutableList()
+                else
+                    mutableListOf()
+            )
+        }
+
         fun isValidNewChild(child: Node): Boolean {
             return !(this === child || isChildOf(child))
         }

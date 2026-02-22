@@ -13,7 +13,7 @@ import kotlin.reflect.full.primaryConstructor
 abstract class MusicTriggerFactory<T, TParam: MusicTrigger.Parameters> (
     private val registry: MusicTriggerRegistry<T>, private val errorFallback: (JsonObject, Exception) -> T)
         where T: MusicTrigger<TParam> {
-    open fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): T {
+    fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): T {
         return try {
             val typeName = JsonHelper.getString(json, "type")
             val type = registry[typeName]
@@ -27,7 +27,7 @@ abstract class MusicTriggerFactory<T, TParam: MusicTrigger.Parameters> (
     fun fromArgs(typeName: String, music: List<PlayableSound>, parameters: List<Any>, args: List<Any>): T {
         val result = getConstructorFromTypeName(typeName).call(*args.toTypedArray()) as? T
             ?: throw MusicTriggerException("Could not instantiate music trigger from args.")
-        result.music = music
+        result.music = music.toMutableList()
         result.parameters = result.parameters.initializeCopyFromArgs(*parameters.toTypedArray())
                 as TParam
         return result

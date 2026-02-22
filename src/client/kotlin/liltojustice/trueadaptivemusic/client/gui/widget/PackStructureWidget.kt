@@ -12,6 +12,7 @@ import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.client.input.KeyInput
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
@@ -35,6 +36,8 @@ class PackStructureWidget(
     x,
     y) {
     private var mouseButtonHeld = false
+    private var shiftHeld = false
+    private var ctrlHeld = false
     private var targetedNode: MusicPredicateTree.Node? = null
 
     init {
@@ -90,6 +93,30 @@ class PackStructureWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
+    override fun keyPressed(input: KeyInput): Boolean {
+        if (input.key == SHIFT_KEY) {
+            shiftHeld = true
+        }
+
+        if (input.key == CTRL_KEY) {
+            ctrlHeld = true
+        }
+
+        return super.keyPressed(input)
+    }
+
+    override fun keyReleased(input: KeyInput): Boolean {
+        if (input.key == SHIFT_KEY) {
+            shiftHeld = false
+        }
+
+        if (input.key == CTRL_KEY) {
+            ctrlHeld = false
+        }
+
+        return super.keyReleased(input)
+    }
+
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         val result = super.mouseClicked(click, doubled)
         mouseButtonHeld = false
@@ -113,19 +140,26 @@ class PackStructureWidget(
         forEachChild { child ->
             if (child !is NodeWidget
                 || !child.isMouseOver(click.x, click.y)
-                || targetedNode === child.targetNode.node
-                || targetedNode?.let { child.isValidDestination(it) } != true) {
+                || (targetedNode === child.targetNode.node && !shiftHeld)
+                || targetedNode?.let { child.isValidDestination(it) || shiftHeld } != true) {
                 return@forEachChild
             }
 
             val targetNode = child.targetNode.node
+            val toAdopt = targetedNode?.let {
+                if (shiftHeld) {
+                    it.copy(ctrlHeld)
+                }
+                else {
+                    it
+                }
+            } ?: return@forEachChild
 
             if (child.targetNode.isParent) {
-                targetNode.adoptChild(targetedNode!!)
+                targetNode.adoptChild(toAdopt)
             }
             else {
-                targetNode.parent!!
-                    .adoptChild(targetedNode!!, targetNode.parent!!.children.indexOf(targetNode))
+                targetNode.parent?.let { it.adoptChild(toAdopt, it.children.indexOf(targetNode)) }
             }
 
             musicPack.initRules()
@@ -146,13 +180,13 @@ class PackStructureWidget(
 
             val baseTooltipText = child.getBaseTooltipString()
             child.setTooltip(
-                if (targetedNode === child.targetNode.node
-                    && !child.targetNode.isParent
-                    && child.targetNode.node.parent != null)
+                if (targetedNode === child.targetNode.node &&
+                    !child.targetNode.isParent &&
+                    child.targetNode.node.parent != null)
                     if (baseTooltipText.isBlank())
                         Tooltip.of(Text.literal(MOVE_NODE_STRING))
                     else
-                        Tooltip.of(Text.literal("$MOVE_NODE_STRING\n$baseTooltipText"))
+                        Tooltip.of(Text.literal("$MOVE_NODE_STRING\n\n$baseTooltipText"))
                 else
                     Tooltip.of(Text.literal(baseTooltipText)))
         }
@@ -166,12 +200,11 @@ class PackStructureWidget(
         forEachChild { child ->
             if (child !is NodeWidget
                 || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
-                || child.targetNode.node === targetedNode
-            ) {
+                || (child.targetNode.node === targetedNode && !shiftHeld)) {
                 return@forEachChild
             }
 
-            val valid = targetedNode?.let { child.isValidDestination(it) } == true
+            val valid = targetedNode?.let { child.isValidDestination(it) || shiftHeld } == true
 
             context?.drawText(
                 textRenderer,
@@ -179,7 +212,8 @@ class PackStructureWidget(
                 child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
                 child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
                 if (valid) Colors.WHITE else Colors.RED,
-                false)
+                false
+            )
             return@forEachChild
         }
     }
@@ -190,8 +224,12 @@ class PackStructureWidget(
 
     companion object {
         const val INDENT = 10
+        const val SHIFT_KEY = 340
+        const val CTRL_KEY = 341
         val MOVE_NODE_STRING: String = Text.translatableWithFallback(
-            "trueadaptivemusic.move_node", "Click and drag to move").string
+            "trueadaptivemusic.move_node",
+            "Click and drag to move + shift (copy) + ctrl (copy with children)."
+        ).string
         val ARROW_TEXT: Text = Text.literal("->")
     }
 
