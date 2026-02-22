@@ -1,8 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
-import com.google.common.collect.Sets
 import net.minecraft.client.sound.Source
-import java.util.function.Consumer
 
 class SoundEngine {
     private var sources = SourceSet()
@@ -20,13 +18,11 @@ class SoundEngine {
     }
 
     class SourceSet() {
-        private val sources: MutableSet<Source?> = Sets.newIdentityHashSet<Source?>()
+        private val sources: MutableSet<Source> = mutableSetOf()
 
         fun createSource(): Source? {
             val source = Source.create()
-            if (source != null) {
-                this.sources.add(source)
-            }
+            source?.let { this.sources.add(it) }
 
             return source
         }
@@ -41,7 +37,7 @@ class SoundEngine {
         }
 
         fun close() {
-            this.sources.forEach(Consumer { obj: Source? -> obj!!.close() })
+            this.sources.forEach { it.close() }
             this.sources.clear()
         }
     }
