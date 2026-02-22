@@ -55,6 +55,7 @@ abstract class ContainerWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        focusedWidget?.isFocused = true
         renderChildren.clear()
         if (!visible) {
             return
@@ -101,6 +102,7 @@ abstract class ContainerWidget(
             !active ||
             !this.isValidClickButton(click.buttonInfo) ||
             !isMouseOver(click.x, click.y)) {
+            unfocus()
             return false
         }
 
@@ -122,9 +124,7 @@ abstract class ContainerWidget(
             }
         }
 
-        focusedWidget?.isFocused = true
         screen?.focused = this
-        isFocused = true
 
         return true
     }
@@ -389,6 +389,19 @@ abstract class ContainerWidget(
         val widgetTop = widget.y
         val widgetBottom = widgetTop + widget.height
         return left <= widgetRight && right >= widgetLeft && top <= widgetBottom && bottom >= widgetTop
+    }
+
+    private fun unfocus() {
+        focusedWidget = null
+        isFocused = false
+        children.values.forEach {
+            if (it.widget is ContainerWidget) {
+                it.widget.unfocus()
+            }
+            else {
+                it.widget.isFocused = false
+            }
+        }
     }
 
     companion object {

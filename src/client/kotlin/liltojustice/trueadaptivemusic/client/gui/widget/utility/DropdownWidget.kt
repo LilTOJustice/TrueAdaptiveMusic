@@ -29,7 +29,7 @@ class DropdownWidget<TKey>(
     false,
     false,
     false,
-    true,
+    false,
     x,
     y,
     true) {
@@ -53,14 +53,14 @@ class DropdownWidget<TKey>(
     )
     private val selectedOptionWidget = run {
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
-        ClickableTextWidget(
+        ClickableTextDisplayWidget(
             notSelectedPlaceholder
                 ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
-                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "",
-            isSelected = { true }
+                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: ""
         )
     }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
+    private var open = true
 
     init {
         tooltipText?.let {
@@ -101,16 +101,17 @@ class DropdownWidget<TKey>(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val showTextInput = focusedWidget == textInputWidget
-        if (textInputWidget.visible != showTextInput) {
+        val shouldOpen = focusedWidget == textInputWidget && isFocused
+        if (open != shouldOpen) {
+            open = shouldOpen
             onHoverOption(null)
+            textInputWidget.visible = shouldOpen
+            textInputWidget.isFocused = shouldOpen
+            selectedOptionWidget.visible = !shouldOpen
+            dropdownResultsWidget.visible = shouldOpen
+            dropdownResultsWidget.width = width
         }
 
-        textInputWidget.visible = showTextInput
-        textInputWidget.isFocused = showTextInput
-        selectedOptionWidget.visible = !showTextInput
-        dropdownResultsWidget.visible = showTextInput
-        dropdownResultsWidget.width = width
         super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }
