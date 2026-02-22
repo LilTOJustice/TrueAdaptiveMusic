@@ -217,7 +217,7 @@ class PredicateViewWidget(
                                 .map { id -> id.toString() }
                                 .filter { path -> path.contains("music.") }
                         )
-                        .toList()
+                        .sorted()
                     },
                     Text.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,

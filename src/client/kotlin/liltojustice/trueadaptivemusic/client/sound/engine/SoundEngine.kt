@@ -10,7 +10,7 @@ class SoundEngine {
     }
 
     fun release(source: Source) {
-        check(this.sources.release(source)) { "Tried to release unknown channel" }
+        this.sources.release(source)
     }
 
     fun close() {

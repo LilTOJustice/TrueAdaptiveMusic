@@ -12,37 +12,33 @@ import kotlin.collections.get
 @Environment(EnvType.CLIENT)
 class SoundSystem(private val options: GameOptions) {
     private val soundEngine = SoundEngine()
-    val sources = mutableMapOf<TAMSoundInstance, Channel>()
+    val channels = mutableMapOf<TAMSoundInstance, Channel>()
 
     fun stop(soundInstance: TAMSoundInstance?) {
-        sources[soundInstance]?.run(Source::stop)
+        channels[soundInstance]?.run(Source::stop)
     }
 
     fun stopAll() {
         soundEngine.close()
-        sources.clear()
+        channels.values.forEach { it.close() }
+        channels.clear()
     }
 
     fun tick() {
-        sources
-            .filter { it.value.isStopped }
-            .forEach {
-                it.value.close()
-                sources.remove(it.key)
-            }
+        channels.filter { it.value.isStopped }.forEach { channels.remove(it.key) }
     }
 
     fun isPlaying(soundInstance: TAMSoundInstance?): Boolean {
-        return !(sources[soundInstance]?.isStopped ?: true)
+        return !(channels[soundInstance]?.isStopped ?: true)
     }
 
     fun play(soundInstance: TAMSoundInstance) {
-        sources[soundInstance] = Channel.new(
+        channels[soundInstance] = Channel.new(
             soundEngine, soundInstance, getProperSourceVolume(soundInstance)) ?: return
     }
 
     fun refreshSoundVolume() {
-        sources.keys.forEach { refreshSoundVolume(it) }
+        channels.keys.forEach { refreshSoundVolume(it) }
     }
 
     fun refreshSoundVolume(soundInstance: TAMSoundInstance) {
@@ -68,12 +64,12 @@ class SoundSystem(private val options: GameOptions) {
     }
 
     private fun runOnSource(soundInstance: TAMSoundInstance?, sourceConsumer: (source: Source) -> Unit): Boolean {
-        return sources[soundInstance]?.run(sourceConsumer) == null
+        return channels[soundInstance]?.run(sourceConsumer) == null
     }
 
     private fun <T> getFromSource(soundInstance: TAMSoundInstance?, sourceGetter: (source: Source) -> T): T? {
         var result: T? = null
-        sources[soundInstance]?.run { result = (sourceGetter)(it) }
+        channels[soundInstance]?.run { result = (sourceGetter)(it) }
 
         return result
     }
