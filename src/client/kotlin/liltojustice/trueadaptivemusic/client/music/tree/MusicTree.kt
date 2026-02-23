@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.trigger.predicate
+package liltojustice.trueadaptivemusic.client.music.tree
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -7,13 +7,15 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.JsonHelper
+import kotlin.collections.plus
 
-typealias NodeVisitor = (node: MusicPredicateTree.Node, path: List<String>) -> Unit
+typealias NodeVisitor = (node: MusicTree.Node, path: List<String>) -> Unit
 
-class MusicPredicateTree private constructor(json: JsonObject? = null, soundLibrary: SoundLibrary = mapOf()) {
+class MusicTree private constructor(json: JsonObject? = null, soundLibrary: SoundLibrary = mapOf()) {
     private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
 
     fun toJson(): JsonObject {
@@ -57,13 +59,13 @@ class MusicPredicateTree private constructor(json: JsonObject? = null, soundLibr
     companion object {
         const val PATH_SEPARATOR = "/"
 
-        fun makeEmpty(): MusicPredicateTree {
-            return MusicPredicateTree()
+        fun makeEmpty(): MusicTree {
+            return MusicTree()
         }
 
-        fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): MusicPredicateTree {
+        fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): MusicTree {
             try {
-                return MusicPredicateTree(json, soundLibrary)
+                return MusicTree(json, soundLibrary)
             } catch (e: Exception) {
                 throw RulesParserException("Failed to parse rules.", e)
             }

@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.trigger.predicate
+package liltojustice.trueadaptivemusic.client.trigger
 
 typealias TriggerParam = TriggerArg
 

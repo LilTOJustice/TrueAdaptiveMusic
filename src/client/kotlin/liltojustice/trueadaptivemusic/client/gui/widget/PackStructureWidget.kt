@@ -7,7 +7,7 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -21,8 +21,8 @@ class PackStructureWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onChangesSaved: () -> Unit,
-    private val onSelectEditExistingNode: (node: MusicPredicateTree.Node) -> Unit,
-    private val onSelectCreateNewNode: (parent: MusicPredicateTree.Node) -> Unit,
+    private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
+    private val onSelectCreateNewNode: (parent: MusicTree.Node) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -38,13 +38,13 @@ class PackStructureWidget(
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
-    private var targetedNode: MusicPredicateTree.Node? = null
+    private var targetedNode: MusicTree.Node? = null
 
     init {
         initPredicateWidgets()
     }
 
-    fun setNode(node: MusicPredicateTree.Node?) {
+    fun setNode(node: MusicTree.Node?) {
         targetedNode = node
     }
 
@@ -254,11 +254,11 @@ class PackStructureWidget(
                         ""
         }
 
-        fun isValidDestination(selectedNode: MusicPredicateTree.Node): Boolean {
+        fun isValidDestination(selectedNode: MusicTree.Node): Boolean {
             return (targetNode.node.parent != null || targetNode.isParent)
                     && targetNode.node.isValidNewChild(selectedNode)
         }
     }
 
-    data class TargetNode(val node: MusicPredicateTree.Node, val isParent: Boolean)
+    data class TargetNode(val node: MusicTree.Node, val isParent: Boolean)
 }

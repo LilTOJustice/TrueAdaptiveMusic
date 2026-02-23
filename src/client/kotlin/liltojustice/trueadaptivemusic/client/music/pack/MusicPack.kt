@@ -18,7 +18,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.toast.SystemToast
@@ -38,7 +38,7 @@ import kotlin.reflect.full.primaryConstructor
 
 class MusicPack private constructor(
     var metadata: Metadata,
-    val rules: MusicPredicateTree,
+    val rules: MusicTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
     private val packPath = Path(Constants.MUSIC_PACK_DIR.pathString, packName)
@@ -317,7 +317,7 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), packName)
+            return MusicPack(Metadata(), MusicTree.makeEmpty(), packName)
         }
 
         fun fromFile(filePath: Path): MusicPack? {
@@ -372,12 +372,12 @@ class MusicPack private constructor(
             val preValidation = MusicPackValidation()
 
             val rules = try {
-                MusicPredicateTree.fromJson(
+                MusicTree.fromJson(
                     JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSounds)
             }
             catch (e: JsonParseException) {
                 preValidation.addError("$jsonErrorText\n$e")
-                MusicPredicateTree.makeEmpty()
+                MusicTree.makeEmpty()
             }
 
             return MusicPack(
@@ -417,13 +417,13 @@ class MusicPack private constructor(
 
                 val rules = try {
                     zipFile.getInputStream(rulesFile).use {
-                        MusicPredicateTree.fromJson(
+                        MusicTree.fromJson(
                             JsonHelper.deserialize(it.reader()) , playableSounds)
                     }
                 }
                 catch (e: JsonParseException) {
                     preValidation.addError("$jsonErrorText\n$e")
-                    MusicPredicateTree.makeEmpty()
+                    MusicTree.makeEmpty()
                 }
 
                 return MusicPack(

@@ -9,7 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
@@ -28,7 +28,7 @@ class PredicateViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: (target: MusicPredicateTree.Node?) -> Unit,
+    private val onChangesSaved: (target: MusicTree.Node?) -> Unit,
     private val onEventClick: (event: MusicEvent?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
@@ -54,8 +54,8 @@ class PredicateViewWidget(
     private var predicateParams: MutableList<Any?> = defaultPredicateParams.toMutableList()
     private var events = mutableListOf<MusicEvent>()
     private var selectedEvent: MusicEvent? = null
-    private var selectedNode: MusicPredicateTree.Node? = null
-    private var newPredicateParent: MusicPredicateTree.Node? = null
+    private var selectedNode: MusicTree.Node? = null
+    private var newPredicateParent: MusicTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
@@ -90,7 +90,7 @@ class PredicateViewWidget(
         }
     }
 
-    fun setEditExistingNode(node: MusicPredicateTree.Node) {
+    fun setEditExistingNode(node: MusicTree.Node) {
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(node.predicate.getTypeName())
         selectedNode = node
@@ -104,7 +104,7 @@ class PredicateViewWidget(
         resetScrolling()
     }
 
-    fun setCreateNewNode(parent: MusicPredicateTree.Node) {
+    fun setCreateNewNode(parent: MusicTree.Node) {
         clearWidgetsFromRender()
         selectedPredicateTypeName = ""
         selectedNode = null

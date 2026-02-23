@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.trigger.predicate
+package liltojustice.trueadaptivemusic.client.music.tree
 
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusicException
 
