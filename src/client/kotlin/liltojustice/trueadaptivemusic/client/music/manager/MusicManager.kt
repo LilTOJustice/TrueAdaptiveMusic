@@ -150,7 +150,8 @@ class MusicManager(private val client: MinecraftClient) {
             val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
             musicPlayer.startNew(
                 AMBIENCE_TRACK,
-                getPseudoRandomTrack(ambienceToPlay, lastAmbience)
+                getPseudoRandomTrack(ambienceToPlay, lastAmbience),
+                fadeIn = true
             )
             lastAmbience = newAmbience
         }
