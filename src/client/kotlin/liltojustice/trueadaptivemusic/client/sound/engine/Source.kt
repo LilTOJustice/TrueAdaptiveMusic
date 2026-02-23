@@ -4,7 +4,6 @@ import liltojustice.trueadaptivemusic.Logger
 import net.minecraft.client.sound.AlUtil
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.StaticSound
-import net.minecraft.util.math.Vec3d
 import org.lwjgl.openal.AL10
 import java.io.IOException
 import javax.sound.sampled.AudioFormat
@@ -20,6 +19,10 @@ class Source private constructor(private val pointer: Int) {
     val sourceState: Int
         get() = if (!this.playing) 4116 else AL10.alGetSourcei(this.pointer, 4112)
 
+    init {
+        AL10.alSourcei(this.pointer, 514, 1)
+        AL10.alSourcei(this.pointer, 53248, 0)
+    }
 
     fun isPaused(): Boolean {
         return this.sourceState == 0x1013
@@ -84,20 +87,8 @@ class Source private constructor(private val pointer: Int) {
         }
     }
 
-    fun setPosition(pos: Vec3d) {
-        AL10.alSourcefv(this.pointer, 4100, floatArrayOf(pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat()))
-    }
-
     fun setVolume(volume: Float) {
         AL10.alSourcef(this.pointer, 4106, volume)
-    }
-
-    fun disableAttenuation() {
-        AL10.alSourcei(this.pointer, 53248, 0)
-    }
-
-    fun setRelative(relative: Boolean) {
-        AL10.alSourcei(this.pointer, 514, if (relative) 1 else 0)
     }
 
     fun setStream(stream: AudioStream) {
@@ -133,7 +124,7 @@ class Source private constructor(private val pointer: Int) {
     }
 
     fun tick() {
-        if (this.stream != null) {
+        if (this.stream != null && this.playing) {
             val i = this.removeProcessedBuffers()
             this.read(i)
         }

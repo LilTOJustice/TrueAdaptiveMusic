@@ -1,42 +1,33 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
 class SoundEngine {
-    private var sources = SourceSet()
-
-    fun createSource(): Source? {
-        return this.sources.createSource()
-    }
+    private val sources: MutableSet<Source> = mutableSetOf()
 
     fun release(source: Source) {
-        this.sources.release(source)
+        synchronized(lock) {
+            if (this.sources.remove(source)) {
+                source.close()
+            }
+        }
     }
 
     fun close() {
-        this.sources.close()
+        synchronized(lock) {
+            this.sources.forEach { it.close() }
+            this.sources.clear()
+        }
     }
 
-    class SourceSet() {
-        private val sources: MutableSet<Source> = mutableSetOf()
-
-        fun createSource(): Source? {
+    fun createSource(): Source? {
+        synchronized(lock) {
             val source = Source.create()
             source?.let { this.sources.add(it) }
 
             return source
         }
+    }
 
-        fun release(source: Source): Boolean {
-            if (!this.sources.remove(source)) {
-                return false
-            } else {
-                source.close()
-                return true
-            }
-        }
-
-        fun close() {
-            this.sources.forEach { it.close() }
-            this.sources.clear()
-        }
+    companion object {
+        private val lock = Object()
     }
 }

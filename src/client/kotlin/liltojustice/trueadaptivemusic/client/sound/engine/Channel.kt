@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.util.math.Vec3d
 import java.util.concurrent.locks.LockSupport
 import java.util.function.Consumer
 
@@ -49,9 +48,6 @@ class Channel private constructor(
                 soundInstance.getAudioStream()?.use {
                     source.setVolume(startingVolume)
                     source.setStream(it)
-                    source.disableAttenuation()
-                    source.setPosition(Vec3d.ZERO)
-                    source.setRelative(true)
                     source.play()
                     waitForStop()
                 }
