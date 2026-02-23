@@ -1,12 +1,9 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import liltojustice.trueadaptivemusic.client.sound.isPaused
-import liltojustice.trueadaptivemusic.client.sound.setStereoRotation
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.option.GameOptions
-import net.minecraft.client.sound.Source
 import net.minecraft.sound.SoundCategory
 import kotlin.collections.get
 
@@ -36,6 +33,10 @@ class SoundSystem(private val options: GameOptions) {
 
     fun isPlaying(soundInstance: TAMSoundInstance?): Boolean {
         return !(channels[soundInstance]?.isStopped ?: true)
+    }
+
+    fun isAlmostDone(soundInstance: TAMSoundInstance?): Boolean {
+        return channels[soundInstance]?.almostDone ?: false
     }
 
     fun play(soundInstance: TAMSoundInstance) {

@@ -37,6 +37,10 @@ internal class MusicPlayer(private val client: MinecraftClient) {
         return isTrackDelayed(getTrack(trackName))
     }
 
+    fun isTrackAlmostDone(trackName: String): Boolean {
+        return isTrackAlmostDone(getTrack(trackName))
+    }
+
     fun tick() {
         tracks.values.forEach { track ->
             val currentSoundInstance = track.currentSoundInstance ?: return@forEach
@@ -144,6 +148,10 @@ internal class MusicPlayer(private val client: MinecraftClient) {
 
     private fun isTrackDelayed(track: Track): Boolean {
         return track.isDelayed()
+    }
+
+    private fun isTrackAlmostDone(track: Track): Boolean {
+        return soundSystem.isAlmostDone(track.currentSoundInstance)
     }
 
     private fun playInstance(soundInstance: TAMSoundInstance) {

@@ -1,7 +1,5 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
-import net.minecraft.client.sound.Source
-
 class SoundEngine {
     private var sources = SourceSet()
 

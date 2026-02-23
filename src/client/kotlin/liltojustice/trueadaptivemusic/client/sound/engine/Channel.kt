@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.client.sound.Source
 import net.minecraft.util.math.Vec3d
 import java.util.concurrent.locks.LockSupport
 import java.util.function.Consumer
@@ -11,7 +10,7 @@ class Channel private constructor(
     private val soundEngine: SoundEngine,
     private val source: Source,
     private val soundInstance: TAMSoundInstance,
-    private val startingVolume: Float
+    private val startingVolume: Float,
 ) {
     private val thread = this.createThread()
     private val tasks = ArrayDeque<Consumer<Source>>()
@@ -19,6 +18,8 @@ class Channel private constructor(
         get() = soundInstance.isAmbient
     var isStopped: Boolean = false
         private set
+    val almostDone: Boolean
+        get() = source.lastRead == 0
 
     fun close() {
         thread.interrupt()
@@ -45,10 +46,10 @@ class Channel private constructor(
     private fun createThread(): Thread {
         val thread = Thread {
             try {
-                soundInstance.getAudioStream().use {
+                soundInstance.getAudioStream()?.use {
                     source.setVolume(startingVolume)
                     source.setStream(it)
-                    source.setAttenuation(0F)
+                    source.disableAttenuation()
                     source.setPosition(Vec3d.ZERO)
                     source.setRelative(true)
                     source.play()
@@ -89,7 +90,7 @@ class Channel private constructor(
         fun new(soundEngine: SoundEngine, soundInstance: TAMSoundInstance, startingVolume: Float): Channel? {
             val source = soundEngine.createSource() ?: return null
 
-            return Channel(soundEngine, source, soundInstance, startingVolume)
+            return Channel(soundEngine, source, soundInstance, startingVolume,)
         }
     }
 }

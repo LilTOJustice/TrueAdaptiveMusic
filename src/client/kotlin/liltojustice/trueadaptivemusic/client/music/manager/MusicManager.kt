@@ -32,12 +32,14 @@ class MusicManager(private val client: MinecraftClient) {
     private var lastMusic: PlayableSound? = null
     private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
+    private var ambienceTrack = AMBIENCE_TRACK_1
     private var lastInstance: TAMSoundInstance? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(MAIN_TRACK_2, false, MAIN_CROSSFADE_TICKS)
-        musicPlayer.createTrack(AMBIENCE_TRACK, true, MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(AMBIENCE_TRACK_1, true, MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(AMBIENCE_TRACK_2, true, MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(EVENT_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
         musicPlayer.createTrack(ON_DEMAND_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
 
@@ -125,10 +127,10 @@ class MusicManager(private val client: MinecraftClient) {
             }
 
         musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
-        musicPlayer.clampTrackVolume(getOldTrack(), mainTrackClamp)
+        musicPlayer.clampTrackVolume(getOldMainTrack(), mainTrackClamp)
 
         musicPlayer.clampTrackVolume(
-            AMBIENCE_TRACK,
+            ambienceTrack,
             if (isPaused) {
                 PAUSE_VOLUME
             }
@@ -139,20 +141,17 @@ class MusicManager(private val client: MinecraftClient) {
 
         musicPlayer.tick()
 
-        val isAmbiencePlaying = musicPlayer.isTrackPlaying(AMBIENCE_TRACK)
-        if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
-            musicPlayer.stop(AMBIENCE_TRACK)
+        val isAmbiencePlaying = musicPlayer.isTrackPlaying(ambienceTrack)
+        val isAmbienceAlmostDone = musicPlayer.isTrackAlmostDone(ambienceTrack)
+            if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
+            musicPlayer.stop(ambienceTrack)
         }
 
         if (!ambienceToPlay.isEmpty() &&
             client.player != null &&
-            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience))) {
+            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience) || isAmbienceAlmostDone)) {
             val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
-            musicPlayer.startNew(
-                AMBIENCE_TRACK,
-                getPseudoRandomTrack(ambienceToPlay, lastAmbience),
-                fadeIn = true
-            )
+            playNextAmbience(newAmbience)
             lastAmbience = newAmbience
         }
 
@@ -230,7 +229,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         val oldTrack = mainTrack
-        swapTracks()
+        swapMainTrack()
         if (resume && musicPlayer.isTrackPlaying(mainTrack)) {
             musicPlayer.crossfadeTracks(oldTrack, mainTrack)
             return
@@ -242,12 +241,26 @@ class MusicManager(private val client: MinecraftClient) {
         lastMusic = newMusic
     }
 
-    private fun swapTracks() {
-        musicPlayer.cancelDelayedMusic(mainTrack)
-        mainTrack = getOldTrack()
+    private fun playNextAmbience(newAmbience: PlayableSound) {
+        val oldTrack = ambienceTrack
+        swapAmbienceTrack()
+
+        musicPlayer.startNew(ambienceTrack, newAmbience, fadeIn = true)
+        musicPlayer.crossfadeTracks(oldTrack, ambienceTrack)
+
+        lastAmbience = newAmbience
     }
 
-    private fun getOldTrack(): String {
+    private fun swapMainTrack() {
+        musicPlayer.cancelDelayedMusic(mainTrack)
+        mainTrack = getOldMainTrack()
+    }
+
+    private fun swapAmbienceTrack() {
+        ambienceTrack = getOldAmbienceTrack()
+    }
+
+    private fun getOldMainTrack(): String {
         return if (mainTrack == MAIN_TRACK_1) {
             MAIN_TRACK_2
         }
@@ -256,10 +269,20 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
+    private fun getOldAmbienceTrack(): String {
+        return if (ambienceTrack == AMBIENCE_TRACK_1) {
+            AMBIENCE_TRACK_2
+        }
+        else {
+            AMBIENCE_TRACK_1
+        }
+    }
+
     companion object {
         private const val MAIN_TRACK_1 = "main1"
         private const val MAIN_TRACK_2 = "main2"
-        private const val AMBIENCE_TRACK = "ambience"
+        private const val AMBIENCE_TRACK_1 = "ambience1"
+        private const val AMBIENCE_TRACK_2 = "ambience2"
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
         private const val MAIN_CROSSFADE_TICKS = 75
