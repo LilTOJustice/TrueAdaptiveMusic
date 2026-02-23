@@ -12,7 +12,7 @@ import java.util.TimerTask
 import kotlin.concurrent.schedule
 import kotlin.math.min
 
-internal class MusicPlayer(client: MinecraftClient) {
+internal class MusicPlayer(private val client: MinecraftClient) {
     private val soundSystem = SoundSystem(client.options)
     private val volumeManager = VolumeManager(soundSystem)
     private val tracks = mutableMapOf<String, Track>()
@@ -60,7 +60,7 @@ internal class MusicPlayer(client: MinecraftClient) {
         }
 
         volumeManager.tick()
-        soundSystem.tick()
+        soundSystem.tick(client.player?.yaw)
     }
 
     fun crossfadeTracks(fadeOutTrackName: String, fadeInTrackName: String) {

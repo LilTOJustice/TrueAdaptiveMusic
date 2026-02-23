@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.isPaused
+import liltojustice.trueadaptivemusic.client.sound.setStereoRotation
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.option.GameOptions
@@ -24,8 +25,13 @@ class SoundSystem(private val options: GameOptions) {
         channels.clear()
     }
 
-    fun tick() {
+    fun tick(yaw: Float? = null) {
         channels.filter { it.value.isStopped }.forEach { channels.remove(it.key) }
+        yaw?.let {
+            channels.values
+                .filter { channel -> channel.isAmbient }
+                .forEach { channel -> channel.run { source -> source.setStereoRotation(yaw) } }
+        }
     }
 
     fun isPlaying(soundInstance: TAMSoundInstance?): Boolean {

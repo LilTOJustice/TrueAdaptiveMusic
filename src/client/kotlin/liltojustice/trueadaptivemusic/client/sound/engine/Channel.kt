@@ -15,6 +15,8 @@ class Channel private constructor(
 ) {
     private val thread = this.createThread()
     private val tasks = ArrayDeque<Consumer<Source>>()
+    val isAmbient
+        get() = soundInstance.isAmbient
     var isStopped: Boolean = false
         private set
 

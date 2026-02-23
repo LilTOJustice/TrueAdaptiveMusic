@@ -100,13 +100,15 @@ class MusicManager(private val client: MinecraftClient) {
         val isPaused = isPaused(client)
         val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
 
-        musicPlayer.clampTrackVolume(EVENT_TRACK,
+        musicPlayer.clampTrackVolume(
+            EVENT_TRACK,
             if (isPaused) {
                 PAUSE_VOLUME
             }
             else {
                 1F
-            })
+            }
+        )
 
         val mainTrackClamp =
             if (shouldStop) {
@@ -125,26 +127,31 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
         musicPlayer.clampTrackVolume(getOldTrack(), mainTrackClamp)
 
-        musicPlayer.clampTrackVolume(AMBIENCE_TRACK,
+        musicPlayer.clampTrackVolume(
+            AMBIENCE_TRACK,
             if (isPaused) {
                 PAUSE_VOLUME
             }
             else {
                 1F
-            })
+            }
+        )
 
         musicPlayer.tick()
 
         val isAmbiencePlaying = musicPlayer.isTrackPlaying(AMBIENCE_TRACK)
-        if (ambienceToPlay.isEmpty() && isAmbiencePlaying) {
+        if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
             musicPlayer.stop(AMBIENCE_TRACK)
         }
 
-        if (!ambienceToPlay.isEmpty() && (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience))) {
+        if (!ambienceToPlay.isEmpty() &&
+            client.player != null &&
+            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience))) {
             val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
             musicPlayer.startNew(
                 AMBIENCE_TRACK,
-                getPseudoRandomTrack(ambienceToPlay, lastAmbience))
+                getPseudoRandomTrack(ambienceToPlay, lastAmbience)
+            )
             lastAmbience = newAmbience
         }
 

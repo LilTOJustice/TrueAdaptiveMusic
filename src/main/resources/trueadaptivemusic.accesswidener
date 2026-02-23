@@ -18,3 +18,4 @@ accessible field net/minecraft/client/sound/SoundSystem soundLoader Lnet/minecra
 accessible field net/minecraft/client/sound/SoundLoader resourceFactory Lnet/minecraft/resource/ResourceFactory;
 accessible field net/minecraft/client/sound/SoundSystem started Z
 accessible method net/minecraft/client/sound/Source create ()Lnet/minecraft/client/sound/Source;
+accessible field net/minecraft/client/sound/Source pointer I
