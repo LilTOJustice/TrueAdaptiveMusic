@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import com.google.gson.JsonObject
 
-class ErrorPredicate(private val actualJson: JsonObject, val reason: String): MusicPredicate() {
+class ErrorPredicate(val actualJson: JsonObject, val reason: String): MusicPredicate() {
     val shortenedJson: JsonObject = run {
         val shortened = actualJson.deepCopy()
         shortened.remove("musicPath")
@@ -15,10 +15,6 @@ class ErrorPredicate(private val actualJson: JsonObject, val reason: String): Mu
 
     override fun test(): Boolean {
         return false
-    }
-
-    override fun toJson(): JsonObject {
-        return actualJson
     }
 
     companion object: MusicPredicateCompanion {

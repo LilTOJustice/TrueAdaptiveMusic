@@ -18,6 +18,8 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.toast.SystemToast
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
@@ -164,5 +166,16 @@ object TAMClient {
         }
 
         initialized = true
+    }
+
+    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
+        minecraftClient.toastManager.add(
+            SystemToast.create(
+                minecraftClient,
+                SystemToast.Type.FILE_DROP_FAILURE,
+                errorMessage,
+                Text.literal(exceptionMessage ?: "")
+            )
+        )
     }
 }

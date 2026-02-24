@@ -2,14 +2,17 @@ package liltojustice.trueadaptivemusic.client.gui.extensions
 
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 
-fun MusicTrigger<*>.getTriggerTooltipString(): String {
+fun MusicTrigger.getTriggerTooltipString(): String {
     return getTriggerTooltipText().string
 }
 
-fun MusicTrigger<*>.getTriggerTooltipText(): Text {
+fun MusicTrigger.getTriggerTooltipText(): MutableText {
     if (this is ErrorPredicate) {
         return Text.literal(Text.translatableWithFallback(
             "trueadaptivemusic.trigger_error_predicate_tooltip",
@@ -27,6 +30,13 @@ fun MusicTrigger<*>.getTriggerTooltipText(): Text {
 
     val result = StringBuilder()
     val args = getTriggerArgs()
+    if (this is MusicPredicate) {
+        result.appendLine("Predicate Arguments:")
+    }
+    else if (this is MusicEvent) {
+        result.appendLine("Predicate Arguments:")
+    }
+
     args.forEach { param -> result.appendLine(param.toString()) }
 
     if (args.isEmpty()) {

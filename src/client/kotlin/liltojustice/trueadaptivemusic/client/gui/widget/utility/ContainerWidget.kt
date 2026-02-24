@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.input.CharInput
 import net.minecraft.client.input.KeyInput
@@ -45,6 +46,9 @@ abstract class ContainerWidget(
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
+    }
+
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
     override fun playDownSound(soundManager: SoundManager?) {
@@ -270,6 +274,10 @@ abstract class ContainerWidget(
 
     fun resetScrolling() {
         scrollPosition = 0
+    }
+
+    fun scrollToBottom() {
+        scrollPosition = Int.MAX_VALUE
     }
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {

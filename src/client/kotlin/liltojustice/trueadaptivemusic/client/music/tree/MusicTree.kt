@@ -1,36 +1,50 @@
 package liltojustice.trueadaptivemusic.client.music.tree
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
+import net.minecraft.text.Text
 import kotlin.collections.plus
+import kotlin.reflect.full.declaredMembers
+import kotlin.reflect.full.primaryConstructor
 
 typealias NodeVisitor = (node: MusicTree.Node, path: List<String>) -> Unit
 
-class MusicTree private constructor(json: JsonObject? = null, soundLibrary: SoundLibrary = mapOf()) {
-    private val root = if (json != null) Node.fromJson(json, soundLibrary) else Node.makeRoot()
+class MusicTree {
+    @Serialize
+    private val version = 2
+
+    @Serialize
+    private val root = Node.makeRoot()
 
     fun toJson(): JsonObject {
-        return root.toJson()
+        return MusicTreeSerializer.serialize(this)
     }
 
     fun getMusicToPlay(client: MinecraftClient): Result {
         val result = root.getSatisfiedNode(client)
         return Result(
             result.path.joinToString(PATH_SEPARATOR),
-            result.node.predicate.parameters,
+            result.node.parameters,
             result.music,
             result.ambience,
             result.events.values.toList()
         )
+    }
+
+    fun initializeParents() {
+        root.initializeParents()
     }
 
     private fun traverseRecursive(
@@ -40,7 +54,7 @@ class MusicTree private constructor(json: JsonObject? = null, soundLibrary: Soun
         path: List<String> = emptyList()) {
         var newPath = emptyList<String>()
         try {
-            newPath = path + root.predicate.getTriggerId()
+            newPath = path + root.predicates.joinToString { it.getTriggerId() }
         }
         catch (_: Exception) {}
         preorderVisitor?.invoke(root, newPath)
@@ -65,7 +79,7 @@ class MusicTree private constructor(json: JsonObject? = null, soundLibrary: Soun
 
         fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): MusicTree {
             try {
-                return MusicTree(json, soundLibrary)
+                return MusicTreeSerializer.deserialize(json, soundLibrary)
             } catch (e: Exception) {
                 throw RulesParserException("Failed to parse rules.", e)
             }
@@ -73,108 +87,112 @@ class MusicTree private constructor(json: JsonObject? = null, soundLibrary: Soun
     }
 
     class Node private constructor(
-        var predicate: MusicPredicate,
+        var music: List<PlayableSound>,
+        var ambience: List<PlayableSound>,
+        var predicates: MutableList<MusicPredicate>,
         var events: List<MusicEvent>,
+        var parameters: Parameters,
         val children: MutableList<Node> = mutableListOf()
     ) {
         var parent: Node? = null
             private set
 
         init {
-            children.forEach { child -> child.parent = this }
+            initializeParents()
+        }
+
+        fun initializeParents() {
+            children.forEach { child ->
+                child.parent = this
+                child.initializeParents()
+            }
         }
 
         fun forEachChild(visitor: (child: Node) -> Unit) {
             children.forEach(visitor)
         }
 
-        fun toJson(): JsonObject {
-            val result = predicate.toJson()
-            val jsonEvents = JsonArray(events.size)
-            val jsonChildren = JsonArray(children.size)
-            events.forEach { event -> jsonEvents.add(event.toJson()) }
-            children.forEach { child -> jsonChildren.add(child.toJson()) }
-            result.add("events", jsonEvents)
-            result.add("children", jsonChildren)
-
-            return result
-        }
-
         fun getSatisfiedNode(
             client: MinecraftClient,
             path: List<String> = emptyList(),
-            events: Map<String, MusicEvent> = emptyMap(),
-            music: Set<PlayableSound> = emptySet(),
-            ambience: Set<PlayableSound> = emptySet()): Result {
-            try {
-                if (!predicate.testPredicate()) {
+            eventCollection: Map<String, MusicEvent> = emptyMap(),
+            musicCollection: Set<PlayableSound> = emptySet(),
+            ambienceCollection: Set<PlayableSound> = emptySet()): Result {
+            predicates.forEach { predicate ->
+                try {
+                    if (!predicate.testPredicate()) {
+                        return@forEach
+                    }
+                }
+                catch (e: NoClassDefFoundError) {
+                    Logger.logError(
+                        "Testing predicates failed due to a class loader error. " +
+                                "Are you missing a mod?\nError: $e",
+                        true)
+
                     return Result(
                         this, emptyList(), emptyMap(), emptyList(), emptyList())
                 }
-            }
-            catch (e: NoClassDefFoundError) {
-                Logger.logError(
-                    "Testing predicate type ${predicate.getTypeName()} failed due to a class loader error. " +
-                            "Are you missing a mod?\nError: $e",
-                    true)
+                catch (e: Exception) {
+                    Logger.logError("Testing predicates threw an exception.\nError: $e", true)
 
-                return Result(
-                    this, emptyList(), emptyMap(), emptyList(), emptyList())
-            }
-            catch (e: Exception) {
-                Logger.logError(
-                    "Test for predicate type ${predicate.getTypeName()} threw an exception.\nError: $e",
-                    true
-                )
-
-                return Result(
-                    this, emptyList(), emptyMap(), emptyList(), emptyList())
-            }
-
-            val newPath = path + predicate.getTriggerId()
-            val newEvents = events + this.events.map { event -> Pair(event.getTriggerId(), event) }
-            val newMusic = predicate.music.toSet() +
-                    if (predicate.parameters.inheritMusic)
-                        music
-                    else
-                        emptySet()
-            val newAmbience = predicate.ambience.toSet() +
-                    if (predicate.parameters.inheritAmbience)
-                        ambience
-                    else
-                        emptySet()
-
-            for (child in children) {
-                val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic, newAmbience)
-
-                if (result.path.isNotEmpty()) {
-                    return result
+                    return Result(
+                        this, emptyList(), emptyMap(), emptyList(), emptyList())
                 }
+
+                val newPath = path + predicate.getTriggerId()
+                val newEvents = eventCollection + this.events.map { event -> Pair(event.getTriggerId(), event) }
+                val newMusic = this.music.toSet() +
+                        if (parameters.inheritMusic)
+                            musicCollection
+                        else
+                            emptySet()
+                val newAmbience = ambience.toSet() +
+                        if (parameters.inheritAmbience)
+                            ambienceCollection
+                        else
+                            emptySet()
+
+                for (child in children) {
+                    val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic, newAmbience)
+
+                    if (result.path.isNotEmpty()) {
+                        return result
+                    }
+                }
+
+                return Result(this, newPath, newEvents, newMusic.toList(), newAmbience.toList())
             }
 
-            return Result(this, newPath, newEvents, newMusic.toList(), newAmbience.toList())
+            return Result(this, emptyList(), emptyMap(), emptyList(), emptyList())
         }
 
         fun newChild(
-            predicateType: String,
-            predicateParams: List<Any>,
-            predicateArgs: List<Any>,
+            parameters: List<Any>,
             events: List<MusicEvent>,
             music: List<PlayableSound>,
             ambience: List<PlayableSound>): Node {
-            val predicate = TAMClient.predicateFactory.fromArgs(
-                predicateType, music, ambience, predicateParams, predicateArgs)
-            val child = Node(predicate, events)
+            val child = Node(music, ambience, mutableListOf(), events, Parameters.fromArgs(parameters))
             child.parent = this
             children.add(child)
 
             return child
         }
 
+        fun newPredicate(predicateType: String, predicateArgs: List<Any>): MusicTree.Node {
+            val predicate = TAMClient.predicateFactory.fromArgs(predicateType, predicateArgs)
+            predicates.add(predicate)
+
+            return this
+        }
+
         fun copy(withChildren: Boolean): Node {
             return Node(
-                TAMClient.predicateFactory.makeCopy(predicate),
+                music,
+                ambience,
+                predicates.map { TAMClient.predicateFactory.makeCopy(it) }.toMutableList(),
                 events.map { TAMClient.eventFactory.makeCopy(it) },
+                parameters.copy(),
                 if (withChildren)
                     children.map { it.copy(true) }.toMutableList()
                 else
@@ -232,24 +250,13 @@ class MusicTree private constructor(json: JsonObject? = null, soundLibrary: Soun
 
         companion object {
             fun makeRoot(): Node {
-                return Node(RootPredicate(), listOf())
-            }
-
-            fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): Node {
                 return Node(
-                    TAMClient.predicateFactory.fromJson(json, soundLibrary),
-                    (json.getAsJsonArray("events") ?: JsonArray())
-                        .map { element -> TAMClient.eventFactory.fromJson(element.asJsonObject, soundLibrary) },
-                    parseChildren(json, soundLibrary)
+                    listOf(),
+                    listOf(),
+                    mutableListOf(RootPredicate()),
+                    listOf(),
+                    Parameters.default()
                 )
-            }
-
-            private fun parseChildren(json: JsonObject, soundLibrary: SoundLibrary)
-                    : MutableList<Node> {
-                return if (JsonHelper.hasArray(json, "children"))
-                    JsonHelper.getArray(json, "children")
-                        .map { child -> fromJson(child.asJsonObject, soundLibrary) }.toMutableList()
-                else mutableListOf()
             }
         }
 
@@ -258,13 +265,58 @@ class MusicTree private constructor(json: JsonObject? = null, soundLibrary: Soun
             val path: List<String>,
             val events: Map<String, MusicEvent>,
             val music: List<PlayableSound>,
-            val ambience: List<PlayableSound>)
+            val ambience: List<PlayableSound>
+        )
+
+        data class Parameters(
+            var trackDelay: UInt = 0U,
+            var trackDelayNoise: UInt = 0U,
+            var enterDelay: UInt = 0U,
+            var inheritMusic: Boolean = false,
+            var inheritAmbience: Boolean = true
+        ): MusicTrigger.Parameters() {
+            companion object: ParametersCompanion<Parameters> {
+                fun fromArgs(args: List<Any>): Parameters {
+                    return Parameters::class.primaryConstructor?.call(*args.toTypedArray()) ?: default()
+                }
+
+                override val displayNames: Map<String, String>
+                    get() = super.displayNames +
+                            Parameters::class.declaredMembers.map { it.name }.associateWith { it.prettify() }
+
+                override val descriptions: Map<String, String>
+                    get() = super.descriptions + mapOf(
+                        "trackDelay" to "After a track finishes, wait this many seconds before playing the next.",
+                        "trackDelayNoise" to "Add randomly + or - this many seconds to track delay.",
+                        "enterDelay" to "Wait this many seconds before starting music when entering this predicate. " +
+                                "Disables music resuming for this predicate.",
+                        "inheritMusic" to "Include this predicate's parent's music along with this predicate's music.",
+                        "inheritAmbience" to "Include this predicate's parent's ambience along with this predicate's " +
+                                "ambience."
+                    )
+
+                override fun default(): Parameters {
+                    return Parameters()
+                }
+
+                fun getParamDisplayName(paramName: String): Text? {
+                    return translatableWithFallbackOrNull(
+                        "trueadaptivemusic.param.predicate.${paramName}.display", displayNames[paramName])
+                }
+
+                fun getParamDescription(paramName: String): Text? {
+                    return Text.translatableWithFallback(
+                        "trueadaptivemusic.param.predicate.${paramName}.description", descriptions[paramName])
+                }
+            }
+        }
     }
 
-    class Result(
+    data class Result(
         val path: String,
-        val predicateParameters: MusicPredicate.Parameters,
+        val parameters: Node.Parameters,
         val music: List<PlayableSound>,
         val ambience: List<PlayableSound>,
-        val events: List<MusicEvent>)
+        val events: List<MusicEvent>
+    )
 }

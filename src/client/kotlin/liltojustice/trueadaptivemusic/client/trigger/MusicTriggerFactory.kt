@@ -1,36 +1,15 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
-import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
-import net.minecraft.util.JsonHelper
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 @Suppress("UNCHECKED_CAST")
-abstract class MusicTriggerFactory<T, TParam: MusicTrigger.Parameters> (
-    private val registry: MusicTriggerRegistry<T>, private val errorFallback: (JsonObject, Exception) -> T)
-        where T: MusicTrigger<TParam> {
-    fun fromJson(json: JsonObject, soundLibrary: SoundLibrary): T {
-        return try {
-            val typeName = JsonHelper.getString(json, "type")
-            val type = registry[typeName]
-
-            MusicTrigger.getGson(soundLibrary).fromJson(json, type.java)
-        } catch (e: MusicTriggerException) {
-            errorFallback(json, e)
-        }
-    }
-
-    fun fromArgs(typeName: String, music: List<PlayableSound>, parameters: List<Any>, args: List<Any>): T {
-        val result = getConstructorFromTypeName(typeName).call(*args.toTypedArray()) as? T
+abstract class MusicTriggerFactory<T: MusicTrigger> (private val registry: MusicTriggerRegistry<T>) {
+    fun fromArgs(typeName: String, args: List<Any>): T {
+        return getConstructorFromTypeName(typeName).call(*args.toTypedArray()) as? T
             ?: throw MusicTriggerException("Could not instantiate music trigger from args.")
-        result.music = music.toMutableList()
-        result.parameters = result.parameters.initializeCopyFromArgs(*parameters.toTypedArray())
-                as TParam
-        return result
     }
 
     fun getRequiredArgs(typeName: String): List<KParameter> {

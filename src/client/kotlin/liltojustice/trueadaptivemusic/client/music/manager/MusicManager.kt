@@ -88,7 +88,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
-        val parameters = predicateResult.predicateParameters
+        val parameters = predicateResult.parameters
         val musicToPlay = predicateResult.music
         val ambienceToPlay = predicateResult.ambience
         val trackDelayNoise = parameters.trackDelayNoise
