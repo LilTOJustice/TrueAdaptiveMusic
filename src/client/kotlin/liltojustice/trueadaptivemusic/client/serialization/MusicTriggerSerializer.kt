@@ -9,7 +9,6 @@ import com.google.gson.JsonParser
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
@@ -22,6 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 
 object MusicTriggerSerializer {
@@ -99,6 +99,10 @@ object MusicTriggerSerializer {
     private object MusicTriggerExclusionStrategy: ExclusionStrategy {
         @OptIn(ExperimentalStdlibApi::class)
         override fun shouldSkipField(f: FieldAttributes): Boolean {
+            if (!f.declaringClass.kotlin.isSubclassOf(MusicTrigger::class)) {
+                return false
+            }
+
             val kotlinAnnotations = f.declaringClass.kotlin.declaredMemberProperties
                 .firstOrNull() { it.name == f.name }
                 ?.annotations
