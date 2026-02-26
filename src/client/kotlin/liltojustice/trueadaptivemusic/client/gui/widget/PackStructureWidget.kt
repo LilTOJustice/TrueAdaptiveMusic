@@ -199,7 +199,6 @@ class PackStructureWidget(
         val ARROW_TEXT: MutableText = Text.literal("->")
         val LINE_SPACE: MutableText = Text.literal("\n\n")
         val ADD_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.add", "Add")
-        val NODE_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.node", "Node")
         val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.create_node", "Create a new node")
         val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
@@ -278,24 +277,32 @@ class PackStructureWidget(
 
         val configureNodeWidget = run {
             val widget = ClickableTextWidget(
-                "${NODE_TEXT.string}:",
+                if (targetedNode == node && node.parent != null) "⠿⠿" else "⚙",
+                showHighlight = false,
                 onClick = {
                     targetedPredicate = null
                     targetedNode = node
                     onSelectEditExistingNode(node)
                 }
             )
-            val tooltipText = CONFIGURE_NODE_TEXT.copyContentOnly().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+            val tooltipText = if (targetedNode !== node)
+                CONFIGURE_NODE_TEXT.copyContentOnly().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+            else
+                MOVE_NODE_TEXT
             widget.setTooltip(Tooltip.of(tooltipText))
 
             widget
         }
 
-        override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
             val result = super.mouseClicked(click, doubled)
-            predicateWidgets.forEach { it.mouseClicked(click, doubled) }
-            combinePredicateWidget?.mouseClicked(click, doubled)
+            val predicateClicked = predicateWidgets.any { it.mouseClicked(click, doubled) }
+            val combineClicked = combinePredicateWidget?.mouseClicked(click, doubled) ?: false
             configureNodeWidget.mouseClicked(click, doubled)
+
+            if (!predicateClicked && !combineClicked && result) {
+                configureNodeWidget.onClick(click, doubled)
+            }
 
             return result
         }
