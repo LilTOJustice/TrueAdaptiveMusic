@@ -18,15 +18,9 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 
-abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
+abstract class MusicTrigger {
     @Serialize
     private val type = getTypeName()
-
-    @Serialize
-    var music: List<PlayableSound> = emptyList()
-
-    @Serialize
-    lateinit var parameters: TParameters
 
     abstract fun getTypeName(): String
 
@@ -40,20 +34,7 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         return getTypeName()  + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
     }
 
-    open fun toJson(): JsonObject {
-        return getGson().toJsonTree(this).asJsonObject
-    }
-
     companion object {
-        fun getGson(soundLibrary: SoundLibrary? = null): Gson {
-            return GsonBuilder()
-                .addDeserializationExclusionStrategy(MusicTriggerExclusionStrategy)
-                .addSerializationExclusionStrategy(MusicTriggerExclusionStrategy)
-                .registerTypeHierarchyAdapter(
-                    PlayableSound::class.java, PlayableSoundTypeAdapter(soundLibrary))
-                .create()
-        }
-
         fun getTruncatedTriggerId(triggerId: String): String {
             val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
             val text = arrays.fold(triggerId) { partial: String, array ->
@@ -85,10 +66,6 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
                 .map { arg -> TriggerParam(arg.name, arg.value) }
         }
 
-        fun initializeCopyFromArgs(vararg constructorArgs: Any): Parameters {
-            return (this::class.primaryConstructor?.call(*constructorArgs) ?: default())
-        }
-
         companion object: ParametersCompanion<Parameters> {
             override fun default(): Parameters {
                 throw MusicTriggerException("default() called on abstract Parameters class.")
@@ -103,47 +80,6 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
                 get() = mapOf()
 
             fun default(): TSelf
-        }
-    }
-
-    object MusicTriggerExclusionStrategy: ExclusionStrategy {
-        @OptIn(ExperimentalStdlibApi::class)
-        override fun shouldSkipField(f: FieldAttributes): Boolean {
-            if (!f.declaringClass.kotlin.isSubclassOf(MusicTrigger::class)) {
-                return false
-            }
-
-            val kotlinAnnotations = f.declaringClass.kotlin.declaredMemberProperties
-                .firstOrNull() { it.name == f.name }
-                    ?.annotations
-            return f.annotations?.any { it is Serialize } != true &&
-                    kotlinAnnotations?.any { it is Serialize } != true &&
-                    f.declaringClass?.kotlin?.primaryConstructor?.parameters?.map { it.name }
-                        ?.let {
-                            it.none { name -> name == f.name }
-                        }
-                    ?: true
-        }
-
-        override fun shouldSkipClass(clazz: Class<*>?): Boolean {
-            return false
-        }
-    }
-
-    class PlayableSoundTypeAdapter(private val soundLibrary: SoundLibrary?): TypeAdapter<PlayableSound>() {
-        override fun write(output: JsonWriter, sound: PlayableSound) {
-            output.value(sound.getSoundName())
-        }
-
-        override fun read(input: JsonReader): PlayableSound? {
-            val path = input.nextString()
-            val library = soundLibrary
-                ?: throw MusicTriggerException("No sound library given for deserializing sound files from trigger.")
-            return PlayableSound.of(path, library)
-                ?: run {
-                    Logger.logWarning("Could not find sound for \"$path\", skipping...")
-                    null
-                }
         }
     }
 }

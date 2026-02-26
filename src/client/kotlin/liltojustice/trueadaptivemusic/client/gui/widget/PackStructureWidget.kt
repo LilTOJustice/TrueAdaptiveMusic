@@ -1,93 +1,72 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipString
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.input.KeyInput
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import kotlin.math.max
 
 class PackStructureWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: () -> Unit,
     private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
-    private val onSelectCreateNewNode: (parent: MusicTree.Node) -> Unit,
+    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate) -> Unit,
+    private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
+    private val onSelectCreateNewPredicate: (node: MusicTree.Node) -> Unit,
     x: Int = 0,
-    y: Int = 0)
-    : ContainerWidget(
-    width,
-    height,
-    Text.translatableWithFallback("trueadaptivemusic.pack_structure", "Pack Structure").string,
-    true,
-    false,
-    true,
-    true,
-    x,
-    y) {
+    y: Int = 0
+): ContainerWidget(
+    width, height, TITLE_TEXT.string, true, false, true, true, x, y)
+{
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
     private var targetedNode: MusicTree.Node? = null
+    private var targetedPredicate: MusicPredicate? = null
 
     init {
         initPredicateWidgets()
     }
 
-    fun setNode(node: MusicTree.Node?) {
+    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate?) {
         targetedNode = node
+        targetedPredicate = predicate
     }
 
-    fun initPredicateWidgets() {
+    fun initPredicateWidgets(newTarget: MusicTree.Node? = null) {
+        targetedNode = newTarget
         clearWidgets()
         var row = 0
         musicPack.rules.traverse(
             { node, path ->
-                val newWidget = addWidget(
-                    NodeWidget(
-                        MusicPredicate.getDisplayName(node.predicate.getTypeName()).string,
-                        onClick = { widget ->
-                            onSelectEditExistingNode(node)
-                        },
-                        isSelected = { node === targetedNode })
-                        .withCustomData(TargetNode(node, false)),
+                addWidget(
+                    NodeWidget(node, TargetNode(node, false)),
                     row++,
-                    (path.size - 1) * INDENT) as NodeWidget
-
-                if (node.predicate is ErrorPredicate) {
-                    newWidget.color = Colors.RED
-                }
-                else if (node.events.any { event -> event is ErrorEvent }) {
-                    newWidget.color = Colors.YELLOW
-                }
+                    (path.size - 1) * INDENT
+                )
             },
             { node, path ->
-                if (node.predicate is ErrorPredicate) {
-                    return@traverse
-                }
-
                 addWidget(
-                    NodeWidget(
-                        "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
-                        onClick = { widget ->
-                            onSelectCreateNewNode(node)
-                        },
-                        isSelected = { false }
-                    )
-                        .withCustomData(TargetNode(node, true)),
+                    CreateNodeWidget(TargetNode(node, true)),
                     row++,
-                    path.size * INDENT)
-            })
+                    path.size * INDENT
+                )
+            }
+        )
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -121,8 +100,11 @@ class PackStructureWidget(
         val result = super.mouseClicked(click, doubled)
         mouseButtonHeld = false
         forEachChild { child ->
-            if (child is ClickableTextWidget && child.isMouseOver(click.x, click.y)) {
+            if (child is NodeWidget &&
+                child.targetNode.node.parent != null &&
+                child.isMouseOver(click.x, click.y)) {
                 mouseButtonHeld = true
+
                 return@forEachChild
             }
         }
@@ -138,7 +120,7 @@ class PackStructureWidget(
         }
 
         forEachChild { child ->
-            if (child !is NodeWidget
+            if (child !is AbstractNodeWidget
                 || !child.isMouseOver(click.x, click.y)
                 || (targetedNode === child.targetNode.node && !shiftHeld)
                 || targetedNode?.let { child.isValidDestination(it) || shiftHeld } != true) {
@@ -163,8 +145,7 @@ class PackStructureWidget(
             }
 
             musicPack.initRules()
-            onChangesSaved()
-            initPredicateWidgets()
+            initPredicateWidgets(toAdopt)
         }
 
         mouseButtonHeld = false
@@ -173,24 +154,6 @@ class PackStructureWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        forEachChild { child ->
-            if (child !is NodeWidget) {
-                return@forEachChild
-            }
-
-            val baseTooltipText = child.getBaseTooltipString()
-            child.setTooltip(
-                if (targetedNode === child.targetNode.node &&
-                    !child.targetNode.isParent &&
-                    child.targetNode.node.parent != null)
-                    if (baseTooltipText.isBlank())
-                        Tooltip.of(Text.literal(MOVE_NODE_STRING))
-                    else
-                        Tooltip.of(Text.literal("$MOVE_NODE_STRING\n\n$baseTooltipText"))
-                else
-                    Tooltip.of(Text.literal(baseTooltipText)))
-        }
-
         super.renderWidget(context, mouseX, mouseY, delta)
 
         if (!isMovingNode()) {
@@ -198,7 +161,7 @@ class PackStructureWidget(
         }
 
         forEachChild { child ->
-            if (child !is NodeWidget
+            if (child !is AbstractNodeWidget
                 || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
                 || (child.targetNode.node === targetedNode && !shiftHeld)) {
                 return@forEachChild
@@ -214,6 +177,7 @@ class PackStructureWidget(
                 if (valid) Colors.WHITE else Colors.RED,
                 false
             )
+
             return@forEachChild
         }
     }
@@ -226,39 +190,167 @@ class PackStructureWidget(
         const val INDENT = 10
         const val SHIFT_KEY = 340
         const val CTRL_KEY = 341
-        val MOVE_NODE_STRING: String = Text.translatableWithFallback(
+        val TITLE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.pack_structure", "Pack Structure")
+        val MOVE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.move_node",
-            "Click and drag to move + shift (copy) + ctrl (copy with children)."
-        ).string
-        val ARROW_TEXT: Text = Text.literal("->")
+            "Click and drag to move\n+ shift (copy)\n+ ctrl (copy with children)"
+        )
+        val ARROW_TEXT: MutableText = Text.literal("->")
+        val LINE_SPACE: MutableText = Text.literal("\n\n")
+        val ADD_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.add", "Add")
+        val NODE_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.node", "Node")
+        val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.create_node", "Create a new node")
+        val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.create_predicate", "Create a Predicate")
+        val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.combine_predicates", "Combine Predicates")
+        val CONFIGURE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.configure_node", "Configure this node")
     }
 
-    class NodeWidget(text: String, onClick: (ClickableTextWidget) -> Unit, isSelected: (ClickableTextWidget) -> Boolean)
-        : ClickableTextWidget(text, onClick = onClick, isSelected = isSelected)
+    private inner class NodeWidget(node: MusicTree.Node, override val targetNode: TargetNode):
+        AbstractNodeWidget,
+        ClickableTextWidget(
+            "", showHighlight = false, isSelected = { targetedNode === node && targetedPredicate == null })
     {
-        val targetNode
-            get() = customData as TargetNode
-
-        fun getBaseTooltipString(): String {
-            if (targetNode.isParent) {
-                return Text.translatableWithFallback("trueadaptivemusic.create_node", "Create a new node")
-                    .string
-            }
-
-            return targetNode.node.predicate.getTriggerTooltipString() +
-                    if (targetNode.node.events.any { event -> event is ErrorEvent })
-                        "\n\n${Text.translatableWithFallback(
-                            "trueadaptivemusic.has_event_errors",
-                            "Has event errors. Click to see.").string}"
-                    else
-                        ""
+        init {
+            active = true
         }
 
+        val predicateWidgets = run {
+            node.predicates.map { predicate ->
+                val widget = ClickableTextWidget(
+                    MusicPredicate.getDisplayName(predicate.getTypeName()).string,
+                    onClick = if (predicate is RootPredicate) ({
+                        targetedPredicate = null
+                        targetedNode = node
+                        onSelectEditExistingNode(node)
+                    })
+                    else ({
+                        targetedPredicate = predicate
+                        onSelectEditExistingPredicate(node, predicate)
+                    }),
+                    isSelected = { predicate === targetedPredicate }
+                )
+
+                val tooltipText = predicate.getTriggerTooltipText()
+
+                widget.setTooltip(Tooltip.of(tooltipText))
+                widget.color = if (predicate is ErrorPredicate)
+                    Colors.RED
+                else
+                    Colors.WHITE
+
+                widget
+            }
+        }
+
+        val orWidgets = buildList(max(0, predicateWidgets.size - 1)) {
+            repeat(max(0, predicateWidgets.size - 1)) { add(ClickableTextWidget("||")) }
+        }
+
+        val combinePredicateWidget = if (node.predicates.any { it is RootPredicate })
+            null
+        else
+            run {
+                val widget = ClickableTextWidget(
+                    "+",
+                    showHighlight = false,
+                    onClick = {
+                        onSelectCreateNewPredicate(node)
+                        initPredicateWidgets()
+                    }
+                )
+                widget.setTooltip(
+                    Tooltip.of(
+                        if (node.predicates.isEmpty())
+                            CREATE_PREDICATE_TEXT
+                        else
+                            COMBINE_PREDICATES_TEXT
+                    )
+                )
+
+                widget
+            }
+
+        val configureNodeWidget = run {
+            val widget = ClickableTextWidget(
+                "${NODE_TEXT.string}:",
+                onClick = {
+                    targetedPredicate = null
+                    targetedNode = node
+                    onSelectEditExistingNode(node)
+                }
+            )
+            val tooltipText = CONFIGURE_NODE_TEXT.copyContentOnly().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+            widget.setTooltip(Tooltip.of(tooltipText))
+
+            widget
+        }
+
+        override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+            val result = super.mouseClicked(click, doubled)
+            predicateWidgets.forEach { it.mouseClicked(click, doubled) }
+            combinePredicateWidget?.mouseClicked(click, doubled)
+            configureNodeWidget.mouseClicked(click, doubled)
+
+            return result
+        }
+
+        override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+            super.renderWidget(context, mouseX, mouseY, delta)
+            var nextX = 0
+
+            nextX = renderWidget(configureNodeWidget, nextX) {
+                configureNodeWidget.render(context, mouseX, mouseY, delta)
+            }
+            predicateWidgets.forEachIndexed { index, widget ->
+                nextX = renderWidget(widget, nextX) { widget.render(context, mouseX, mouseY, delta) }
+
+                if (index < orWidgets.size) {
+                    val orWidget = orWidgets[index]
+                    nextX = renderWidget(orWidget, nextX) { orWidget.render(context, mouseX, mouseY, delta) }
+                }
+            }
+
+            combinePredicateWidget?.let {
+                renderWidget(it, nextX) {
+                    it.render(context, mouseX, mouseY, delta)
+                }
+            }
+        }
+
+        override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+        }
+
+        private fun renderWidget(widget: ClickableWidget, nextX: Int, render: () -> Unit): Int {
+            widget.x = x + nextX
+            widget.y = y
+            width = max(width, nextX + widget.width)
+            height = max(height, widget.height)
+            render()
+
+            return nextX + widget.width + 4
+        }
+    }
+
+    private inner class CreateNodeWidget(override val targetNode: TargetNode):
+        AbstractNodeWidget,
+        ClickableTextWidget("+ ${ADD_TEXT.string}", onClick = { onSelectCreateNewNode(targetNode.node) }) {
+        init {
+            setTooltip(Tooltip.of(CREATE_NODE_TEXT))
+        }
+    }
+
+    private interface AbstractNodeWidget {
+        val targetNode: TargetNode
         fun isValidDestination(selectedNode: MusicTree.Node): Boolean {
             return (targetNode.node.parent != null || targetNode.isParent)
                     && targetNode.node.isValidNewChild(selectedNode)
         }
     }
 
-    data class TargetNode(val node: MusicTree.Node, val isParent: Boolean)
+    private data class TargetNode(val node: MusicTree.Node, val isParent: Boolean)
 }

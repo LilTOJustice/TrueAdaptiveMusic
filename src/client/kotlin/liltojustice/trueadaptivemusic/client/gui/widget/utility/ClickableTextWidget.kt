@@ -19,10 +19,7 @@ open class ClickableTextWidget(
     private val isSelected: (ClickableTextWidget) -> Boolean = { false },
     private val onMouseOn: (ClickableTextWidget) -> Unit = {},
     private val onMouseOff: (ClickableTextWidget) -> Unit = {}
-)
-    : ClickableWidget(x, y, 0, 0, Text.literal(text)),
-    DataWrapped<ClickableTextWidget> {
-    override var customData: Any? = null
+): ClickableWidget(x, y, 0, 0, Text.literal(text)) {
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
@@ -36,14 +33,14 @@ open class ClickableTextWidget(
             }
 
             val result = message.getWithStyle(style).firstOrNull()
-            width = textRenderer.getWidth(result)
+            result?.let { width = textRenderer.getWidth(it) }
 
             result
         }
     var hovering = false
 
     init {
-        width = textRenderer.getWidth(coloredText)
+        coloredText?.let { width = textRenderer.getWidth(it) }
         height = textRenderer.fontHeight
         active = onClick != null
     }

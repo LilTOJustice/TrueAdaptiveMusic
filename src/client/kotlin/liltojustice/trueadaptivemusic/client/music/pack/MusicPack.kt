@@ -201,18 +201,12 @@ class MusicPack private constructor(
             packOngoingDir.deleteRecursively()
         }
         catch (e: Exception) {
-            Logger.logError("Failed to export to zip!")
-            val client = MinecraftClient.getInstance()
-            client.toastManager.add(
-                SystemToast.create(
-                    client,
-                    SystemToast.Type.FILE_DROP_FAILURE,
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.export_failure", "Failed to export pack! Try again."),
-                    Text.literal(e.message)
-                )
+            TAMClient.errorToast(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.export_failure", "Failed to export pack! Try again."),
+                e.message
             )
-
+            Logger.logError("Failed to export to zip!")
             newZip.deleteIfExists()
         }
 
@@ -235,11 +229,13 @@ class MusicPack private constructor(
         val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
         val usedEventTypes = mutableSetOf<KClass<out MusicEvent>>()
         rules.traverse { node, _ ->
-            (node.predicate as? ErrorPredicate)?.let {
-                validation.addWarning(it.reason)
-            }
+            node.predicates.forEach { predicate ->
+                (predicate as? ErrorPredicate)?.let {
+                    validation.addWarning(it.reason)
+                }
 
-            usedPredicateTypes.add(node.predicate::class)
+                usedPredicateTypes.add(predicate::class)
+            }
 
             node.events.forEach { event ->
                 (event as? ErrorEvent)?.let {

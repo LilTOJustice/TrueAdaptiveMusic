@@ -79,6 +79,10 @@ class EventViewWidget(
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.renderWidget(context, mouseX, mouseY, delta)
+        if (!visible) {
+            return
+        }
+
         if (selectedEvent is ErrorEvent) {
             val result = addWidgetFromRender(
                 {
@@ -99,10 +103,6 @@ class EventViewWidget(
                 )
             )
 
-            return
-        }
-
-        if (!visible) {
             return
         }
 
@@ -164,15 +164,6 @@ class EventViewWidget(
             TAMClient.playSoundNow(null)
         }
 
-        if (!requiredEventArgs.isEmpty()) {
-            addWidgetFromRender(
-                {
-                    ClickableTextWidget("Event Arguments:")
-                },
-                "arguments"
-            )
-        }
-
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
                 {
@@ -187,15 +178,6 @@ class EventViewWidget(
                     ) { save() }
                 },
                 "eventArg: ${arg.name ?: arg.index}"
-            )
-        }
-
-        if (!requiredEventParams.isEmpty()) {
-            addWidgetFromRender(
-                {
-                    ClickableTextWidget("Event Parameters:")
-                },
-                "parameters"
             )
         }
 
@@ -214,43 +196,48 @@ class EventViewWidget(
             )
         }
 
-        if (selectedEvent != null) {
-            val result = addWidgetFromRender(
-                {
-                    var clicked = false
-                    ClickableTextWidget(
-                        Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
-                        onClick = { widget ->
-                            if (!clicked) {
-                                clicked = true
-                                widget.setText(widget.text + '?')
-                                widget.color = Colors.RED
-                                val timer = Timer()
-                                timer.schedule(delay = 2000) {
-                                    clicked = false
-                                    widget.setText(
-                                        Text.translatableWithFallback(
-                                            "trueadaptivemusic.delete", "Delete").string)
-                                    widget.color = Colors.WHITE
-                                }
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "deleteSpacer"
+        )
 
-                                return@ClickableTextWidget
+        val result = addWidgetFromRender(
+            {
+                var clicked = false
+                ClickableTextWidget(
+                    Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
+                    onClick = { widget ->
+                        if (!clicked) {
+                            clicked = true
+                            widget.setText(widget.text + '?')
+                            widget.color = Colors.RED
+                            val timer = Timer()
+                            timer.schedule(delay = 2000) {
+                                clicked = false
+                                widget.setText(
+                                    Text.translatableWithFallback(
+                                        "trueadaptivemusic.delete", "Delete").string)
+                                widget.color = Colors.WHITE
                             }
 
-                            selectedEvent = null
-                            exit()
+                            return@ClickableTextWidget
                         }
-                    )
-                },
-                "Delete"
-            )
-            result.setTooltip(
-                Tooltip.of(
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.delete_event_description", "Delete this event")
+
+                        selectedEvent = null
+                        exit()
+                    }
                 )
+            },
+            "Delete"
+        )
+        result.setTooltip(
+            Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.delete_event_description", "Delete this event")
             )
-        }
+        )
     }
 
     private fun setSelectedEventTypeName(typeName: String) {
@@ -286,8 +273,8 @@ class EventViewWidget(
             .fromArgs(
                 selectedEventTypeName,
                 selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
-                eventParams.filterNotNull(),
-                eventArgs.filterNotNull())
+                eventArgs.filterNotNull(),
+                eventParams.filterNotNull())
         selectedEvent = newEvent
         onSaveEvent(newEvent, false)
     }
