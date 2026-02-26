@@ -5,20 +5,12 @@ import com.google.gson.FieldAttributes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.TypeAdapter
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonWriter
-import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
-import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import kotlin.reflect.full.isSubclassOf
 
 object MusicTreeSerializer {
     fun serialize(musicTree: MusicTree): JsonObject {
@@ -26,7 +18,16 @@ object MusicTreeSerializer {
     }
 
     fun deserialize(json: JsonObject, soundLibrary: SoundLibrary): MusicTree {
-        val tree = getGson(soundLibrary).fromJson(json, MusicTree::class.java)
+        var toDeserialize = json
+        val serializationVersion = if (!json.has("version"))
+            null
+        else
+            json.getAsJsonPrimitive("version").asInt
+        if (serializationVersion != MusicTree.SERIALIZATION_VERSION) {
+            toDeserialize = LegacyMusicTreeJsonConverter.convert(toDeserialize, serializationVersion)
+        }
+
+        val tree = getGson(soundLibrary).fromJson(toDeserialize, MusicTree::class.java)
         tree.initializeParents()
 
         return tree

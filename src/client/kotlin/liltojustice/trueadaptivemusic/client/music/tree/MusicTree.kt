@@ -23,7 +23,8 @@ typealias NodeVisitor = (node: MusicTree.Node, path: List<String>) -> Unit
 
 class MusicTree {
     @Serialize
-    private val version = 2
+    @Suppress("unused")
+    private val version = SERIALIZATION_VERSION
 
     @Serialize
     private val root = Node.makeRoot()
@@ -71,6 +72,7 @@ class MusicTree {
     }
 
     companion object {
+        const val SERIALIZATION_VERSION = 2
         const val PATH_SEPARATOR = "/"
 
         fun makeEmpty(): MusicTree {
@@ -179,7 +181,7 @@ class MusicTree {
             return child
         }
 
-        fun newPredicate(predicateType: String, predicateArgs: List<Any>): MusicTree.Node {
+        fun newPredicate(predicateType: String, predicateArgs: List<Any>): Node {
             val predicate = TAMClient.predicateFactory.fromArgs(predicateType, predicateArgs)
             predicates.add(predicate)
 
