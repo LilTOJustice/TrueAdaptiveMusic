@@ -131,6 +131,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                 packStructureWidget.initPredicateWidgets()
 
                 if (exit) {
+                    nodeViewWidget.reset()
                     switchToNodeView()
                 }
             }

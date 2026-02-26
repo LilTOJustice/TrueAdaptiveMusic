@@ -309,6 +309,12 @@ class NodeViewWidget(
         save()
     }
 
+    fun reset() {
+        clearWidgetsFromRender { false }
+        selectedNode = null
+        newNodeParent = null
+    }
+
     private fun save(exit: Boolean = false) {
         musicPack.initRules()
 

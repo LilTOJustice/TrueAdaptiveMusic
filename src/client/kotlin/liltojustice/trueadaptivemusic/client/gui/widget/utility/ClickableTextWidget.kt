@@ -25,11 +25,16 @@ open class ClickableTextWidget(
         get() = message.string
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     private var disableBold = false
+    private var enableItalic = false
     private val coloredText: Text?
         get() = run {
             var style = message.style.withColor(TextColor.fromRgb(color))
             if (onClick == null && !disableBold) {
                 style = style.withBold(true)
+            }
+
+            if (enableItalic) {
+                style = style.withItalic(true)
             }
 
             val result = message.getWithStyle(style).firstOrNull()
@@ -95,6 +100,10 @@ open class ClickableTextWidget(
 
     fun disableBold() {
         disableBold = true
+    }
+
+    fun enableItalic() {
+        enableItalic = true
     }
 
     fun setText(text: String) {

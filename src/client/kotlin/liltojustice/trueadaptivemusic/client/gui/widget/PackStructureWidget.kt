@@ -205,6 +205,7 @@ class PackStructureWidget(
             "trueadaptivemusic.create_predicate", "Create a Predicate")
         val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.combine_predicates", "Combine Predicates")
+        val EMPTY_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.empty", "Empty")
         val CONFIGURE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.configure_node", "Configure this node")
     }
@@ -250,19 +251,25 @@ class PackStructureWidget(
             repeat(max(0, predicateWidgets.size - 1)) { add(ClickableTextWidget("||")) }
         }
 
-        val combinePredicateWidget = if (node.predicates.any { it is RootPredicate } ||
-            (node !== targetedNode && node.predicates.none { it === targetedPredicate }))
+        val combinePredicateWidget = if (!node.predicates.isEmpty() &&
+            (node.predicates.any { it is RootPredicate } ||
+                    (node !== targetedNode && node.predicates.none { it === targetedPredicate })))
             null
         else
             run {
                 val widget = ClickableTextWidget(
-                    "+",
+                    if (node.predicates.isEmpty()) "${EMPTY_TEXT.string} +" else "+",
                     showHighlight = false,
                     onClick = {
                         onSelectCreateNewPredicate(node)
                         initPredicateWidgets()
                     }
                 )
+
+                if (node.predicates.isEmpty()) {
+                    widget.enableItalic()
+                }
+
                 widget.setTooltip(
                     Tooltip.of(
                         if (node.predicates.isEmpty())
