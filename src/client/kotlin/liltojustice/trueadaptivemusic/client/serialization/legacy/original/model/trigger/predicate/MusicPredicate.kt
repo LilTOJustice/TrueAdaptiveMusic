@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.DimensionPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.EntityNearbyPredicate
+import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.HeightPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.StructurePredicate
@@ -36,6 +37,7 @@ object MusicPredicate: Convertible {
             "boss" -> BossPredicate
             "dimension" -> DimensionPredicate
             "entity_nearby" -> EntityNearbyPredicate
+            "height" -> HeightPredicate
             "riding" -> RidingPredicate
             "status_effect" -> StatusEffectPredicate
             "structure" -> StructurePredicate
