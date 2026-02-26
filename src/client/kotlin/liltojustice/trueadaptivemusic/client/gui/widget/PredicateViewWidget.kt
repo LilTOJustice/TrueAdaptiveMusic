@@ -11,7 +11,6 @@ import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.Timer
@@ -22,7 +21,7 @@ class PredicateViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: (targetNode: MusicTree.Node?, targetPredicate: MusicPredicate?) -> Unit,
+    private val onChangesSaved: (targetNode: MusicTree.Node?, targetPredicate: MusicPredicate?, exit: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -77,6 +76,7 @@ class PredicateViewWidget(
                             && predicateArgs.filterNotNull().size == requiredPredicateArgs.size) {
                             selectedPredicate = makeNewPredicate()?.predicates?.lastOrNull()
                         }
+                        onChange()
                     },
                     width,
                     Text.translatableWithFallback("trueadaptivemusic.type", "Type").string,
@@ -133,7 +133,8 @@ class PredicateViewWidget(
                                     clicked = false
                                     widget.setText(
                                         Text.translatableWithFallback(
-                                            "trueadaptivemusic.delete", "Delete").string)
+                                            "trueadaptivemusic.delete", "Delete").string
+                                    )
                                     widget.color = Colors.WHITE
                                 }
 
@@ -194,6 +195,8 @@ class PredicateViewWidget(
                     Text.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
                     onClick = {
                         selectedNode?.predicates?.remove(selectedPredicate)
+                        selectedNode = null
+                        selectedPredicate = null
                         save(true)
                     }
                 )
@@ -214,11 +217,10 @@ class PredicateViewWidget(
         if (exit) {
             selectedNode = null
             selectedPredicate = null
-            selectedNode = null
             clearWidgetsFromRender { false }
         }
 
-        onChangesSaved(selectedNode, selectedPredicate)
+        onChangesSaved(selectedNode, selectedPredicate, exit)
     }
 
     private fun onChange() {

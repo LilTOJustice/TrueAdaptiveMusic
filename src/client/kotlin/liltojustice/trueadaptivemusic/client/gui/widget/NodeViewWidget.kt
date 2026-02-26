@@ -23,7 +23,7 @@ class NodeViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: () -> Unit,
+    private val onChangesSaved: (newTarget: MusicTree.Node?) -> Unit,
     private val onEventClick: (event: MusicEvent?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
@@ -63,6 +63,10 @@ class NodeViewWidget(
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         super.renderWidget(context, mouseX, mouseY, delta)
+        if (!visible) {
+            return
+        }
+
         if (selectedNode != null || newNodeParent != null) {
             renderEditMode()
         }
@@ -140,7 +144,8 @@ class NodeViewWidget(
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
                     tooltipText = Text.translatableWithFallback(
                         "trueadaptivemusic.ambience_choice.description",
-                        "Select any amount of ambience to be chosen randomly to play"))
+                        "Select any amount of ambience to be chosen randomly to play")
+                )
             },
             "ambienceChoice"
         )
@@ -309,10 +314,11 @@ class NodeViewWidget(
 
         if (exit) {
             selectedNode = null
+            newNodeParent = null
             clearWidgetsFromRender { false }
         }
 
-        onChangesSaved()
+        onChangesSaved(selectedNode)
     }
 
     private fun onChange() {

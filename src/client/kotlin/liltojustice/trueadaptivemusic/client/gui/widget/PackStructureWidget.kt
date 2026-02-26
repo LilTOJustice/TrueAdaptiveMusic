@@ -23,7 +23,6 @@ class PackStructureWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: () -> Unit,
     private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
     private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate) -> Unit,
     private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
@@ -31,16 +30,8 @@ class PackStructureWidget(
     x: Int = 0,
     y: Int = 0
 ): ContainerWidget(
-    width,
-    height,
-    Text.translatableWithFallback("trueadaptivemusic.pack_structure", "Pack Structure").string,
-    true,
-    false,
-    true,
-    true,
-    x,
-    y
-) {
+    width, height, TITLE_TEXT.string, true, false, true, true, x, y)
+{
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
@@ -56,7 +47,8 @@ class PackStructureWidget(
         targetedPredicate = predicate
     }
 
-    fun initPredicateWidgets() {
+    fun initPredicateWidgets(newTarget: MusicTree.Node? = null) {
+        targetedNode = newTarget
         clearWidgets()
         var row = 0
         musicPack.rules.traverse(
@@ -108,7 +100,9 @@ class PackStructureWidget(
         val result = super.mouseClicked(click, doubled)
         mouseButtonHeld = false
         forEachChild { child ->
-            if (child is NodeWidget && child.isMouseOver(click.x, click.y)) {
+            if (child is NodeWidget &&
+                child.targetNode.node.parent != null &&
+                child.isMouseOver(click.x, click.y)) {
                 mouseButtonHeld = true
 
                 return@forEachChild
@@ -151,8 +145,7 @@ class PackStructureWidget(
             }
 
             musicPack.initRules()
-            onChangesSaved()
-            initPredicateWidgets()
+            initPredicateWidgets(toAdopt)
         }
 
         mouseButtonHeld = false
@@ -197,20 +190,24 @@ class PackStructureWidget(
         const val INDENT = 10
         const val SHIFT_KEY = 340
         const val CTRL_KEY = 341
+        val TITLE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.pack_structure", "Pack Structure")
         val MOVE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.move_node",
             "Click and drag to move\n+ shift (copy)\n+ ctrl (copy with children)"
         )
         val ARROW_TEXT: MutableText = Text.literal("->")
         val LINE_SPACE: MutableText = Text.literal("\n\n")
+        val ADD_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.add", "Add")
+        val NODE_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.node", "Node")
+        val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.create_node", "Create a new node")
+        val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.create_predicate", "Create a Predicate")
         val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.combine_predicates",
-            "Combine Predicates"
-        )
+            "trueadaptivemusic.combine_predicates", "Combine Predicates")
         val CONFIGURE_NODE_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.configure_node",
-            "Configure this node"
-        )
+            "trueadaptivemusic.configure_node", "Configure this node")
     }
 
     private inner class NodeWidget(node: MusicTree.Node, override val targetNode: TargetNode):
@@ -224,7 +221,6 @@ class PackStructureWidget(
 
         val predicateWidgets = run {
             node.predicates.map { predicate ->
-                val isSelected = predicate === targetedPredicate
                 val widget = ClickableTextWidget(
                     MusicPredicate.getDisplayName(predicate.getTypeName()).string,
                     onClick = if (predicate is RootPredicate) ({
@@ -236,14 +232,10 @@ class PackStructureWidget(
                         targetedPredicate = predicate
                         onSelectEditExistingPredicate(node, predicate)
                     }),
-                    isSelected = { isSelected }
+                    isSelected = { predicate === targetedPredicate }
                 )
 
                 val tooltipText = predicate.getTriggerTooltipText()
-
-                if (isSelected) {
-                    tooltipText.append(LINE_SPACE).append(MOVE_NODE_TEXT)
-                }
 
                 widget.setTooltip(Tooltip.of(tooltipText))
                 widget.color = if (predicate is ErrorPredicate)
@@ -266,23 +258,34 @@ class PackStructureWidget(
                 val widget = ClickableTextWidget(
                     "+",
                     showHighlight = false,
-                    onClick = { onSelectCreateNewPredicate(node) }
+                    onClick = {
+                        onSelectCreateNewPredicate(node)
+                        initPredicateWidgets()
+                    }
                 )
-                widget.setTooltip(Tooltip.of(COMBINE_PREDICATES_TEXT))
+                widget.setTooltip(
+                    Tooltip.of(
+                        if (node.predicates.isEmpty())
+                            CREATE_PREDICATE_TEXT
+                        else
+                            COMBINE_PREDICATES_TEXT
+                    )
+                )
 
                 widget
             }
 
         val configureNodeWidget = run {
             val widget = ClickableTextWidget(
-                "<Node>",
+                "${NODE_TEXT.string}:",
                 onClick = {
                     targetedPredicate = null
                     targetedNode = node
                     onSelectEditExistingNode(node)
                 }
             )
-            widget.setTooltip(Tooltip.of(CONFIGURE_NODE_TEXT))
+            val tooltipText = CONFIGURE_NODE_TEXT.copyContentOnly().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+            widget.setTooltip(Tooltip.of(tooltipText))
 
             widget
         }
@@ -299,6 +302,10 @@ class PackStructureWidget(
         override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
             super.renderWidget(context, mouseX, mouseY, delta)
             var nextX = 0
+
+            nextX = renderWidget(configureNodeWidget, nextX) {
+                configureNodeWidget.render(context, mouseX, mouseY, delta)
+            }
             predicateWidgets.forEachIndexed { index, widget ->
                 nextX = renderWidget(widget, nextX) { widget.render(context, mouseX, mouseY, delta) }
 
@@ -309,12 +316,10 @@ class PackStructureWidget(
             }
 
             combinePredicateWidget?.let {
-                nextX = renderWidget(it, nextX) {
+                renderWidget(it, nextX) {
                     it.render(context, mouseX, mouseY, delta)
                 }
             }
-
-            renderWidget(configureNodeWidget, nextX) { configureNodeWidget.render(context, mouseX, mouseY, delta) }
         }
 
         override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -333,17 +338,9 @@ class PackStructureWidget(
 
     private inner class CreateNodeWidget(override val targetNode: TargetNode):
         AbstractNodeWidget,
-        ClickableTextWidget(
-            "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
-            onClick = { onSelectCreateNewNode(targetNode.node) }
-        ) {
+        ClickableTextWidget("+ ${ADD_TEXT.string}", onClick = { onSelectCreateNewNode(targetNode.node) }) {
         init {
-            setTooltip(
-                Tooltip.of(
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.create_node", "Create a new node")
-                )
-            )
+            setTooltip(Tooltip.of(CREATE_NODE_TEXT))
         }
     }
 

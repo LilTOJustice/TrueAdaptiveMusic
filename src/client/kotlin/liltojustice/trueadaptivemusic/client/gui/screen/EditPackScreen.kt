@@ -36,7 +36,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var closeButtonWidget: ButtonWidget
     private lateinit var openAssetsFolderButtonWidget: ButtonWidget
     private lateinit var metaButtonWidget: ButtonWidget
-    private var selectedEvent: MusicEvent? = null
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -118,7 +117,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             containerWidth,
             containerHeight,
             musicPack,
-            { packStructureWidget.initPredicateWidgets() },
+            { newTarget -> packStructureWidget.initPredicateWidgets(newTarget) },
             { event -> switchToEventView(event) },
             { eventView }
         )
@@ -127,9 +126,13 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             containerWidth,
             containerHeight,
             musicPack,
-            { targetNode, targetPredicate ->
+            { targetNode, targetPredicate, exit ->
                 packStructureWidget.setNode(targetNode, targetPredicate)
                 packStructureWidget.initPredicateWidgets()
+
+                if (exit) {
+                    switchToNodeView()
+                }
             }
         )
 
@@ -137,9 +140,6 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             containerWidth,
             containerHeight,
             musicPack,
-            {
-                packStructureWidget.initPredicateWidgets()
-            },
             { node ->
                 nodeViewWidget.setEditExistingNode(node)
                 switchToNodeView()
