@@ -444,7 +444,10 @@ class MusicPack private constructor(
     }
 
     @Serializable
-    data class Metadata(val description: String = "") {
+    data class Metadata(
+            val description: String = "",
+            val finishTrackBeforeSwitching: Boolean = false
+       ) {
         fun getArgs(): List<Any?> {
             return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
         }
@@ -462,6 +465,7 @@ class MusicPack private constructor(
 
             private val descriptions = mapOf(
                 "description" to "Description of the Music Pack."
+                "finishTrackBeforeSwitching" to "If true, the current track will finish playing before switching when a condition becomes invalid. If false (default), tracks switch immediately."
             )
 
             private val json = Json {
