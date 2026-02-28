@@ -94,6 +94,12 @@ class MusicManager(private val client: MinecraftClient) {
         val enterDelay = parameters.enterDelay
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
+        val finishTrackBeforeSwitching = musicPack?.metadata?.finishTrackBeforeSwitching ?: false
+        // If the pack opts into finishing the current track before switching, and a track is
+        // still playing, hold off until it finishes naturally
+        if (finishTrackBeforeSwitching && isEnter && musicPlayer.isTrackPlaying(mainTrack)) {
+            return
+        }
 
         activeEvents = predicateResult.events
 
