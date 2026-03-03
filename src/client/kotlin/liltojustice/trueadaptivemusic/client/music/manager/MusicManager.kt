@@ -27,7 +27,7 @@ class MusicManager(private val client: MinecraftClient) {
         client.options.getSoundVolumeOption(SoundCategory.MUSIC)
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
-    private var activeEvents: List<MusicEvent> = emptyList()
+    private var eventPool: List<MusicEvent> = emptyList()
     private var lastMusic: PlayableSound? = null
     private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
@@ -44,7 +44,7 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg args: Any?) {
-        activeEvents.firstOrNull { event ->
+        eventPool.firstOrNull { event ->
             eventType == event::class && runCatching { event.validate(*args) }.getOrNull() == true }
             ?.let { event ->
                 event.music.randomOrNull()?.let {
@@ -85,15 +85,15 @@ class MusicManager(private val client: MinecraftClient) {
         val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
         val parameters = predicateResult.parameters
-        val musicToPlay = predicateResult.music
-        val ambienceToPlay = predicateResult.ambience
+        val musicToPlay = predicateResult.accumulatedMusic
+        val ambienceToPlay = predicateResult.accumulatedAmbience
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
 
-        activeEvents = predicateResult.events
+        eventPool = predicateResult.accumulatedEvents
 
         val isPaused = isPaused(client)
         val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
@@ -160,7 +160,7 @@ class MusicManager(private val client: MinecraftClient) {
             playingEvent = null
         }
 
-        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
+        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !eventPool.contains(playingEvent)) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
@@ -169,7 +169,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (identifier != currentMusicPredicateId &&
-            predicateResult.events.any { event -> event is OnEnterPredicateEvent }) {
+            predicateResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
             invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 
@@ -196,7 +196,7 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
-        activeEvents = emptyList()
+        eventPool = emptyList()
         lastMusic = null
     }
 

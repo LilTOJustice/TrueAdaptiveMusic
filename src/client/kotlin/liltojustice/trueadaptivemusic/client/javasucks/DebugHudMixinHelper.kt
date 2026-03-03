@@ -33,17 +33,15 @@ object DebugHudMixinHelper {
         val currentNodeDepth = currentNodePathElements.size
 
         rules.preorderTraverse { _, path ->
-            val pathStringElements = path.map { it.split(",") }
             val text = MusicTrigger.getTruncatedTriggerId(path.last())
 
-            if (currentNodePathElements
-                .zip(pathStringElements).all { pair -> pair.second.contains(pair.first) }) {
+            if (path.all { pathElement -> currentNodePathElements.contains(pathElement) }) {
                 predicateTreeLines.add(
                     Line(
                         path.size - 1,
                         text,
                         Colors.GREEN,
-                        currentNodeDepth == pathStringElements.size
+                        currentNodeDepth == path.size
                     )
                 )
             }

@@ -317,8 +317,8 @@ class MusicTree {
     data class Result(
         val path: String,
         val parameters: Node.Parameters,
-        val music: List<PlayableSound>,
-        val ambience: List<PlayableSound>,
-        val events: List<MusicEvent>
+        val accumulatedMusic: List<PlayableSound>,
+        val accumulatedAmbience: List<PlayableSound>,
+        val accumulatedEvents: List<MusicEvent>
     )
 }
