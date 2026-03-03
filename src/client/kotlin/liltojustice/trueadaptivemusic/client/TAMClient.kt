@@ -19,7 +19,6 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.toast.SystemToast
-import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
@@ -106,14 +105,6 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
-    fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
-        predicateRegistry[name] = triggerType
-    }
-
-    fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
-        eventRegistry[name] = triggerType
-    }
-
     fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
         inputWidgetMaker.register(predicate, widgetMaker)
     }
@@ -135,6 +126,14 @@ object TAMClient {
 
     fun refreshSoundVolume() {
         musicManager?.refreshSoundVolume()
+    }
+
+    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg eventArgs: Any?) {
+        musicManager?.invokeMusicEvent(eventType, *eventArgs)
+    }
+
+    fun <T: MusicEvent> invokeMusicEvent(eventType: Class<T>, vararg eventArgs: Any?) {
+        invokeMusicEvent(eventType.kotlin, *eventArgs)
     }
 
     private fun initialize(client: MinecraftClient) {

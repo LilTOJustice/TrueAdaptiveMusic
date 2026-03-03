@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
-import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
@@ -11,9 +10,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.sound.SoundCategory
-import net.minecraft.util.ActionResult
 import net.minecraft.util.math.Vec3d
 import kotlin.math.max
+import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
     var musicPack: MusicPack? = null
@@ -42,20 +41,17 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.createTrack(AMBIENCE_TRACK_2, true, MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(EVENT_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
         musicPlayer.createTrack(ON_DEMAND_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
+    }
 
-        InvokeMusicEventCallback.EVENT.register { eventType, args ->
-            activeEvents.firstOrNull { event ->
-                eventType == event.getTypeName()
-                        && runCatching { event.validate(*args) }.getOrNull() == true }
-                ?.let { event ->
-                    event.music.randomOrNull()?.let {
-                        musicPlayer.startNew(EVENT_TRACK, it)
-                    }
-                    playingEvent = event
+    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg args: Any?) {
+        activeEvents.firstOrNull { event ->
+            eventType == event::class && runCatching { event.validate(*args) }.getOrNull() == true }
+            ?.let { event ->
+                event.music.randomOrNull()?.let {
+                    musicPlayer.startNew(EVENT_TRACK, it)
                 }
-
-            ActionResult.PASS
-        }
+                playingEvent = event
+            }
     }
 
     fun refreshSoundVolume() {
@@ -174,7 +170,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         if (identifier != currentMusicPredicateId &&
             predicateResult.events.any { event -> event is OnEnterPredicateEvent }) {
-            MusicEvent.invokeMusicEvent(TAMClient.eventRegistry[OnEnterPredicateEvent::class])
+            invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 
         updatePredicateId(identifier)

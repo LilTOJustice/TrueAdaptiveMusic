@@ -6,7 +6,7 @@ import net.minecraft.util.Identifier
 
 class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEvent() {
     override fun validate(vararg eventArgs: Any?): Boolean {
-        val bossId = Identifier.tryParse((eventArgs[0] as? Identifier)
+        val bossId = Identifier.tryParse((eventArgs[0] as? EntityTypeIdentifier)
             ?.path?.split(".")?.drop(1)?.joinToString(":")) ?: return false
         return bosses.isEmpty()
                 || bosses.any {

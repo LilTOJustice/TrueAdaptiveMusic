@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -89,10 +88,6 @@ abstract class MusicEvent: MusicTrigger() {
                 "trueadaptivemusic.event.arg.${triggerName}.${argName}.description",
                 TriggerReflectionHelper.getMusicTriggerArgDescriptions(
                     TAMClient.eventRegistry[triggerName])[argName])
-        }
-
-        fun invokeMusicEvent(eventName: String, vararg eventArgs: Any?) {
-            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName, *eventArgs)
         }
     }
 }
