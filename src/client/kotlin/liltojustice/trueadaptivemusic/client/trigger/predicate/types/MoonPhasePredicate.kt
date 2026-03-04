@@ -1,13 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
-import kotlin.ranges.contains
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val world = client.world ?: return false
         val currentPhase = world.moonPhase
         val time = world.timeOfDay % 24000
@@ -22,24 +20,11 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
         return super.getTickRate() * 10
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty(FIELD_NAME, moonPhase.name)
-
-        return result
-    }
-
-    companion object: MusicPredicateCompanion<MoonPhasePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "moonPhase" to "What phase of the moon the music should play for."
             )
-
-        override fun fromJson(json: JsonObject): MoonPhasePredicate {
-            return MoonPhasePredicate(MoonPhase.valueOf(JsonHelper.getString(json, FIELD_NAME)))
-        }
-
-        private const val FIELD_NAME = "moonPhase"
     }
 
     enum class MoonPhase {

@@ -1,18 +1,18 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.gui.widget.TextWidget
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
+import net.minecraft.client.sound.SoundManager
 import net.minecraft.text.Text
 import kotlin.math.min
 
 class TextInputWidget(
-    private val screen: Screen,
     prompt: String,
     onChange: (widget: TextInputWidget, text: String) -> String,
     placeholder: String = "",
@@ -33,7 +33,26 @@ class TextInputWidget(
         text = placeholder
     }
 
+    override fun playDownSound(soundManager: SoundManager?) {
+    }
+
+    override fun charTyped(input: CharInput): Boolean {
+        return fieldWidget.charTyped(input)
+    }
+
+    override fun keyPressed(input: KeyInput): Boolean {
+        return fieldWidget.keyPressed(input)
+    }
+
+    override fun keyReleased(input: KeyInput): Boolean {
+        return fieldWidget.keyReleased(input)
+    }
+
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        if (fieldWidget.isFocused != isFocused) {
+            fieldWidget.isFocused = isFocused
+        }
+
         if (updateText.isNotEmpty()) {
             text = updateText
             updateText = ""
@@ -47,15 +66,6 @@ class TextInputWidget(
 
         promptWidget.render(context, mouseX, mouseY, delta)
         fieldWidget.render(context, mouseX, mouseY, delta)
-    }
-
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val clicked = fieldWidget.mouseClicked(click, doubled)
-        if (clicked) {
-            screen.focused = fieldWidget
-        }
-
-        return clicked
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
