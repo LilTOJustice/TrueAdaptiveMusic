@@ -8,12 +8,10 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.input.KeyInput
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -72,37 +70,37 @@ class PackStructureWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        if (input.key == SHIFT_KEY) {
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == SHIFT_KEY) {
             shiftHeld = true
         }
 
-        if (input.key == CTRL_KEY) {
+        if (keyCode == CTRL_KEY) {
             ctrlHeld = true
         }
 
-        return super.keyPressed(input)
+        return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
-        if (input.key == SHIFT_KEY) {
+    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == SHIFT_KEY) {
             shiftHeld = false
         }
 
-        if (input.key == CTRL_KEY) {
+        if (keyCode == CTRL_KEY) {
             ctrlHeld = false
         }
 
-        return super.keyReleased(input)
+        return super.keyReleased(keyCode, scanCode, modifiers)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
         mouseButtonHeld = false
         forEachChild { child ->
             if (child is NodeWidget &&
                 child.targetNode.node.parent != null &&
-                child.isMouseOver(click.x, click.y)) {
+                child.isMouseOver(mouseX, mouseY)) {
                 mouseButtonHeld = true
 
                 return@forEachChild
@@ -121,7 +119,7 @@ class PackStructureWidget(
 
         forEachChild { child ->
             if (child !is AbstractNodeWidget
-                || !child.isMouseOver(click.x, click.y)
+                || !child.isMouseOver(mouseX, mouseY)
                 || (targetedNode === child.targetNode.node && !shiftHeld)
                 || targetedNode?.let { child.isValidDestination(it) || shiftHeld } != true) {
                 return@forEachChild
@@ -301,14 +299,14 @@ class PackStructureWidget(
             widget
         }
 
-        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-            val result = super.mouseClicked(click, doubled)
-            val predicateClicked = predicateWidgets.any { it.mouseClicked(click, doubled) }
-            val combineClicked = combinePredicateWidget?.mouseClicked(click, doubled) ?: false
-            configureNodeWidget.mouseClicked(click, doubled)
+        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+            val result = super.mouseClicked(mouseX, mouseY, button)
+            val predicateClicked = predicateWidgets.any { it.mouseClicked(mouseX, mouseY, button) }
+            val combineClicked = combinePredicateWidget?.mouseClicked(mouseX, mouseY, button) ?: false
+            configureNodeWidget.mouseClicked(mouseX, mouseY, button)
 
             if (!predicateClicked && !combineClicked && result) {
-                configureNodeWidget.onClick(click, doubled)
+                configureNodeWidget.onClick(mouseX, mouseY)
             }
 
             return result

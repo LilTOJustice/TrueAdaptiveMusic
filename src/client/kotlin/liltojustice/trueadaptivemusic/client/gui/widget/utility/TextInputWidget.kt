@@ -6,8 +6,6 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.text.Text
 import kotlin.math.min
@@ -36,16 +34,16 @@ class TextInputWidget(
     override fun playDownSound(soundManager: SoundManager?) {
     }
 
-    override fun charTyped(input: CharInput): Boolean {
-        return fieldWidget.charTyped(input)
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        return fieldWidget.charTyped(chr, modifiers)
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        return fieldWidget.keyPressed(input)
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return fieldWidget.keyPressed(keyCode, scanCode, modifiers)
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
-        return fieldWidget.keyReleased(input)
+    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return fieldWidget.keyReleased(keyCode, scanCode, modifiers)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
