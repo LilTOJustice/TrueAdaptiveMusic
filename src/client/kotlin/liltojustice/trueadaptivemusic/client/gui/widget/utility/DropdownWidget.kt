@@ -17,7 +17,7 @@ class DropdownWidget<TKey>(
     getOptions: (() -> List<TKey>)? = null,
     notSelectedPlaceholder: String? = null,
     startingOption: TKey? = null,
-    onHoverOption: (option: String?) -> Unit = {},
+    private val onHoverOption: (option: String?) -> Unit = {},
     tooltipText: Text? = null,
     x: Int = 0,
     y: Int = 0
@@ -29,7 +29,7 @@ class DropdownWidget<TKey>(
     false,
     false,
     false,
-    true,
+    false,
     x,
     y,
     true) {
@@ -53,22 +53,20 @@ class DropdownWidget<TKey>(
     )
     private val selectedOptionWidget = run {
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
-        ClickableTextWidget(
+        ClickableTextDisplayWidget(
             notSelectedPlaceholder
                 ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
-                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "",
-            onClick = { screen?.focused = textInputWidget },
-            isSelected = { true }
+                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: ""
         )
     }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
+    private var open = true
 
     init {
+        titleTextWidget.disableBold()
         tooltipText?.let {
-            titleTextWidget.setTooltip(Tooltip.of(it))
-            selectedOptionWidget.setTooltip(Tooltip.of(it))
+            setTooltip(Tooltip.of(it))
         }
-        titleTextWidget.active = false
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
@@ -93,23 +91,27 @@ class DropdownWidget<TKey>(
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        if (selectedOptionWidget.mouseClicked(click, doubled)) {
-            screen?.focused = textInputWidget
-            return true
-        }
-
         val result = super.mouseClicked(click, doubled)
         textInputWidget.text = ""
+        if (focusedWidget == selectedOptionWidget) {
+            focusedWidget = textInputWidget
+        }
 
         return result
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val showTextInput = screen?.focused == textInputWidget
-        textInputWidget.visible = showTextInput
-        selectedOptionWidget.visible = !showTextInput
-        dropdownResultsWidget.visible = screen?.focused == textInputWidget
-        dropdownResultsWidget.width = width
+        val shouldOpen = focusedWidget == textInputWidget && isFocused
+        if (open != shouldOpen) {
+            open = shouldOpen
+            onHoverOption(null)
+            textInputWidget.visible = shouldOpen
+            textInputWidget.isFocused = shouldOpen
+            selectedOptionWidget.visible = !shouldOpen
+            dropdownResultsWidget.visible = shouldOpen
+            dropdownResultsWidget.width = width
+        }
+
         super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }

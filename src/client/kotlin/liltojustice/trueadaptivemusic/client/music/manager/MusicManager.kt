@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
-import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
@@ -11,9 +10,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.sound.SoundCategory
-import net.minecraft.util.ActionResult
 import net.minecraft.util.math.Vec3d
 import kotlin.math.max
+import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
     var musicPack: MusicPack? = null
@@ -28,32 +27,31 @@ class MusicManager(private val client: MinecraftClient) {
         client.options.getSoundVolumeOption(SoundCategory.MUSIC)
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
-    private var activeEvents: List<MusicEvent> = emptyList()
+    private var eventPool: List<MusicEvent> = emptyList()
     private var lastMusic: PlayableSound? = null
     private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
+    private var ambienceTrack = AMBIENCE_TRACK_1
     private var lastInstance: TAMSoundInstance? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(MAIN_TRACK_2, false, MAIN_CROSSFADE_TICKS)
-        musicPlayer.createTrack(AMBIENCE_TRACK, true, MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(AMBIENCE_TRACK_1, true, MAIN_CROSSFADE_TICKS)
+        musicPlayer.createTrack(AMBIENCE_TRACK_2, true, MAIN_CROSSFADE_TICKS)
         musicPlayer.createTrack(EVENT_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
         musicPlayer.createTrack(ON_DEMAND_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
+    }
 
-        InvokeMusicEventCallback.EVENT.register { eventType, args ->
-            activeEvents.firstOrNull { event ->
-                eventType == event.getTypeName()
-                        && runCatching { event.validate(*args) }.getOrNull() == true }
-                ?.let { event ->
-                    event.music.randomOrNull()?.let {
-                        musicPlayer.startNew(EVENT_TRACK, it)
-                    }
-                    playingEvent = event
+    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg args: Any?) {
+        eventPool.firstOrNull { event ->
+            eventType == event::class && runCatching { event.validate(*args) }.getOrNull() == true }
+            ?.let { event ->
+                event.music.randomOrNull()?.let {
+                    musicPlayer.startNew(EVENT_TRACK, it)
                 }
-
-            ActionResult.PASS
-        }
+                playingEvent = event
+            }
     }
 
     fun refreshSoundVolume() {
@@ -86,27 +84,29 @@ class MusicManager(private val client: MinecraftClient) {
 
         val predicateResult = TAMClient.currentPredicateResult ?: return
         val identifier = predicateResult.path
-        val parameters = predicateResult.predicateParameters
-        val musicToPlay = predicateResult.music
-        val ambienceToPlay = predicateResult.ambience
+        val parameters = predicateResult.parameters
+        val musicToPlay = predicateResult.accumulatedMusic
+        val ambienceToPlay = predicateResult.accumulatedAmbience
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
 
-        activeEvents = predicateResult.events
+        eventPool = predicateResult.accumulatedEvents
 
         val isPaused = isPaused(client)
         val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
 
-        musicPlayer.clampTrackVolume(EVENT_TRACK,
+        musicPlayer.clampTrackVolume(
+            EVENT_TRACK,
             if (isPaused) {
                 PAUSE_VOLUME
             }
             else {
                 1F
-            })
+            }
+        )
 
         val mainTrackClamp =
             if (shouldStop) {
@@ -123,28 +123,31 @@ class MusicManager(private val client: MinecraftClient) {
             }
 
         musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
-        musicPlayer.clampTrackVolume(getOldTrack(), mainTrackClamp)
+        musicPlayer.clampTrackVolume(getOldMainTrack(), mainTrackClamp)
 
-        musicPlayer.clampTrackVolume(AMBIENCE_TRACK,
+        musicPlayer.clampTrackVolume(
+            ambienceTrack,
             if (isPaused) {
                 PAUSE_VOLUME
             }
             else {
                 1F
-            })
+            }
+        )
 
         musicPlayer.tick()
 
-        val isAmbiencePlaying = musicPlayer.isTrackPlaying(AMBIENCE_TRACK)
-        if (ambienceToPlay.isEmpty() && isAmbiencePlaying) {
-            musicPlayer.stop(AMBIENCE_TRACK)
+        val isAmbiencePlaying = musicPlayer.isTrackPlaying(ambienceTrack)
+        val isAmbienceAlmostDone = musicPlayer.isTrackAlmostDone(ambienceTrack)
+            if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
+            musicPlayer.stop(ambienceTrack)
         }
 
-        if (!ambienceToPlay.isEmpty() && (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience))) {
+        if (!ambienceToPlay.isEmpty() &&
+            client.player != null &&
+            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience) || isAmbienceAlmostDone)) {
             val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
-            musicPlayer.startNew(
-                AMBIENCE_TRACK,
-                getPseudoRandomTrack(ambienceToPlay, lastAmbience))
+            playNextAmbience(newAmbience)
             lastAmbience = newAmbience
         }
 
@@ -157,7 +160,7 @@ class MusicManager(private val client: MinecraftClient) {
             playingEvent = null
         }
 
-        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !activeEvents.contains(playingEvent)) {
+        if (playingEvent != null && !playingEvent!!.parameters.isPersistent && !eventPool.contains(playingEvent)) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
@@ -166,8 +169,8 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (identifier != currentMusicPredicateId &&
-            predicateResult.events.any { event -> event is OnEnterPredicateEvent }) {
-            MusicEvent.invokeMusicEvent(TAMClient.eventRegistry[OnEnterPredicateEvent::class])
+            predicateResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
+            invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 
         updatePredicateId(identifier)
@@ -193,7 +196,7 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
-        activeEvents = emptyList()
+        eventPool = emptyList()
         lastMusic = null
     }
 
@@ -222,7 +225,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         val oldTrack = mainTrack
-        swapTracks()
+        swapMainTrack()
         if (resume && musicPlayer.isTrackPlaying(mainTrack)) {
             musicPlayer.crossfadeTracks(oldTrack, mainTrack)
             return
@@ -234,12 +237,26 @@ class MusicManager(private val client: MinecraftClient) {
         lastMusic = newMusic
     }
 
-    private fun swapTracks() {
-        musicPlayer.cancelDelayedMusic(mainTrack)
-        mainTrack = getOldTrack()
+    private fun playNextAmbience(newAmbience: PlayableSound) {
+        val oldTrack = ambienceTrack
+        swapAmbienceTrack()
+
+        musicPlayer.startNew(ambienceTrack, newAmbience, fadeIn = true)
+        musicPlayer.crossfadeTracks(oldTrack, ambienceTrack)
+
+        lastAmbience = newAmbience
     }
 
-    private fun getOldTrack(): String {
+    private fun swapMainTrack() {
+        musicPlayer.cancelDelayedMusic(mainTrack)
+        mainTrack = getOldMainTrack()
+    }
+
+    private fun swapAmbienceTrack() {
+        ambienceTrack = getOldAmbienceTrack()
+    }
+
+    private fun getOldMainTrack(): String {
         return if (mainTrack == MAIN_TRACK_1) {
             MAIN_TRACK_2
         }
@@ -248,10 +265,20 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
+    private fun getOldAmbienceTrack(): String {
+        return if (ambienceTrack == AMBIENCE_TRACK_1) {
+            AMBIENCE_TRACK_2
+        }
+        else {
+            AMBIENCE_TRACK_1
+        }
+    }
+
     companion object {
         private const val MAIN_TRACK_1 = "main1"
         private const val MAIN_TRACK_2 = "main2"
-        private const val AMBIENCE_TRACK = "ambience"
+        private const val AMBIENCE_TRACK_1 = "ambience1"
+        private const val AMBIENCE_TRACK_2 = "ambience2"
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
         private const val MAIN_CROSSFADE_TICKS = 75
