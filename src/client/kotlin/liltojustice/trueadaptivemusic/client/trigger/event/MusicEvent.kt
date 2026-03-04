@@ -1,10 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.InvokeMusicEventCallback
+import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
@@ -12,29 +11,17 @@ import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import kotlin.collections.plus
 import kotlin.reflect.full.declaredMembers
+import kotlin.reflect.full.primaryConstructor
 
-abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
-    init {
-        parameters = Parameters.default()
-    }
+abstract class MusicEvent: MusicTrigger() {
+    @Serialize
+    var music: List<PlayableSound> = listOf()
+
+    @Serialize
+    var parameters = Parameters.default()
 
     open fun validate(vararg eventArgs: Any?): Boolean {
         return true
-    }
-
-    final override fun initParams(json: JsonObject) {
-        val gson = Gson()
-        val default = Parameters.default()
-        val parametersJson = json.get("parameters").asJsonObject
-        default.getTriggerParams().forEach {
-            if (!parametersJson.has(it.name)) {
-                val jsonRep = gson.toJsonTree(it.value)
-                parametersJson.add(
-                    it.name,
-                    if (jsonRep.isJsonObject) jsonRep.asJsonObject.getAsJsonPrimitive("data") else jsonRep.asJsonPrimitive)
-            }
-        }
-        parameters = gson.fromJson<Parameters>(parametersJson, Parameters::class.java)
     }
 
     final override fun getTypeName(): String {
@@ -44,11 +31,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
             TAMClient.eventRegistry[this::class]
     }
 
-    final override fun toJsonFull(): JsonObject {
-        return super.toJsonFull()
-    }
-
-    companion object: MusicEventCompanion<MusicEvent> {
+    companion object: MusicEventCompanion {
     }
 
     data class Parameters(var isPersistent: Boolean = false): MusicTrigger.Parameters() {
@@ -65,6 +48,10 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
                 return Parameters()
             }
 
+            fun fromArgs(paramArgs: List<Any>): Parameters {
+                return Parameters::class.primaryConstructor?.call(*paramArgs.toTypedArray()) ?: default()
+            }
+
             fun getParamDisplayName(paramName: String): Text? {
                 return translatableWithFallbackOrNull(
                     "trueadaptivemusic.param.event.${paramName}.display", displayNames[paramName])
@@ -77,7 +64,7 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
         }
     }
 
-    interface MusicEventCompanion<TSelf>: MusicTriggerCompanion<MusicEvent> where TSelf: MusicEvent {
+    interface MusicEventCompanion: MusicTriggerCompanion {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",
@@ -101,10 +88,6 @@ abstract class MusicEvent: MusicTrigger<MusicEvent.Parameters>() {
                 "trueadaptivemusic.event.arg.${triggerName}.${argName}.description",
                 TriggerReflectionHelper.getMusicTriggerArgDescriptions(
                     TAMClient.eventRegistry[triggerName])[argName])
-        }
-
-        fun invokeMusicEvent(eventName: String, vararg eventArgs: Any?) {
-            InvokeMusicEventCallback.EVENT.invoker().invokeMusicEvent(eventName, *eventArgs)
         }
     }
 }
