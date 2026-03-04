@@ -6,6 +6,7 @@ import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.screen.ScreenTexts
@@ -37,10 +38,13 @@ abstract class ContainerWidget(
     protected val screen: Screen? = client.currentScreen
     private var scrollPosition = 0
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
-    private var focusedWidget: ClickableWidget? = null
+    protected var focusedWidget: ClickableWidget? = null
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
+    }
+
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
     override fun playDownSound(soundManager: SoundManager?) {
@@ -51,6 +55,7 @@ abstract class ContainerWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        focusedWidget?.isFocused = true
         renderChildren.clear()
         if (!visible) {
             return
@@ -71,8 +76,7 @@ abstract class ContainerWidget(
             }
         }
 
-        if (bordered) {
-            context?.fill(x, y, x + width, y + height, Colors.BLACK)
+       if (bordered) {
             context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
@@ -94,35 +98,51 @@ abstract class ContainerWidget(
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (!visible || !active) {
+        if (!visible ||
+            !active ||
+            !this.isValidClickButton(button) ||
+            !isMouseOver(mouseX, mouseY)) {
+            unfocus()
             return false
         }
 
         backButton?.let {
-            if (it.isMouseOver(mouseX, mouseY)) {
-                it.mouseClicked(mouseX, mouseY, button)
+            if (it.mouseClicked(mouseX, mouseY, button)) {
                 return true
             }
         }
 
+        focusedWidget = null
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
             if (child.widget.mouseClicked(mouseX, mouseY, button)) {
                 focusedWidget = child.widget
-                return false
+            }
+            else {
+                child.widget.isFocused = false
             }
         }
 
-        focusedWidget = null
-        
-        return false
+        screen?.focused = this
+
+        return true
     }
 
     override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
-        focusedWidget?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)
+        return focusedWidget?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) ?: false
+    }
 
-        return false
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        return focusedWidget?.charTyped(chr, modifiers) ?: false
+    }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return focusedWidget?.keyPressed(keyCode, scanCode, modifiers) ?: false
+    }
+
+    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return focusedWidget?.keyReleased(keyCode, scanCode, modifiers) ?: false
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
@@ -130,9 +150,7 @@ abstract class ContainerWidget(
             return false
         }
 
-        focusedWidget?.mouseReleased(mouseX, mouseY, button)
-
-        return false
+        return focusedWidget?.mouseReleased(mouseX, mouseY, button) ?: true
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
@@ -192,7 +210,7 @@ abstract class ContainerWidget(
 
         if (row == null) {
             children[widgetId] = children[widgetId]!!.copy(
-                row = maxUsedRow(onlyThisRender = true, countOffscreen = true) + 1)
+                row = maxUsedRow(onlyThisRender = true, countOffscreen = true))
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
@@ -252,6 +270,10 @@ abstract class ContainerWidget(
 
     fun resetScrolling() {
         scrollPosition = 0
+    }
+
+    fun scrollToBottom() {
+        scrollPosition = Int.MAX_VALUE
     }
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
@@ -322,7 +344,7 @@ abstract class ContainerWidget(
             .filterValues { child ->
                 if (countOffscreen) child.widget.visible else childVisible(child) }
             .maxOfOrNull { (_, child) ->
-                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 0 }
+                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 1 }
             ?: 0 else 0
     }
 
@@ -373,6 +395,19 @@ abstract class ContainerWidget(
         return left <= widgetRight && right >= widgetLeft && top <= widgetBottom && bottom >= widgetTop
     }
 
+    private fun unfocus() {
+        focusedWidget = null
+        isFocused = false
+        children.values.forEach {
+            if (it.widget is ContainerWidget) {
+                it.widget.unfocus()
+            }
+            else {
+                it.widget.isFocused = false
+            }
+        }
+    }
+
     companion object {
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
@@ -382,7 +417,7 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget(ScreenTexts.BACK.string, onClick = { it() }) }
+            return backButtonCallback.let { ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() }) }
         }
     }
 

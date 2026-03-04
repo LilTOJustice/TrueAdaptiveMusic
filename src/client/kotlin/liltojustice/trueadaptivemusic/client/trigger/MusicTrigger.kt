@@ -1,53 +1,37 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
+import com.google.gson.ExclusionStrategy
+import com.google.gson.FieldAttributes
 import com.google.gson.Gson
-import com.google.gson.JsonArray
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.Serialize
+import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerArg
-import liltojustice.trueadaptivemusic.client.trigger.predicate.TriggerParam
 import net.minecraft.text.Text
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 
-abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
-    var music: List<PlayableSound> = emptyList()
-    lateinit var parameters: TParameters
+abstract class MusicTrigger {
+    @Serialize
+    private val type = getTypeName()
+
+    abstract fun getTypeName(): String
 
     fun getTriggerArgs(): List<TriggerArg> {
         return ReflectionHelper.getConstructorParameterValues(this)
             .map { arg -> TriggerArg(arg.name, arg.value) }
     }
 
-    open fun toJsonFull(): JsonObject {
-        val result = JsonObject()
-        result.addProperty("type", getTypeName())
-
-        val jsonMusicPath = JsonArray(music.size)
-        music.forEach { sound -> jsonMusicPath.add(sound.getSoundName()) }
-        result.add("musicPath", jsonMusicPath)
-        result.add("parameters", paramsJson())
-
-        toJson().asMap().forEach { entry -> result.add(entry.key, entry.value) }
-
-        return result
-    }
-
     fun getTriggerId(): String {
         val args = getTriggerArgs()
         return getTypeName()  + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
-    }
-
-    private fun paramsJson(): JsonObject {
-        return Gson().toJsonTree(parameters).asJsonObject
-    }
-
-    abstract fun getTypeName(): String
-
-    abstract fun initParams(json: JsonObject)
-
-    protected open fun toJson(): JsonObject {
-        return JsonObject()
     }
 
     companion object {
@@ -61,7 +45,7 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         }
     }
 
-    interface MusicTriggerCompanion<TSelf: MusicTrigger<*>> {
+    interface MusicTriggerCompanion {
         val displayName: String?
             get() = null
 
@@ -74,21 +58,12 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
         fun getDisplayName(triggerName: String): Text
         fun getArgDisplayName(triggerName: String, argName: String): Text?
         fun getArgDescription(triggerName: String, argName: String): Text?
-
-        fun fromJson(json: JsonObject): TSelf {
-            throw MusicTriggerException(
-                "Type \"${this::class.qualifiedName}\" must define a fromJson function.")
-        }
     }
 
     abstract class Parameters {
         fun getTriggerParams(): List<TriggerParam> {
             return ReflectionHelper.getConstructorParameterValues(this)
                 .map { arg -> TriggerParam(arg.name, arg.value) }
-        }
-
-        fun initializeCopyFromArgs(vararg constructorArgs: Any): Parameters {
-            return (this::class.primaryConstructor?.call(*constructorArgs) ?: default())
         }
 
         companion object: ParametersCompanion<Parameters> {
@@ -104,7 +79,7 @@ abstract class MusicTrigger<TParameters: MusicTrigger.Parameters> {
             val descriptions: Map<String, String>
                 get() = mapOf()
 
-            fun default(): Parameters
+            fun default(): TSelf
         }
     }
 }
