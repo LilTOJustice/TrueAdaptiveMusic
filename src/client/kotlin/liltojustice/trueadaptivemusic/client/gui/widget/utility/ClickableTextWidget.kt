@@ -26,7 +26,7 @@ open class ClickableTextWidget(
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     private var disableBold = false
     private var enableItalic = false
-    private val coloredText: Text?
+    private val styledText: Text
         get() = run {
             var style = message.style.withColor(TextColor.fromRgb(color))
             if (onClick == null && !disableBold) {
@@ -40,12 +40,12 @@ open class ClickableTextWidget(
             val result = message.getWithStyle(style).firstOrNull()
             result?.let { width = textRenderer.getWidth(it) }
 
-            result
+            result ?: Text.literal(text)
         }
     var hovering = false
 
     init {
-        coloredText?.let { width = textRenderer.getWidth(it) }
+        width = textRenderer.getWidth(styledText)
         height = textRenderer.fontHeight
         active = onClick != null
     }
@@ -75,7 +75,7 @@ open class ClickableTextWidget(
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
-        drawScrollableText(context, textRenderer, coloredText, x, y, x + width, y + height, color)
+        drawScrollableText(context, textRenderer, styledText, x, y, x + width, y + height, color)
     }
 
     override fun onClick(click: Click, doubled: Boolean) {

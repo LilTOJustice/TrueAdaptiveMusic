@@ -36,15 +36,8 @@ open class ClickableTextDisplayWidget(
         context?.drawBorder(x + TEXT_OFFSET, y, width - TEXT_OFFSET / 2, height, padding = BORDER_BUFFER)
 
         x += TEXT_OFFSET
-        context?.let {
-            coloredText?.let {
-                drawTextWithMargin(
-                    context.getHoverListener(this, DrawContext.HoverType.NONE),
-                    coloredText,
-                    0
-                )
-            }
-        }
+        drawScrollableText(
+            context, textRenderer, coloredText, x, y, x + width, y + height, color)
         x -= TEXT_OFFSET
     }
 
