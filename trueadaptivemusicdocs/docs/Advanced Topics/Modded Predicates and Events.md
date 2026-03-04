@@ -117,12 +117,12 @@ class OnSomethingEvent(private val stringToTest: String): MusicEvent() {
 The above code takes in some arguments from the event invoker and interprets them to validate whether the event instance should occur.
 
 Then at the event call site:
-```kotlin title="SomeMixin.java"
+```java title="SomeMixin.java"
 ...
-TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.class, someCondition, someString)
+TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.class, someCondition, someString);
 ...
 ```
-We pass in the type name like usual, but then include the parameters matching the types used in the `validate` definition.
+We pass in the type like usual, but then include the parameters matching the types used in the `validate` definition.
 
 Now the event will only trigger if the validate function says so after the event has been invoked by the mixin.
 
