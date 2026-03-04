@@ -2,12 +2,11 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.world.GameMode
 
 class HungerPredicate(private val direction: Direction, private val hungerPercentage: Int): MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
-        if (client.player?.gameMode in listOf(GameMode.CREATIVE, GameMode.SPECTATOR)) {
+        if (client.player?.isCreative == true || client.player?.isSpectator == true) {
             return false
         }
 
