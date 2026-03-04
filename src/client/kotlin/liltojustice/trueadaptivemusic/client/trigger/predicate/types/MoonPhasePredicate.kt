@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.world.attribute.EnvironmentAttributes
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     override fun test(): Boolean {

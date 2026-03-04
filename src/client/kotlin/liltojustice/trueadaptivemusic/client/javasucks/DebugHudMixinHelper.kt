@@ -84,7 +84,11 @@ object DebugHudMixinHelper {
 
             if (line.selected) {
                 context.drawBorder(
-                    x - 2, y - 2, textRenderer.getWidth(line.text) + 3, fontHeight + 3)
+                    x - 2,
+                    y - 2,
+                    textRenderer.getWidth(line.text) + 3,
+                    fontHeight + 3, Colors.WHITE
+                )
             }
         }
     }
