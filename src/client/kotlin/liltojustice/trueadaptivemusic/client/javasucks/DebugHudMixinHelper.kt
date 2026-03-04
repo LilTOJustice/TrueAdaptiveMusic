@@ -1,9 +1,8 @@
 package liltojustice.trueadaptivemusic.client.javasucks
 
-import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.text.Text
@@ -29,27 +28,34 @@ object DebugHudMixinHelper {
         val predicateTreeLines = mutableListOf<Line>()
         val rules = musicPack.rules
         val currentNodePath = TAMClient.currentPredicateResult?.path ?: return
-        val currentNodeDepth = currentNodePath.split(MusicPredicateTree.PATH_SEPARATOR).size
+        val currentNodePathElements = currentNodePath.split(MusicTree.PATH_SEPARATOR)
+        val currentNodeDepth = currentNodePathElements.size
 
         rules.preorderTraverse { _, path ->
-            val pathString = path.joinToString(MusicPredicateTree.PATH_SEPARATOR)
             val text = MusicTrigger.getTruncatedTriggerId(path.last())
 
-            if (currentNodePath.contains(pathString)) {
-                predicateTreeLines.add(Line(path.size - 1, pathString, text, Constants.Colors.GREEN))
+            if (path.all { pathElement -> currentNodePathElements.contains(pathElement) }) {
+                predicateTreeLines.add(
+                    Line(
+                        path.size - 1,
+                        text,
+                        Colors.GREEN,
+                        currentNodeDepth == path.size
+                    )
+                )
             }
             else if (path.size <= currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, pathString, text))
+                predicateTreeLines.add(Line(path.size - 1, text))
             }
             else if (path.size - 1 == currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, pathString, text))
+                predicateTreeLines.add(Line(path.size - 1, text))
             }
             else if (path.size - 2 == currentNodeDepth) {
                 predicateTreeLines.add(
-                    Line(path.size - 1, pathString, text.replace(Regex("\\{.*}"), "{...}")))
+                    Line(path.size - 1, text.replace(Regex("\\{.*}"), "{...}")))
             }
             else if (path.size - 3 == currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, pathString, "..."))
+                predicateTreeLines.add(Line(path.size - 1, "..."))
             }
         }
 
@@ -64,7 +70,8 @@ object DebugHudMixinHelper {
                 1,
                 1,
                 Colors.WHITE,
-                true)
+                true
+            )
             rowOffset += 2
         }
 
@@ -75,17 +82,17 @@ object DebugHudMixinHelper {
 
             context.drawText(textRenderer, line.text, x, y, line.color, true)
 
-            if (line.path == currentNodePath) {
+            if (line.selected) {
                 context.drawBorder(
                     x - 2,
                     y - 2,
                     textRenderer.getWidth(line.text) + 3,
-                    fontHeight + 3,
-                    Colors.WHITE)
+                    fontHeight + 3, Colors.WHITE
+                )
             }
         }
     }
 
-    data class Line(val indent: Int, val path: String, val text: String, val color: Int = Colors.WHITE)
+    data class Line(val indent: Int, val text: String, val color: Int = Colors.WHITE, val selected: Boolean = false)
 }
 

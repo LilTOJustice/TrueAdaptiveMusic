@@ -1,9 +1,7 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.client.sound.SoundEngine
-import net.minecraft.client.sound.Source
-import net.minecraft.util.math.Vec3d
 import java.util.concurrent.locks.LockSupport
 import java.util.function.Consumer
 
@@ -11,28 +9,21 @@ class Channel private constructor(
     private val soundEngine: SoundEngine,
     private val source: Source,
     private val soundInstance: TAMSoundInstance,
-    private val startingVolume: Float
+    private val startingVolume: Float,
 ) {
     private val thread = this.createThread()
     private val tasks = ArrayDeque<Consumer<Source>>()
+    val isAmbient
+        get() = soundInstance.isAmbient
     var isStopped: Boolean = false
         private set
+    val almostDone: Boolean
+        get() = source.lastRead == 0
 
     fun close() {
-        if (isStopped) {
-            return
-        }
-
-        isStopped = true
-        soundEngine.release(source)
-        source.close()
         thread.interrupt()
-
-        try {
-            thread.join()
-        } catch (_: InterruptedException) {
-            Thread.currentThread().interrupt()
-        }
+        thread.join()
+        tasks.clear()
     }
 
     fun run(action: Consumer<Source>) {
@@ -43,23 +34,32 @@ class Channel private constructor(
         tasks.add(action)
     }
 
+    private fun stop() {
+        if (isStopped) {
+            return
+        }
+        isStopped = true
+        soundEngine.release(source)
+    }
+
     private fun createThread(): Thread {
         val thread = Thread {
             try {
-                soundInstance.getAudioStream()?.let {
+                soundInstance.getAudioStream()?.use {
                     source.setVolume(startingVolume)
                     source.setStream(it)
-                    source.setAttenuation(0F)
-                    source.setPosition(Vec3d.ZERO)
-                    source.setRelative(true)
                     source.play()
+                    waitForStop()
                 }
-                waitForStop()
             }
-            catch (_: Exception) {
-                close()
+            catch (e: Exception) {
+                if (e !is InterruptedException) {
+                    Logger.logError("TAM Sound Engine thread encountered an exception: ${e.message}")
+                    stop()
+                }
             }
         }
+
         thread.setDaemon(true)
         thread.setName("TAM Sound Engine: ${soundInstance.hashCode()}")
         thread.start()
@@ -70,7 +70,7 @@ class Channel private constructor(
         while (!isStopped) {
             source.tick()
             if (source.isStopped) {
-                close()
+                stop()
             }
 
             while (true) {
@@ -78,15 +78,15 @@ class Channel private constructor(
                 action.accept(source)
             }
 
-            LockSupport.parkNanos("Sleeping for a bit", 100000L)
+            LockSupport.parkNanos("Sleeping for a bit", 1000000L)
         }
     }
 
     companion object {
         fun new(soundEngine: SoundEngine, soundInstance: TAMSoundInstance, startingVolume: Float): Channel? {
-            val source = soundEngine.createSource(SoundEngine.RunMode.STREAMING) ?: return null
+            val source = soundEngine.createSource() ?: return null
 
-            return Channel(soundEngine, source, soundInstance, startingVolume)
+            return Channel(soundEngine, source, soundInstance, startingVolume,)
         }
     }
 }

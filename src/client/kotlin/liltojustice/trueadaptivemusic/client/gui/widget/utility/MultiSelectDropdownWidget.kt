@@ -17,7 +17,8 @@ class MultiSelectDropdownWidget<TKey>(
     private val onHoverOption: (option: String?) -> Unit = {},
     private val tooltipText: Text? = null,
     x: Int = 0,
-    y: Int = 0)
+    y: Int = 0
+)
     : ContainerWidget(
     width.takeUnless { it == 0 } ?: 500,
     500,
@@ -39,7 +40,7 @@ class MultiSelectDropdownWidget<TKey>(
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
-                DropdownWidget<TKey>(
+                DropdownWidget(
                     options,
                     { option ->
                         if (selected.contains(option)) {
@@ -63,7 +64,7 @@ class MultiSelectDropdownWidget<TKey>(
                 )
             },
             "dropdown"
-        ) as DropdownWidget<Pair<TKey, String>>
+        )
 
         selected.map { it to (getDisplay?.invoke(it) ?: it.toString()) }.sortedBy { it.second }.map { option ->
             addWidgetFromRender(
@@ -71,6 +72,7 @@ class MultiSelectDropdownWidget<TKey>(
                     val widget = ClickableTextWidget(
                         option.second,
                         onClick = {
+                            onHoverOption(null)
                             selected.remove(option.first)
                             onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
