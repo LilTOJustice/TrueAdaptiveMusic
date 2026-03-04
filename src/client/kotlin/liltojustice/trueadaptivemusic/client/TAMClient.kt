@@ -14,10 +14,11 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.toast.SystemToast
 import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
@@ -49,7 +50,7 @@ object TAMClient {
     var hasFFmpeg = false
         private set
 
-    var currentPredicateResult: MusicPredicateTree.Result? = null
+    var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
             field = value
@@ -104,12 +105,14 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
+    @Suppress("unused")
     fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
-        predicateRegistry[name] = triggerType
+        registerPredicate(name, triggerType.kotlin)
     }
 
+    @Suppress("unused")
     fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
-        eventRegistry[name] = triggerType
+        registerEvent(name, triggerType.kotlin)
     }
 
     fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
@@ -135,8 +138,16 @@ object TAMClient {
         musicManager?.refreshSoundVolume()
     }
 
+    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg eventArgs: Any?) {
+        musicManager?.invokeMusicEvent(eventType, *eventArgs)
+    }
+
+    fun <T: MusicEvent> invokeMusicEvent(eventType: Class<T>, vararg eventArgs: Any?) {
+        invokeMusicEvent(eventType.kotlin, *eventArgs)
+    }
+
     private fun initialize(client: MinecraftClient) {
-        if (initialized) {
+        if (initialized || !client.soundManager.soundSystem.started) {
             return
         }
 
@@ -164,5 +175,16 @@ object TAMClient {
         }
 
         initialized = true
+    }
+
+    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
+        minecraftClient.toastManager.add(
+            SystemToast.create(
+                minecraftClient,
+                SystemToast.Type.PACK_LOAD_FAILURE,
+                errorMessage,
+                Text.literal(exceptionMessage ?: "")
+            )
+        )
     }
 }

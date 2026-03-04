@@ -4,9 +4,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.util.Identifier
 
-class DimensionIdentifier(id: String): TypedIdentifier(id) {
+class DimensionIdentifier(id: Identifier): TypedIdentifier(id) {
     override fun toPrefixedTranslationKey(): String {
-        return identifier.toTranslationKey("dimension")
+        return id.toTranslationKey("dimension")
     }
 
     companion object: TypedIdentifierCompanion() {

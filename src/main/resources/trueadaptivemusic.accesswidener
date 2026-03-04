@@ -14,3 +14,8 @@ accessible field net/minecraft/client/sound/MusicTracker current Lnet/minecraft/
 accessible field net/minecraft/client/sound/SoundSystem soundEngine Lnet/minecraft/client/sound/SoundEngine;
 accessible field net/minecraft/client/sound/SoundSystem soundLoader Lnet/minecraft/client/sound/SoundLoader;
 accessible field net/minecraft/client/sound/SoundLoader resourceFactory Lnet/minecraft/resource/ResourceFactory;
+accessible field net/minecraft/client/sound/SoundSystem started Z
+accessible method net/minecraft/client/sound/Source create ()Lnet/minecraft/client/sound/Source;
+accessible field net/minecraft/client/sound/Source pointer I
+accessible method net/minecraft/client/sound/AlUtil checkErrors (Ljava/lang/String;)Z
+accessible method net/minecraft/client/sound/StaticSound getStreamBufferPointer ()Ljava/util/OptionalInt;
