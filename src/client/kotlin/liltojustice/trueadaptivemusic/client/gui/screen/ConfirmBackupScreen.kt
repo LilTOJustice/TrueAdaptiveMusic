@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
@@ -22,7 +23,13 @@ class ConfirmBackupScreen(
     override fun init() {
         val acceptButtonWidget = IconButtonWidget.Builder(
             Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), CHECKMARK) {
-            client?.setScreen(EditPackScreen(parent, MusicPack.fromFile(backupPath)))
+            val backup = MusicPack.fromFile(backupPath)
+            TAMClient.musicPack = backup
+            TAMClient.musicPack?.let {
+                client?.setScreen(EditPackScreen(parent, it))
+            } ?: run {
+                Logger.logError("Failed to load existing pack.")
+            }
         }
             .iconSize(9, 8)
             .textureSize(9, 8)
@@ -50,7 +57,7 @@ class ConfirmBackupScreen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context)
+        super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,
             Text.translatableWithFallback(
@@ -66,7 +73,6 @@ class ConfirmBackupScreen(
             width / 2,
             height / 2 + textRenderer.fontHeight + 5,
             Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
     }
 
     companion object {

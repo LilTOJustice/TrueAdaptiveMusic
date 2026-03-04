@@ -1,14 +1,12 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.StatusEffectIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
 
 class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifier>): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerStatusEffects = client.player?.statusEffects ?: return false
 
         return statusEffects.any { statusEffect ->
@@ -16,26 +14,10 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
                 statusEffect.toTranslationKey("effect") == playerStatusEffect.effectType.translationKey } }
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        val jsonEntities = JsonArray()
-        statusEffects.forEach { statusEffect -> jsonEntities.add(statusEffect.toString()) }
-        result.add("statusEffects", jsonEntities)
-
-        return result
-    }
-
-    companion object: MusicPredicateCompanion<StatusEffectPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "statusEffects" to "Which status effects the player needs to have for the music to play."
             )
-
-        override fun fromJson(json: JsonObject): StatusEffectPredicate {
-            return StatusEffectPredicate(
-                JsonHelper.getArray(json, "statusEffects")
-                    .map { element -> StatusEffectIdentifier(element.asString) }
-            )
-        }
     }
 }

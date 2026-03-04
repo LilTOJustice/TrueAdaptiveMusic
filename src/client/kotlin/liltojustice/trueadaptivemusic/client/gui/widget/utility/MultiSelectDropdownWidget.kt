@@ -17,7 +17,8 @@ class MultiSelectDropdownWidget<TKey>(
     private val onHoverOption: (option: String?) -> Unit = {},
     private val tooltipText: Text? = null,
     x: Int = 0,
-    y: Int = 0)
+    y: Int = 0
+)
     : ContainerWidget(
     width.takeUnless { it == 0 } ?: 500,
     500,
@@ -39,7 +40,7 @@ class MultiSelectDropdownWidget<TKey>(
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
-                DropdownWidget<TKey>(
+                DropdownWidget(
                     options,
                     { option ->
                         if (selected.contains(option)) {
@@ -63,7 +64,7 @@ class MultiSelectDropdownWidget<TKey>(
                 )
             },
             "dropdown"
-        ) as DropdownWidget<Pair<TKey, String>>
+        )
 
         selected.map { it to (getDisplay?.invoke(it) ?: it.toString()) }.sortedBy { it.second }.map { option ->
             addWidgetFromRender(
@@ -71,14 +72,17 @@ class MultiSelectDropdownWidget<TKey>(
                     val widget = ClickableTextWidget(
                         option.second,
                         onClick = {
+                            onHoverOption(null)
                             selected.remove(option.first)
                             onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })
-                    widget.tooltip = Tooltip.of(
-                        Text.translatableWithFallback(
-                            "trueadaptivemusic.click_to_remove", "Click to remove")
+                    widget.setTooltip(
+                        Tooltip.of(
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.click_to_remove", "Click to remove")
+                        )
                     )
                     widget
                 },

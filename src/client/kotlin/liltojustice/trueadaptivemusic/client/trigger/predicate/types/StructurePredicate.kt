@@ -1,14 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.structure.StructureStart
-import net.minecraft.util.JsonHelper
 import net.minecraft.util.math.BlockBox
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkSectionPos
@@ -22,7 +19,7 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
 
-        return (structures.takeIf { structures.isNotEmpty() }?.map { structure -> structure.identifier }
+        return (structures.takeIf { structures.isNotEmpty() }?.map { structure -> structure.id }
             ?: StructureIdentifier.getRegistryIds())
             .any { structureId ->
                 val structure: Structure =
@@ -36,7 +33,8 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         return super.getTickRate() * 2
     }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val serverWorld = client.server?.worlds?.firstOrNull { world ->
             world.registryKey == client.world?.registryKey } ?: return false
         val x: Double = client.player?.x ?: return false
@@ -46,30 +44,12 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        val jsonStructures = JsonArray()
-        structures.forEach { structure -> jsonStructures.add(structure.toString()) }
-        result.add("id", jsonStructures)
-
-        return result
-    }
-
-    companion object: MusicPredicateCompanion<StructurePredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "structures" to "Which structures the player must be in for the music to play. If none, any " +
                         "structure will trigger the music."
             )
-
-        override fun fromJson(json: JsonObject): StructurePredicate {
-            return StructurePredicate(
-                if (JsonHelper.hasArray(json, "id"))
-                    JsonHelper.getArray(json, "id").map { element -> StructureIdentifier(element.asString) }
-                else
-                    listOf(StructureIdentifier(JsonHelper.getString(json, "id")))
-            )
-        }
 
         fun testStructure(structureAccessor: StructureAccessor, structure: Structure, blockPos: BlockPos): Boolean {
             var minX = Int.MAX_VALUE

@@ -11,7 +11,6 @@ import net.minecraft.util.math.MathHelper
 import kotlin.math.max
 
 class CheckboxWidget(
-    private val checkboxSize: Int,
     prompt: String,
     private val onChange: (checked: Boolean) -> Unit,
     x: Int = 0,
@@ -20,8 +19,8 @@ class CheckboxWidget(
     val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
-        width = checkboxSize + PADDING + textRenderer.getWidth(prompt)
-        height = max(textRenderer.fontHeight, checkboxSize)
+        width = CHECKBOX_SIZE + PADDING + textRenderer.getWidth(prompt)
+        height = max(textRenderer.fontHeight, CHECKBOX_SIZE)
         onChange(isChecked)
     }
 
@@ -39,8 +38,8 @@ class CheckboxWidget(
             TEXTURE,
             x,
             y,
-            checkboxSize,
-            checkboxSize,
+            CHECKBOX_SIZE,
+            CHECKBOX_SIZE,
             if (isFocused) 20.0f else 0.0f,
             if (isChecked) 20.0f else 0.0f,
             20,
@@ -52,7 +51,7 @@ class CheckboxWidget(
         context?.drawTextWithShadow(
             textRenderer,
             message,
-            x + checkboxSize + PADDING,
+            x + CHECKBOX_SIZE + PADDING,
             y,
             14737632 or (MathHelper.ceil(this.alpha * 255.0f) shl 24)
         )
@@ -61,5 +60,6 @@ class CheckboxWidget(
     companion object {
         private val TEXTURE = Identifier("textures/gui/checkbox.png")
         private const val PADDING = 5
+        private const val CHECKBOX_SIZE = 10
     }
 }

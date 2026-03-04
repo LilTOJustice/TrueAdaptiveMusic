@@ -1,12 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.util.JsonHelper
 
 class WeatherPredicate(private val weather: Weather): MusicPredicate() {
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val properties = client.world?.levelProperties ?: return false
 
         return when(weather) {
@@ -20,24 +19,11 @@ class WeatherPredicate(private val weather: Weather): MusicPredicate() {
         return super.getTickRate() * 3
     }
 
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty(FIELD_NAME, weather.name)
-
-        return result
-    }
-
-    companion object: MusicPredicateCompanion<WeatherPredicate> {
+    companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
                 "weather" to "Which weather the music should play for."
             )
-
-        override fun fromJson(json: JsonObject): WeatherPredicate {
-            return WeatherPredicate(Weather.valueOf(JsonHelper.getString(json, FIELD_NAME)))
-        }
-
-        private const val FIELD_NAME = "weatherType"
     }
 
     enum class Weather {

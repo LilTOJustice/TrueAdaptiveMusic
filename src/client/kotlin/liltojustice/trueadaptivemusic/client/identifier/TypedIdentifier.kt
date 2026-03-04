@@ -7,19 +7,20 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import kotlin.text.split
 
-sealed class TypedIdentifier(id: String) {
-    val identifier: Identifier = Identifier(id)
-    val path: String = identifier.path
-    val namespace: String = identifier.namespace
+sealed class TypedIdentifier(val id: Identifier) {
+    val path: String
+        get() = id.path
+    val namespace: String
+        get() = id.namespace
 
     abstract fun toPrefixedTranslationKey(): String
 
     override fun equals(other: Any?): Boolean {
-        return super.equals(other) || (other as? TypedIdentifier)?.identifier == identifier
+        return super.equals(other) || (other as? TypedIdentifier)?.id == id
     }
 
     fun toTranslationKey(prefix: String): String {
-        return identifier.toTranslationKey(prefix)
+        return id.toTranslationKey(prefix)
     }
 
     fun prettify(): String {
@@ -61,17 +62,17 @@ sealed class TypedIdentifier(id: String) {
                 .firstOrNull { subclass ->
                     subclass.createType(
                         type.arguments, type.isMarkedNullable, type.annotations) == type }
-                ?.primaryConstructor?.call(id)
+                ?.primaryConstructor?.call(Identifier(id))
                 ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from id $id")
         }
     }
 
     override fun toString(): String {
-        return identifier.toString()
+        return id.toString()
     }
 
     override fun hashCode(): Int {
-        var result = identifier.hashCode()
+        var result = id.hashCode()
         result = 31 * result + path.hashCode()
         result = 31 * result + namespace.hashCode()
         return result

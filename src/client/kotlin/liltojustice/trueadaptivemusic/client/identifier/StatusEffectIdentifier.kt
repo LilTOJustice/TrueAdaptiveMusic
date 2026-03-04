@@ -3,9 +3,9 @@ package liltojustice.trueadaptivemusic.client.identifier
 import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 
-class StatusEffectIdentifier(id: String): TypedIdentifier(id) {
+class StatusEffectIdentifier(id: Identifier): TypedIdentifier(id) {
     override fun toPrefixedTranslationKey(): String {
-        return identifier.toTranslationKey("effect")
+        return id.toTranslationKey("effect")
     }
 
     companion object: TypedIdentifierCompanion() {

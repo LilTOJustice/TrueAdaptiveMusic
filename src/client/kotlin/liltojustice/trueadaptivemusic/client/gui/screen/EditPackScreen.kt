@@ -1,17 +1,22 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.NodeViewWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PackStructureWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.PredicateViewWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.*
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.client.gui.widget.GridWidget
+import net.minecraft.client.gui.widget.IconButtonWidget
+import net.minecraft.client.gui.widget.SimplePositioningWidget
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -22,14 +27,17 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     : Screen(
     Text.translatableWithFallback(
         "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")) {
-    private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var packStructureWidget: PackStructureWidget
+    private lateinit var nodeViewWidget: NodeViewWidget
+    private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
     private lateinit var saveButtonWidget: IconButtonWidget
     private lateinit var closeButtonWidget: ButtonWidget
     private lateinit var openAssetsFolderButtonWidget: ButtonWidget
     private lateinit var metaButtonWidget: ButtonWidget
-    private var selectedEvent: MusicEvent? = null
+
+    private val predicateView: Boolean
+        get() = predicateViewWidget.visible
 
     private val eventView: Boolean
         get() = eventViewWidget.visible
@@ -50,8 +58,35 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         client?.setScreen(parent)
     }
 
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val optional = this.hoveredElement(mouseX, mouseY)
+        if (optional.isEmpty) {
+            return false
+        } else {
+            val element = optional.get()
+            if (element.mouseClicked(mouseX, mouseY, button)) {
+                if (button == 0) {
+                    this.isDragging = true
+                }
+            }
+
+            return true
+        }
+    }
+
     override fun init() {
-        initPack()
+        try {
+            initPack()
+        }
+        catch (e: Exception) {
+            TAMClient.errorToast(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.edit_load_error", "Failed to load pack to edit!"),
+                e.message
+            )
+            Logger.logError("Failed to load pack to edit:\n$e")
+            close()
+        }
 
         val saveButtonWidgetWidth = textRenderer.getWidth(SAVE_BUTTON_TEXT) + 20
 
@@ -78,36 +113,63 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        predicateViewWidget = PredicateViewWidget(
-            getContainerWidth(),
-            getContainerHeight(),
+        val containerWidth = getContainerWidth()
+        val containerHeight = getContainerHeight()
+
+        nodeViewWidget = NodeViewWidget(
+            containerWidth,
+            containerHeight,
             musicPack,
-            { target ->
-                packStructureWidget.setNode(target)
-                packStructureWidget.initPredicateWidgets()
-            },
+            { newTarget -> packStructureWidget.initPredicateWidgets(newTarget) },
             { event -> switchToEventView(event) },
-            { eventView })
+            { eventView }
+        )
+
+        predicateViewWidget = PredicateViewWidget(
+            containerWidth,
+            containerHeight,
+            musicPack,
+            { targetNode, targetPredicate, exit ->
+                packStructureWidget.setNode(targetNode, targetPredicate)
+                packStructureWidget.initPredicateWidgets()
+
+                if (exit) {
+                    nodeViewWidget.reset()
+                    switchToNodeView()
+                }
+            }
+        )
+
         packStructureWidget = PackStructureWidget(
-            getContainerWidth(),
-            getContainerHeight(),
+            containerWidth,
+            containerHeight,
             musicPack,
             { node ->
-                predicateViewWidget.setEditExistingNode(node)
+                nodeViewWidget.setEditExistingNode(node)
+                switchToNodeView()
+            },
+            { node, predicate ->
+                predicateViewWidget.setEditExistingPredicate(node, predicate)
                 switchToPredicateView()
             },
+            { node ->
+                nodeViewWidget.setCreateNewNode(node)
+                switchToNodeView()
+            },
             { parent ->
-                predicateViewWidget.setCreateNewNode(parent)
+                predicateViewWidget.setCreateNewPredicate(parent)
                 switchToPredicateView()
-            })
+            }
+        )
+
         eventViewWidget = EventViewWidget(
-            getContainerWidth(),
-            getContainerHeight(),
+            containerWidth,
+            containerHeight,
             musicPack,
             { newEvent, exit ->
-                predicateViewWidget.onEventModeSave(newEvent, exit)
+                nodeViewWidget.onEventModeSave(newEvent, exit)
                 if (exit) {
-                    switchToPredicateView()
+                    switchToNodeView()
                 }
             }
         )
@@ -115,41 +177,35 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         addDrawableChild(saveButtonWidget)
         addDrawableChild(closeButtonWidget)
         addDrawableChild(openAssetsFolderButtonWidget)
-        addDrawableChild(predicateViewWidget)
         addDrawableChild(packStructureWidget)
+        addDrawableChild(nodeViewWidget)
+        addDrawableChild(predicateViewWidget)
         addDrawableChild(eventViewWidget)
         addDrawableChild(metaButtonWidget)
 
-        saveButtonWidget.width = saveButtonWidgetWidth
+        saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
         closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
-        closeButtonWidget.tooltip = Tooltip.of(
-            Text.translatableWithFallback(
-                "trueadaptivemusic.change_save", "Changes will be saved"))
+        closeButtonWidget.setTooltip(
+            Tooltip.of(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.change_save", "Changes will be saved")
+            )
+        )
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
         metaButtonWidget.width = textRenderer.getWidth(META_BUTTON_TEXT) + 10
         metaButtonWidget.x = openAssetsFolderButtonWidget.x - metaButtonWidget.width - 5
 
-        val containerWidth = getContainerWidth()
-        val containerHeight = getContainerHeight()
-        packStructureWidget.width = containerWidth
-        packStructureWidget.height = containerHeight
-        predicateViewWidget.width = containerWidth
-        predicateViewWidget.height = containerHeight
-        eventViewWidget.width = containerWidth
-        eventViewWidget.height = containerHeight
-
-        if (selectedEvent == null) {
-            switchToPredicateView()
-        }
-        else {
-            switchToEventView(selectedEvent)
-        }
+        switchToNodeView()
     }
 
     override fun close() {
-        initPack()
+        try {
+            initPack()
+        }
+        catch (_: Exception) {}
+
         if (parent is MainScreen) {
             parent.reload()
         }
@@ -169,15 +225,31 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         gridWidget.mainPositioner
             .marginLeft(LEFT_MARGIN / 2)
             .marginRight(RIGHT_MARGIN / 2)
-        val adder: GridWidget.Adder? = gridWidget.createAdder(2)
+        val adder: GridWidget.Adder = gridWidget.createAdder(2)
 
-        if (eventView) {
-            adder?.add(predicateViewWidget)
-            adder?.add(eventViewWidget)
+        packStructureWidget.height = getContainerHeight()
+        nodeViewWidget.height = getContainerHeight()
+        predicateViewWidget.height = getContainerHeight()
+        eventViewWidget.height = getContainerHeight()
+
+        if (predicateView) {
+            adder.add(packStructureWidget)
+            adder.add(predicateViewWidget)
+        }
+        else if (eventView) {
+            val innerGridWidget = GridWidget()
+            nodeViewWidget.height = getContainerHeight() / 2
+            eventViewWidget.height = getContainerHeight() / 2
+            innerGridWidget.add(nodeViewWidget, 0, 0)
+            innerGridWidget.add(eventViewWidget, 1, 0)
+            innerGridWidget.setRowSpacing(1)
+            adder.add(packStructureWidget)
+            adder.add(innerGridWidget)
+            innerGridWidget.refreshPositions()
         }
         else {
-            adder?.add(packStructureWidget)
-            adder?.add(predicateViewWidget)
+            adder.add(packStructureWidget)
+            adder.add(nodeViewWidget)
         }
 
         gridWidget.refreshPositions()
@@ -191,15 +263,22 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             0f)
     }
 
+    private fun switchToNodeView() {
+        nodeViewWidget.visible = true
+        eventViewWidget.visible = false
+        predicateViewWidget.visible = false
+        positionContainers()
+    }
+
     private fun switchToEventView(event: MusicEvent?) {
         eventViewWidget.visible = true
-        packStructureWidget.visible = false
         eventViewWidget.setEvent(event)
         positionContainers()
     }
 
     private fun switchToPredicateView() {
-        packStructureWidget.visible = true
+        predicateViewWidget.visible = true
+        nodeViewWidget.visible = false
         eventViewWidget.visible = false
         positionContainers()
     }
