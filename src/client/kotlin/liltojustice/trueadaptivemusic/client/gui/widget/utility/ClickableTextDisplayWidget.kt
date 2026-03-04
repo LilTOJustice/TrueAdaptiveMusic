@@ -1,8 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -33,23 +31,22 @@ open class ClickableTextDisplayWidget(
             return
         }
 
-        context?.drawBorder(x + TEXT_OFFSET, y, width - TEXT_OFFSET / 2, height, padding = BORDER_BUFFER)
+        context?.drawBorder(
+            x + TEXT_OFFSET - BORDER_BUFFER / 2,
+            y - BORDER_BUFFER / 2,
+            width - TEXT_OFFSET / 2 + BORDER_BUFFER,
+            height + BORDER_BUFFER,
+            Colors.WHITE
+        )
 
         x += TEXT_OFFSET
-        context?.let {
-            coloredText?.let {
-                drawTextWithMargin(
-                    context.getHoverListener(this, DrawContext.HoverType.NONE),
-                    coloredText,
-                    0
-                )
-            }
-        }
+        drawScrollableText(
+            context, textRenderer, coloredText, x, y, x + width, y + height, color)
         x -= TEXT_OFFSET
     }
 
-    override fun onClick(click: Click, doubled: Boolean) {
-        super.onClick(click, doubled)
+    override fun onClick(mouseX: Double, mouseY: Double) {
+        super.onClick(mouseX, mouseY)
 
         if (visible && active)
         {

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import kotlin.math.max
 

@@ -7,7 +7,7 @@ import net.minecraft.client.MinecraftClient
 class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
-        val playerDimension = client.player?.entityWorld?.dimensionEntry ?: return false
+        val playerDimension = client.player?.world?.dimensionEntry ?: return false
 
         return dimensions.isEmpty() ||
                 dimensions.any { dimension -> playerDimension.matchesId(dimension.id) }

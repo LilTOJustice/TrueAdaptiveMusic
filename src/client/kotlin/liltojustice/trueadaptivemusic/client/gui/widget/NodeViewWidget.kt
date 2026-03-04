@@ -8,7 +8,6 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -53,12 +52,12 @@ class NodeViewWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        if (isMouseOver(click.x, click.y)) {
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (isMouseOver(mouseX, mouseY)) {
             screen?.focused = null
         }
 
-        return super.mouseClicked(click, doubled)
+        return super.mouseClicked(mouseX, mouseY, button)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

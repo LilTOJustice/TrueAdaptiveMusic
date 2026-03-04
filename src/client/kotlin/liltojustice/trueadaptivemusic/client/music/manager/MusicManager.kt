@@ -31,7 +31,6 @@ class MusicManager(private val client: MinecraftClient) {
     private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
-    private var lastInstance: TAMSoundInstance? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
