@@ -5,9 +5,9 @@ import net.minecraft.registry.RegistryKeys
 import net.minecraft.util.Identifier
 import kotlin.jvm.optionals.getOrNull
 
-class BiomeIdentifier(id: String): TypedIdentifier(id) {
+class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
     override fun toPrefixedTranslationKey(): String {
-        return identifier.toTranslationKey("biome")
+        return id.toTranslationKey("biome")
     }
 
     companion object: TypedIdentifierCompanion() {

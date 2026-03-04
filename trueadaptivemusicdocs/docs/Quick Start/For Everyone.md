@@ -3,9 +3,11 @@
 ## Quick Start: For Everyone
 
 First start up Minecraft with the mod loaded and you will now notice a new button at the bottom of the Music & Sound Options menu:
+
 ![Sound Options](sound_options.png)
 
 Clicking this will take you to the main menu for True Adaptive Music:
+
 ![Main Menu](main_menu.png)
 
 But you don't have any Music Packs yet (probably)! Join the [community discord](https://discord.gg/v64K4hNdXu) to check out the community's creations!
