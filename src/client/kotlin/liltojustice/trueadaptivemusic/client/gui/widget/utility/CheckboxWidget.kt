@@ -6,6 +6,7 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import kotlin.math.max
 
@@ -49,7 +50,7 @@ class CheckboxWidget(
             y,
             CHECKBOX_SIZE,
             CHECKBOX_SIZE,
-            Colors.WHITE)
+        )
         context?.drawTextWithShadow(
             textRenderer,
             message,

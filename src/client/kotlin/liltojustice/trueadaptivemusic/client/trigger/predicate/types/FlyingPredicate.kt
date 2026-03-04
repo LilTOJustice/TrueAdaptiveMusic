@@ -6,6 +6,6 @@ import net.minecraft.client.MinecraftClient
 class FlyingPredicate: MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
-        return client.player?.isGliding ?: false
+        return client.player?.isFallFlying ?: false
     }
 }
