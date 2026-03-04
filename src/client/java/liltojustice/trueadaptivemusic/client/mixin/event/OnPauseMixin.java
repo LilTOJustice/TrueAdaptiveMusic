@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent;
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnPauseEvent;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +15,7 @@ public class OnPauseMixin {
             at = @At("HEAD"))
     public void openGameMenu(boolean pauseOnly, CallbackInfo ci) {
         if (MinecraftClient.getInstance().currentScreen == null) {
-            MusicEvent.Companion.invokeMusicEvent(TAMClient.INSTANCE.getEventRegistry().get(OnPauseEvent.class));
+            TAMClient.INSTANCE.invokeMusicEvent(OnPauseEvent.class);
         }
     }
 }
