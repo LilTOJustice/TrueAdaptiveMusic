@@ -9,6 +9,7 @@
     "MusicTrackerMixin",
     "SoundEngineMixin",
     "SoundManagerMixin",
+    "SoundSystemMixin",
     "event.OnBossDefeatEventMixin",
     "event.OnDayStartEventMixin",
     "event.OnDeathEventMixin",
