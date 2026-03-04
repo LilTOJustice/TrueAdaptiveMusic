@@ -6,22 +6,31 @@ import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.CheckboxWidget
 import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.MathHelper
 import kotlin.math.max
 
 class CheckboxWidget(
-    private val checkboxSize: Int,
     prompt: String,
     private val onChange: (checked: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0,
-    checked: Boolean = true): CheckboxWidget(x, y, 0, Text.literal(prompt), MinecraftClient.getInstance().textRenderer, checked, { widget, checked -> }) {
+    checked: Boolean = true
+):
+    CheckboxWidget(
+        x,
+        y,
+        0,
+        Text.literal(prompt),
+        MinecraftClient.getInstance().textRenderer,
+        checked,
+        { widget, checked -> }
+    ) {
     val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
 
     init {
-        width = checkboxSize + PADDING + textRenderer.getWidth(prompt)
-        height = max(textRenderer.fontHeight, checkboxSize)
+        width = CHECKBOX_SIZE + PADDING + textRenderer.getWidth(prompt)
+        height = max(textRenderer.fontHeight, CHECKBOX_SIZE)
         onChange(isChecked)
     }
 
@@ -39,22 +48,22 @@ class CheckboxWidget(
             if (isChecked) CHECKED else UNCHECKED,
             x,
             y,
-            checkboxSize,
-            checkboxSize,
+            CHECKBOX_SIZE,
+            CHECKBOX_SIZE,
         )
-        context?.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         context?.drawTextWithShadow(
             textRenderer,
             message,
-            x + checkboxSize + PADDING,
+            x + CHECKBOX_SIZE + PADDING,
             y,
-            14737632 or (MathHelper.ceil(this.alpha * 255.0f) shl 24)
+            Colors.WHITE
         )
     }
 
     companion object {
-        private val UNCHECKED = Identifier.of("widget/checkbox")
+        private val UNCHECKED = Identifier.ofVanilla("widget/checkbox")
         private val CHECKED = Identifier.ofVanilla("widget/checkbox_selected")
         private const val PADDING = 5
+        private const val CHECKBOX_SIZE = 10
     }
 }

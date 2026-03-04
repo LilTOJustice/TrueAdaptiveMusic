@@ -1,7 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
@@ -28,7 +26,8 @@ class CombatPredicate(
     private var isAggro: Boolean = false
     private val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
 
-    override fun test(client: MinecraftClient): Boolean {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
         val playerEntity = client.player ?: return false
         val world = client.world ?: return false
         val verticalFov = client.options.fov.value.toDouble() / DEG_PER_RAD
@@ -54,16 +53,6 @@ class CombatPredicate(
 
     override fun getTickRate(): Int {
         return super.getTickRate() * 2
-    }
-
-    override fun toJson(): JsonObject {
-        val result = JsonObject()
-        result.addProperty("blacklist", blacklist)
-        val mobEntities = JsonArray()
-        this.mobEntities.forEach { mobEntity -> mobEntities.add(mobEntity.toString()) }
-        result.add("mobEntities", mobEntities)
-
-        return result
     }
 
     private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
@@ -104,7 +93,7 @@ class CombatPredicate(
             ?: true
     }
 
-    companion object: MusicPredicateCompanion<CombatPredicate> {
+    companion object: MusicPredicateCompanion {
         private val baseAxialDistance = Vec3d(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 4L
         private const val DEG_PER_RAD = 180.0 / PI
@@ -115,24 +104,6 @@ class CombatPredicate(
                         "(if not checked) make the music play.",
                 "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
             )
-
-        override fun fromJson(json: JsonObject): CombatPredicate {
-            return CombatPredicate(
-                if (json.has("blacklist")) {
-                    json.getAsJsonPrimitive("blacklist").asBoolean
-                }
-                else {
-                    false
-                },
-                if (json.has("mobEntities")) {
-                    json.getAsJsonArray("mobEntities").map {
-                            element -> EntityTypeIdentifier(element.asString) }
-                }
-                else {
-                    listOf()
-                }
-            )
-        }
 
         private fun isValidAttacker(
             mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {

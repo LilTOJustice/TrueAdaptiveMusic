@@ -13,24 +13,39 @@ open class ClickableTextWidget(
     x: Int = 0,
     y: Int = 0,
     private val showHighlight: Boolean = true,
-    private val onClick: (ClickableTextWidget) -> Unit = {},
+    private val onClick: ((ClickableTextWidget) -> Unit)? = null,
     private val isSelected: (ClickableTextWidget) -> Boolean = { false },
     private val onMouseOn: (ClickableTextWidget) -> Unit = {},
-    private val onMouseOff: (ClickableTextWidget) -> Unit = {})
-    : ClickableWidget(x, y, 0, 0, Text.literal(text)),
-    DataWrapped<ClickableTextWidget> {
-    override var customData: Any? = null
-    private val textRenderer = MinecraftClient.getInstance().textRenderer
+    private val onMouseOff: (ClickableTextWidget) -> Unit = {}
+): ClickableWidget(x, y, 0, 0, Text.literal(text)) {
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
-    val coloredText: Text?
-        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).firstOrNull()
+    private val textRenderer = MinecraftClient.getInstance().textRenderer
+    private var disableBold = false
+    private var enableItalic = false
+    private val styledText: Text
+        get() = run {
+            var style = message.style.withColor(TextColor.fromRgb(color))
+            if (onClick == null && !disableBold) {
+                style = style.withBold(true)
+            }
+
+            if (enableItalic) {
+                style = style.withItalic(true)
+            }
+
+            val result = message.getWithStyle(style).firstOrNull()
+            result?.let { width = textRenderer.getWidth(it) }
+
+            result ?: Text.literal(text)
+        }
     var hovering = false
 
     init {
-        width = textRenderer.getWidth(message)
+        width = textRenderer.getWidth(styledText)
         height = textRenderer.fontHeight
+        active = onClick != null
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
@@ -64,7 +79,8 @@ open class ClickableTextWidget(
             context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
         }
 
-        drawScrollableText(context, textRenderer, coloredText, x, y, x + width, y + height, color)
+        drawScrollableText(
+            context, textRenderer, styledText, x, y, x + width, y + height, color)
     }
 
     override fun onClick(mouseX: Double, mouseY: Double) {
@@ -72,11 +88,19 @@ open class ClickableTextWidget(
 
         if (visible && active)
         {
-            onClick(this)
+            onClick?.invoke(this)
         }
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    }
+
+    fun disableBold() {
+        disableBold = true
+    }
+
+    fun enableItalic() {
+        enableItalic = true
     }
 
     fun setText(text: String) {
