@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
@@ -24,7 +25,11 @@ class ConfirmBackupScreen(
             Text.translatableWithFallback("trueadaptivemusic.keep", "Keep"), {
                 val backup = MusicPack.fromFile(backupPath)
                 TAMClient.musicPack = backup
-                client?.setScreen(EditPackScreen(parent, backup))
+                TAMClient.musicPack?.let {
+                    client?.setScreen(EditPackScreen(parent, it))
+                } ?: run {
+                    Logger.logError("Failed to load existing pack.")
+                }
         }, false)
             .texture(CHECKMARK, 9, 8)
             .build()

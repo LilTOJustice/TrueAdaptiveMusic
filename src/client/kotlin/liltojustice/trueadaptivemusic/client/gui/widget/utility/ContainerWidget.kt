@@ -8,7 +8,10 @@ import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.input.CharInput
+import net.minecraft.client.input.KeyInput
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
@@ -39,10 +42,13 @@ abstract class ContainerWidget(
     protected val screen: Screen? = client.currentScreen
     private var scrollPosition = 0
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
-    private var focusedWidget: ClickableWidget? = null
+    protected var focusedWidget: ClickableWidget? = null
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
+    }
+
+    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
     override fun playDownSound(soundManager: SoundManager?) {
@@ -53,6 +59,7 @@ abstract class ContainerWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        focusedWidget?.isFocused = true
         renderChildren.clear()
         if (!visible) {
             return
@@ -73,7 +80,7 @@ abstract class ContainerWidget(
             }
         }
 
-        if (bordered) {
+       if (bordered) {
             context?.drawBorder(x, y, width, height)
         }
 
@@ -95,40 +102,51 @@ abstract class ContainerWidget(
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+        if (!visible ||
+            !active ||
+            !this.isValidClickButton(click.buttonInfo) ||
+            !isMouseOver(click.x, click.y)) {
+            unfocus()
             return false
-        }
-
-        val result = this.isMouseOver(click.x(), click.y())
-        if (result) {
-            screen?.focused = this
-            this.onClick(click, doubled)
         }
 
         backButton?.let {
             if (it.mouseClicked(click, doubled)) {
-                return result
+                return true
             }
         }
 
+        focusedWidget = null
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
             if (child.widget.mouseClicked(click, doubled)) {
                 focusedWidget = child.widget
-                return result
+            }
+            else {
+                child.widget.isFocused = false
             }
         }
 
-        focusedWidget = null
-        
-        return result
+        screen?.focused = this
+
+        return true
     }
 
     override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
-        focusedWidget?.mouseDragged(click, offsetX, offsetY)
+        return focusedWidget?.mouseDragged(click, offsetX, offsetY) ?: false
+    }
 
-        return false
+    override fun charTyped(input: CharInput): Boolean {
+        return focusedWidget?.charTyped(input) ?: false
+    }
+
+    override fun keyPressed(input: KeyInput): Boolean {
+        return focusedWidget?.keyPressed(input) ?: false
+    }
+
+    override fun keyReleased(input: KeyInput): Boolean {
+        return focusedWidget?.keyReleased(input) ?: false
     }
 
     override fun mouseReleased(click: Click): Boolean {
@@ -136,9 +154,7 @@ abstract class ContainerWidget(
             return false
         }
 
-        focusedWidget?.mouseReleased(click)
-
-        return false
+        return focusedWidget?.mouseReleased(click) ?: true
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
@@ -198,7 +214,7 @@ abstract class ContainerWidget(
 
         if (row == null) {
             children[widgetId] = children[widgetId]!!.copy(
-                row = maxUsedRow(onlyThisRender = true, countOffscreen = true) + 1)
+                row = maxUsedRow(onlyThisRender = true, countOffscreen = true))
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
@@ -258,6 +274,10 @@ abstract class ContainerWidget(
 
     fun resetScrolling() {
         scrollPosition = 0
+    }
+
+    fun scrollToBottom() {
+        scrollPosition = Int.MAX_VALUE
     }
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
@@ -328,7 +348,7 @@ abstract class ContainerWidget(
             .filterValues { child ->
                 if (countOffscreen) child.widget.visible else childVisible(child) }
             .maxOfOrNull { (_, child) ->
-                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 0 }
+                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 1 }
             ?: 0 else 0
     }
 
@@ -379,6 +399,19 @@ abstract class ContainerWidget(
         return left <= widgetRight && right >= widgetLeft && top <= widgetBottom && bottom >= widgetTop
     }
 
+    private fun unfocus() {
+        focusedWidget = null
+        isFocused = false
+        children.values.forEach {
+            if (it.widget is ContainerWidget) {
+                it.widget.unfocus()
+            }
+            else {
+                it.widget.isFocused = false
+            }
+        }
+    }
+
     companion object {
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
@@ -388,7 +421,7 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget(ScreenTexts.BACK.string, onClick = { it() }) }
+            return backButtonCallback.let { ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() }) }
         }
     }
 
