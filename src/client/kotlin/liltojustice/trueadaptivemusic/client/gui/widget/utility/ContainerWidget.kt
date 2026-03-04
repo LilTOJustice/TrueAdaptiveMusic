@@ -8,8 +8,6 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
@@ -79,7 +77,7 @@ abstract class ContainerWidget(
         }
 
        if (bordered) {
-            context?.drawBorder(x, y, width, height)
+            context?.drawBorder(x, y, width, height, Colors.WHITE)
         }
 
         clampScrollPosition()
@@ -99,17 +97,17 @@ abstract class ContainerWidget(
         context?.disableScissor()
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (!visible ||
             !active ||
-            !this.isValidClickButton(click.buttonInfo) ||
-            !isMouseOver(click.x, click.y)) {
+            !this.isValidClickButton(button) ||
+            !isMouseOver(mouseX, mouseY)) {
             unfocus()
             return false
         }
 
         backButton?.let {
-            if (it.mouseClicked(click, doubled)) {
+            if (it.mouseClicked(mouseX, mouseY, button)) {
                 return true
             }
         }
@@ -131,20 +129,20 @@ abstract class ContainerWidget(
         return true
     }
 
-    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
-        return focusedWidget?.mouseDragged(click, offsetX, offsetY) ?: false
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
+        return focusedWidget?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) ?: false
     }
 
-    override fun charTyped(input: CharInput): Boolean {
-        return focusedWidget?.charTyped(input) ?: false
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        return focusedWidget?.charTyped(chr, modifiers) ?: false
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        return focusedWidget?.keyPressed(input) ?: false
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return focusedWidget?.keyPressed(keyCode, scanCode, modifiers) ?: false
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
-        return focusedWidget?.keyReleased(input) ?: false
+    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        return focusedWidget?.keyReleased(keyCode, scanCode, modifiers) ?: false
     }
 
     override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
@@ -152,7 +150,7 @@ abstract class ContainerWidget(
             return false
         }
 
-        return focusedWidget?.mouseReleased(click) ?: true
+        return focusedWidget?.mouseReleased(mouseX, mouseY, button) ?: true
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
