@@ -105,10 +105,12 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
+    @Suppress("unused")
     fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
         registerPredicate(name, triggerType.kotlin)
     }
 
+    @Suppress("unused")
     fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
         registerEvent(name, triggerType.kotlin)
     }
