@@ -5,6 +5,7 @@ The True Adaptive Music API provides some convenience types for handling registr
 - BiomeIdentifier
 - DimensionIdentifier
 - EntityTypeIdentifier
+- StatusEffectIdentifier
 - StructureIdentifier
 - StructureSetIdentifier
 
