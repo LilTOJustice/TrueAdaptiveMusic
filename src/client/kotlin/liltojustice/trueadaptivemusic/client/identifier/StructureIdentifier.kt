@@ -4,9 +4,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.util.Identifier
 
-class StructureIdentifier(id: String): TypedIdentifier(id) {
+class StructureIdentifier(id: Identifier): TypedIdentifier(id) {
     override fun toPrefixedTranslationKey(): String {
-        return identifier.toTranslationKey("structure")
+        return id.toTranslationKey("structure")
     }
 
     companion object: TypedIdentifierCompanion() {

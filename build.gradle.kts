@@ -3,8 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.0.20"
-    kotlin("plugin.serialization") version "2.0.20"
-    id("fabric-loom") version "1.7.1"
+    id("fabric-loom") version "1.14-SNAPSHOT"
     id("maven-publish")
 }
 
@@ -58,12 +57,6 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-
-    implementation(
-        "org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_version")}")
-        ?.let { includeInternal(it) }
-    //implementation("org.apache.maven.shared:maven-dependency-analyzer:${project.property("mda_version")}")
-    //    ?.let { includeInternal(it) }
 }
 
 tasks.processResources {
