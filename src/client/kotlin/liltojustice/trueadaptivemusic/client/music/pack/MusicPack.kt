@@ -2,32 +2,32 @@ package liltojustice.trueadaptivemusic.client.music.pack
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.toast.SystemToast
 import net.minecraft.text.Text
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -38,7 +38,7 @@ import kotlin.reflect.full.primaryConstructor
 
 class MusicPack private constructor(
     var metadata: Metadata,
-    val rules: MusicPredicateTree,
+    val rules: MusicTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
     private val packPath = Path(Constants.MUSIC_PACK_DIR.pathString, packName)
@@ -64,14 +64,19 @@ class MusicPack private constructor(
                     Path(
                         Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString)
                     .use { zipFile ->
-                    zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
-                        .forEach { entry ->
-                            FileOutputStream(
-                                Path(assetsDir.pathString,
-                                    Path(entry.name).name).pathString).use { out ->
-                                        zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) }
-                                    }
-                        }
+                        zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
+                            .forEach { entry ->
+                                val path = Path(
+                                    assetsDir.pathString,
+                                    *Path(entry.name).drop(1).map { it.name }.toTypedArray())
+                                path.createParentDirectories()
+                                if (path.isDirectory()) {
+                                    return@forEach
+                                }
+
+                                FileOutputStream(path.pathString)
+                                    .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                            }
                     }
             }
             else if (packWithAssets != null) {
@@ -97,9 +102,9 @@ class MusicPack private constructor(
         return Path(getEditPackDir().pathString, Constants.ASSETS_DIRNAME)
     }
 
-    fun getEditPackAssets(): Map<String, PlayableSound> {
-        return getEditPackAssetsPath().listDirectoryEntries()
-            .map { file -> PlayableSoundFile(RegularSoundFile(file)) }
+    fun getEditPackSoundLibrary(): SoundLibrary {
+        return getEditPackAssetsPath().listDirectoryEntriesRecursive()
+            .map { file -> makePlayableSound(file) }
             .associateBy { file -> file.getSoundName() }
     }
 
@@ -162,19 +167,48 @@ class MusicPack private constructor(
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
         metaFile.toFile().writeText(metadata.jsonEncode())
         val outputPath = Path(packDir.pathString + ".zip")
-        outputPath.deleteIfExists()
-        ZipOutputStream(FileOutputStream(outputPath.createFile().pathString)).use { out ->
-            out.putNextEntry(ZipEntry(rulesFile.name))
-            rulesFile.inputStream().copyTo(out)
-            out.putNextEntry(ZipEntry(metaFile.name))
-            metaFile.inputStream().copyTo(out)
-            assetsDir.listDirectoryEntries().forEach { entry ->
-                out.putNextEntry(
-                    ZipEntry(Path(Constants.ASSETS_DIRNAME, entry.name).pathString))
-                entry.inputStream().copyTo(out)
+        val newZipPath = Path(outputPath.pathString + ".new")
+
+        val newZip = newZipPath.createFile()
+        FileOutputStream(newZip.pathString).use { file ->
+            ZipOutputStream(file).use { out ->
+                out.putNextEntry(ZipEntry(rulesFile.name))
+                rulesFile.inputStream().use { it.copyTo(out) }
+                out.putNextEntry(ZipEntry(metaFile.name))
+                metaFile.inputStream().use { it.copyTo(out) }
+                assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
+                    out.putNextEntry(
+                        ZipEntry(
+                            Path(
+                                Constants.ASSETS_DIRNAME,
+                                *entry.drop(3).map { it.name }.toTypedArray()
+                            ).pathString + if (entry.isDirectory()) Path("").fileSystem.separator else ""
+                        )
+                    )
+
+                    if (entry.isDirectory()) {
+                        out.closeEntry()
+                    }
+                    else {
+                        entry.inputStream().use { it.copyTo(out) }
+                    }
+                }
             }
         }
-        packOngoingDir.deleteRecursively()
+
+        try {
+            Files.move(newZip, outputPath, StandardCopyOption.REPLACE_EXISTING)
+            packOngoingDir.deleteRecursively()
+        }
+        catch (e: Exception) {
+            TAMClient.errorToast(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.export_failure", "Failed to export pack! Try again."),
+                e.message
+            )
+            Logger.logError("Failed to export to zip!")
+            newZip.deleteIfExists()
+        }
 
         return outputPath
     }
@@ -186,8 +220,8 @@ class MusicPack private constructor(
                 Text.translatableWithFallback(
                     "trueadaptivemusic.ogg_warning",
                     "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
-                        "This music will not play unless FFmpeg is installed on your system. You can install it at " +
-                        "the top right of your screen. If you already did, you may just need to restart your system."
+                            "This music will not play unless FFmpeg is installed on your system. You can install it at " +
+                            "the top right of your screen. If you already did, you may just need to restart your system."
                 ).string
             )
         }
@@ -195,11 +229,13 @@ class MusicPack private constructor(
         val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
         val usedEventTypes = mutableSetOf<KClass<out MusicEvent>>()
         rules.traverse { node, _ ->
-            (node.predicate as? ErrorPredicate)?.let {
-                validation.addWarning(it.reason)
-            }
+            node.predicates.forEach { predicate ->
+                (predicate as? ErrorPredicate)?.let {
+                    validation.addWarning(it.reason)
+                }
 
-            usedPredicateTypes.add(node.predicate::class)
+                usedPredicateTypes.add(predicate::class)
+            }
 
             node.events.forEach { event ->
                 (event as? ErrorEvent)?.let {
@@ -277,13 +313,14 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(Metadata(), MusicPredicateTree.makeEmpty(), packName)
+            return MusicPack(Metadata(), MusicTree.makeEmpty(), packName)
         }
 
-        fun fromFile(filePath: Path): MusicPack {
+        fun fromFile(filePath: Path): MusicPack? {
             val zip = filePath.extension == "zip"
             if (!zip && !filePath.isDirectory()) {
-                throw MusicLoadException("Given path \"$filePath\" is neither a directory nor a zip file")
+                Logger.logWarning("Could not find music pack $filePath.")
+                return null
             }
 
             try {
@@ -294,37 +331,6 @@ class MusicPack private constructor(
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to read music pack: $filePath", e)
-            }
-        }
-
-        fun parseAudio(audioMemberName: String, json: JsonObject, soundLibrary: Map<String, PlayableSoundFile>)
-                : List<PlayableSound> {
-            return (if (JsonHelper.hasString(json, audioMemberName))
-                listOf(JsonHelper.getString(json, audioMemberName))
-            else if (JsonHelper.hasArray(json, audioMemberName))
-                JsonHelper.getArray(json, audioMemberName).map { element -> element.asString }
-                    else emptyList())
-                .map { path ->
-                    try {
-                        return@map soundLibrary[path]
-                            ?: PlayableSoundEvent(
-                                Identifier.of(path)
-                                    ?: throw InvalidIdentifierException("Couldn't find sound event for $path"),
-                            )
-                    }
-                    catch (_: InvalidIdentifierException) {}
-
-                    Logger.logWarning("Could not find \"$path\", skipping...")
-                    return@map null
-                }.filterNotNull()
-        }
-
-        fun toPlayableSound(assets: Map<String, PlayableSound>, id: String): PlayableSound? {
-            return assets[id] ?: try {
-                PlayableSoundEvent(Identifier.of(id))
-            }
-            catch (_: InvalidIdentifierException) {
-                null
             }
         }
 
@@ -341,8 +347,8 @@ class MusicPack private constructor(
                 Logger.logInfo(
                     "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
             }
-            val playableSoundFiles = assetsDir?.listDirectoryEntries()
-                ?.map { file -> PlayableSoundFile(RegularSoundFile(file)) }
+            val playableSounds = assetsDir?.listDirectoryEntriesRecursive()
+                ?.map { file -> makePlayableSound(file) }
                 ?.associateBy { file -> file.getSoundName() } ?: mapOf()
             val rulesFile = files.find { file -> file.fileName.name == Constants.RULES_FILENAME }
             val metaFile = files.find { file -> file.fileName.name == Constants.META_FILENAME }
@@ -362,12 +368,12 @@ class MusicPack private constructor(
             val preValidation = MusicPackValidation()
 
             val rules = try {
-                MusicPredicateTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSoundFiles)
+                MusicTree.fromJson(
+                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSounds)
             }
             catch (e: JsonParseException) {
                 preValidation.addError("$jsonErrorText\n$e")
-                MusicPredicateTree.makeEmpty()
+                MusicTree.makeEmpty()
             }
 
             return MusicPack(
@@ -382,18 +388,18 @@ class MusicPack private constructor(
             ZipFile(filePath.toFile()).use { zipFile ->
                 val files = zipFile.entries().toList()
                 var metadata = Metadata()
-                val playableSoundFiles = files
+                val playableSounds = files
                     .filter { file -> isZipAsset(file.name) }
-                    .map { file ->
-                        PlayableSoundFile(ZipSoundFile(filePath, Path(file.name))) }
+                    .map { file -> makePlayableSounds(filePath, file, files) }
                     .associateBy { file -> file.getSoundName() }
                 val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
                 val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
 
                 if (metaFile != null)
                 {
-                    metadata = Metadata.jsonDecode(
-                        zipFile.getInputStream(metaFile).reader().readText())
+                    zipFile.getInputStream(metaFile).use {
+                        metadata = Metadata.jsonDecode(it.reader().readText())
+                    }
                 }
 
                 if (rulesFile == null)
@@ -406,13 +412,14 @@ class MusicPack private constructor(
                 val preValidation = MusicPackValidation()
 
                 val rules = try {
-                    MusicPredicateTree.fromJson(
-                        JsonHelper.deserialize(
-                            zipFile.getInputStream(rulesFile).reader()), playableSoundFiles)
+                    zipFile.getInputStream(rulesFile).use {
+                        MusicTree.fromJson(
+                            JsonHelper.deserialize(it.reader()) , playableSounds)
+                    }
                 }
                 catch (e: JsonParseException) {
                     preValidation.addError("$jsonErrorText\n$e")
-                    MusicPredicateTree.makeEmpty()
+                    MusicTree.makeEmpty()
                 }
 
                 return MusicPack(
@@ -425,7 +432,35 @@ class MusicPack private constructor(
         }
 
         private fun isZipAsset(fileName: String): Boolean {
-            return fileName.contains(Constants.ASSETS_DIRNAME + Path("").fileSystem.separator)
+            return fileName.startsWith(Constants.ASSETS_DIRNAME)
+        }
+
+        private fun makePlayableSound(filePath: Path): PlayableSound {
+            return if (filePath.isDirectory()) {
+                PlayableSoundDirectory(
+                    filePath.name,
+                    filePath.listDirectoryEntriesRecursive()
+                        .filter { !it.isDirectory() }
+                        .map { RegularSoundFile(it) }
+                )
+            }
+            else {
+                PlayableSoundFile(RegularSoundFile(filePath))
+            }
+        }
+
+        private fun makePlayableSounds(
+            zipFilePath: Path, zipEntry: ZipEntry, zipEntries: List<ZipEntry>): PlayableSound {
+            return if (zipEntry.isActuallyDirectory || zipEntry.name.endsWith("\\")) {
+                PlayableSoundDirectory(
+                    Path(zipEntry.name).name,
+                    zipEntries.filter { it.name.startsWith(zipEntry.name) && !it.isActuallyDirectory }
+                        .map { ZipSoundFile(zipFilePath, Path(it.name)) }
+                )
+            }
+            else {
+                PlayableSoundFile(ZipSoundFile(zipFilePath, Path(zipEntry.name)))
+            }
         }
 
         /*private fun packageNameOf(qualifiedClassName: String): String {
@@ -443,14 +478,13 @@ class MusicPack private constructor(
         }*/
     }
 
-    @Serializable
     data class Metadata(val description: String = "") {
         fun getArgs(): List<Any?> {
             return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
         }
 
         fun jsonEncode(): String {
-            return json.encodeToString(this)
+            return json.toJson(this)
         }
 
         companion object {
@@ -464,14 +498,12 @@ class MusicPack private constructor(
                 "description" to "Description of the Music Pack."
             )
 
-            private val json = Json {
-                encodeDefaults = true
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
+            private val json = GsonBuilder()
+                .setPrettyPrinting()
+                .create()
 
             fun jsonDecode(string: String): Metadata {
-                return json.decodeFromString(string)
+                return json.fromJson(string, Metadata::class.java)
             }
 
             fun getRequiredArgs(): List<KParameter> {
@@ -490,4 +522,15 @@ class MusicPack private constructor(
         }
     }
 }
+
+private fun Path.listDirectoryEntriesRecursive(includeRoot: Boolean = false, includeDirectories: Boolean = true): List<Path> {
+    val thisList = listOf(this).takeIf { includeRoot && includeDirectories } ?: emptyList()
+    if (!isDirectory()) {
+        return listOf(this)
+    }
+
+    return listDirectoryEntries().flatMap { it.listDirectoryEntriesRecursive(true, includeDirectories) } + thisList
+}
+
+private val ZipEntry.isActuallyDirectory: Boolean get() = isDirectory || name.endsWith("\\")
 
