@@ -105,6 +105,14 @@ object TAMClient {
         eventRegistry[name] = triggerType
     }
 
+    fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
+        registerPredicate(name, triggerType.kotlin)
+    }
+
+    fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
+        registerEvent(name, triggerType.kotlin)
+    }
+
     fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
         inputWidgetMaker.register(predicate, widgetMaker)
     }
