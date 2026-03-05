@@ -11,7 +11,8 @@ object StructurePredicate: Convertible {
         val result = JsonObject()
         val structures = JsonArray()
         json.asJsonObject
-            .getAsJsonArray("id").forEach { element -> structures.add(Identifier.convert(element)) }
+            .getAsJsonArray("id")
+            ?.forEach { element -> structures.add(Identifier.convert(element)) }
         result.add("structures", structures)
 
         return result

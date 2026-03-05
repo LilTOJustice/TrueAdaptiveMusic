@@ -180,7 +180,7 @@ class MusicPack private constructor(
                             Path(
                                 Constants.ASSETS_DIRNAME,
                                 *entry.drop(3).map { it.name }.toTypedArray()
-                            ).pathString + if (entry.isDirectory()) Path("").fileSystem.separator else ""
+                            ).pathString + if (entry.isDirectory()) PATH_SEPARATOR else ""
                         )
                     )
 
@@ -217,9 +217,10 @@ class MusicPack private constructor(
             validation.addWarning(
                 Text.translatableWithFallback(
                     "trueadaptivemusic.ogg_warning",
-                    "This pack contains music that is not 'ogg' type (the only type supported by minecraft). " +
-                            "This music will not play unless FFmpeg is installed on your system. You can install it at " +
-                            "the top right of your screen. If you already did, you may just need to restart your system."
+                    "This pack contains music that is not 'ogg' type (the only type supported by " +
+                            "minecraft). This music will not play unless FFmpeg is installed on your system. You " +
+                            "can install it at the top right of your screen. If you already did, you may just need " +
+                            "to restart your system."
                 ).string
             )
         }
@@ -449,15 +450,26 @@ class MusicPack private constructor(
 
         private fun makePlayableSounds(
             zipFilePath: Path, zipEntry: ZipEntry, zipEntries: List<ZipEntry>): PlayableSound {
-            return if (zipEntry.isActuallyDirectory || zipEntry.name.endsWith("\\")) {
+            return if (zipEntry.isActuallyDirectory) {
                 PlayableSoundDirectory(
                     Path(zipEntry.name).name,
-                    zipEntries.filter { it.name.startsWith(zipEntry.name) && !it.isActuallyDirectory }
-                        .map { ZipSoundFile(zipFilePath, Path(it.name)) }
+                    zipEntries
+                        .filter { it.name.startsWith(zipEntry.name) && !it.isActuallyDirectory }
+                        .map {
+                            ZipSoundFile(
+                                zipFilePath,
+                                Path(it.name.replace("\\", PATH_SEPARATOR))
+                            )
+                        }
                 )
             }
             else {
-                PlayableSoundFile(ZipSoundFile(zipFilePath, Path(zipEntry.name)))
+                PlayableSoundFile(
+                    ZipSoundFile(
+                        zipFilePath,
+                        Path(zipEntry.name.replace("\\", PATH_SEPARATOR))
+                    )
+                )
             }
         }
 
@@ -530,5 +542,7 @@ private fun Path.listDirectoryEntriesRecursive(includeRoot: Boolean = false, inc
     return listDirectoryEntries().flatMap { it.listDirectoryEntriesRecursive(true, includeDirectories) } + thisList
 }
 
-private val ZipEntry.isActuallyDirectory: Boolean get() = isDirectory || name.endsWith("\\")
+private val ZipEntry.isActuallyDirectory: Boolean get() =
+    isDirectory || name.endsWith(PATH_SEPARATOR) || name.endsWith("\\")
 
+private const val PATH_SEPARATOR = "/"
