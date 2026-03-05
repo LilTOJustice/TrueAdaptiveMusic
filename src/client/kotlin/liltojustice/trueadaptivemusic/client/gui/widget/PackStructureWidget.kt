@@ -60,6 +60,10 @@ class PackStructureWidget(
                 )
             },
             { node, path ->
+                if (node !== targetedNode) {
+                    return@traverse
+                }
+
                 addWidget(
                     CreateNodeWidget(TargetNode(node, true)),
                     row++,
@@ -198,9 +202,11 @@ class PackStructureWidget(
         )
         val ARROW_TEXT: MutableText = Text.literal("->")
         val LINE_SPACE: MutableText = Text.literal("\n\n")
-        val ADD_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.add", "Add")
+        val CREATE_CHILD_NODE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.create_child_node", "Create Child Node"
+        )
         val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.create_node", "Create a new node")
+            "trueadaptivemusic.create_node", "Create new node")
         val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.create_predicate", "Create a Predicate")
         val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
@@ -353,7 +359,8 @@ class PackStructureWidget(
 
     private inner class CreateNodeWidget(override val targetNode: TargetNode):
         AbstractNodeWidget,
-        ClickableTextWidget("+ ${ADD_TEXT.string}", onClick = { onSelectCreateNewNode(targetNode.node) }) {
+        ClickableTextWidget(
+            "+ ${CREATE_CHILD_NODE_TEXT.string}", onClick = { onSelectCreateNewNode(targetNode.node) }) {
         init {
             setTooltip(Tooltip.of(CREATE_NODE_TEXT))
         }
