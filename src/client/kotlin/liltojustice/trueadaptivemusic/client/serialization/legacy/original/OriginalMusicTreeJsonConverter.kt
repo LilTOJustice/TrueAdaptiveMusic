@@ -20,7 +20,7 @@ object OriginalMusicTreeJsonConverter {
         val result = JsonObject()
 
         result.add("music", json.getAsJsonArray("musicPath"))
-        result.add("ambience", json.getAsJsonArray("ambiencePath"))
+        result.add("ambience", json.getAsJsonArray("ambiencePath") ?: JsonArray())
 
         val predicates = JsonArray()
         predicates.add(MusicPredicate.convert(json))
