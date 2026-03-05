@@ -54,7 +54,7 @@ class Channel private constructor(
             }
             catch (e: Exception) {
                 if (e !is InterruptedException) {
-                    Logger.logError("TAM Sound Engine thread encountered an exception: ${e.message}")
+                    Logger.logError("TAM Sound Engine thread encountered an exception: $e")
                     stop()
                 }
             }
