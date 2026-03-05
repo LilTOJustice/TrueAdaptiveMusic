@@ -179,7 +179,7 @@ class NodeViewWidget(
         events.forEach { event ->
             addWidgetFromRender(
                 { val eventWidget = ClickableTextWidget(
-                    event.getTypeName(),
+                    MusicEvent.getDisplayName(event.getTypeName()).string,
                     onClick = {
                         if (selectedEvent === event) {
                             return@ClickableTextWidget
