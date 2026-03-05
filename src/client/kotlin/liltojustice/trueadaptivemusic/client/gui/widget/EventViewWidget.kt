@@ -55,8 +55,10 @@ class EventViewWidget(
         eventParams = selectedEvent?.parameters?.getTriggerParams()?.map { param -> param.value }?.toMutableList()
             ?: requiredEventParams.map { null }.toMutableList()
         if (event != null) {
-            setSelectedEventTypeName(event.getTypeName())
-            eventArgs = (event.getTriggerArgs().map { arg -> arg.value }).toMutableList()
+            if (event !is ErrorEvent) {
+                setSelectedEventTypeName(event.getTypeName())
+                eventArgs = (event.getTriggerArgs().map { arg -> arg.value }).toMutableList()
+            }
             selectedMusicPaths = event.music.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {

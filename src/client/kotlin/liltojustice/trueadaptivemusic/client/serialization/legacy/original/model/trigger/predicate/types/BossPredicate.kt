@@ -11,7 +11,8 @@ object BossPredicate: Convertible {
         val result = JsonObject()
         val bossesArray = JsonArray()
         json.asJsonObject
-            .getAsJsonArray("id").forEach { element -> bossesArray.add(Identifier.convert(element)) }
+            .getAsJsonArray("id")
+            ?.forEach { element -> bossesArray.add(Identifier.convert(element)) }
         result.add("bosses", bossesArray)
 
         return result
