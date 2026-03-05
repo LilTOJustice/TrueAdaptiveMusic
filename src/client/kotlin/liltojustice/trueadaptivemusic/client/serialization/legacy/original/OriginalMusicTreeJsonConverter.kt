@@ -1,7 +1,9 @@
 package liltojustice.trueadaptivemusic.client.serialization.legacy.original
 
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.MusicPredicate
 
@@ -19,7 +21,7 @@ object OriginalMusicTreeJsonConverter {
     fun convertPredicateToNode(json: JsonObject): JsonObject {
         val result = JsonObject()
 
-        result.add("music", json.getAsJsonArray("musicPath"))
+        result.add("music", json.getAsJsonArray("musicPath") ?: JsonArray())
         result.add("ambience", json.getAsJsonArray("ambiencePath") ?: JsonArray())
 
         val predicates = JsonArray()
@@ -27,15 +29,18 @@ object OriginalMusicTreeJsonConverter {
         result.add("predicates", predicates)
 
         val events = JsonArray()
-        json.getAsJsonArray("events").forEach { element -> events.add(MusicEvent.convert(element)) }
+        json.getAsJsonArray("events")?.forEach { element -> events.add(MusicEvent.convert(element)) }
         result.add("events", events)
 
-        result.add("parameters", json.get("parameters"))
+        result.add(
+            "parameters",
+            json.get("parameters") ?: Gson().toJsonTree(MusicTree.Node.Parameters.default())
+        )
 
         val children = JsonArray()
         json
             .getAsJsonArray("children")
-            .forEach { element -> children.add(convertPredicateToNode(element.asJsonObject)) }
+            ?.forEach { element -> children.add(convertPredicateToNode(element.asJsonObject)) }
         result.add("children", children)
 
         return result
