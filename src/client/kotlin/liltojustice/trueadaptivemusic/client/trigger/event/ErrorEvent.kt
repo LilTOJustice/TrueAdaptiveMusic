@@ -11,6 +11,6 @@ class ErrorEvent(val actualJson: JsonObject, val reason: String): MusicEvent() {
     }
 
     companion object: MusicEventCompanion {
-        const val NAME = "error_predicate"
+        const val NAME = "error_event"
     }
 }
