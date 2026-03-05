@@ -11,7 +11,8 @@ object BiomePredicate: Convertible {
         val result = JsonObject()
         val biomesArray = JsonArray()
         json.asJsonObject
-            .getAsJsonArray("id").forEach { element -> biomesArray.add(Identifier.convert(element)) }
+            .getAsJsonArray("id")
+            ?.forEach { element -> biomesArray.add(Identifier.convert(element)) }
         result.add("biomes", biomesArray)
 
         return result
