@@ -11,7 +11,8 @@ object DimensionPredicate: Convertible {
         val result = JsonObject()
         val dimensions = JsonArray()
         json.asJsonObject
-            .getAsJsonArray("id").forEach { element -> dimensions.add(Identifier.convert(element)) }
+            .getAsJsonArray("id")
+            ?.forEach { element -> dimensions.add(Identifier.convert(element)) }
         result.add("dimensions", dimensions)
 
         return result
