@@ -261,7 +261,7 @@ class NodeViewWidget(
             result.setTooltip(
                 Tooltip.of(
                     Text.translatableWithFallback(
-                        "trueadaptivemusic.delete_predicate_description", "Delete this predicate")
+                        "trueadaptivemusic.delete_node_description", "Delete this node")
                 )
             )
         }
@@ -270,6 +270,7 @@ class NodeViewWidget(
     fun setEditExistingNode(node: MusicTree.Node) {
         clearWidgetsFromRender()
         selectedNode = node
+        selectedEvent = null
         selectedMusicPaths = node.music.map { sound -> sound.getSoundName() }.toMutableList()
         selectedAmbiencePaths = node.ambience.map { sound -> sound.getSoundName() }.toMutableList()
         nodeParams = node.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
@@ -281,6 +282,7 @@ class NodeViewWidget(
         clearWidgetsFromRender()
         newNodeParent = parent
         selectedNode = null
+        selectedEvent = null
         selectedMusicPaths = mutableListOf()
         selectedAmbiencePaths = mutableListOf()
         nodeParams = defaultNodeParams.toMutableList()
@@ -322,6 +324,7 @@ class NodeViewWidget(
 
         if (exit) {
             selectedNode = null
+            selectedEvent = null
             newNodeParent = null
             clearWidgetsFromRender { false }
         }
