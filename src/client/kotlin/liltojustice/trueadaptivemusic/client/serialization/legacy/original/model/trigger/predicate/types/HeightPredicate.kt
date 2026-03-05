@@ -8,7 +8,7 @@ object HeightPredicate: Convertible {
     override fun convert(json: JsonElement): JsonObject {
         val jsonObject = json.asJsonObject
         val result = JsonObject()
-        val above = jsonObject.getAsJsonPrimitive("direction").asBoolean
+        val above = jsonObject.getAsJsonPrimitive("above").asBoolean
         val direction = if (above) "Above" else "Below"
 
         result.addProperty("direction", direction)
