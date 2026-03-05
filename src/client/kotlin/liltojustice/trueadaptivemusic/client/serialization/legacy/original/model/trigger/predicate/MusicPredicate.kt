@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.serialization.legacy.Convertible
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.BiomePredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.BossPredicate
+import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.DimensionPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.EntityNearbyPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.HeightPredicate
@@ -18,7 +19,7 @@ object MusicPredicate: Convertible {
         val jsonObject = json.asJsonObject
         val result = JsonObject()
 
-        val type = jsonObject.getAsJsonPrimitive("type").asString
+        val type = jsonObject.getAsJsonPrimitive("type")?.asString ?: "ErrorPredicate"
         result.addProperty("type", type)
 
         val rest = convertFor(type, jsonObject).entrySet()
@@ -35,6 +36,7 @@ object MusicPredicate: Convertible {
         return when(type) {
             "biome" -> BiomePredicate
             "boss" -> BossPredicate
+            "combat" -> CombatPredicate
             "dimension" -> DimensionPredicate
             "entity_nearby" -> EntityNearbyPredicate
             "height" -> HeightPredicate

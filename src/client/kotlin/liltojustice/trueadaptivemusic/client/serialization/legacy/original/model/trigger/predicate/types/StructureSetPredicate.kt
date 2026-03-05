@@ -12,7 +12,7 @@ object StructureSetPredicate: Convertible {
         val structureSets = JsonArray()
         json.asJsonObject
             .getAsJsonArray("id")
-            .forEach { element -> structureSets.add(Identifier.convert(element)) }
+            ?.forEach { element -> structureSets.add(Identifier.convert(element)) }
         result.add("structureSets", structureSets)
 
         return result
