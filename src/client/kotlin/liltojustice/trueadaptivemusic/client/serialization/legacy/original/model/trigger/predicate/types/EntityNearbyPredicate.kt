@@ -12,7 +12,7 @@ object EntityNearbyPredicate: Convertible {
         val entities = JsonArray()
         json.asJsonObject
             .getAsJsonArray("entities")
-            .forEach { element -> entities.add(Identifier.convert(element)) }
+            ?.forEach { element -> entities.add(Identifier.convert(element)) }
         result.add("entities", entities)
 
         return result

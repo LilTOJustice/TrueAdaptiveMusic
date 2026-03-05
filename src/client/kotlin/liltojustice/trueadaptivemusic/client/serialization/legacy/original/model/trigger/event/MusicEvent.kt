@@ -1,9 +1,11 @@
 package liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.event
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.serialization.legacy.Convertible
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.event.types.OnBossDefeatEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 
 object MusicEvent: Convertible {
     override fun convert(json: JsonElement): JsonObject {
@@ -14,7 +16,10 @@ object MusicEvent: Convertible {
         result.addProperty("type", type)
 
         result.add("music", jsonObject.getAsJsonArray("musicPath"))
-        result.add("parameters", jsonObject.get("parameters"))
+        result.add(
+            "parameters",
+            jsonObject.get("parameters") ?: Gson().toJsonTree(MusicEvent.Parameters.default())
+        )
 
         val rest = convertFor(type, jsonObject).entrySet()
         rest.forEach { entry -> result.add(entry.key, entry.value) }
