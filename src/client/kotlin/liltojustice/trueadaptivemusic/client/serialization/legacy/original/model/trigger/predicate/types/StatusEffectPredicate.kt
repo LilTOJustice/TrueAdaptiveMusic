@@ -12,7 +12,7 @@ object StatusEffectPredicate: Convertible {
         val entities = JsonArray()
         json.asJsonObject
             .getAsJsonArray("statusEffects")
-            .forEach { element -> entities.add(Identifier.convert(element)) }
+            ?.forEach { element -> entities.add(Identifier.convert(element)) }
         result.add("statusEffects", entities)
 
         return result
