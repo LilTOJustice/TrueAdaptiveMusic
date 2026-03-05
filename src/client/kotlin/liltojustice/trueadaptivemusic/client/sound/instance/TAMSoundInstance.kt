@@ -106,8 +106,8 @@ abstract class TAMSoundInstance(val isAmbient: Boolean): SoundInstance {
                     )
                 }
             }
-            catch (_: Exception) {
-                throw MusicLoadException("Failed to load audio stream for '$name'")
+            catch (e: Exception) {
+                throw MusicLoadException("Failed to load audio stream for '$name'", e)
             }
         }
     }
