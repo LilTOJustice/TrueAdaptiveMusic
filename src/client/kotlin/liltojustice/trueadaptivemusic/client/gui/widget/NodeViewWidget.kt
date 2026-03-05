@@ -202,7 +202,9 @@ class NodeViewWidget(
         addWidgetFromRender(
             {
                 val result = ClickableTextWidget(
-                    "+ ${Text.translatableWithFallback("trueadaptivemusic.add", "Add").string}",
+                    "+ ${
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.create_event", "Create Event").string}",
                     onClick = {
                         selectedEvent = null
                         onEventClick(null)
@@ -294,7 +296,6 @@ class NodeViewWidget(
 
         events.sortBy { event -> event.getTriggerId() }
         clearWidgetsFromRender { widget -> !widget.id.startsWith("event:") }
-        save()
 
         if (exit && newEvent == null) {
             events.remove(selectedEvent)
@@ -306,6 +307,7 @@ class NodeViewWidget(
             newEvent
         }
 
+        selectedNode?.events = events
         save()
     }
 
