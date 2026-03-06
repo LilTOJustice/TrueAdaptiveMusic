@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
@@ -66,7 +67,11 @@ object MusicTriggerSerializer {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMClient.predicateRegistry[typeName]
 
-            getGson(soundLibrary).fromJson(json, type.java)
+            val stateless = getGson(soundLibrary).fromJson(json, type.java)
+            stateless::class.constructors.firstOrNull()
+                ?.call(*stateless.getTriggerArgs().map { arg -> arg.value }.toTypedArray())
+                ?: throw MusicLoadException(
+                    "Failed to deserialize type '$type' with json $json due to constructor failure.")
         }
         catch (e: MusicTriggerException) {
             ErrorPredicate(json, e.message ?: "Unknown")
@@ -78,7 +83,11 @@ object MusicTriggerSerializer {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMClient.eventRegistry[typeName]
 
-            getGson(soundLibrary).fromJson(json, type.java)
+            val stateless = getGson(soundLibrary).fromJson(json, type.java)
+            stateless::class.constructors.firstOrNull()
+                ?.call(*stateless.getTriggerArgs().map { arg -> arg.value }.toTypedArray())
+                ?: throw MusicLoadException(
+                    "Failed to deserialize type '$type' with json $json due to constructor failure.")
         }
         catch (e: MusicTriggerException) {
             ErrorEvent(json, e.message ?: "Unknown")
