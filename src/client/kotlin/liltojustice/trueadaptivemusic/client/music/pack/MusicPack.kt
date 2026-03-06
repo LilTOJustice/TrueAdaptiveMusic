@@ -229,7 +229,7 @@ class MusicPack private constructor(
         if (isZipped()) {
             val zipFile = ZipFile(packPath.toFile())
             if (zipFile.entries().toList().any { it.name.contains("\\") }) {
-                validation.addError(
+                validation.addWarning(
                     "This pack has not been zipped properly, likely because it is old. " +
                             "If you are the pack creator, you should re-export it before releasing it."
                 )
