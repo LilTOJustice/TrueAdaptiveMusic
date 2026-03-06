@@ -496,7 +496,7 @@ class MusicPack private constructor(
         }*/
     }
 
-    data class Options(val description: String = "") {
+    data class Options(val description: String = "", val persistentNodeMusic: Boolean = false) {
         fun getArgs(): List<Any?> {
             return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
         }
@@ -513,7 +513,9 @@ class MusicPack private constructor(
                 ?.associateWith { it.prettify() } ?: mapOf()
 
             private val descriptions = mapOf(
-                "description" to "Description of the Music Pack."
+                "description" to "Description of the Music Pack.",
+                "persistentPredicates" to "If checked, music from the current node will continue to play until it" +
+                        " finishes if another node is chosen. Disables music fading between nodes."
             )
 
             private val json = GsonBuilder()

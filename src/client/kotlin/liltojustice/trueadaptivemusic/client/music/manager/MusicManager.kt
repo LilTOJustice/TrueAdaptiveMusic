@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
-import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -15,8 +14,6 @@ import kotlin.math.max
 import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
-    var musicPack: MusicPack? = null
-        private set
     var playingEvent: MusicEvent? = null
         private set
 
@@ -63,12 +60,7 @@ class MusicManager(private val client: MinecraftClient) {
             ?: musicPlayer.stop(ON_DEMAND_TRACK)
     }
 
-    fun selectMusicPack(musicPack: MusicPack?) {
-        stop()
-        this.musicPack = musicPack
-    }
-
-    fun tick() {
+    fun tick(treeResult: MusicTree.Result) {
         musicPlayer.getPlayingInstance(mainTrack)?.let {
             client.musicTracker.setCurrent(it)
 
@@ -82,18 +74,17 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        val predicateResult = TAMClient.currentPredicateResult ?: return
-        val identifier = predicateResult.path
-        val parameters = predicateResult.parameters
-        val musicToPlay = predicateResult.accumulatedMusic
-        val ambienceToPlay = predicateResult.accumulatedAmbience
+        val identifier = treeResult.path
+        val parameters = treeResult.parameters
+        val musicToPlay = treeResult.accumulatedMusic
+        val ambienceToPlay = treeResult.accumulatedAmbience
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
 
-        eventPool = predicateResult.accumulatedEvents
+        eventPool = treeResult.accumulatedEvents
 
         val isPaused = isPaused(client)
         val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
@@ -169,7 +160,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (identifier != currentMusicPredicateId &&
-            predicateResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
+            treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
             invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 

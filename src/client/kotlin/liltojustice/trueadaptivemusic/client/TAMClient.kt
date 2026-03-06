@@ -56,12 +56,12 @@ object TAMClient {
             field = value
             options.save()
         }
-    var musicPack: MusicPack?
-        get() = musicManager?.musicPack
+    var musicPack: MusicPack? = null
         set(value) {
+            field = value
             minecraftClient.soundManager.soundSystem.reloadSounds()
             hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
-            musicManager?.selectMusicPack(value)
+            musicManager?.stop()
 
             val packName = value?.packName ?: ""
             try {
@@ -82,7 +82,7 @@ object TAMClient {
         }
 
         currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
-        musicManager?.tick()
+        currentPredicateResult?.let { musicManager?.tick(it) }
     }
 
     fun resetSound() {
