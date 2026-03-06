@@ -1,17 +1,26 @@
 package liltojustice.trueadaptivemusic.client.sound.file
 
+import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import java.io.InputStream
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.extension
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.name
-import kotlin.io.path.pathString
 
 class ZipSoundFile(private val zipFilePath: Path, private val zipEntryPath: Path): SoundFile {
     override fun getInputStream(): InputStream {
         val zipFile = ZipFile(zipFilePath.toFile())
-        val zipEntry = zipFile.getEntry(zipEntryPath.pathString)
-        return zipFile.getInputStream(zipEntry)
+        val trueEntryPath = zipEntryPath.invariantSeparatorsPathString
+        val zipEntry = zipFile.getEntry(trueEntryPath)
+
+        return zipFile.getInputStream(
+            zipEntry
+                ?: zipFile
+                    .entries().toList().firstOrNull { it.name.replace("\\", "/") == trueEntryPath }
+                ?: throw MusicLoadException(
+                    "Could not load zip entry $trueEntryPath from zip file ${zipFile.name}")
+        )
     }
 
     override fun getName(): String {
