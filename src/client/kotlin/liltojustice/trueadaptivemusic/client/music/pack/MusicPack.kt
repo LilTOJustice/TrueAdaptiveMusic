@@ -180,7 +180,7 @@ class MusicPack private constructor(
                             Path(
                                 Constants.ASSETS_DIRNAME,
                                 *entry.drop(3).map { it.name }.toTypedArray()
-                            ).pathString + if (entry.isDirectory()) PATH_SEPARATOR else ""
+                            ).invariantSeparatorsPathString + if (entry.isDirectory()) PATH_SEPARATOR else ""
                         )
                     )
 
@@ -223,6 +223,17 @@ class MusicPack private constructor(
                             "to restart your system."
                 ).string
             )
+        }
+
+
+        if (isZipped()) {
+            val zipFile = ZipFile(packPath.toFile())
+            if (zipFile.entries().toList().any { it.name.contains("\\") }) {
+                validation.addWarning(
+                    "This pack has not been zipped properly, likely because it is old. " +
+                            "If you are the pack creator, you should re-export it before releasing it."
+                )
+            }
         }
 
         val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
@@ -455,21 +466,11 @@ class MusicPack private constructor(
                     Path(zipEntry.name).name,
                     zipEntries
                         .filter { it.name.startsWith(zipEntry.name) && !it.isActuallyDirectory }
-                        .map {
-                            ZipSoundFile(
-                                zipFilePath,
-                                Path(it.name.replace("\\", PATH_SEPARATOR))
-                            )
-                        }
+                        .map { ZipSoundFile(zipFilePath, Path(it.name)) }
                 )
             }
             else {
-                PlayableSoundFile(
-                    ZipSoundFile(
-                        zipFilePath,
-                        Path(zipEntry.name.replace("\\", PATH_SEPARATOR))
-                    )
-                )
+                PlayableSoundFile(ZipSoundFile(zipFilePath, Path(zipEntry.name)))
             }
         }
 
