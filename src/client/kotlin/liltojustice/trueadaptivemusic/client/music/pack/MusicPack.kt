@@ -466,11 +466,17 @@ class MusicPack private constructor(
                     Path(zipEntry.name).name,
                     zipEntries
                         .filter { it.name.startsWith(zipEntry.name) && !it.isActuallyDirectory }
-                        .map { ZipSoundFile(zipFilePath, Path(it.name)) }
+                        .map {
+                            ZipSoundFile(
+                                zipFilePath, Path(it.name.replace("\\", "/")))
+                        }
                 )
             }
             else {
-                PlayableSoundFile(ZipSoundFile(zipFilePath, Path(zipEntry.name)))
+                PlayableSoundFile(
+                    ZipSoundFile(
+                        zipFilePath, Path(zipEntry.name.replace("\\", "/")))
+                )
             }
         }
 
