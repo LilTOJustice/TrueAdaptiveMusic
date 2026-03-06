@@ -1,15 +1,12 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
-import kotlin.reflect.full.declaredMembers
 
 abstract class MusicPredicate: MusicTrigger() {
     private var lastResult = false
@@ -61,6 +58,7 @@ abstract class MusicPredicate: MusicTrigger() {
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                 TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
+
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.display",
                 combined[argName]

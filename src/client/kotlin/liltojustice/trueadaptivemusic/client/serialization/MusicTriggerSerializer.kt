@@ -68,10 +68,11 @@ object MusicTriggerSerializer {
             val type = TAMClient.predicateRegistry[typeName]
 
             val stateless = getGson(soundLibrary).fromJson(json, type.java)
-            stateless::class.constructors.firstOrNull()
+            val result = stateless::class.constructors.firstOrNull()
                 ?.call(*stateless.getTriggerArgs().map { arg -> arg.value }.toTypedArray())
                 ?: throw MusicLoadException(
                     "Failed to deserialize type '$type' with json $json due to constructor failure.")
+            result
         }
         catch (e: MusicTriggerException) {
             ErrorPredicate(json, e.message ?: "Unknown")
@@ -84,10 +85,12 @@ object MusicTriggerSerializer {
             val type = TAMClient.eventRegistry[typeName]
 
             val stateless = getGson(soundLibrary).fromJson(json, type.java)
-            stateless::class.constructors.firstOrNull()
+            val result = stateless::class.constructors.firstOrNull()
                 ?.call(*stateless.getTriggerArgs().map { arg -> arg.value }.toTypedArray())
                 ?: throw MusicLoadException(
                     "Failed to deserialize type '$type' with json $json due to constructor failure.")
+            result.music = stateless.music
+            result
         }
         catch (e: MusicTriggerException) {
             ErrorEvent(json, e.message ?: "Unknown")
