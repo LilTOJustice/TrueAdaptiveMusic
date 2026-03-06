@@ -8,10 +8,10 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import kotlin.reflect.full.primaryConstructor
 
-class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x: Int = 0, y: Int = 0)
+class PackOptionsViewWidget(initialOptions: MusicPack.Options, width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
-    private val requiredMetaArgs = MusicPack.Metadata.getRequiredArgs()
-    private var metaArgs: MutableList<Any?> = initialMeta.getArgs().toMutableList()
+    private val requiredOptionsArgs = MusicPack.Options.getRequiredArgs()
+    private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -27,23 +27,23 @@ class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x
             return
         }
 
-        requiredMetaArgs.forEach { required ->
+        requiredOptionsArgs.forEach { required ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
                         screen!!,
-                        metaArgs,
+                        optionsArgs,
                         required,
-                        required.name?.let { MusicPack.Metadata.getArgDisplayName(it) },
-                        required.name?.let { MusicPack.Metadata.getArgDescription(it) }
+                        required.name?.let { MusicPack.Options.getArgDisplayName(it) },
+                        required.name?.let { MusicPack.Options.getArgDescription(it) }
                     )
                 },
                 "${required.name}: ${required.type}")
         }
     }
 
-    fun getCurrentMeta(): MusicPack.Metadata {
-        return MusicPack.Metadata::class.primaryConstructor?.call(*metaArgs.toTypedArray())
-            ?: MusicPack.Metadata()
+    fun getCurrentOptions(): MusicPack.Options {
+        return MusicPack.Options::class.primaryConstructor?.call(*optionsArgs.toTypedArray())
+            ?: MusicPack.Options()
     }
 }

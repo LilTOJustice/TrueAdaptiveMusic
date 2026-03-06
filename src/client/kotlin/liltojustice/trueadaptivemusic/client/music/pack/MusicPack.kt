@@ -35,7 +35,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 class MusicPack private constructor(
-    var metadata: Metadata,
+    var options: Options,
     val rules: MusicTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
@@ -91,7 +91,7 @@ class MusicPack private constructor(
         }
 
         initRules()
-        initMeta()
+        initOptions()
 
         return packDir
     }
@@ -142,14 +142,14 @@ class MusicPack private constructor(
         rulesFile.writeText(getGson().toJson(rules.toJson()))
     }
 
-    fun initMeta() {
-        val metaFile = Path(getEditPackDir().pathString, Constants.META_FILENAME)
+    fun initOptions() {
+        val optionsFile = Path(getEditPackDir().pathString, Constants.PACK_OPTIONS_FILENAME)
 
-        if (!metaFile.exists()) {
-            metaFile.createFile()
+        if (!optionsFile.exists()) {
+            optionsFile.createFile()
         }
 
-        metaFile.writeText(metadata.jsonEncode())
+        optionsFile.writeText(options.jsonEncode())
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -160,10 +160,10 @@ class MusicPack private constructor(
             Constants.MUSIC_PACK_DIR.pathString, Path(packName).nameWithoutExtension)
         val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
-        val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
+        val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
-        metaFile.toFile().writeText(metadata.jsonEncode())
+        optionsFile.toFile().writeText(options.jsonEncode())
         val outputPath = Path(packDir.pathString + ".zip")
         val newZipPath = Path(outputPath.pathString + ".new")
 
@@ -172,8 +172,8 @@ class MusicPack private constructor(
             ZipOutputStream(file).use { out ->
                 out.putNextEntry(ZipEntry(rulesFile.name))
                 rulesFile.inputStream().use { it.copyTo(out) }
-                out.putNextEntry(ZipEntry(metaFile.name))
-                metaFile.inputStream().use { it.copyTo(out) }
+                out.putNextEntry(ZipEntry(optionsFile.name))
+                optionsFile.inputStream().use { it.copyTo(out) }
                 assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
                     out.putNextEntry(
                         ZipEntry(
@@ -323,7 +323,7 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(Metadata(), MusicTree.makeEmpty(), packName)
+            return MusicPack(Options(), MusicTree.makeEmpty(), packName)
         }
 
         fun fromFile(filePath: Path): MusicPack? {
@@ -350,7 +350,7 @@ class MusicPack private constructor(
 
         private fun fromDirectory(filePath: Path): MusicPack {
             val files = filePath.listDirectoryEntries()
-            var metadata = Metadata()
+            var options = Options()
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
             if (assetsDir == null)
             {
@@ -361,11 +361,11 @@ class MusicPack private constructor(
                 ?.map { file -> makePlayableSound(file) }
                 ?.associateBy { file -> file.getSoundName() } ?: mapOf()
             val rulesFile = files.find { file -> file.fileName.name == Constants.RULES_FILENAME }
-            val metaFile = files.find { file -> file.fileName.name == Constants.META_FILENAME }
+            val optionsFile = files.find { file -> file.fileName.name == Constants.PACK_OPTIONS_FILENAME }
 
-            if (metaFile != null)
+            if (optionsFile != null)
             {
-                metadata = Metadata.jsonDecode(metaFile.inputStream().reader().readText())
+                options = Options.jsonDecode(optionsFile.inputStream().reader().readText())
             }
 
             if (rulesFile == null)
@@ -387,7 +387,7 @@ class MusicPack private constructor(
             }
 
             return MusicPack(
-                metadata,
+                options,
                 rules,
                 filePath.name,
                 preValidation
@@ -397,18 +397,19 @@ class MusicPack private constructor(
         private fun fromZipFile(filePath: Path): MusicPack {
             ZipFile(filePath.toFile()).use { zipFile ->
                 val files = zipFile.entries().toList()
-                var metadata = Metadata()
+                var options = Options()
                 val playableSounds = files
                     .filter { file -> isZipAsset(file.name) }
                     .map { file -> makePlayableSounds(filePath, file, files) }
                     .associateBy { file -> file.getSoundName() }
                 val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
-                val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
+                val optionsFile = files
+                    .find { file -> Path(file.name).fileName.name == Constants.PACK_OPTIONS_FILENAME }
 
-                if (metaFile != null)
+                if (optionsFile != null)
                 {
-                    zipFile.getInputStream(metaFile).use {
-                        metadata = Metadata.jsonDecode(it.reader().readText())
+                    zipFile.getInputStream(optionsFile).use {
+                        options = Options.jsonDecode(it.reader().readText())
                     }
                 }
 
@@ -433,7 +434,7 @@ class MusicPack private constructor(
                 }
 
                 return MusicPack(
-                    metadata,
+                    options,
                     rules,
                     filePath.name,
                     preValidation
@@ -495,7 +496,7 @@ class MusicPack private constructor(
         }*/
     }
 
-    data class Metadata(val description: String = "") {
+    data class Options(val description: String = "") {
         fun getArgs(): List<Any?> {
             return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
         }
@@ -505,7 +506,7 @@ class MusicPack private constructor(
         }
 
         companion object {
-            private val displayNames = Metadata::class
+            private val displayNames = Options::class
                 .primaryConstructor
                 ?.parameters
                 ?.mapNotNull { it.name }
@@ -519,22 +520,22 @@ class MusicPack private constructor(
                 .setPrettyPrinting()
                 .create()
 
-            fun jsonDecode(string: String): Metadata {
-                return json.fromJson(string, Metadata::class.java)
+            fun jsonDecode(string: String): Options {
+                return json.fromJson(string, Options::class.java)
             }
 
             fun getRequiredArgs(): List<KParameter> {
-                return Metadata::class.primaryConstructor?.parameters ?: emptyList()
+                return Options::class.primaryConstructor?.parameters ?: emptyList()
             }
 
             fun getArgDisplayName(argName: String): Text? {
                 return translatableWithFallbackOrNull(
-                    "trueadaptivemusic.metadata.${argName}.display", displayNames[argName])
+                    "trueadaptivemusic.pack_options.${argName}.display", displayNames[argName])
             }
 
             fun getArgDescription(argName: String): Text? {
                 return translatableWithFallbackOrNull(
-                    "trueadaptivemusic.metadata.${argName}.description", descriptions[argName])
+                    "trueadaptivemusic.pack_options.${argName}.description", descriptions[argName])
             }
         }
     }
