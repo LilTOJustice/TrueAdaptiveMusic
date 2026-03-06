@@ -514,7 +514,7 @@ class MusicPack private constructor(
 
             private val descriptions = mapOf(
                 "description" to "Description of the Music Pack.",
-                "persistentPredicates" to "If checked, music from the current node will continue to play until it" +
+                "persistentNodeMusic" to "If checked, music from the current node will continue to play until it" +
                         " finishes if another node is chosen. Disables music fading between nodes."
             )
 

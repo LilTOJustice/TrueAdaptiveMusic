@@ -81,8 +81,10 @@ object TAMClient {
             initialize(client)
         }
 
-        currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
-        currentPredicateResult?.let { musicManager?.tick(it) }
+        musicPack?.let { pack ->
+            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
+            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
+        } ?: { currentPredicateResult = null }
     }
 
     fun resetSound() {

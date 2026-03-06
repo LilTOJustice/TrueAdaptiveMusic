@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
@@ -60,7 +61,16 @@ class MusicManager(private val client: MinecraftClient) {
             ?: musicPlayer.stop(ON_DEMAND_TRACK)
     }
 
-    fun tick(treeResult: MusicTree.Result) {
+    fun stop() {
+        client.musicTracker.setCurrent(null)
+        musicPlayer.stopAll()
+        currentMusicPredicateId = ""
+        oldMusicPredicateId = ""
+        eventPool = emptyList()
+        lastMusic = null
+    }
+
+    fun tick(treeResult: MusicTree.Result, packOptions: MusicPack.Options) {
         musicPlayer.getPlayingInstance(mainTrack)?.let {
             client.musicTracker.setCurrent(it)
 
@@ -166,7 +176,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         updatePredicateId(identifier)
 
-        if (musicPlayer.isTrackPlaying(mainTrack) && musicToPlay.contains(lastMusic) && enterDelay != 0U) {
+        if (shouldKeepPlaying(packOptions, musicToPlay, enterDelay, isEnter)) {
             return
         }
 
@@ -182,13 +192,13 @@ class MusicManager(private val client: MinecraftClient) {
                 && musicVolumeOption.value > 0
     }
 
-    fun stop() {
-        client.musicTracker.setCurrent(null)
-        musicPlayer.stopAll()
-        currentMusicPredicateId = ""
-        oldMusicPredicateId = ""
-        eventPool = emptyList()
-        lastMusic = null
+    private fun shouldKeepPlaying(
+        packOptions: MusicPack.Options, musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean): Boolean {
+        val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
+        return mainTrackPlaying && (
+                (musicToPlay.contains(lastMusic) && enterDelay != 0U)
+                        || (packOptions.persistentNodeMusic && isEnter)
+                )
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
