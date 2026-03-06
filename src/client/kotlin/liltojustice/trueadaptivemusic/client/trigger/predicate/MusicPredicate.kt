@@ -58,6 +58,7 @@ abstract class MusicPredicate: MusicTrigger() {
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                 TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
+
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.display",
                 combined[argName]
