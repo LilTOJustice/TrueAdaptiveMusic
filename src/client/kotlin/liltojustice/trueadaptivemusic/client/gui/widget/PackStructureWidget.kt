@@ -261,9 +261,7 @@ class PackStructureWidget(
             repeat(max(0, predicateWidgets.size - 1)) { add(ClickableTextWidget("||")) }
         }
 
-        val combinePredicateWidget = if (!node.predicates.isEmpty() &&
-            (node.predicates.any { it is RootPredicate } ||
-                    (node !== targetedNode && node.predicates.none { it === targetedPredicate })))
+        val combinePredicateWidget = if (!node.predicates.isEmpty() && node.predicates.any { it is RootPredicate })
             null
         else
             run {

@@ -47,6 +47,7 @@ abstract class ContainerWidget(
     private var verticalScrollHeld = false
     private var horizontalScrollHeld = false
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
+    private var lastUsedWidth = 0
     protected var focusedWidget: ClickableWidget? = null
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
@@ -89,7 +90,11 @@ abstract class ContainerWidget(
             context?.drawBorder(x, y, width, height)
         }
 
-        clampScrollPosition()
+        val usedWidth = getMaxUsedWidth()
+        if (lastUsedWidth == usedWidth) {
+            clampScrollPosition()
+        }
+
         val verticalExtent = drawVerticalScrollbar(context)
         val horizontalExtent = drawHorizontalScrollbar(context)
 
@@ -112,7 +117,9 @@ abstract class ContainerWidget(
 
             translated.widget.render(context, mouseX, mouseY, delta)
         }
+
         context?.disableScissor()
+        lastUsedWidth = getMaxUsedWidth()
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
