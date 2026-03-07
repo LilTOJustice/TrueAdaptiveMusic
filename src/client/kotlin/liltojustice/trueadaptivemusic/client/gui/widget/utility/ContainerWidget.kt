@@ -572,7 +572,9 @@ abstract class ContainerWidget(
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() }) }
+            return backButtonCallback.let {
+                ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() })
+            }
         }
     }
 
