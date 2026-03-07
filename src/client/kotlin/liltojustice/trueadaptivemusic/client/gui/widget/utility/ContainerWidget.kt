@@ -48,7 +48,8 @@ abstract class ContainerWidget(
     private var horizontalScrollHeld = false
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
     private var lastUsedWidth = 0
-    protected var focusedWidget: ClickableWidget? = null
+    var focusedWidget: ClickableWidget? = null
+        protected set
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
