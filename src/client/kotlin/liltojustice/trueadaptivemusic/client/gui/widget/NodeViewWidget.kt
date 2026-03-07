@@ -36,6 +36,7 @@ class NodeViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
@@ -265,6 +266,13 @@ class NodeViewWidget(
                 )
             )
         }
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
+        )
     }
 
     fun setEditExistingNode(node: MusicTree.Node) {

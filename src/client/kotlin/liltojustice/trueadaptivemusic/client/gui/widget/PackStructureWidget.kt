@@ -30,7 +30,7 @@ class PackStructureWidget(
     x: Int = 0,
     y: Int = 0
 ): ContainerWidget(
-    width, height, TITLE_TEXT.string, true, false, true, true, x, y)
+    width, height, TITLE_TEXT.string, true, false, true, true, true, x, y)
 {
     private var mouseButtonHeld = false
     private var shiftHeld = false
@@ -104,7 +104,8 @@ class PackStructureWidget(
         val result = super.mouseClicked(click, doubled)
         mouseButtonHeld = false
         forEachChild { child ->
-            if (child is NodeWidget &&
+            if (focusedWidget == child &&
+                child is NodeWidget &&
                 child.targetNode.node.parent != null &&
                 child.isMouseOver(click.x, click.y)) {
                 mouseButtonHeld = true
@@ -356,7 +357,7 @@ class PackStructureWidget(
             height = max(height, widget.height)
             render()
 
-            return nextX + widget.width + 4
+            return nextX + widget.width + 5
         }
     }
 

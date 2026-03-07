@@ -32,6 +32,7 @@ class EventViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
@@ -239,6 +240,13 @@ class EventViewWidget(
                 Text.translatableWithFallback(
                     "trueadaptivemusic.delete_event_description", "Delete this event")
             )
+        )
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
         )
     }
 

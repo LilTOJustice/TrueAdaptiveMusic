@@ -27,6 +27,7 @@ class MultiSelectDropdownWidget<TKey>(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {

@@ -32,6 +32,7 @@ class PredicateViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
@@ -155,6 +156,13 @@ class PredicateViewWidget(
                 )
             )
         }
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
+        )
     }
 
     fun setEditExistingPredicate(node: MusicTree.Node, predicate: MusicPredicate) {

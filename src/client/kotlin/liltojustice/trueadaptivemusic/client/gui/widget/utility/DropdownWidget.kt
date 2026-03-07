@@ -30,6 +30,7 @@ class DropdownWidget<TKey>(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {
@@ -101,7 +102,7 @@ class DropdownWidget<TKey>(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val shouldOpen = focusedWidget == textInputWidget && isFocused
+        val shouldOpen = (focusedWidget == textInputWidget || focusedWidget == dropdownResultsWidget) && isFocused
         if (open != shouldOpen) {
             open = shouldOpen
             onHoverOption(null)
@@ -141,6 +142,7 @@ class DropdownWidget<TKey>(
         false,
         true,
         true,
+        false,
         true,
         x,
         y) {
