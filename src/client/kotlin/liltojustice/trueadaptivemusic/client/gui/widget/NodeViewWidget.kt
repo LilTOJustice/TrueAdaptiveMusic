@@ -50,6 +50,8 @@ class NodeViewWidget(
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
+    private var shouldSave = false
+    private var shouldExit = false
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -63,6 +65,8 @@ class NodeViewWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        shouldExit = false
+        shouldSave = false
         super.renderWidget(context, mouseX, mouseY, delta)
         if (!visible) {
             return
@@ -78,6 +82,10 @@ class NodeViewWidget(
                     "trueadaptivemusic.select_add_node", "Select or create a node").string,
                 0,
                 width / 2)
+        }
+
+        if (shouldSave) {
+            save(shouldExit)
         }
     }
 
@@ -253,7 +261,8 @@ class NodeViewWidget(
                             }
 
                             selectedNode?.orphan()
-                            save(true)
+                            shouldSave = true
+                            shouldExit = true
                         }
                     )
                 },
@@ -357,7 +366,7 @@ class NodeViewWidget(
             node.parameters = MusicTree.Node.Parameters.fromArgs(nodeParams.filterNotNull())
         }
 
-        save()
+        shouldSave = true
     }
 
     private fun makeNewChild(): MusicTree.Node? {
