@@ -2,15 +2,15 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import kotlin.reflect.full.primaryConstructor
 
-class PackOptionsViewWidget(initialOptions: MusicPack.Options, width: Int, height: Int, x: Int = 0, y: Int = 0)
+class PackOptionsViewWidget(initialOptions: MusicPackOptions, width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
-    private val requiredOptionsArgs = MusicPack.Options.getRequiredArgs()
+    private val requiredOptionsArgs = MusicPackOptions.getRequiredArgs()
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
@@ -34,16 +34,16 @@ class PackOptionsViewWidget(initialOptions: MusicPack.Options, width: Int, heigh
                         screen!!,
                         optionsArgs,
                         required,
-                        required.name?.let { MusicPack.Options.getArgDisplayName(it) },
-                        required.name?.let { MusicPack.Options.getArgDescription(it) }
+                        required.name?.let { MusicPackOptions.getArgDisplayName(it) },
+                        required.name?.let { MusicPackOptions.getArgDescription(it) }
                     )
                 },
                 "${required.name}: ${required.type}")
         }
     }
 
-    fun getCurrentOptions(): MusicPack.Options {
-        return MusicPack.Options::class.primaryConstructor?.call(*optionsArgs.toTypedArray())
-            ?: MusicPack.Options()
+    fun getCurrentOptions(): MusicPackOptions {
+        return MusicPackOptions::class.primaryConstructor?.call(*optionsArgs.toTypedArray())
+            ?: MusicPackOptions()
     }
 }

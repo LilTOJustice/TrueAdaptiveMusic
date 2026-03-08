@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
@@ -13,13 +12,11 @@ import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
-import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
@@ -31,11 +28,9 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.primaryConstructor
 
 class MusicPack private constructor(
-    var options: Options,
+    var options: MusicPackOptions,
     val rules: MusicTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
@@ -323,7 +318,7 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(Options(), MusicTree.makeEmpty(), packName)
+            return MusicPack(MusicPackOptions(), MusicTree.makeEmpty(), packName)
         }
 
         fun fromFile(filePath: Path): MusicPack? {
@@ -350,7 +345,7 @@ class MusicPack private constructor(
 
         private fun fromDirectory(filePath: Path): MusicPack {
             val files = filePath.listDirectoryEntries()
-            var options = Options()
+            var options = MusicPackOptions()
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
             if (assetsDir == null)
             {
@@ -365,7 +360,7 @@ class MusicPack private constructor(
 
             if (optionsFile != null)
             {
-                options = Options.jsonDecode(optionsFile.inputStream().reader().readText())
+                options = MusicPackOptions.jsonDecode(optionsFile.inputStream().reader().readText())
             }
 
             if (rulesFile == null)
@@ -397,7 +392,7 @@ class MusicPack private constructor(
         private fun fromZipFile(filePath: Path): MusicPack {
             ZipFile(filePath.toFile()).use { zipFile ->
                 val files = zipFile.entries().toList()
-                var options = Options()
+                var options = MusicPackOptions()
                 val playableSounds = files
                     .filter { file -> isZipAsset(file.name) }
                     .map { file -> makePlayableSounds(filePath, file, files) }
@@ -409,7 +404,7 @@ class MusicPack private constructor(
                 if (optionsFile != null)
                 {
                     zipFile.getInputStream(optionsFile).use {
-                        options = Options.jsonDecode(it.reader().readText())
+                        options = MusicPackOptions.jsonDecode(it.reader().readText())
                     }
                 }
 
@@ -495,64 +490,4 @@ class MusicPack private constructor(
             return commonPackage(first, second) != null
         }*/
     }
-
-    data class Options(val description: String = "", val persistentNodeMusic: Boolean = false) {
-        fun getArgs(): List<Any?> {
-            return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
-        }
-
-        fun jsonEncode(): String {
-            return json.toJson(this)
-        }
-
-        companion object {
-            private val displayNames = Options::class
-                .primaryConstructor
-                ?.parameters
-                ?.mapNotNull { it.name }
-                ?.associateWith { it.prettify() } ?: mapOf()
-
-            private val descriptions = mapOf(
-                "description" to "Description of the Music Pack.",
-                "persistentNodeMusic" to "If checked, music from the current node will continue to play until it" +
-                        " finishes if another node is chosen. Disables music fading between nodes."
-            )
-
-            private val json = GsonBuilder()
-                .setPrettyPrinting()
-                .create()
-
-            fun jsonDecode(string: String): Options {
-                return json.fromJson(string, Options::class.java)
-            }
-
-            fun getRequiredArgs(): List<KParameter> {
-                return Options::class.primaryConstructor?.parameters ?: emptyList()
-            }
-
-            fun getArgDisplayName(argName: String): Text? {
-                return translatableWithFallbackOrNull(
-                    "trueadaptivemusic.pack_options.${argName}.display", displayNames[argName])
-            }
-
-            fun getArgDescription(argName: String): Text? {
-                return translatableWithFallbackOrNull(
-                    "trueadaptivemusic.pack_options.${argName}.description", descriptions[argName])
-            }
-        }
-    }
 }
-
-private fun Path.listDirectoryEntriesRecursive(includeRoot: Boolean = false, includeDirectories: Boolean = true): List<Path> {
-    val thisList = listOf(this).takeIf { includeRoot && includeDirectories } ?: emptyList()
-    if (!isDirectory()) {
-        return listOf(this)
-    }
-
-    return listDirectoryEntries().flatMap { it.listDirectoryEntriesRecursive(true, includeDirectories) } + thisList
-}
-
-private val ZipEntry.isActuallyDirectory: Boolean get() =
-    isDirectory || name.endsWith(PATH_SEPARATOR) || name.endsWith("\\")
-
-private const val PATH_SEPARATOR = "/"

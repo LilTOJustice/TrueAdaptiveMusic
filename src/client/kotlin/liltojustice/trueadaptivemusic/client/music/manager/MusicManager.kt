@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
@@ -70,7 +70,7 @@ class MusicManager(private val client: MinecraftClient) {
         lastMusic = null
     }
 
-    fun tick(treeResult: MusicTree.Result, packOptions: MusicPack.Options) {
+    fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
         musicPlayer.getPlayingInstance(mainTrack)?.let {
             client.musicTracker.setCurrent(it)
 
@@ -193,7 +193,7 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     private fun shouldKeepPlaying(
-        packOptions: MusicPack.Options, musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean): Boolean {
+        packOptions: MusicPackOptions, musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
         return mainTrackPlaying && (
                 (musicToPlay.contains(lastMusic) && enterDelay != 0U)
