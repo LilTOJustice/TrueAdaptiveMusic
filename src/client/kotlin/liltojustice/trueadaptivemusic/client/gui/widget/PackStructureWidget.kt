@@ -100,7 +100,9 @@ class PackStructureWidget(
                 row++
             },
             { node, path ->
-                if (node !== targetedNode || collapsed[node.parent] == true || collapsed[node] == true) {
+                if ((node.parent != null &&
+                            (node !== targetedNode || collapsed[node.parent] == true || collapsed[node] == true)) ||
+                    (node.parent == null && collapsed[node] == true)) {
                     return@traverse
                 }
 
