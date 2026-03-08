@@ -261,8 +261,7 @@ class NodeViewWidget(
                             }
 
                             selectedNode?.orphan()
-                            shouldSave = true
-                            shouldExit = true
+                            save(true)
                         }
                     )
                 },
