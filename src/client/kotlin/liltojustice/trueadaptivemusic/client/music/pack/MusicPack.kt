@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.music.pack.meta.MusicPackMeta
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.file.RegularSoundFile
 import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
@@ -13,10 +14,9 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.text.Text
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
@@ -27,10 +27,10 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
-import kotlin.reflect.KClass
 
 class MusicPack private constructor(
     var options: MusicPackOptions,
+    var meta: MusicPackMeta,
     val rules: MusicTree,
     val packName: String,
     preValidation: MusicPackValidation? = null) {
@@ -128,6 +128,7 @@ class MusicPack private constructor(
     }
 
     fun initRules() {
+        initMeta()
         val rulesFile = Path(getEditPackDir().pathString, Constants.RULES_FILENAME)
 
         if (!rulesFile.exists()) {
@@ -135,6 +136,17 @@ class MusicPack private constructor(
         }
 
         rulesFile.writeText(getGson().toJson(rules.toJson()))
+    }
+
+    fun initMeta() {
+        meta = MusicPackMeta.init(rules)
+        val metaFile = Path(getEditPackDir().pathString, Constants.META_FILENAME)
+
+        if (!metaFile.exists()) {
+            metaFile.createFile()
+        }
+
+        metaFile.writeText(meta.jsonEncode())
     }
 
     fun initOptions() {
@@ -155,10 +167,14 @@ class MusicPack private constructor(
             Constants.MUSIC_PACK_DIR.pathString, Path(packName).nameWithoutExtension)
         val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
+        val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
+
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
+        metaFile.toFile().writeText(meta.jsonEncode())
         optionsFile.toFile().writeText(options.jsonEncode())
+
         val outputPath = Path(packDir.pathString + ".zip")
         val newZipPath = Path(outputPath.pathString + ".new")
 
@@ -167,8 +183,11 @@ class MusicPack private constructor(
             ZipOutputStream(file).use { out ->
                 out.putNextEntry(ZipEntry(rulesFile.name))
                 rulesFile.inputStream().use { it.copyTo(out) }
+                out.putNextEntry(ZipEntry(metaFile.name))
+                metaFile.inputStream().use { it.copyTo(out) }
                 out.putNextEntry(ZipEntry(optionsFile.name))
                 optionsFile.inputStream().use { it.copyTo(out) }
+
                 assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
                     out.putNextEntry(
                         ZipEntry(
@@ -231,62 +250,27 @@ class MusicPack private constructor(
             }
         }
 
-        val usedPredicateTypes = mutableSetOf<KClass<out MusicPredicate>>()
-        val usedEventTypes = mutableSetOf<KClass<out MusicEvent>>()
+        val loader = FabricLoader.getInstance()
+        meta.requiredBridgeMods.forEach { mod ->
+            if (!loader.isModLoaded(mod.id)) {
+                validation.addWarning("This pack requires the mod ${mod.name} (${mod.id}) which could not be found.")
+            }
+        }
+
         rules.traverse { node, _ ->
             node.predicates.forEach { predicate ->
                 (predicate as? ErrorPredicate)?.let {
                     validation.addWarning(it.reason)
                 }
-
-                usedPredicateTypes.add(predicate::class)
             }
 
             node.events.forEach { event ->
                 (event as? ErrorEvent)?.let {
                     validation.addWarning(it.reason)
                 }
-
-                usedEventTypes.add(event::class)
             }
         }
-
-        // TODO: Figure out how to properly include ASMDependencyAnalyzer
-        /*val analyzer = ASMDependencyAnalyzer()
-        usedPredicateTypes.forEach { kClass -> validateClass(kClass, analyzer) }
-        usedEventTypes.forEach { kClass -> validateClass(kClass, analyzer) }*/
     }
-
-    /*private fun validateClass(kClass: KClass<*>, analyzer: ASMDependencyAnalyzer) {
-        val typeName = (kClass.companionObject?.objectInstance as? MusicPredicate.MusicPredicateCompanion<*>)
-            ?.getTypeName() ?: kClass.qualifiedName
-        val packageName = kClass.java.packageName
-        val referencedClasses = analyzer.analyze(kClass.java.protectionDomain.codeSource.location)
-        val badReferences =
-            referencedClasses.filter { ref ->
-                !relatedPackages(packageNameOf(ref), packageName) &&
-                        runCatching { kClass.java.classLoader.loadClass(ref) }
-                            .getOrDefault(false) == false }
-        val commonPackages = badReferences.map { outerRef ->
-            badReferences.fold(outerRef) { acc, innerRef ->
-                commonPackage(acc, innerRef) ?: acc
-            }
-        }.toSet()
-        val parentType =
-            if (kClass.isSubclassOf(MusicPredicate::class))
-                "Predicate "
-            else if (kClass.isSubclassOf(MusicEvent::class))
-                "Event "
-            else
-                ""
-
-        if (badReferences.isNotEmpty()) {
-            validation.addWarning(
-                "$parentType$typeName references ${badReferences.size} unknown class(es) from " +
-                        "${commonPackages.size} missing package(s):\n\n" + commonPackages.joinToString("\n")
-                        + "\nYou are probably missing a mod.")
-        }
-    }*/
 
     private fun getEditPackDir(): Path {
         return Path(
@@ -318,7 +302,7 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(MusicPackOptions(), MusicTree.makeEmpty(), packName)
+            return MusicPack(MusicPackOptions(), MusicPackMeta(), MusicTree.makeEmpty(), packName)
         }
 
         fun fromFile(filePath: Path): MusicPack? {
@@ -345,26 +329,30 @@ class MusicPack private constructor(
 
         private fun fromDirectory(filePath: Path): MusicPack {
             val files = filePath.listDirectoryEntries()
+            var meta = MusicPackMeta()
             var options = MusicPackOptions()
             val assetsDir = files.find { file -> file.fileName.name == Constants.ASSETS_DIRNAME }
-            if (assetsDir == null)
-            {
+            if (assetsDir == null) {
                 Logger.logInfo(
                     "Assets dir ${Constants.ASSETS_DIRNAME} is missing, so no external music will be used")
             }
+
             val playableSounds = assetsDir?.listDirectoryEntriesRecursive()
                 ?.map { file -> makePlayableSound(file) }
                 ?.associateBy { file -> file.getSoundName() } ?: mapOf()
             val rulesFile = files.find { file -> file.fileName.name == Constants.RULES_FILENAME }
+            val metaFile = files.find { file -> file.fileName.name == Constants.META_FILENAME }
             val optionsFile = files.find { file -> file.fileName.name == Constants.PACK_OPTIONS_FILENAME }
 
-            if (optionsFile != null)
-            {
+            if (metaFile != null) {
+                meta = MusicPackMeta.jsonDecode(metaFile.inputStream().reader().readText())
+            }
+
+            if (optionsFile != null) {
                 options = MusicPackOptions.jsonDecode(optionsFile.inputStream().reader().readText())
             }
 
-            if (rulesFile == null)
-            {
+            if (rulesFile == null) {
                 throw MusicLoadException(
                     "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}"
                 )
@@ -383,6 +371,7 @@ class MusicPack private constructor(
 
             return MusicPack(
                 options,
+                meta,
                 rules,
                 filePath.name,
                 preValidation
@@ -392,24 +381,30 @@ class MusicPack private constructor(
         private fun fromZipFile(filePath: Path): MusicPack {
             ZipFile(filePath.toFile()).use { zipFile ->
                 val files = zipFile.entries().toList()
+                var meta = MusicPackMeta()
                 var options = MusicPackOptions()
                 val playableSounds = files
                     .filter { file -> isZipAsset(file.name) }
                     .map { file -> makePlayableSounds(filePath, file, files) }
                     .associateBy { file -> file.getSoundName() }
                 val rulesFile = files.find { file -> Path(file.name).fileName.name == Constants.RULES_FILENAME }
+                val metaFile = files.find { file -> Path(file.name).fileName.name == Constants.META_FILENAME }
                 val optionsFile = files
                     .find { file -> Path(file.name).fileName.name == Constants.PACK_OPTIONS_FILENAME }
 
-                if (optionsFile != null)
-                {
+                if (metaFile != null) {
+                    zipFile.getInputStream(metaFile).use {
+                        meta = MusicPackMeta.jsonDecode(it.reader().readText())
+                    }
+                }
+
+                if (optionsFile != null) {
                     zipFile.getInputStream(optionsFile).use {
                         options = MusicPackOptions.jsonDecode(it.reader().readText())
                     }
                 }
 
-                if (rulesFile == null)
-                {
+                if (rulesFile == null) {
                     throw MusicLoadException(
                         "Rules file \"${Constants.RULES_FILENAME}\" not found in pack ${filePath.name}"
                     )
@@ -430,6 +425,7 @@ class MusicPack private constructor(
 
                 return MusicPack(
                     options,
+                    meta,
                     rules,
                     filePath.name,
                     preValidation
@@ -475,19 +471,5 @@ class MusicPack private constructor(
                 )
             }
         }
-
-        /*private fun packageNameOf(qualifiedClassName: String): String {
-            return qualifiedClassName.split(".").dropLast(1).joinToString(".")
-        }
-
-        private fun commonPackage(first: String, second: String): String? {
-            return first.commonPrefixWith(second)
-                .dropLastWhile { c -> c == '.' }
-                .takeIf { it.split(".").size > 1 }
-        }
-
-        private fun relatedPackages(first: String, second: String): Boolean {
-            return commonPackage(first, second) != null
-        }*/
     }
 }
