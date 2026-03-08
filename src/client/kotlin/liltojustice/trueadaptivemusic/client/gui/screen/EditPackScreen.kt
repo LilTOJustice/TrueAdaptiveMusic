@@ -156,7 +156,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             { parent ->
                 predicateViewWidget.setCreateNewPredicate(parent)
                 switchToPredicateView()
-            }
+            },
+            { nodeViewWidget.reset() },
+            { switchToNodeView() }
         )
 
         eventViewWidget = EventViewWidget(

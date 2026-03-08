@@ -27,6 +27,8 @@ class PackStructureWidget(
     private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate) -> Unit,
     private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
     private val onSelectCreateNewPredicate: (node: MusicTree.Node) -> Unit,
+    private val onUnselectNode: () -> Unit,
+    private val onUnselectPredicate: () -> Unit,
     x: Int = 0,
     y: Int = 0
 ): ContainerWidget(
@@ -37,6 +39,7 @@ class PackStructureWidget(
     private var ctrlHeld = false
     private var targetedNode: MusicTree.Node? = null
     private var targetedPredicate: MusicPredicate? = null
+    private var collapsed = mutableMapOf<MusicTree.Node, Boolean>()
 
     init {
         initPredicateWidgets()
@@ -53,21 +56,58 @@ class PackStructureWidget(
         var row = 0
         musicPack.rules.traverse(
             { node, path ->
-                addWidget(
-                    NodeWidget(node, TargetNode(node, false)),
-                    row++,
-                    (path.size - 1) * INDENT
-                )
+                if (node !in collapsed) {
+                    collapsed[node] = false
+                }
+
+                node.parent?.let { parent ->
+                    if (collapsed[parent] ?: false) {
+                        collapsed[node] = true
+                        if (node == targetedNode || node.predicates.any { it == targetedPredicate }) {
+                            targetedNode = null
+                            targetedPredicate = null
+                            onUnselectNode()
+                            onUnselectPredicate()
+                        }
+                        return@traverse
+                    }
+                }
+
+                val isCollapsed = collapsed[node] ?: false
+                val xOffset = (path.size - 1) * INDENT
+
+                if (node.children.isNotEmpty()) {
+                    val widget = addWidget(
+                        ClickableTextWidget(
+                            if (isCollapsed) "˃" else "˅",
+                            showHighlight = false,
+                            onClick = {
+                                collapsed[node] = !isCollapsed
+                                if (isCollapsed && shiftHeld) {
+                                    expandRecursively(node)
+                                }
+
+                                initPredicateWidgets(targetedNode)
+                            }
+                        ),
+                        row,
+                        xOffset
+                    )
+                    widget.setTooltip(Tooltip.of(if (isCollapsed) EXPAND_TEXT else COLLAPSE_TEXT))
+                }
+
+                addWidget(NodeWidget(node, TargetNode(node, false)), row, xOffset + 7)
+                row++
             },
             { node, path ->
-                if (node.parent != null && node !== targetedNode) {
+                if (node !== targetedNode || collapsed[node.parent] == true || collapsed[node] == true) {
                     return@traverse
                 }
 
                 addWidget(
                     CreateNodeWidget(TargetNode(node, true)),
                     row++,
-                    path.size * INDENT
+                    path.size * INDENT + 7
                 )
             }
         )
@@ -191,6 +231,11 @@ class PackStructureWidget(
         return mouseButtonHeld && targetedNode != null
     }
 
+    private fun expandRecursively(node: MusicTree.Node) {
+        collapsed[node] = false
+        node.children.forEach { expandRecursively(it) }
+    }
+
     companion object {
         const val INDENT = 10
         const val SHIFT_KEY = 340
@@ -199,9 +244,9 @@ class PackStructureWidget(
             "trueadaptivemusic.pack_structure", "Pack Structure")
         val MOVE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.move_node",
-            "Click and drag to move\n+ shift (copy)\n+ ctrl (copy with children)"
+            "Click and drag to move\n+ shift (copy)\n+ ctrl (copy recursively)"
         )
-        val ARROW_TEXT: MutableText = Text.literal("->")
+        val ARROW_TEXT: MutableText = Text.literal("→")
         val LINE_SPACE: MutableText = Text.literal("\n\n")
         val CREATE_CHILD_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.create_child_node", "Create Child Node"
@@ -210,7 +255,7 @@ class PackStructureWidget(
             "trueadaptivemusic.create_child_node_root", "Create Child Node of Root"
         )
         val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.create_node", "Create new node")
+            "trueadaptivemusic.create_node", "Create New Node")
         val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.create_predicate", "Create a Predicate")
         val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
@@ -218,6 +263,10 @@ class PackStructureWidget(
         val EMPTY_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.empty", "Empty")
         val CONFIGURE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.configure_node", "Configure this node")
+        val EXPAND_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.expand", "Click to Expand Children\n\nHold shift to expand recursively")
+        val COLLAPSE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.collapse", "Click to Collapse Children")
     }
 
     private inner class NodeWidget(node: MusicTree.Node, override val targetNode: TargetNode):
@@ -267,7 +316,7 @@ class PackStructureWidget(
             run {
                 val widget = ClickableTextWidget(
                     if (node.predicates.isEmpty()) "${EMPTY_TEXT.string} +" else "+",
-                    showHighlight = false,
+                    showHighlight = node.predicates.isEmpty(),
                     onClick = {
                         onSelectCreateNewPredicate(node)
                         initPredicateWidgets()
@@ -295,6 +344,7 @@ class PackStructureWidget(
                 if (targetedNode == node && node.parent != null) "⠿⠿" else "⚙",
                 showHighlight = false,
                 onClick = {
+                    collapsed[node] = false
                     targetedPredicate = null
                     targetedNode = node
                     onSelectEditExistingNode(node)
