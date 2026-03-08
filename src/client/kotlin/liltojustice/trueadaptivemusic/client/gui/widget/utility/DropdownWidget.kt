@@ -95,7 +95,7 @@ class DropdownWidget<TKey>(
         if (focusedWidget == selectedOptionWidget) {
             open()
         }
-        else if (focusedWidget != dropdownResultsWidget || dropdownResultsWidget.focusedWidget != null) {
+        else if (focusedWidget != dropdownResultsWidget || dropdownResultsWidget.focusedWidget != null || !result) {
             close()
         }
 
@@ -111,6 +111,7 @@ class DropdownWidget<TKey>(
     }
 
     private fun open() {
+        focusedWidget = textInputWidget
         onHoverOption(null)
         textInputWidget.visible = true
         textInputWidget.isFocused = true
