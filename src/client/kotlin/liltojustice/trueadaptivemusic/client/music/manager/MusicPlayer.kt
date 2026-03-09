@@ -45,7 +45,7 @@ internal class MusicPlayer(private val client: MinecraftClient) {
         tracks.values.forEach { track ->
             val currentSoundInstance = track.currentSoundInstance ?: return@forEach
             val currentVolume = currentSoundInstance.desiredVolume
-            if (currentVolume > track.clampedVolume && !volumeManager.hasFade(currentSoundInstance) ) {
+            if (currentVolume > track.clampedVolume && !volumeManager.hasDownFade(currentSoundInstance) ) {
                 volumeManager.startFade(
                     currentSoundInstance,
                     CLAMP_TICKS,
@@ -54,7 +54,7 @@ internal class MusicPlayer(private val client: MinecraftClient) {
             }
             else if (currentVolume < track.clampedVolume &&
                 currentVolume < track.desiredVolume &&
-                !volumeManager.hasFade(currentSoundInstance)) {
+                !volumeManager.hasUpFade(currentSoundInstance)) {
                 volumeManager.startFade(
                     currentSoundInstance,
                     track.crossFadeTicks,
@@ -177,7 +177,10 @@ internal class MusicPlayer(private val client: MinecraftClient) {
         outFadeTicks: Int,
         inFadeTicks: Int,
         inVolume: Float) {
-        volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
+        if (inSoundInstance.desiredVolume == 0F || inSoundInstance.desiredVolume == 1F) {
+            volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
+        }
+
         soundSystem.resumeInstance(inSoundInstance)
         volumeManager.startFade(inSoundInstance, inFadeTicks, inVolume, false)
         volumeManager.startFade(outSoundInstance, outFadeTicks, 0F, false)
