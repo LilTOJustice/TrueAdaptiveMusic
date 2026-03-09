@@ -15,7 +15,8 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import java.io.InputStream
 
-abstract class TAMSoundInstance(val isAmbient: Boolean): SoundInstance {
+abstract class TAMSoundInstance(
+    val isAmbient: Boolean, val isLooping: Boolean, val loopStartPoint: UInt): SoundInstance {
     var desiredVolume = 1F
     abstract fun getAudioStream(): AudioStream?
     override fun getId(): Identifier? {

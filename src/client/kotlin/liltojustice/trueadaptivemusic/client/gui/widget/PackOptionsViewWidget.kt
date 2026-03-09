@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
@@ -10,7 +11,8 @@ import kotlin.reflect.full.primaryConstructor
 
 class PackOptionsViewWidget(initialOptions: MusicPackOptions, width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
-    private val requiredOptionsArgs = MusicPackOptions.getRequiredArgs()
+    private val requiredOptionsArgs = MusicPackOptions
+        .getRequiredArgs().map { InputWidgetMaker.WidgetArg.of(it) }
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {

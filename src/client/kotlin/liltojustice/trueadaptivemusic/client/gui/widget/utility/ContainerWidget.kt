@@ -48,6 +48,7 @@ abstract class ContainerWidget(
     private var horizontalScrollHeld = false
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
     private var lastUsedWidth = 0
+    private var renderWidgetClearQueue = mutableListOf<(ChildWidget) -> Boolean>()
     var focusedWidget: ClickableWidget? = null
         protected set
 
@@ -66,6 +67,8 @@ abstract class ContainerWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        renderWidgetClearQueue.forEach { clearWidgetsFromRender(it) }
+        renderWidgetClearQueue.clear()
         focusedWidget?.isFocused = true
         renderChildren.clear()
         if (!visible) {
@@ -303,13 +306,18 @@ abstract class ContainerWidget(
 
     // Use to only clear widgets created from addWidgetToRender
     fun clearWidgetsFromRender(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
-        children
-            .filterValues { child -> child.fromRender }
-            .forEach { (key, child) ->
-                if (!keepPredicate(child))
-                    children.remove(key)
-            }
+        val toRemove = children
+            .filterValues { child -> child.fromRender && !keepPredicate(child) }
+
+        toRemove.forEach { (key, _) ->
+            children.remove(key)
+        }
+
         renderChildren.clear()
+    }
+
+    fun queueClearWidgetsFromRender(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
+        renderWidgetClearQueue.add(keepPredicate)
     }
 
     fun clearWidgets(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {

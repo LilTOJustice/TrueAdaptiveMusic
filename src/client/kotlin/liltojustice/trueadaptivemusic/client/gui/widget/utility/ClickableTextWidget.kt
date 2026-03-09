@@ -97,15 +97,23 @@ open class ClickableTextWidget(
 
     fun disableBold() {
         disableBold = true
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     fun enableItalic() {
         enableItalic = true
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     fun setText(text: String) {
         message = Text.literal(text)
-        this.width = textRenderer.getWidth(message)
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     companion object {

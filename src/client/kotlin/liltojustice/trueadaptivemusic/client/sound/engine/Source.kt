@@ -5,27 +5,32 @@ import net.minecraft.client.sound.AlUtil
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.StaticSound
 import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import java.io.IOException
 import javax.sound.sampled.AudioFormat
+import kotlin.math.PI
 
 class Source private constructor(private val pointer: Int) {
     var playing: Boolean = true
-    private var bufferSize = 16384
+    private var bufferSize = 0
     private var stream: AudioStream? = null
+    private var looping = false
+    private var loopStartPointSeconds = 0F
+    private var lastTimestamp = 0F
     val isStopped: Boolean
-        get() = this.sourceState == 4116
+        get() = this.sourceState == AL_STOPPED
     var lastRead: Int? = null
         private set
     val sourceState: Int
-        get() = if (!this.playing) 4116 else AL10.alGetSourcei(this.pointer, 4112)
+        get() = if (!this.playing) AL_STOPPED else AL10.alGetSourcei(this.pointer, AL_SOURCE_STATE)
 
     init {
-        AL10.alSourcei(this.pointer, 514, 1)
-        AL10.alSourcei(this.pointer, 53248, 0)
+        AL10.alSourcei(this.pointer, AL_SOURCE_RELATIVE, 1)
+        AL10.alSourcei(this.pointer, AL_DISTANCE_MODEL, 0)
     }
 
     fun isPaused(): Boolean {
-        return this.sourceState == 0x1013
+        return this.sourceState == AL_PAUSED
     }
 
     fun setStereoRotation(rotationFromCenter: Float) {
@@ -34,10 +39,10 @@ class Source private constructor(private val pointer: Int) {
         }
 
         val angles = FloatArray(2)
-        val rotationRadians = rotationFromCenter * PI / 180
-        angles[0] = PI / 6.0f + rotationRadians
-        angles[1] = -PI / 6.0f - rotationRadians
-        AL10.alSourcefv(this.pointer, 0x1030, angles)
+        val rotationRadians = rotationFromCenter * FPI / 180
+        angles[0] = FPI / 6.0f + rotationRadians
+        angles[1] = -FPI / 6.0f - rotationRadians
+        AL10.alSourcefv(this.pointer, AL_STEREO_ANGLES, angles)
     }
 
     fun close() {
@@ -61,7 +66,6 @@ class Source private constructor(private val pointer: Int) {
 
         AL10.alDeleteSources(intArrayOf(this.pointer))
         AlUtil.checkErrors("Cleanup")
-
     }
 
     fun play() {
@@ -69,13 +73,13 @@ class Source private constructor(private val pointer: Int) {
     }
 
     fun pause() {
-        if (this.sourceState == 4114) {
+        if (this.sourceState == AL_PLAYING) {
             AL10.alSourcePause(this.pointer)
         }
     }
 
     fun resume() {
-        if (this.sourceState == 4115) {
+        if (this.sourceState == AL_PAUSED) {
             AL10.alSourcePlay(this.pointer)
         }
     }
@@ -88,35 +92,39 @@ class Source private constructor(private val pointer: Int) {
     }
 
     fun setVolume(volume: Float) {
-        AL10.alSourcef(this.pointer, 4106, volume)
+        AL10.alSourcef(this.pointer, AL_GAIN, volume)
     }
 
     fun setStream(stream: AudioStream) {
         this.stream = stream
         val audioFormat = stream.format
         this.bufferSize = getBufferSize(audioFormat)
-        this.read(4)
+        this.read()
     }
 
-    private fun read(count: Int) {
+    fun setLooping(looping: Boolean, loopStartPoint: UInt) {
+        this.looping = looping
+        this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
+        AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
+    }
+
+    private fun read() {
         this.stream?.let { stream ->
             try {
-                repeat(count) {
-                    val byteBuffer = stream.read(this.bufferSize)
-                    if (byteBuffer == null) {
-                        this.lastRead = 0
-                        return
-                    }
-
-                    StaticSound(byteBuffer, stream.format)
-                        .takeStreamBufferPointer()
-                        .ifPresent { pointer: Int ->
-                            AL10.alSourceQueueBuffers(
-                                this.pointer,
-                                intArrayOf(pointer)
-                            )
-                        }
+                val byteBuffer = stream.read(this.bufferSize)
+                if (byteBuffer == null) {
+                    this.lastRead = 0
+                    return
                 }
+
+                StaticSound(byteBuffer, stream.format)
+                    .takeStreamBufferPointer()
+                    .ifPresent { pointer: Int ->
+                        AL10.alSourceQueueBuffers(
+                            this.pointer,
+                            intArrayOf(pointer)
+                        )
+                    }
             } catch (e: IOException) {
                 Logger.logError("Failed to read from audio stream:\n${e.message}")
             }
@@ -125,13 +133,20 @@ class Source private constructor(private val pointer: Int) {
 
     fun tick() {
         if (this.stream != null && this.playing) {
-            val i = this.removeProcessedBuffers()
-            this.read(i)
+            val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
+            if (newTimestamp < lastTimestamp) {
+                AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
+                AlUtil.checkErrors("seek")
+            }
+
+            lastTimestamp = newTimestamp
+
+            this.read()
         }
     }
 
-    private fun removeProcessedBuffers(): Int {
-        val finished = AL10.alGetSourcei(this.pointer, 4118)
+    private fun removeProcessedBuffers() {
+        val finished = AL10.alGetSourcei(this.pointer, AL_BUFFERS_PROCESSED)
         if (finished > 0) {
             val buffers = IntArray(finished)
             AL10.alSourceUnqueueBuffers(this.pointer, buffers)
@@ -139,12 +154,22 @@ class Source private constructor(private val pointer: Int) {
             AL10.alDeleteBuffers(buffers)
             AlUtil.checkErrors("Remove processed buffers")
         }
-
-        return finished
     }
 
     companion object {
-        const val PI = kotlin.math.PI.toFloat()
+        private const val FPI = PI.toFloat()
+        private const val BYTE = 8.0F
+        private const val AL_SOURCE_RELATIVE = 514
+        private const val AL_BUFFERS_PROCESSED = 4118
+        private const val AL_SEC_OFFSET = 4132
+        private const val AL_LOOPING = 4103
+        private const val AL_GAIN = 4106
+        private const val AL_SOURCE_STATE = 4112
+        private const val AL_PLAYING = 4114
+        private const val AL_PAUSED = 4115
+        private const val AL_STOPPED = 4116
+        private const val AL_STEREO_ANGLES = 4144
+        private const val AL_DISTANCE_MODEL = 53248
 
         fun create(): Source? {
             val i = IntArray(1)
@@ -152,8 +177,8 @@ class Source private constructor(private val pointer: Int) {
             return if (AlUtil.checkErrors("Allocate new source")) null else Source(i[0])
         }
 
-        private fun getBufferSize(format: AudioFormat,): Int {
-            return (format.getSampleSizeInBits() / 8.0f * format.getChannels() * format.getSampleRate()).toInt()
+        private fun getBufferSize(format: AudioFormat): Int {
+            return (format.getSampleSizeInBits() / BYTE * format.getChannels() * format.getSampleRate()).toInt()
         }
     }
 }

@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.tree
 
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Serialize
@@ -275,13 +276,11 @@ class MusicTree {
             var trackDelayNoise: UInt = 0U,
             var enterDelay: UInt = 0U,
             var inheritMusic: Boolean = false,
-            var inheritAmbience: Boolean = true
+            var inheritAmbience: Boolean = true,
+            var loopMusic: Boolean = false,
+            var loopStartPoints: Map<String, UInt> = mapOf()
         ): MusicTrigger.Parameters() {
             companion object: ParametersCompanion<Parameters> {
-                fun fromArgs(args: List<Any>): Parameters {
-                    return Parameters::class.primaryConstructor?.call(*args.toTypedArray()) ?: default()
-                }
-
                 override val displayNames: Map<String, String>
                     get() = super.displayNames +
                             Parameters::class.declaredMembers.map { it.name }.associateWith { it.prettify() }
@@ -294,21 +293,39 @@ class MusicTree {
                                 "Disables music resuming for this predicate.",
                         "inheritMusic" to "Include this predicate's parent's music along with this predicate's music.",
                         "inheritAmbience" to "Include this predicate's parent's ambience along with this predicate's " +
-                                "ambience."
+                                "ambience.",
+                        "loopMusic" to "A random selected track is picked once, and then looped forever until the" +
+                                " node is left.",
+                        "loopStartPoints" to "Some looping music has an intro before the loop starts. This " +
+                                "denotes, for each looping track, where the intro ends and the loop starts. " +
+                                "Give a value in milliseconds from the start. Leave this as 0 if " +
+                                "there is no intro."
                     )
+                private val json = GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+
 
                 override fun default(): Parameters {
                     return Parameters()
                 }
 
+                fun jsonDecode(input: JsonObject): Parameters {
+                    return json.fromJson(input, Parameters::class.java)
+                }
+
+                fun fromArgs(args: List<Any>): Parameters {
+                    return Parameters::class.primaryConstructor?.call(*args.toTypedArray()) ?: default()
+                }
+
                 fun getParamDisplayName(paramName: String): Text? {
                     return translatableWithFallbackOrNull(
-                        "trueadaptivemusic.param.predicate.${paramName}.display", displayNames[paramName])
+                        "trueadaptivemusic.param.node.${paramName}.display", displayNames[paramName])
                 }
 
                 fun getParamDescription(paramName: String): Text? {
                     return Text.translatableWithFallback(
-                        "trueadaptivemusic.param.predicate.${paramName}.description", descriptions[paramName])
+                        "trueadaptivemusic.param.node.${paramName}.description", descriptions[paramName])
                 }
             }
         }

@@ -24,7 +24,6 @@ import java.io.IOException
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 object TAMClient {
@@ -128,7 +127,7 @@ object TAMClient {
     fun makeInputWidget(
         screen: Screen,
         outArgs: MutableList<Any?>,
-        arg: KParameter,
+        arg: InputWidgetMaker.WidgetArg,
         displayName: Text?,
         tooltipText: Text?,
         onChange: () -> Unit = {})

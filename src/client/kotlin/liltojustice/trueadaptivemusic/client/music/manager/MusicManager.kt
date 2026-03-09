@@ -91,6 +91,8 @@ class MusicManager(private val client: MinecraftClient) {
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
+        val loopMusic = parameters.loopMusic
+        val loopIntroEndpoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
 
@@ -182,7 +184,14 @@ class MusicManager(private val client: MinecraftClient) {
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
         val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
-        playNextMusic(newMusic, delay, shouldResume, !isEnter)
+        playNextMusic(
+            newMusic,
+            delay,
+            shouldResume,
+            !isEnter,
+            loopMusic,
+            loopIntroEndpoints[newMusic.getSoundName()] ?: 0U
+        )
     }
 
     private fun shouldPlay(identifier: String): Boolean {
@@ -218,10 +227,24 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = newIdentifier
     }
 
-    private fun playNextMusic(newMusic: PlayableSound, delay: UInt, resume: Boolean, keepTrack: Boolean) {
+    private fun playNextMusic(
+        newMusic: PlayableSound,
+        delay: UInt,
+        resume: Boolean,
+        keepTrack: Boolean,
+        loopMusic: Boolean,
+        loopIntroEndpoint: UInt
+    ) {
         val delayMillis = delay.toLong() * 1000L
         if (keepTrack) {
-            musicPlayer.startNew(mainTrack, newMusic, delayMillis)
+            musicPlayer.startNew(
+                mainTrack,
+                newMusic,
+                delayMillis,
+                isLooping = loopMusic,
+                loopStartPoint = loopIntroEndpoint
+            )
+
             return
         }
 
@@ -232,7 +255,8 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        musicPlayer.startNew(mainTrack, newMusic, delayMillis)
+        musicPlayer.startNew(
+            mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
 
         lastMusic = newMusic
