@@ -14,7 +14,6 @@ class Source private constructor(private val pointer: Int) {
     var playing: Boolean = true
     private var bufferSize = 0
     private var stream: AudioStream? = null
-    private var looping = false
     private var loopStartPointSeconds = 0F
     private var lastTimestamp = 0F
     val isStopped: Boolean
@@ -103,7 +102,6 @@ class Source private constructor(private val pointer: Int) {
     }
 
     fun setLooping(looping: Boolean, loopStartPoint: UInt) {
-        this.looping = looping
         this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
         AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
     }
