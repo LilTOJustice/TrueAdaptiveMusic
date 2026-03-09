@@ -296,10 +296,10 @@ class MusicTree {
                                 "ambience.",
                         "loopMusic" to "A random selected track is picked once, and then looped forever until the" +
                                 " node is left.",
-                        "loopStartPoints" to "Some looping music has an intro before the loop starts. This " +
-                                "denotes, for each looping track, where the intro ends and the loop starts. " +
-                                "Give a value in milliseconds from the start. Leave this as 0 if " +
-                                "there is no intro."
+                        "loopStartPoints" to "Some looping music has an intro before the loop starts.\n\nThis " +
+                                "denotes, for each looping track, where the intro ends and the loop starts." +
+                                "\n\nGive a value in milliseconds from the start. Leave this as 0 if " +
+                                "there is no intro.\n\n* Disables persistent node music for this node."
                     )
                 private val json = GsonBuilder()
                     .setPrettyPrinting()

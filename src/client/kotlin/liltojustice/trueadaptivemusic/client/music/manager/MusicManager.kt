@@ -92,9 +92,10 @@ class MusicManager(private val client: MinecraftClient) {
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
         val loopMusic = parameters.loopMusic
-        val loopIntroEndpoints = parameters.loopStartPoints
+        val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
+        val persistentNodeMusic = packOptions.persistentNodeMusic && !loopMusic
 
         eventPool = treeResult.accumulatedEvents
 
@@ -178,7 +179,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         updatePredicateId(identifier)
 
-        if (shouldKeepPlaying(packOptions, musicToPlay, enterDelay, isEnter)) {
+        if (shouldKeepPlaying(musicToPlay, enterDelay, isEnter, persistentNodeMusic)) {
             return
         }
 
@@ -190,7 +191,7 @@ class MusicManager(private val client: MinecraftClient) {
             shouldResume,
             !isEnter,
             loopMusic,
-            loopIntroEndpoints[newMusic.getSoundName()] ?: 0U
+            loopStartPoints[newMusic.getSoundName()] ?: 0U
         )
     }
 
@@ -202,11 +203,11 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     private fun shouldKeepPlaying(
-        packOptions: MusicPackOptions, musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean): Boolean {
+        musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean, persistentNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
         return mainTrackPlaying && (
                 (musicToPlay.contains(lastMusic) && enterDelay != 0U)
-                        || (packOptions.persistentNodeMusic && isEnter)
+                        || (persistentNodeMusic && isEnter)
                 )
     }
 
