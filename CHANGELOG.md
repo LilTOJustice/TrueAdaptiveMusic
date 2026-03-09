@@ -4,6 +4,7 @@ New Features:
 - Music Looping
   - Music can be set to loop within a node
   - Support for "intros" where the loop doesn't start until a specific point in the song
+  - The music file must be edited to have the end match the start for looping to work properly
 - Persistent Node Music
   - Music can be set as "persistent" on a per-pack basis in the pack options (where the description is set)
   - If set to true, music will finish before changing after the active node changes
