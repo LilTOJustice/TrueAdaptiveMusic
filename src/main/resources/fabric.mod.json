@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "trueadaptivemusic",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "True Adaptive Music",
   "description": "Experience dynamic music that adapts to what happens in Minecraft!",
   "authors": [],
