@@ -35,6 +35,7 @@ class PackStructureWidget(
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
+    private var spaceHeld = false
     private var targetedNode: MusicTree.Node? = null
     private var targetedPredicate: MusicPredicate? = null
     private var collapsed = mutableMapOf<MusicTree.Node, Boolean>()
@@ -125,6 +126,10 @@ class PackStructureWidget(
             ctrlHeld = true
         }
 
+        if (keyCode == SPACE_KEY) {
+            spaceHeld = true
+        }
+
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
@@ -135,6 +140,10 @@ class PackStructureWidget(
 
         if (keyCode == CTRL_KEY) {
             ctrlHeld = false
+        }
+
+        if (keyCode == SPACE_KEY) {
+            spaceHeld = false
         }
 
         return super.keyReleased(keyCode, scanCode, modifiers)
@@ -182,7 +191,7 @@ class PackStructureWidget(
                 }
             } ?: return@forEachChild
 
-            if (child.targetNode.isParent) {
+            if (child.targetNode.isParent || spaceHeld) {
                 targetNode.adoptChild(toAdopt)
             }
             else {
@@ -213,15 +222,28 @@ class PackStructureWidget(
             }
 
             val valid = targetedNode?.let { child.isValidDestination(it) || shiftHeld } == true
+            val rowHeight = getRowHeight(textRenderer.fontHeight)
 
-            context?.drawText(
-                textRenderer,
-                ARROW_TEXT,
-                child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
-                child.y - (getRowHeight(textRenderer.fontHeight) / 2).toInt(),
-                if (valid) Colors.WHITE else Colors.RED,
-                false
-            )
+            if (spaceHeld && !child.targetNode.isParent) {
+                context?.drawText(
+                    textRenderer,
+                    ARROW_TEXT,
+                    child.x + INDENT - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.y + (rowHeight / 2).toInt(),
+                    if (valid) Colors.WHITE else Colors.RED,
+                    false
+                )
+            }
+            else {
+                context?.drawText(
+                    textRenderer,
+                    ARROW_TEXT,
+                    child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.y - (rowHeight / 2).toInt(),
+                    if (valid) Colors.WHITE else Colors.RED,
+                    false
+                )
+            }
 
             return@forEachChild
         }
@@ -240,11 +262,13 @@ class PackStructureWidget(
         const val INDENT = 10
         const val SHIFT_KEY = 340
         const val CTRL_KEY = 341
+        const val SPACE_KEY = 32
         val TITLE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.pack_structure", "Pack Structure")
         val MOVE_NODE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.move_node",
-            "Click and drag to move\n+ shift (copy)\n+ ctrl (copy recursively)"
+            "Click and drag to move\n+ shift (copy)\n+ ctrl (copy recursively)\n+ space (target children" +
+                    " of node)"
         )
         val ARROW_TEXT: MutableText = Text.literal("→")
         val LINE_SPACE: MutableText = Text.literal("\n\n")
