@@ -6,7 +6,8 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.InvalidIdentifierException
 
 interface PlayableSound {
-    fun makeSoundInstance(isAmbient: Boolean = false): TAMSoundInstance
+    fun makeSoundInstance(
+        isAmbient: Boolean = false, isLooping: Boolean = false, loopStartPoint: UInt = 0U): TAMSoundInstance
     fun getSoundName(): String
 
     companion object {

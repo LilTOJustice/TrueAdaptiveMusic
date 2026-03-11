@@ -2,15 +2,18 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import kotlin.reflect.full.primaryConstructor
 
-class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x: Int = 0, y: Int = 0)
+class PackOptionsViewWidget(initialOptions: MusicPackOptions, width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
-    private val requiredMetaArgs = MusicPack.Metadata.getRequiredArgs()
-    private var metaArgs: MutableList<Any?> = initialMeta.getArgs().toMutableList()
+    private val requiredOptionsArgs = MusicPackOptions
+        .getRequiredArgs().map { InputWidgetMaker.WidgetArg.of(it) }
+    private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -26,23 +29,23 @@ class MetaViewWidget(initialMeta: MusicPack.Metadata, width: Int, height: Int, x
             return
         }
 
-        requiredMetaArgs.forEach { required ->
+        requiredOptionsArgs.forEach { required ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
                         screen!!,
-                        metaArgs,
+                        optionsArgs,
                         required,
-                        required.name?.let { MusicPack.Metadata.getArgDisplayName(it) },
-                        required.name?.let { MusicPack.Metadata.getArgDescription(it) }
+                        required.name?.let { MusicPackOptions.getArgDisplayName(it) },
+                        required.name?.let { MusicPackOptions.getArgDescription(it) }
                     )
                 },
                 "${required.name}: ${required.type}")
         }
     }
 
-    fun getCurrentMeta(): MusicPack.Metadata {
-        return MusicPack.Metadata::class.primaryConstructor?.call(*metaArgs.toTypedArray())
-            ?: MusicPack.Metadata()
+    fun getCurrentOptions(): MusicPackOptions {
+        return MusicPackOptions::class.primaryConstructor?.call(*optionsArgs.toTypedArray())
+            ?: MusicPackOptions()
     }
 }
