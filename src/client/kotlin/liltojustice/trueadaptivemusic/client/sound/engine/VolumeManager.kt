@@ -18,8 +18,12 @@ class VolumeManager(private val soundSystem: SoundSystem) {
         }
     }
 
-    fun hasFade(soundInstance: TAMSoundInstance): Boolean {
-        return fades.values.any { it.soundInstance == soundInstance }
+    fun hasDownFade(soundInstance: TAMSoundInstance): Boolean {
+        return fades.values.any { it.soundInstance == soundInstance && it.targetVolume < it.startingVolume }
+    }
+
+    fun hasUpFade(soundInstance: TAMSoundInstance): Boolean {
+        return fades.values.any { it.soundInstance == soundInstance && it.targetVolume > it.startingVolume }
     }
 
     fun tick() {
@@ -56,15 +60,16 @@ class VolumeManager(private val soundSystem: SoundSystem) {
     private class Fade(
         val soundInstance: TAMSoundInstance,
         private var totalTicks: Int,
-        private var targetVolume: Float,
+        var targetVolume: Float,
         var stopWhenDone: Boolean,
         soundSystem: SoundSystem
     ) {
         private var fadeTicks: Int = 0
-        private var startingVolume: Float =
+        var startingVolume: Float =
             if (soundSystem.isInstancePaused(soundInstance))
                 0F
             else soundInstance.desiredVolume
+            private set
 
         fun tick(): Float {
             fadeTicks++
