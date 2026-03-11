@@ -30,6 +30,7 @@ class DropdownWidget<TKey>(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {
@@ -60,13 +61,10 @@ class DropdownWidget<TKey>(
         )
     }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
-    private var open = true
 
     init {
         titleTextWidget.disableBold()
-        tooltipText?.let {
-            setTooltip(Tooltip.of(it))
-        }
+        tooltipText?.let { setTooltip(Tooltip.of(it)) }
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
@@ -88,35 +86,47 @@ class DropdownWidget<TKey>(
         addWidget(selectedOptionWidget, 1)
         addWidget(textInputWidget, 1)
         addWidget(dropdownResultsWidget, 2)
+        close()
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         val result = super.mouseClicked(click, doubled)
         textInputWidget.text = ""
         if (focusedWidget == selectedOptionWidget) {
-            focusedWidget = textInputWidget
+            open()
+        }
+        else if (focusedWidget != dropdownResultsWidget || dropdownResultsWidget.focusedWidget != null || !result) {
+            close()
         }
 
         return result
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        val shouldOpen = focusedWidget == textInputWidget && isFocused
-        if (open != shouldOpen) {
-            open = shouldOpen
-            onHoverOption(null)
-            textInputWidget.visible = shouldOpen
-            textInputWidget.isFocused = shouldOpen
-            selectedOptionWidget.visible = !shouldOpen
-            dropdownResultsWidget.visible = shouldOpen
-            dropdownResultsWidget.width = width
-        }
-
         super.renderWidget(context, mouseX, mouseY, delta)
         fitToChildrenHeight()
     }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    }
+
+    private fun open() {
+        focusedWidget = textInputWidget
+        onHoverOption(null)
+        textInputWidget.visible = true
+        textInputWidget.isFocused = true
+        selectedOptionWidget.visible = false
+        dropdownResultsWidget.visible = true
+        dropdownResultsWidget.width = width
+    }
+
+    private fun close() {
+        onHoverOption(null)
+        textInputWidget.visible = false
+        textInputWidget.isFocused = false
+        selectedOptionWidget.visible = true
+        dropdownResultsWidget.visible = false
+        dropdownResultsWidget.width = width
     }
 
     companion object {
@@ -141,6 +151,7 @@ class DropdownWidget<TKey>(
         false,
         true,
         true,
+        false,
         true,
         x,
         y) {
