@@ -14,7 +14,6 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.Timer
 import kotlin.concurrent.schedule
-import kotlin.reflect.KParameter
 
 class PredicateViewWidget(
     width: Int,
@@ -31,13 +30,14 @@ class PredicateViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
     private val predicateTypeNameOptions = TAMClient.predicateRegistry.getAllNames()
         .filter { typeName -> typeName != TAMClient.predicateRegistry[RootPredicate::class] }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
-    private var requiredPredicateArgs = listOf<KParameter>()
+    private var requiredPredicateArgs = listOf<InputWidgetMaker.WidgetArg>()
     private var predicateArgs = mutableListOf<Any?>()
     private var selectedPredicate: MusicPredicate? = null
     private var selectedNode: MusicTree.Node? = null
@@ -154,6 +154,13 @@ class PredicateViewWidget(
                 )
             )
         }
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
+        )
     }
 
     fun setEditExistingPredicate(node: MusicTree.Node, predicate: MusicPredicate) {
@@ -176,7 +183,8 @@ class PredicateViewWidget(
 
     private fun setSelectedPredicateTypeName(typeName: String) {
         selectedPredicateTypeName = typeName
-        requiredPredicateArgs = TAMClient.predicateFactory.getRequiredArgs(typeName)
+        requiredPredicateArgs = TAMClient.predicateFactory
+            .getRequiredArgs(typeName).map { InputWidgetMaker.WidgetArg.of(it) }
         predicateArgs = selectedPredicate?.let {
             if (it.getTypeName() == selectedPredicateTypeName)
                 it.getTriggerArgs().map { arg -> arg.value }.toMutableList()

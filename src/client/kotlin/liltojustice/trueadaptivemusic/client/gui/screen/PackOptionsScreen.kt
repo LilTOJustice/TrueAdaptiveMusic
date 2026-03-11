@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
-import liltojustice.trueadaptivemusic.client.gui.widget.MetaViewWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.PackOptionsViewWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -12,14 +12,14 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 
 @Environment(EnvType.CLIENT)
-class MetaScreen(private val parent: Screen, private val musicPack: MusicPack): Screen(
-    Text.translatableWithFallback("trueadaptivemusic.meta_title", "Edit Pack Meta")) {
-    private lateinit var metaViewWidget: MetaViewWidget
+class PackOptionsScreen(private val parent: Screen, private val musicPack: MusicPack): Screen(
+    Text.translatableWithFallback("trueadaptivemusic.pack_options_title", "Edit Pack Options")) {
+    private lateinit var packOptionsViewWidget: PackOptionsViewWidget
     private lateinit var doneButton: ButtonWidget
 
     override fun init() {
-        metaViewWidget = MetaViewWidget(
-            musicPack.metadata,
+        packOptionsViewWidget = PackOptionsViewWidget(
+            musicPack.options,
             width - BUFFER,
             height - BUFFER - TITLE_Y - textRenderer.fontHeight - 20,
             BUFFER / 2,
@@ -30,15 +30,15 @@ class MetaScreen(private val parent: Screen, private val musicPack: MusicPack): 
             .build()
 
         doneButton.x = width - doneButton.width
-        doneButton.y = metaViewWidget.y + metaViewWidget.height + 2
+        doneButton.y = packOptionsViewWidget.y + packOptionsViewWidget.height + 2
 
-        addDrawableChild(metaViewWidget)
+        addDrawableChild(packOptionsViewWidget)
         addDrawableChild(doneButton)
     }
 
     override fun close() {
-        musicPack.metadata = metaViewWidget.getCurrentMeta()
-        musicPack.initMeta()
+        musicPack.options = packOptionsViewWidget.getCurrentOptions()
+        musicPack.initOptions()
         client?.setScreen(parent)
     }
 

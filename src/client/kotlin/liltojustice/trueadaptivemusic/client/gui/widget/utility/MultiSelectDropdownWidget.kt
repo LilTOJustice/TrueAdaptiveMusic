@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -27,6 +28,7 @@ class MultiSelectDropdownWidget<TKey>(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {
@@ -37,7 +39,17 @@ class MultiSelectDropdownWidget<TKey>(
         onChange(selected)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        val result = super.mouseClicked(click, doubled)
+
+        if (!result) {
+            forEachChild { it.mouseClicked(click, doubled) }
+        }
+
+        return result
+    }
+
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         addWidgetFromRender(
             {
                 DropdownWidget(
