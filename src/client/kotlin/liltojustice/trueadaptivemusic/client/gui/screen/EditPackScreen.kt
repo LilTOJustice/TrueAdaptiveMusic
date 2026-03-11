@@ -31,7 +31,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var saveButtonWidget: TextIconButtonWidget
     private lateinit var closeButtonWidget: ButtonWidget
     private lateinit var openAssetsFolderButtonWidget: ButtonWidget
-    private lateinit var metaButtonWidget: ButtonWidget
+    private lateinit var optionsButtonWidget: ButtonWidget
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -85,8 +85,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        metaButtonWidget = ButtonWidget.Builder(META_BUTTON_TEXT) {
-            client?.setScreen(MetaScreen(this, musicPack))
+        optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
+            client?.setScreen(PackOptionsScreen(this, musicPack))
         }
             .build()
 
@@ -136,7 +136,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             { parent ->
                 predicateViewWidget.setCreateNewPredicate(parent)
                 switchToPredicateView()
-            }
+            },
+            { nodeViewWidget.reset() },
+            { switchToNodeView() }
         )
 
         eventViewWidget = EventViewWidget(
@@ -158,7 +160,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         addDrawableChild(nodeViewWidget)
         addDrawableChild(predicateViewWidget)
         addDrawableChild(eventViewWidget)
-        addDrawableChild(metaButtonWidget)
+        addDrawableChild(optionsButtonWidget)
 
         saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
@@ -171,8 +173,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         )
         openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
-        metaButtonWidget.width = textRenderer.getWidth(META_BUTTON_TEXT) + 10
-        metaButtonWidget.x = openAssetsFolderButtonWidget.x - metaButtonWidget.width - 5
+        optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
+        optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
     }
@@ -279,6 +281,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
-        private val META_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.meta", "Meta")
+        private val OPTIONS_BUTTON_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.options", "Options")
     }
 }

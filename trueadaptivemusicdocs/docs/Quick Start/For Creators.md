@@ -117,8 +117,26 @@ You can move nodes by simply clicking and dragging the grabber icon attached the
 
 If you hold `shift`, you can copy the node (which allows bypassing some of the aforementioned restrictions), and you can hold `ctrl` as well to copy all of a node's children along with the node.
 
+#### Collapsing/Expanding Nodes
+
+If the pack structure list is getting too cluttered, you can collapse parent nodes' children to make them invisible using the down-arrow buttons next to each parent node. Click the side-arrow to expand them again. Shift-clicking the expand button will expand recursively.
+
 #### Hybrid predicate nodes
 
 Nodes can have more than one predicate, which can be achieved by hitting the + sign next to the node multiple times.
 
 When a node has multiple predicates, it will be satisfied as long as at least one of the predicates within it is satisfied, equivalent to a logical "OR".
+
+#### Music Looping
+
+By enabling the Music Looping option for a node, that node's music will now loop until the node is left. This renders track delay/noise options useless for that node.
+
+You are responsible for clipping the audio file for the end of the file to match the start of the loop perfectly.
+
+You can also set a timestamp (in milliseconds) for when the loop should start from in the music. This is useful if the looping music has an intro section before the loop.
+
+#### Persistent Node Music
+
+By enabling this in the pack options (next to the "Show Assets" button), every node's music will play to completion before switching to another node's music.
+
+This option has no effect on nodes that have Music Looping enabled, as that would cause the looping music to never stop playing.
