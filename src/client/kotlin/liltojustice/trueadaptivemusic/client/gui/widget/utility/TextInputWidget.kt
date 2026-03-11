@@ -5,7 +5,6 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.text.Text
 import kotlin.math.min
@@ -18,7 +17,12 @@ class TextInputWidget(
     y: Int = 0)
     : ClickableWidget(x, y, Int.MAX_VALUE, HEIGHT, Text.literal(prompt)) {
     private val textRenderer = MinecraftClient.getInstance().textRenderer
-    private val promptWidget = TextWidget(Text.literal(prompt), textRenderer)
+    private val promptWidget = run {
+        val widget = ClickableTextWidget(prompt)
+        widget.disableBold()
+
+        widget
+    }
     private val fieldWidget = TextFieldWidget(
         textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Text.literal(placeholder))
     var text: String
@@ -62,9 +66,11 @@ class TextInputWidget(
 
         promptWidget.x = x
         promptWidget.y = y
-        fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
         fieldWidget.y = y
-        fieldWidget.width = min(textRenderer.getWidth(text) + 30, width - (fieldWidget.x - x))
+        promptWidget.width = min(
+            textRenderer.getWidth(promptWidget.text), width - fieldWidget.width - PADDING)
+        fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
+        fieldWidget.width = textRenderer.getWidth(text) + 30
 
         promptWidget.render(context, mouseX, mouseY, delta)
         fieldWidget.render(context, mouseX, mouseY, delta)

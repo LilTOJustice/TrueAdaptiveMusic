@@ -27,6 +27,7 @@ class MultiSelectDropdownWidget<TKey>(
     false,
     false,
     false,
+    false,
     x,
     y,
     true) {
@@ -35,6 +36,16 @@ class MultiSelectDropdownWidget<TKey>(
     init {
         selected.addAll(alreadySelected)
         onChange(selected)
+    }
+
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
+
+        if (!result) {
+            forEachChild { it.mouseClicked(mouseX, mouseY, button) }
+        }
+
+        return result
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
