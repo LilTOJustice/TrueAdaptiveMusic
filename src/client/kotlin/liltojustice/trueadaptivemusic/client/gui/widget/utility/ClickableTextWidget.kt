@@ -76,10 +76,16 @@ open class ClickableTextWidget(
         }
 
         context?.let {
-            coloredText?.let { text ->
-                it.getHoverListener(this, DrawContext.HoverType.NONE)
-                    .marqueedText(text, x, x, x + width, y, y + textRenderer.fontHeight)
-            }
+            drawScrollableText(
+                it,
+                textRenderer,
+                styledText,
+                x,
+                y,
+                x + width,
+                y + textRenderer.fontHeight,
+                Colors.WHITE
+            )
         }
     }
 
@@ -97,23 +103,17 @@ open class ClickableTextWidget(
 
     fun disableBold() {
         disableBold = true
-        coloredText?.let {
-            this.width = textRenderer.getWidth(it)
-        }
+        this.width = textRenderer.getWidth(styledText)
     }
 
     fun enableItalic() {
         enableItalic = true
-        coloredText?.let {
-            this.width = textRenderer.getWidth(it)
-        }
+        this.width = textRenderer.getWidth(styledText)
     }
 
     fun setText(text: String) {
         message = Text.literal(text)
-        coloredText?.let {
-            this.width = textRenderer.getWidth(it)
-        }
+        this.width = textRenderer.getWidth(styledText)
     }
 
     companion object {
