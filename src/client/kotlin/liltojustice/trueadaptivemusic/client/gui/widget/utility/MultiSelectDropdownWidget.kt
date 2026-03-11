@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -39,11 +38,11 @@ class MultiSelectDropdownWidget<TKey>(
         onChange(selected)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
 
         if (!result) {
-            forEachChild { it.mouseClicked(click, doubled) }
+            forEachChild { it.mouseClicked(mouseX, mouseY, button) }
         }
 
         return result
