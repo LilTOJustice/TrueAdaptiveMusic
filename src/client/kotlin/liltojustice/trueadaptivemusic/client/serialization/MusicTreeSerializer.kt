@@ -4,6 +4,9 @@ import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
@@ -11,6 +14,7 @@ import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import java.lang.reflect.Type
 
 object MusicTreeSerializer {
     fun serialize(musicTree: MusicTree): JsonObject {
@@ -45,6 +49,10 @@ object MusicTreeSerializer {
                 PlayableSound::class.java,
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
             )
+            .registerTypeAdapter(
+                MusicTree.Node.Parameters::class.java,
+                MusicTreeNodeParametersDeserializer
+            )
             .addSerializationExclusionStrategy(MusicTreeNodeDeserializationStrategy)
             .create()
     }
@@ -56,6 +64,17 @@ object MusicTreeSerializer {
 
         override fun shouldSkipClass(clazz: Class<*>?): Boolean {
             return false
+        }
+    }
+
+    @Suppress("USELESS_ELVIS")
+    private object MusicTreeNodeParametersDeserializer: JsonDeserializer<MusicTree.Node.Parameters> {
+        override fun deserialize(
+            json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTree.Node.Parameters? {
+            val result = MusicTree.Node.Parameters.jsonDecode(json.asJsonObject)
+            result.loopStartPoints = result.loopStartPoints ?: mapOf()
+
+            return result
         }
     }
 }

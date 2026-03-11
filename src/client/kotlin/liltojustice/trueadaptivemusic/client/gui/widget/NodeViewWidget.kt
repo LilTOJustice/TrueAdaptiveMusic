@@ -8,6 +8,8 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -17,6 +19,7 @@ import net.minecraft.util.Colors
 import java.util.Timer
 import kotlin.concurrent.schedule
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.typeOf
 
 class NodeViewWidget(
     width: Int,
@@ -35,11 +38,13 @@ class NodeViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
     private val defaultNodeParams = MusicTree.Node.Parameters.default().getTriggerParams().map { it.value }
-    private val requiredNodeParams = MusicTree.Node.Parameters::class.primaryConstructor?.parameters ?: listOf()
+    private val requiredNodeParams = MusicTree.Node.Parameters::class.primaryConstructor?.parameters
+        ?.map { InputWidgetMaker.WidgetArg.of(it) } ?: listOf()
     private var newNodeParent: MusicTree.Node? = null
     private var nodeParams: MutableList<Any?> = defaultNodeParams.toMutableList()
     private var events = mutableListOf<MusicEvent>()
@@ -48,6 +53,8 @@ class NodeViewWidget(
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
+    private var shouldSave = false
+    private var shouldExit = false
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -61,6 +68,8 @@ class NodeViewWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        shouldExit = false
+        shouldSave = false
         super.renderWidget(context, mouseX, mouseY, delta)
         if (!visible) {
             return
@@ -77,6 +86,10 @@ class NodeViewWidget(
                 0,
                 width / 2)
         }
+
+        if (shouldSave) {
+            save(shouldExit)
+        }
     }
 
     fun renderEditMode() {
@@ -88,6 +101,7 @@ class NodeViewWidget(
                     null,
                     { selected ->
                         selectedMusicPaths = selected.toMutableList()
+                        clearLoopIntroEndpointWidgets()
                         onChange()
                     },
                     Text.translatableWithFallback(
@@ -149,7 +163,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.forEach { param ->
+        requiredNodeParams.dropLast(1).forEach { param ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
@@ -162,6 +176,68 @@ class NodeViewWidget(
                 },
                 "nodeParams: ${param.name ?: param.index}"
             )
+        }
+
+        selectedNode?.let { node ->
+            if (!node.parameters.loopMusic) {
+                clearLoopIntroEndpointWidgets()
+                return@let
+            }
+
+            addWidgetFromRender({ EmptyClickableWidget() }, "loopStartPointsSpacer")
+            addWidgetFromRender(
+                {
+                    val newWidget = ClickableTextWidget(
+                        "${Text.translatableWithFallback(
+                            "trueadaptivemusic.loop_start_points", "Loop Start Points").string}:"
+                    )
+                    newWidget.active = false
+                    newWidget.setTooltip(
+                        Tooltip.of(
+                            MusicTree.Node.Parameters.getParamDescription("loopStartPoints"))
+                    )
+                    newWidget
+                }, "loopStartPoints"
+            )
+
+            val loopStartPointsParam = requiredNodeParams.last()
+            val soundNames = node.music
+                .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
+                .flatMap { sound ->
+                    (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
+                        ?: (sound as? PlayableSoundDirectory)
+                            ?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
+                        ?: emptyList()
+                }
+
+            soundNames.sorted().forEach { soundName ->
+                addWidgetFromRender(
+                    {
+                        val outArg = mutableListOf(node.parameters.loopStartPoints[soundName] as Any?)
+                        TAMClient.makeInputWidget(
+                            screen!!,
+                            outArg,
+                            InputWidgetMaker.WidgetArg(
+                                typeOf<UInt>(), "loopStartPoints", 0),
+                            Text.literal(soundName),
+                            null
+                        ) {
+                            val copy = mutableMapOf<String, UInt>()
+                            soundNames.forEach { copy[it] = 0U }
+                            node.parameters.loopStartPoints.entries.forEach { entry ->
+                                if (entry.key in copy) {
+                                    copy[entry.key] = entry.value
+                                }
+                            }
+
+                            copy[soundName] = outArg[0] as UInt
+                            nodeParams[loopStartPointsParam.index] = copy.toMap()
+                            onChange()
+                        }
+                    },
+                    "loopStartPoints: $soundName"
+                )
+            }
         }
 
         addWidgetFromRender({ EmptyClickableWidget() }, "eventsSpacer")
@@ -264,6 +340,13 @@ class NodeViewWidget(
                 )
             )
         }
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
+        )
     }
 
     fun setEditExistingNode(node: MusicTree.Node) {
@@ -348,7 +431,7 @@ class NodeViewWidget(
             node.parameters = MusicTree.Node.Parameters.fromArgs(nodeParams.filterNotNull())
         }
 
-        save()
+        shouldSave = true
     }
 
     private fun makeNewChild(): MusicTree.Node? {
@@ -360,5 +443,9 @@ class NodeViewWidget(
             selectedAmbiencePaths.mapNotNull {
                     path -> PlayableSound.of(path, soundLibrary) }
         )
+    }
+
+    private fun clearLoopIntroEndpointWidgets() {
+        queueClearWidgetsFromRender { !it.id.startsWith("loopStartPoints") }
     }
 }
