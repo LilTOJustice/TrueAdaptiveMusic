@@ -38,7 +38,6 @@ open class ClickableTextWidget(
             }
 
             val result = message.getWithStyle(style).firstOrNull()
-            result?.let { width = textRenderer.getWidth(it) }
 
             result
         }
@@ -68,6 +67,7 @@ open class ClickableTextWidget(
 
         val selected = isSelected(this)
         if (selected) {
+            x += BORDER_BUFFER / 2
             context?.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
         }
 
@@ -76,12 +76,9 @@ open class ClickableTextWidget(
         }
 
         context?.let {
-            coloredText?.let {
-                drawTextWithMargin(
-                    context.getHoverListener(this, DrawContext.HoverType.NONE),
-                    coloredText,
-                    0
-                )
+            coloredText?.let { text ->
+                it.getHoverListener(this, DrawContext.HoverType.NONE)
+                    .marqueedText(text, x, x, x + width, y, y + textRenderer.fontHeight)
             }
         }
     }
@@ -100,15 +97,23 @@ open class ClickableTextWidget(
 
     fun disableBold() {
         disableBold = true
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     fun enableItalic() {
         enableItalic = true
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     fun setText(text: String) {
         message = Text.literal(text)
-        this.width = textRenderer.getWidth(message)
+        coloredText?.let {
+            this.width = textRenderer.getWidth(it)
+        }
     }
 
     companion object {

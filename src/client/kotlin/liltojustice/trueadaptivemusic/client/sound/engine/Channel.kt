@@ -21,6 +21,7 @@ class Channel private constructor(
         get() = source.lastRead == 0
 
     fun close() {
+        stop()
         thread.interrupt()
         thread.join()
         tasks.clear()
@@ -48,6 +49,7 @@ class Channel private constructor(
                 soundInstance.getAudioStream()?.use {
                     source.setVolume(startingVolume)
                     source.setStream(it)
+                    source.setLooping(soundInstance.isLooping, soundInstance.loopStartPoint)
                     source.play()
                     waitForStop()
                 }
