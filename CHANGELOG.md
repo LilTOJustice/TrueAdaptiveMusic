@@ -1,5 +1,7 @@
 True Adaptive Music v1.8 - The Loopy Update
 
+**True Adaptive Music will now appear in the Forge/Neoforge environment for Modrinth/Curseforge with a dependency on Sinytra Connector. Since Sinytra is limited to 1.20.1 and 1.21.1, those will be the only available versions until they port to other versions of Minecraft.**
+
 New Features:
 - Music Looping
   - Music can be set to loop within a node
