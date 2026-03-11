@@ -24,7 +24,6 @@ import java.io.IOException
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 
 object TAMClient {
@@ -56,12 +55,12 @@ object TAMClient {
             field = value
             options.save()
         }
-    var musicPack: MusicPack?
-        get() = musicManager?.musicPack
+    var musicPack: MusicPack? = null
         set(value) {
+            field = value
             minecraftClient.soundManager.soundSystem.reloadSounds()
             hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
-            musicManager?.selectMusicPack(value)
+            musicManager?.stop()
 
             val packName = value?.packName ?: ""
             try {
@@ -81,8 +80,10 @@ object TAMClient {
             initialize(client)
         }
 
-        currentPredicateResult = musicPack?.rules?.getMusicToPlay(minecraftClient)
-        musicManager?.tick()
+        musicPack?.let { pack ->
+            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
+            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
+        } ?: { currentPredicateResult = null }
     }
 
     fun resetSound() {
@@ -126,7 +127,7 @@ object TAMClient {
     fun makeInputWidget(
         screen: Screen,
         outArgs: MutableList<Any?>,
-        arg: KParameter,
+        arg: InputWidgetMaker.WidgetArg,
         displayName: Text?,
         tooltipText: Text?,
         onChange: () -> Unit = {})

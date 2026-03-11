@@ -18,7 +18,7 @@ class InputWidgetMaker {
     fun makeWidget(
         screen: Screen,
         outArgs: MutableList<Any?>,
-        arg: KParameter,
+        arg: WidgetArg,
         displayName: Text?,
         tooltipText: Text?,
         onChange: () -> Unit
@@ -30,6 +30,14 @@ class InputWidgetMaker {
                 Logger.logWarning("Couldn't create widget for expected type ${arg.type}.")
                 EmptyClickableWidget()
             }
+    }
+
+    data class WidgetArg(val type: KType, val name: String?, val index: Int) {
+        companion object {
+            fun of(kParameter: KParameter): WidgetArg {
+                return WidgetArg(kParameter.type, kParameter.name, kParameter.index)
+            }
+        }
     }
 
     private data class WidgetRegistryEntry(
