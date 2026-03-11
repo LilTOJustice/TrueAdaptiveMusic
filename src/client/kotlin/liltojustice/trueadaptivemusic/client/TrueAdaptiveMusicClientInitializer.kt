@@ -315,20 +315,19 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         )
 
         TAMClient.registerInputWidget(
-            typeOf<TrueAdaptiveMusicOptions.LUFBoost>(),
-            { prompt, screen, outArgs, arg, tooltipText, onChange ->
-                val result = SliderWidget(
-                    0,
-                    TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),
-                    (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
-                    prompt
-                ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
-                tooltipText?.let {
-                    result.setTooltip(Tooltip.of(it))
-                }
-                result
+            typeOf<TrueAdaptiveMusicOptions.LUFBoost>()
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = SliderWidget(
+                0,
+                TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),
+                (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
+                prompt
+            ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
             }
-        )
+            result
+        }
     }
 
     companion object {
