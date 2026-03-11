@@ -10,7 +10,11 @@ import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.random.Random
 
-class SoundEventSoundInstance(identifier: Identifier, isAmbient: Boolean): TAMSoundInstance(isAmbient) {
+class SoundEventSoundInstance(
+    identifier: Identifier,
+    isAmbient: Boolean,
+    isLooping: Boolean
+): TAMSoundInstance(isAmbient, isLooping, 0U) {
     private val soundManager: SoundManager = MinecraftClient.getInstance().soundManager
     private val instance = PositionedSoundInstance(
         SoundEvent.of(identifier),
