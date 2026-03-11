@@ -18,6 +18,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import java.util.function.Consumer
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -28,7 +29,8 @@ abstract class ContainerWidget(
     message: String,
     private val showHeader: Boolean,
     private val bordered: Boolean,
-    private val scrollable: Boolean = false,
+    private val verticallyScrollable: Boolean = false,
+    private val horizontallyScrollable: Boolean = false,
     private val indentChildren: Boolean = true,
     x: Int = 0,
     y: Int = 0,
@@ -40,9 +42,15 @@ abstract class ContainerWidget(
     private val client = MinecraftClient.getInstance()
     protected val textRenderer: TextRenderer = client.textRenderer
     protected val screen: Screen? = client.currentScreen
-    private var scrollPosition = 0
+    private var verticalScrollPosition = 0.0
+    private var horizontalScrollPosition = 0.0
+    private var verticalScrollHeld = false
+    private var horizontalScrollHeld = false
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
-    protected var focusedWidget: ClickableWidget? = null
+    private var lastUsedWidth = 0
+    private var renderWidgetClearQueue = mutableListOf<(ChildWidget) -> Boolean>()
+    var focusedWidget: ClickableWidget? = null
+        protected set
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
@@ -59,6 +67,8 @@ abstract class ContainerWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        renderWidgetClearQueue.forEach { clearWidgetsFromRender(it) }
+        renderWidgetClearQueue.clear()
         focusedWidget?.isFocused = true
         renderChildren.clear()
         if (!visible) {
@@ -84,21 +94,36 @@ abstract class ContainerWidget(
             context?.drawBorder(x, y, width, height)
         }
 
-        clampScrollPosition()
-        drawScrollBar(context)
-
-        context?.enableScissor(x, y + getHeaderOffset() - 2, x + width, y + height)
-        children.forEach { (_, child) ->
-            val translated = child.translated(scrollPosition)
-            translated.widget.x = x + translated.xOffset + if (indentChildren) X_MARGIN else 0
-            translated.widget.y = getTranslatedY(translated.row)
-            translated.widget.width = min(translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
-            val prevVisibility = translated.widget.visible
-            translated.widget.visible = prevVisibility && contains(translated.widget)
-            translated.widget.render(context, mouseX, mouseY, delta)
-            translated.widget.visible = prevVisibility
+        val usedWidth = getMaxUsedWidth()
+        if (lastUsedWidth == usedWidth) {
+            clampScrollPosition()
         }
+
+        val verticalExtent = drawVerticalScrollbar(context)
+        val horizontalExtent = drawHorizontalScrollbar(context)
+
+        context?.enableScissor(
+            x + if (indentChildren) X_MARGIN else 0,
+            y + getHeaderOffset() - 2,
+            (verticalExtent?.third ?: (x + width)) - 2,
+            (horizontalExtent?.third ?: (y + height)) - 2
+        )
+        children.forEach { (_, child) ->
+            val translated = child.translated(
+                verticalScrollPosition.toInt(), -horizontalScrollPosition.toInt())
+            translated.widget.x = x + translated.xOffset + (if (indentChildren) X_MARGIN else 0)
+            translated.widget.y = getTranslatedY(translated.row)
+
+            if (!horizontallyScrollable) {
+                translated.widget.width = min(
+                    translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
+            }
+
+            translated.widget.render(context, mouseX, mouseY, delta)
+        }
+
         context?.disableScissor()
+        lastUsedWidth = getMaxUsedWidth()
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
@@ -112,6 +137,31 @@ abstract class ContainerWidget(
 
         backButton?.let {
             if (it.mouseClicked(click, doubled)) {
+                return true
+            }
+        }
+
+        val verticalScrollExtent = getVerticalScrollbarExtent()
+        val horizontalScrollExtent = getHorizontalScrollbarExtent()
+
+        verticalScrollExtent?.let {
+            if (click.y >= it.first - SCROLLBAR_GRACE &&
+                click.y <= it.second + SCROLLBAR_GRACE &&
+                abs(click.x - it.third) <= SCROLLBAR_GRACE) {
+                verticalScrollHeld = true
+                screen?.focused = this
+
+                return true
+            }
+        }
+
+        horizontalScrollExtent?.let {
+            if (click.x >= it.first - SCROLLBAR_GRACE &&
+                click.x <= it.second + SCROLLBAR_GRACE &&
+                abs(click.y - it.third) <= SCROLLBAR_GRACE) {
+                horizontalScrollHeld = true
+                screen?.focused = this
+
                 return true
             }
         }
@@ -134,7 +184,33 @@ abstract class ContainerWidget(
     }
 
     override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
+        if (verticalScrollHeld) {
+            val usableHeight = getUsableHeight()
+            getVerticalScrollbarExtent()?.let {
+                val ratio = usableHeight.toDouble() / (it.second - it.first)
+                verticalScrollPosition += (offsetY * ratio) / getRowHeight(textRenderer.fontHeight)
+            }
+        }
+        else if (horizontalScrollHeld) {
+            val usableWidth = getUsableWidth()
+            getHorizontalScrollbarExtent()?.let {
+                val ratio = usableWidth.toDouble() / (it.second - it.first)
+                horizontalScrollPosition += offsetX * ratio
+            }
+        }
+
         return focusedWidget?.mouseDragged(click, offsetX, offsetY) ?: false
+    }
+
+    override fun mouseReleased(click: Click): Boolean {
+        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+            return false
+        }
+
+        verticalScrollHeld = false
+        horizontalScrollHeld = false
+
+        return focusedWidget?.mouseReleased(click) ?: true
     }
 
     override fun charTyped(input: CharInput): Boolean {
@@ -149,15 +225,8 @@ abstract class ContainerWidget(
         return focusedWidget?.keyReleased(input) ?: false
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
-            return false
-        }
-
-        return focusedWidget?.mouseReleased(click) ?: true
-    }
-
-    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
+    override fun mouseScrolled(
+        mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         if (!visible || !active) {
             return false
         }
@@ -178,8 +247,12 @@ abstract class ContainerWidget(
             return false
         }
 
-        if (scrollable) {
-            scrollPosition -= verticalAmount.toInt()
+        if (verticallyScrollable) {
+            verticalScrollPosition -= verticalAmount.toInt()
+        }
+
+        if (horizontallyScrollable) {
+            horizontalScrollPosition -= horizontalAmount.toInt()
         }
 
         return true
@@ -214,7 +287,7 @@ abstract class ContainerWidget(
 
         if (row == null) {
             children[widgetId] = children[widgetId]!!.copy(
-                row = maxUsedRow(onlyThisRender = true, countOffscreen = true))
+                row = getMaxUsedRow(onlyThisRender = true, countOffscreen = true))
         }
 
         renderChildren[widgetId] = children[widgetId]!!.copy()
@@ -233,13 +306,18 @@ abstract class ContainerWidget(
 
     // Use to only clear widgets created from addWidgetToRender
     fun clearWidgetsFromRender(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
-        children
-            .filterValues { child -> child.fromRender }
-            .forEach { (key, child) ->
-                if (!keepPredicate(child))
-                    children.remove(key)
-            }
+        val toRemove = children
+            .filterValues { child -> child.fromRender && !keepPredicate(child) }
+
+        toRemove.forEach { (key, _) ->
+            children.remove(key)
+        }
+
         renderChildren.clear()
+    }
+
+    fun queueClearWidgetsFromRender(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
+        renderWidgetClearQueue.add(keepPredicate)
     }
 
     fun clearWidgets(keepPredicate: (childWidget: ChildWidget) -> Boolean = { false }) {
@@ -256,28 +334,33 @@ abstract class ContainerWidget(
     fun fitToUsedRows(maxRows: Int = 0) {
         height = (
                 (if (maxRows > 0)
-                    min(maxRows, maxUsedRow(countOffscreen = true) + 1)
+                    min(maxRows, getMaxUsedRow(countOffscreen = true) + 1)
                 else
-                    maxUsedRow(countOffscreen = true) + 1)
+                    getMaxUsedRow(countOffscreen = true) + 1)
                         * getRowHeight(textRenderer.fontHeight)
                         + getHeaderOffset()).toInt()
     }
 
     fun fitToChildrenHeight() {
         var max = 0
-        children.filterValues { child -> childVisible(child.translated(scrollPosition)) }.forEach { (_, child) ->
-            val translated = child.translated(scrollPosition)
-            max = max(max, getTranslatedY(translated.row) - y + translated.widget.height)
-        }
+        children
+            .filterValues { child -> childVisible(child.translated(verticalScrollPosition.toInt())) }
+            .forEach { (_, child) ->
+                val translated = child.translated(verticalScrollPosition.toInt())
+                max = max(max, getTranslatedY(translated.row) - y + translated.widget.height)
+            }
+
         height = (max + getRowHeight(textRenderer.fontHeight)).toInt()
     }
 
     fun resetScrolling() {
-        scrollPosition = 0
+        verticalScrollPosition = 0.0
+        horizontalScrollPosition = 0.0
     }
 
     fun scrollToBottom() {
-        scrollPosition = Int.MAX_VALUE
+        verticalScrollPosition = Double.MAX_VALUE
+        horizontalScrollPosition = 0.0
     }
 
     override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
@@ -289,11 +372,15 @@ abstract class ContainerWidget(
     }
 
     protected open fun renderDarkening(context: DrawContext, width: Int, height: Int) {
+        renderDarkening(context, this.x, this.y, width, height)
+    }
+
+    protected open fun renderDarkening(context: DrawContext, x: Int, y: Int, width: Int, height: Int) {
         renderBackgroundTexture(
             context,
             MENU_BACKGROUND_TEXTURE,
-            this.x,
-            this.y,
+            x,
+            y,
             0.0f,
             0.0f,
             width,
@@ -326,8 +413,12 @@ abstract class ContainerWidget(
     }
 
     private fun clampScrollPosition() {
-        scrollPosition = min(scrollPosition, maxUsedRow(countOffscreen = true) + 1 - totalRows())
-        scrollPosition = max(0, scrollPosition)
+        verticalScrollPosition = min(
+            verticalScrollPosition, (getMaxUsedRow(countOffscreen = true) - totalRows()).toDouble())
+        verticalScrollPosition = max(0.0, verticalScrollPosition)
+        horizontalScrollPosition = min(
+            horizontalScrollPosition, getMaxUsedWidth().toDouble() - getUsableWidth() - 1)
+        horizontalScrollPosition = max(0.0, horizontalScrollPosition)
     }
 
     private fun getHeaderOffset(): Int {
@@ -339,42 +430,121 @@ abstract class ContainerWidget(
     }
 
     private fun totalRows(): Int {
-        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).roundToInt()
+        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).roundToInt() -
+                (if (horizontallyScrollable) 1 else 0)
     }
 
-    private fun maxUsedRow(onlyThisRender: Boolean = false, countOffscreen: Boolean = false): Int {
+    private fun getUsableHeight(): Int {
+        return height - getHeaderOffset() -
+                if (horizontallyScrollable) getHorizontalScrollbarYPosition() - (y + height) else 0
+    }
+
+    private fun getUsableWidth(): Int {
+        return width - 2 * X_MARGIN - if (verticallyScrollable) getVerticalScrollbarXPosition() - (x + width) else 0
+    }
+
+    private fun getMaxUsedRow(onlyThisRender: Boolean = false, countOffscreen: Boolean = false): Int {
         return if (visible) (if (onlyThisRender) renderChildren else children)
-            .mapValues { (_, child) -> if (countOffscreen) child else child.translated(scrollPosition) }
+            .mapValues { (_, child) ->
+                if (countOffscreen) child else child.translated(verticalScrollPosition.toInt()) }
             .filterValues { child ->
                 if (countOffscreen) child.widget.visible else childVisible(child) }
             .maxOfOrNull { (_, child) ->
-                child.row + if (child.widget is ContainerWidget) child.widget.maxUsedRow() + 1 else 1 }
+                child.row + if (child.widget is ContainerWidget) child.widget.getMaxUsedRow() + 1 else 1 }
             ?: 0 else 0
     }
 
-    private fun drawScrollBar(context: DrawContext?) {
-        if (!scrollable) {
-            return
-        }
+    private fun getMaxUsedWidth(): Int {
+        return children.values.maxOfOrNull { it.xOffset + it.widget.width + X_MARGIN } ?: width
+    }
 
-        val usedRows = maxUsedRow(countOffscreen = true) + 1
-        val totalRows = totalRows()
-        if (usedRows > totalRows) {
-            val adjustedHeight = height - getHeaderOffset() - 2
-            val ratio = totalRows.toDouble() / usedRows
-            val barSize = ratio * adjustedHeight
-            val start = (scrollPosition.toDouble() / (usedRows - totalRows)) * adjustedHeight * (1 - ratio)
-            val end = start + barSize
-            val y1 = (y + start + getHeaderOffset()).toInt()
-            val y2 = (y + end + getHeaderOffset()).toInt()
-            val diff = y2 - y1
-            context?.drawVerticalLine(
-                x + width - 3,
-                y1,
-                if (diff < 2) y2 + (2 - diff) else y2,
+    private fun drawVerticalScrollbar(context: DrawContext?): Triple<Int, Int, Int>? {
+        val extent = getVerticalScrollbarExtent() ?: return null
+        val headerOffset = getHeaderOffset()
+        val adjustedHeight = height - headerOffset - 6
+        val x = extent.third
+
+        context?.let {
+            renderDarkening(it, x, y + headerOffset, 1, adjustedHeight)
+            it.drawVerticalLine(
+                x,
+                extent.first,
+                extent.second,
                 Colors.WHITE
             )
         }
+
+        return extent
+    }
+
+    private fun drawHorizontalScrollbar(context: DrawContext?): Triple<Int, Int, Int>? {
+        val extent = getHorizontalScrollbarExtent() ?: return null
+        val usableWidth = getUsableWidth()
+        val offset = width - usableWidth
+        val y = extent.third
+
+        context?.let {
+            renderDarkening(it, x + offset, y, usableWidth - offset, 1)
+            it.drawHorizontalLine(extent.first, extent.second, y, Colors.WHITE)
+        }
+
+        return extent
+    }
+
+    private fun getVerticalScrollbarExtent(): Triple<Int, Int, Int>? {
+        if (!verticallyScrollable) {
+            return null
+        }
+
+        val usedRows = getMaxUsedRow(countOffscreen = true)
+        val totalRows = totalRows()
+
+        if (usedRows <= totalRows) {
+            return null
+        }
+
+        val headerOffset = getHeaderOffset()
+        val adjustedHeight = height - headerOffset - 6
+        val ratio = totalRows.toDouble() / usedRows
+        val barSize = ratio * adjustedHeight
+        val start = (verticalScrollPosition / (usedRows - totalRows)) * adjustedHeight * (1 - ratio)
+        val end = start + barSize
+        val y1 = (y + start + headerOffset).toInt()
+        val y2 = (y + end + headerOffset).toInt()
+        val diff = y2 - y1
+
+        return Triple(y1, if (diff < 2) y2+ (2 - diff) else y2, getVerticalScrollbarXPosition())
+    }
+
+    private fun getHorizontalScrollbarExtent(): Triple<Int, Int, Int>? {
+        if (!horizontallyScrollable) {
+            return null
+        }
+
+        val usedWidth = getMaxUsedWidth()
+        val usableWidth = getUsableWidth()
+        val offset = width - usableWidth
+
+        if (usedWidth <= usableWidth) {
+            return null
+        }
+
+        val ratio = usableWidth.toDouble() / usedWidth
+        val barSize = ratio * usableWidth
+        val start = (horizontalScrollPosition / (usedWidth - usableWidth)) * usableWidth * (1 - ratio)
+        val end = start + barSize
+        val x1 = (x + start + offset).toInt()
+        val x2 = (x + end).toInt()
+
+        return Triple(x1, x2, getHorizontalScrollbarYPosition())
+    }
+
+    private fun getVerticalScrollbarXPosition(): Int {
+        return x + width - 3
+    }
+
+    private fun getHorizontalScrollbarYPosition(): Int {
+        return y + height -4
     }
 
     private fun childVisible(translated: ChildWidget): Boolean {
@@ -385,18 +555,6 @@ abstract class ContainerWidget(
         return (!translucentInteract && visible && active && isMouseOver(mouseX, mouseY))
                 || children.any { (_, child) ->
             child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY) }
-    }
-
-    private fun contains(widget: ClickableWidget): Boolean {
-        val left = x
-        val right = left + width
-        val top = y + getHeaderOffset()
-        val bottom = top + height - getHeaderOffset()
-        val widgetLeft = widget.x
-        val widgetRight = widgetLeft + widget.width
-        val widgetTop = widget.y
-        val widgetBottom = widgetTop + widget.height
-        return left <= widgetRight && right >= widgetLeft && top <= widgetBottom && bottom >= widgetTop
     }
 
     private fun unfocus() {
@@ -415,13 +573,16 @@ abstract class ContainerWidget(
     companion object {
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
+        private const val SCROLLBAR_GRACE = 4
 
         fun getRowHeight(fontHeight: Int): Double {
             return (1.35 * fontHeight)
         }
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
-            return backButtonCallback.let { ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() }) }
+            return backButtonCallback.let {
+                ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() })
+            }
         }
     }
 
