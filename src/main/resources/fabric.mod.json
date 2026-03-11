@@ -36,5 +36,10 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}"
   },
-  "accessWidener" : "trueadaptivemusic.accesswidener"
+  "accessWidener": "trueadaptivemusic.accesswidener",
+  "custom": {
+    "mc-publish": {
+      "loaders": ["fabric", "forge"]
+    }
+  }
 }
