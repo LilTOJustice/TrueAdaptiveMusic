@@ -70,7 +70,7 @@ class PackListWidget(
                     client.textRenderer, it.packName, x + 3, y + 6, Colors.WHITE, false)
                 context?.drawText(
                     client.textRenderer,
-                    it.metadata.description,
+                    it.options.description,
                     x + 3, y + 14 + 3,
                     Colors.GRAY,
                     false)
