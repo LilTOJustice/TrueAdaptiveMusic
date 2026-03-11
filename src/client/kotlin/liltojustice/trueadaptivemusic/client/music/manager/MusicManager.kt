@@ -1,7 +1,8 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
-import liltojustice.trueadaptivemusic.client.TAMClient
-import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
@@ -14,8 +15,6 @@ import kotlin.math.max
 import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
-    var musicPack: MusicPack? = null
-        private set
     var playingEvent: MusicEvent? = null
         private set
 
@@ -61,28 +60,43 @@ class MusicManager(private val client: MinecraftClient) {
             ?: musicPlayer.stop(ON_DEMAND_TRACK)
     }
 
-    fun selectMusicPack(musicPack: MusicPack?) {
-        stop()
-        this.musicPack = musicPack
+    fun stop() {
+        client.musicTracker.setCurrent(null)
+        musicPlayer.stopAll()
+        currentMusicPredicateId = ""
+        oldMusicPredicateId = ""
+        eventPool = emptyList()
+        lastMusic = null
     }
 
-    fun tick() {
+    fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
+        musicPlayer.getPlayingInstance(mainTrack)?.let {
+            client.musicTracker.setCurrent(it)
+
+            if (it != lastInstance) {
+                client.toastManager.onMusicTrackStart()
+                lastInstance = it
+            }
+        }
+
         if (masterVolumeOption.value == 0.0) {
             return
         }
 
-        val predicateResult = TAMClient.currentPredicateResult ?: return
-        val identifier = predicateResult.path
-        val parameters = predicateResult.parameters
-        val musicToPlay = predicateResult.accumulatedMusic
-        val ambienceToPlay = predicateResult.accumulatedAmbience
+        val identifier = treeResult.path
+        val parameters = treeResult.parameters
+        val musicToPlay = treeResult.accumulatedMusic
+        val ambienceToPlay = treeResult.accumulatedAmbience
         val trackDelayNoise = parameters.trackDelayNoise
         val trackDelay = parameters.trackDelay
         val enterDelay = parameters.enterDelay
+        val loopMusic = parameters.loopMusic
+        val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
+        val persistentNodeMusic = packOptions.persistentNodeMusic && !loopMusic
 
-        eventPool = predicateResult.accumulatedEvents
+        eventPool = treeResult.accumulatedEvents
 
         val isPaused = isPaused(client)
         val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
@@ -158,19 +172,26 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (identifier != currentMusicPredicateId &&
-            predicateResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
+            treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
             invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 
         updatePredicateId(identifier)
 
-        if (musicPlayer.isTrackPlaying(mainTrack) && musicToPlay.contains(lastMusic) && enterDelay != 0U) {
+        if (shouldKeepPlaying(musicToPlay, enterDelay, isEnter, persistentNodeMusic)) {
             return
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
         val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
-        playNextMusic(newMusic, delay, shouldResume, !isEnter)
+        playNextMusic(
+            newMusic,
+            delay,
+            shouldResume,
+            !isEnter,
+            loopMusic,
+            loopStartPoints[newMusic.getSoundName()] ?: 0U
+        )
     }
 
     private fun shouldPlay(identifier: String): Boolean {
@@ -180,13 +201,13 @@ class MusicManager(private val client: MinecraftClient) {
                 && musicVolumeOption.value > 0
     }
 
-    fun stop() {
-        client.musicTracker.setCurrent(null)
-        musicPlayer.stopAll()
-        currentMusicPredicateId = ""
-        oldMusicPredicateId = ""
-        eventPool = emptyList()
-        lastMusic = null
+    private fun shouldKeepPlaying(
+        musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean, persistentNodeMusic: Boolean): Boolean {
+        val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
+        return mainTrackPlaying && (
+                (musicToPlay.contains(lastMusic) && enterDelay != 0U)
+                        || (persistentNodeMusic && isEnter)
+                )
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
@@ -206,10 +227,24 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = newIdentifier
     }
 
-    private fun playNextMusic(newMusic: PlayableSound, delay: UInt, resume: Boolean, keepTrack: Boolean) {
+    private fun playNextMusic(
+        newMusic: PlayableSound,
+        delay: UInt,
+        resume: Boolean,
+        keepTrack: Boolean,
+        loopMusic: Boolean,
+        loopIntroEndpoint: UInt
+    ) {
         val delayMillis = delay.toLong() * 1000L
         if (keepTrack) {
-            musicPlayer.startNew(mainTrack, newMusic, delayMillis)
+            musicPlayer.startNew(
+                mainTrack,
+                newMusic,
+                delayMillis,
+                isLooping = loopMusic,
+                loopStartPoint = loopIntroEndpoint
+            )
+
             return
         }
 
@@ -220,7 +255,8 @@ class MusicManager(private val client: MinecraftClient) {
             return
         }
 
-        musicPlayer.startNew(mainTrack, newMusic, delayMillis)
+        musicPlayer.startNew(
+            mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
 
         lastMusic = newMusic
