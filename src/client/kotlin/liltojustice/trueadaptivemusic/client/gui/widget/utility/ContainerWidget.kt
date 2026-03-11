@@ -4,12 +4,14 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import net.minecraft.util.Identifier
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.max
@@ -140,9 +142,9 @@ abstract class ContainerWidget(
         val horizontalScrollExtent = getHorizontalScrollbarExtent()
 
         verticalScrollExtent?.let {
-            if (click.y >= it.first - SCROLLBAR_GRACE &&
-                click.y <= it.second + SCROLLBAR_GRACE &&
-                abs(click.x - it.third) <= SCROLLBAR_GRACE) {
+            if (mouseY >= it.first - SCROLLBAR_GRACE &&
+                mouseY <= it.second + SCROLLBAR_GRACE &&
+                abs(mouseX - it.third) <= SCROLLBAR_GRACE) {
                 verticalScrollHeld = true
                 screen?.focused = this
 
@@ -151,9 +153,9 @@ abstract class ContainerWidget(
         }
 
         horizontalScrollExtent?.let {
-            if (click.x >= it.first - SCROLLBAR_GRACE &&
-                click.x <= it.second + SCROLLBAR_GRACE &&
-                abs(click.y - it.third) <= SCROLLBAR_GRACE) {
+            if (mouseX >= it.first - SCROLLBAR_GRACE &&
+                mouseX <= it.second + SCROLLBAR_GRACE &&
+                abs(mouseY - it.third) <= SCROLLBAR_GRACE) {
                 horizontalScrollHeld = true
                 screen?.focused = this
 
@@ -178,38 +180,38 @@ abstract class ContainerWidget(
         return true
     }
 
-    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double): Boolean {
         if (verticalScrollHeld) {
             val usableHeight = getUsableHeight()
             getVerticalScrollbarExtent()?.let {
                 val ratio = usableHeight.toDouble() / (it.second - it.first)
-                verticalScrollPosition += (offsetY * ratio) / getRowHeight(textRenderer.fontHeight)
+                verticalScrollPosition += (deltaY * ratio) / getRowHeight(textRenderer.fontHeight)
             }
         }
         else if (horizontalScrollHeld) {
             val usableWidth = getUsableWidth()
             getHorizontalScrollbarExtent()?.let {
                 val ratio = usableWidth.toDouble() / (it.second - it.first)
-                horizontalScrollPosition += offsetX * ratio
+                horizontalScrollPosition += deltaX * ratio
             }
         }
 
-        return focusedWidget?.mouseDragged(click, offsetX, offsetY) ?: false
+        return focusedWidget?.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) ?: false
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (!visible || !active || !this.isValidClickButton(button)) {
             return false
         }
 
         verticalScrollHeld = false
         horizontalScrollHeld = false
 
-        return focusedWidget?.mouseReleased(click) ?: true
+        return focusedWidget?.mouseReleased(mouseX, mouseY, button) ?: true
     }
 
-    override fun charTyped(input: CharInput): Boolean {
-        return focusedWidget?.charTyped(input) ?: false
+    override fun charTyped(chr: Char, modifiers: Int): Boolean {
+        return focusedWidget?.charTyped(chr, modifiers) ?: false
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
@@ -362,14 +364,6 @@ abstract class ContainerWidget(
         children.values.map { child -> child.widget }.forEach(consumer)
     }
 
-    protected open fun renderDarkening(context: DrawContext) {
-        this.renderDarkening(context, this.width, this.height)
-    }
-
-    protected open fun renderDarkening(context: DrawContext, width: Int, height: Int) {
-        renderDarkening(context, this.x, this.y, width, height)
-    }
-
     protected open fun renderDarkening(context: DrawContext, x: Int, y: Int, width: Int, height: Int) {
         renderBackgroundTexture(
             context,
@@ -394,7 +388,6 @@ abstract class ContainerWidget(
         height: Int
     ) {
         context.drawTexture(
-            RenderPipelines.GUI_TEXTURED,
             texture,
             x,
             y,

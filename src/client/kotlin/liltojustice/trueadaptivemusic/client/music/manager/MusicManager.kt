@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.music.manager
 
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
@@ -70,15 +69,6 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
-        musicPlayer.getPlayingInstance(mainTrack)?.let {
-            client.musicTracker.setCurrent(it)
-
-            if (it != lastInstance) {
-                client.toastManager.onMusicTrackStart()
-                lastInstance = it
-            }
-        }
-
         if (masterVolumeOption.value == 0.0) {
             return
         }
