@@ -109,7 +109,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             .build()
 
         optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
-            client.setScreen(PackOptionsScreen(this, musicPack))
+            client?.setScreen(PackOptionsScreen(this, musicPack))
         }
             .build()
 

@@ -109,7 +109,7 @@ class Source private constructor(private val pointer: Int) {
     private fun read() {
         this.stream?.let { stream ->
             try {
-                val byteBuffer = stream.read(this.bufferSize)
+                val byteBuffer = stream.getBuffer(this.bufferSize)
                 if (byteBuffer == null) {
                     this.lastRead = 0
                     return

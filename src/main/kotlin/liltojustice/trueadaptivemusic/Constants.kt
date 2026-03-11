@@ -17,4 +17,10 @@ class Constants {
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val FFMPEG_DOWNLOAD_LINK = "https://www.gyan.dev/ffmpeg/builds/"
     }
+
+    class Colors {
+        companion object {
+            const val GREEN = 0x00FF00
+        }
+    }
 }
