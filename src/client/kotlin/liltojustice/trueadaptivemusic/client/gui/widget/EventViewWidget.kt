@@ -14,7 +14,6 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.Timer
 import kotlin.concurrent.schedule
-import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 class EventViewWidget(
@@ -31,14 +30,16 @@ class EventViewWidget(
     true,
     false,
     true,
+    false,
     true,
     x,
     y) {
     private val eventTypeNameOptions = TAMClient.eventRegistry.getAllNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
-    private var requiredEventArgs = listOf<KParameter>()
+    private var requiredEventArgs = listOf<InputWidgetMaker.WidgetArg>()
     private var eventArgs = mutableListOf<Any?>()
-    private val requiredEventParams = MusicEvent.Parameters::class.primaryConstructor?.parameters ?: listOf()
+    private val requiredEventParams = MusicEvent.Parameters::class.primaryConstructor?.parameters
+        ?.map { InputWidgetMaker.WidgetArg.of(it) } ?: listOf()
     private var eventParams: MutableList<Any?> = requiredEventParams.map { null }.toMutableList()
     private var selectedEvent: MusicEvent? = null
     private var selectedMusicPaths = mutableListOf<String>()
@@ -239,6 +240,13 @@ class EventViewWidget(
                     "trueadaptivemusic.delete_event_description", "Delete this event")
             )
         )
+
+        addWidgetFromRender(
+            {
+                EmptyClickableWidget()
+            },
+            "finalSpacer"
+        )
     }
 
     private fun setSelectedEventTypeName(typeName: String) {
@@ -247,7 +255,8 @@ class EventViewWidget(
         }
 
         selectedEventTypeName = typeName
-        requiredEventArgs = TAMClient.eventFactory.getRequiredArgs(typeName)
+        requiredEventArgs = TAMClient.eventFactory
+            .getRequiredArgs(typeName).map { InputWidgetMaker.WidgetArg.of(it) }
         eventArgs = requiredEventArgs.map { null }.toMutableList()
         clearWidgetsFromRender()
     }
