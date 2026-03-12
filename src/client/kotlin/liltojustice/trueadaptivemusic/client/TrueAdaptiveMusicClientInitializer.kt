@@ -43,6 +43,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
@@ -91,6 +92,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
         TAMClient.registerPredicate("hunger", HungerPredicate::class)
         TAMClient.registerPredicate("entity_nearby", EntityNearbyPredicate::class)
+        TAMClient.registerPredicate("scoreboard", ScoreboardPredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
