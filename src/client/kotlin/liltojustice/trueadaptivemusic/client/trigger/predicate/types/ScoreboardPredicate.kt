@@ -21,6 +21,8 @@ class ScoreboardPredicate(
 
         return matchingEntries.any { matchingEntry ->
             when (comparison) {
+                Comparison.Equal -> matchingEntry.value == value
+                Comparison.NotEqual -> matchingEntry.value == value
                 Comparison.Greater -> matchingEntry.value > value
                 Comparison.GreaterOrEqual -> matchingEntry.value >= value
                 Comparison.Lesser -> matchingEntry.value < value
@@ -39,6 +41,8 @@ class ScoreboardPredicate(
     }
 
     enum class Comparison {
+        Equal,
+        NotEqual,
         Greater,
         GreaterOrEqual,
         Lesser,
