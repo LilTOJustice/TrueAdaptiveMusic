@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
+import kotlin.reflect.full.companionObjectInstance
 
 abstract class MusicPredicate: MusicTrigger() {
     private var lastResult = false
@@ -49,7 +50,8 @@ abstract class MusicPredicate: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",
-                displayName ?: triggerName.prettify()
+                (TAMClient.predicateRegistry[triggerName].companionObjectInstance as? MusicPredicateCompanion)
+                    ?.displayName ?: triggerName.prettify()
             )
         }
 

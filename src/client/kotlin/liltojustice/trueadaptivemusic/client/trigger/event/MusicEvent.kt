@@ -10,6 +10,7 @@ import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
 import kotlin.collections.plus
+import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.primaryConstructor
 
@@ -68,7 +69,8 @@ abstract class MusicEvent: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",
-                displayName ?: triggerName.prettify()
+                (TAMClient.eventRegistry[triggerName].companionObjectInstance as? MusicEventCompanion)
+                    ?.displayName ?: triggerName.prettify()
             )
         }
 
