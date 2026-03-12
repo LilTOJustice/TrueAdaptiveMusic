@@ -282,7 +282,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
-            { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
+            { type -> type.isSubtypeOf(typeOf<Enum<*>>()) },
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
                 val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
@@ -298,7 +298,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         },
                         getDisplay = {
                             Text.translatableWithFallback(
-                                "trueadaptivemusic.enum.$it", it.toString().prettify()).string },
+                                "trueadaptivemusic.enum.$it", prettifyEnum(it)).string },
                         title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
@@ -316,7 +316,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 MultiSelectDropdownWidget(
                     options,
                     0,
-                    { it.toString().prettify() },
+                    { prettifyEnum(it) },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
@@ -413,6 +413,19 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         private fun isTypedIdentifierList(type: KType): Boolean {
             return type.isSubtypeOf(typeOf<List<*>>())
                     && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
+        }
+
+        private fun prettifyEnum(enum: Enum<*>): String {
+            val enumString = enum.toString()
+            return when(enumString) {
+                "Equal" -> "="
+                "NotEqual" -> "!="
+                "Greater" -> ">"
+                "GreaterOrEqual" -> ">="
+                "Lesser" -> "<"
+                "LesserOrEqual" -> "<="
+                else -> enumString.prettify()
+            }
         }
     }
 }
