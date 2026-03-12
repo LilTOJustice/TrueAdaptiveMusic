@@ -41,6 +41,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PlayerAttributePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
@@ -95,6 +96,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("entity_nearby", EntityNearbyPredicate::class)
         TAMClient.registerPredicate("scoreboard", ScoreboardPredicate::class)
         TAMClient.registerPredicate("team", TeamPredicate::class)
+        TAMClient.registerPredicate("player_attribute", PlayerAttributePredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
@@ -198,6 +200,69 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
+            typeOf<Double>()
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
+                prompt,
+                { widget, text ->
+                    if (text.isBlank() || text == "-") {
+                        return@TextInputWidget "0"
+                    }
+
+                    if (text.endsWith('-')) {
+                        return@TextInputWidget if (text.startsWith('-')) {
+                            text.dropWhile { it == '-' }.dropLastWhile { it == '-' }
+                        }
+                        else {
+                            "-${text.dropLast(1).dropWhile { it == '-' }}"
+                        }
+                    }
+
+                    if (text.endsWith(".")) {
+                        if (text.count { it == '.' } > 1) {
+                            return@TextInputWidget text.dropLast(1)
+                        }
+
+                        val newText = "${text.dropLastWhile { it == '.' }}."
+                        newText.dropLast(1).toDoubleOrNull()?.let {
+                            outArgs[arg.index] = it
+                            onChange()
+                        }
+
+                        return@TextInputWidget newText
+                    }
+
+                    if (!text.contains('.') && text.startsWith('0') && text.length > 1) {
+                        return@TextInputWidget text.dropWhile { it == '0' }
+                    }
+
+                    if (!text.contains('.')) {
+                        text.toDoubleOrNull()?.let {
+                            outArgs[arg.index] = it
+                            onChange()
+                        }
+
+                        return@TextInputWidget text
+                    }
+
+                    val value = text.toDoubleOrNull()
+                    if (text != "-0" && value == null) {
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
+                    }
+
+                    outArgs[arg.index] = value
+                    onChange()
+                    ""
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
+            result
+        }
+
+        TAMClient.registerInputWidget(
             typeOf<Boolean>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = CheckboxWidget(
@@ -270,11 +335,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val prettify = TAMClient.options.prettifyIdentifiers
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(arg.type)
-                    .map { id ->
-                        val key = TypedIdentifier.initializeFromIdString(arg.type, id.toString())
-                        key to (if (prettify) key.prettify() else id.toString())
-                    }
-                    .sortedBy { pair -> pair.second }
+                    .map { id -> TypedIdentifier.initializeFromIdString(arg.type, id.toString()) }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
                 DropdownWidget(
                     options,
@@ -282,6 +343,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         outArgs[arg.index] = id
                         onChange()
                     },
+                    getDisplay = { if (prettify) it.prettify() else it.toString() },
                     title = prompt,
                     startingOption = outArgs[arg.index] as? TypedIdentifier,
                     tooltipText = actualTooltipText

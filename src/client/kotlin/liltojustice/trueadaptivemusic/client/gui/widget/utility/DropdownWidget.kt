@@ -57,7 +57,7 @@ class DropdownWidget<TKey>(
         ClickableTextDisplayWidget(
             notSelectedPlaceholder
                 ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
-                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: ""
+                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "No Options"
         )
     }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
