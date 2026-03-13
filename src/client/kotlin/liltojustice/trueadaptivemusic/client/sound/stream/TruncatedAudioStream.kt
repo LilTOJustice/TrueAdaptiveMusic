@@ -6,10 +6,17 @@ import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 
 class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream {
-    private var nonZeroRead: Boolean = true
-    private var isNew: Boolean = true
+    private var nonZeroRead = true
+    private var isNew = true
+    private var done = false
+    private var closed = false
 
     override fun close() {
+        if (closed) {
+            return
+        }
+
+        closed = true
         backingStream.close()
     }
 
@@ -19,6 +26,9 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
 
     override fun getBuffer(size: Int): ByteBuffer? {
         var resultArray: ByteArray?
+        if (done) {
+            return null
+        }
 
         do {
             resultArray = getTruncatedArray(size)
@@ -32,6 +42,7 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
         val buffer = backingStream.getBuffer(size)
         val remaining = buffer.remaining()
         if (remaining == 0) {
+            done = true
             return null
         }
 
