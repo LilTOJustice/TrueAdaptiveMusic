@@ -33,7 +33,7 @@ object DebugHudMixinHelper {
         val currentNodeDepth = currentNodePathElements.size
 
         rules.preorderTraverse { _, path ->
-            val text = MusicTrigger.getTruncatedTriggerId(path.last())
+            val text = MusicTrigger.getTruncatedTriggerId(path.last()).takeIf { it.isNotEmpty() } ?: "empty"
 
             if (path.all { pathElement -> currentNodePathElements.contains(pathElement) }) {
                 predicateTreeLines.add(

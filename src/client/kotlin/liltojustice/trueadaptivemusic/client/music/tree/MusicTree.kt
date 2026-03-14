@@ -143,7 +143,7 @@ class MusicTree {
                         this, emptyList(), emptyMap(), emptyList(), emptyList())
                 }
 
-                val newPath = path + predicate.getTriggerId()
+                val newPath = path + predicates.joinToString(", ") { it.getTriggerId() }
                 val newEvents = eventCollection + this.events.map { event -> Pair(event.getTriggerId(), event) }
                 val newMusic = this.music.toSet() +
                         if (parameters.inheritMusic)
