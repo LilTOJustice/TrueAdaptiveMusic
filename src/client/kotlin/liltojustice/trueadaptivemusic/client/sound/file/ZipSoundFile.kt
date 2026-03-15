@@ -8,19 +8,19 @@ import kotlin.io.path.extension
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.name
 
-class ZipSoundFile(private val zipFilePath: Path, private val zipEntryPath: Path): SoundFile {
-    override fun getInputStream(): InputStream {
-        val zipFile = ZipFile(zipFilePath.toFile())
+class ZipSoundFile(zipFilePath: Path, private val zipEntryPath: Path): SoundFile {
+    val zipFile = ZipFile(zipFilePath.toFile())
+    val zipEntry = run {
         val trueEntryPath = zipEntryPath.invariantSeparatorsPathString
-        val zipEntry = zipFile.getEntry(trueEntryPath)
+        zipFile.getEntry(trueEntryPath)
+            ?: zipFile.entries().toList().firstOrNull { it.name.replace("\\", "/") == trueEntryPath }
+    }
 
-        return zipFile.getInputStream(
-            zipEntry
-                ?: zipFile
-                    .entries().toList().firstOrNull { it.name.replace("\\", "/") == trueEntryPath }
-                ?: throw MusicLoadException(
-                    "Could not load zip entry $trueEntryPath from zip file ${zipFile.name}")
-        )
+    override fun getInputStream(): InputStream {
+        val entry = zipEntry
+            ?: throw MusicLoadException("Could not load zip entry $zipEntryPath from zip file ${zipFile.name}")
+
+        return zipFile.getInputStream(entry)
     }
 
     override fun getName(): String {
