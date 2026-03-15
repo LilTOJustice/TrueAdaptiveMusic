@@ -91,11 +91,11 @@ class DropdownWidget<TKey>(
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
         val result = super.mouseClicked(click, doubled)
-        textInputWidget.text = ""
         if (focusedWidget == selectedOptionWidget) {
             open()
         }
-        else if (focusedWidget != dropdownResultsWidget || dropdownResultsWidget.focusedWidget != null || !result) {
+        else if ((focusedWidget != dropdownResultsWidget && focusedWidget != textInputWidget) ||
+            dropdownResultsWidget.focusedWidget != null || !result) {
             close()
         }
 
@@ -111,6 +111,7 @@ class DropdownWidget<TKey>(
     }
 
     private fun open() {
+        textInputWidget.text = ""
         focusedWidget = textInputWidget
         onHoverOption(null)
         textInputWidget.visible = true
