@@ -219,11 +219,11 @@ class MusicManager(private val client: MinecraftClient) {
 
             parallelTracks[music] = trackName
             musicPlayer.createTrack(trackName, false, PARALLEL_CROSSFADE_TICKS, false)
+            musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
+
             if (music != currentMusic) {
                 musicPlayer.setTrackVolume(trackName, 0F)
             }
-
-            musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
         }
 
         parallelTracks.forEach { music, trackName ->

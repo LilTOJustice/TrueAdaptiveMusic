@@ -126,7 +126,7 @@ internal class MusicPlayer(private val client: MinecraftClient) {
 
     fun setTrackVolume(trackName: String, volume: Float, allowPause: Boolean = false) {
         val track = getTrack(trackName)
-        track.desiredVolume = volume
+        track.clampedVolume = volume
         track.currentSoundInstance?.let { volumeManager.setInstanceVolume(it, volume, allowPause) }
     }
 
