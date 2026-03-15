@@ -31,6 +31,7 @@ class MusicManager(private val client: MinecraftClient) {
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private var lastInstance: TAMSoundInstance? = null
+    private val parallelTracks = mutableMapOf<PlayableSound, String>()
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -88,10 +89,11 @@ class MusicManager(private val client: MinecraftClient) {
         val parameters = treeResult.parameters
         val musicToPlay = treeResult.accumulatedMusic
         val ambienceToPlay = treeResult.accumulatedAmbience
-        val trackDelayNoise = parameters.trackDelayNoise
-        val trackDelay = parameters.trackDelay
-        val enterDelay = parameters.enterDelay
-        val loopMusic = parameters.loopMusic
+        val parallelMusic = parameters.parallelMusic
+        val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
+        val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
+        val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
+        val loopMusic = parameters.loopMusic || parallelMusic
         val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
@@ -126,8 +128,9 @@ class MusicManager(private val client: MinecraftClient) {
                 1F
             }
 
-        musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
-        musicPlayer.clampTrackVolume(getOldMainTrack(), mainTrackClamp)
+        val finalClamp = mainTrackClamp.takeIf { parallelTracks.isEmpty() } ?: 0F
+        musicPlayer.clampTrackVolume(mainTrack, finalClamp)
+        musicPlayer.clampTrackVolume(getOldMainTrack(), finalClamp)
 
         musicPlayer.clampTrackVolume(
             ambienceTrack,
@@ -143,7 +146,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         val isAmbiencePlaying = musicPlayer.isTrackPlaying(ambienceTrack)
         val isAmbienceAlmostDone = musicPlayer.isTrackAlmostDone(ambienceTrack)
-            if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
+        if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
             musicPlayer.stop(ambienceTrack)
         }
 
@@ -157,6 +160,8 @@ class MusicManager(private val client: MinecraftClient) {
 
         if (shouldStop) {
             client.musicTracker.setCurrent(null)
+            closeParallelMusic()
+
             return
         }
 
@@ -168,13 +173,22 @@ class MusicManager(private val client: MinecraftClient) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
-        if (!shouldPlay(identifier)) {
-            return
+        if (isEnter && treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
+            invokeMusicEvent(OnEnterPredicateEvent::class)
         }
 
-        if (identifier != currentMusicPredicateId &&
-            treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
-            invokeMusicEvent(OnEnterPredicateEvent::class)
+        treeResult.parallelMusicContext?.let { context ->
+            musicToPlay.firstOrNull()?.let {
+                handleParallelMusic(it, context, mainTrackClamp)
+
+                return
+            }
+        }
+
+        closeParallelMusic()
+
+        if (!shouldPlay(identifier)) {
+            return
         }
 
         updatePredicateId(identifier)
@@ -195,10 +209,42 @@ class MusicManager(private val client: MinecraftClient) {
         )
     }
 
+    private fun handleParallelMusic(
+        currentMusic: PlayableSound, context: MusicTree.ParallelMusicContext, mainTrackClamp: Float) {
+        context.parallelMusic.forEach { music ->
+            val trackName = parallelTrack(music)
+            if (music in parallelTracks) {
+                return@forEach
+            }
+
+            parallelTracks[music] = trackName
+            musicPlayer.createTrack(trackName, false, PARALLEL_CROSSFADE_TICKS, false)
+            if (music != currentMusic) {
+                musicPlayer.setTrackVolume(trackName, 0F)
+            }
+
+            musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
+        }
+
+        parallelTracks.forEach { music, trackName ->
+            if (music != currentMusic) {
+                musicPlayer.clampTrackVolume(trackName, 0F)
+            }
+            else {
+                musicPlayer.clampTrackVolume(trackName, mainTrackClamp)
+            }
+        }
+    }
+
+    private fun closeParallelMusic() {
+        parallelTracks.values.forEach { musicPlayer.removeTrack(it) }
+        parallelTracks.clear()
+    }
+
     private fun shouldPlay(identifier: String): Boolean {
         return (identifier != currentMusicPredicateId
                 || (!musicPlayer.isTrackPlaying(mainTrack)
-                        && !musicPlayer.isTrackDelayed(mainTrack)))
+                && !musicPlayer.isTrackDelayed(mainTrack)))
                 && musicVolumeOption.value > 0
     }
 
@@ -308,6 +354,7 @@ class MusicManager(private val client: MinecraftClient) {
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
         private const val MAIN_CROSSFADE_TICKS = 75
+        private const val PARALLEL_CROSSFADE_TICKS = 30
         private const val ON_DEMAND_CROSSFADE_TICKS = 10
         private const val PAUSE_VOLUME = 0.3F
         private const val BACKGROUND_VOLUME = 0.1F
@@ -342,6 +389,10 @@ class MusicManager(private val client: MinecraftClient) {
             }
 
             return (lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay).random()
+        }
+
+        private fun parallelTrack(sound: PlayableSound): String {
+            return "Parallel: ${sound.getSoundName()}"
         }
     }
 }

@@ -56,6 +56,22 @@ class NodeViewWidget(
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
     private var shouldSave = false
     private var shouldExit = false
+    private var lastRestricted = false
+    private val restrictedParameters
+        get() = if (selectedNode?.parent?.parameters?.parallelMusic == true)
+            listOf(
+                "parallelMusic",
+                "trackDelay",
+                "trackDelayNoise",
+                "enterDelay",
+                "inheritMusic",
+                "loopMusic",
+                "loopStartPoints"
+            )
+        else if (selectedNode?.parameters?.parallelMusic == true)
+            listOf("trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
+        else
+            listOf()
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -69,8 +85,6 @@ class NodeViewWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        shouldExit = false
-        shouldSave = false
         super.renderWidget(context, mouseX, mouseY, delta)
         if (!visible) {
             return
@@ -91,41 +105,92 @@ class NodeViewWidget(
         if (shouldSave) {
             save(shouldExit)
         }
+        shouldExit = false
+        shouldSave = false
     }
 
     fun renderEditMode() {
+        val restricted = selectedNode?.let { enforceParameterConstraints(it) } ?: false
+        if (restricted) {
+            clearRestrictedWidgets()
+        }
+
+        if (restricted != lastRestricted) {
+            clearWidgetsFromRender { widget -> widget.id != "musicChoice" }
+        }
+
+        lastRestricted = restricted
+
         addWidgetFromRender(
             {
-                MultiSelectDropdownWidget(
-                    listOf(),
-                    width,
-                    null,
-                    { selected ->
-                        selectedMusicPaths = selected.toMutableList()
-                        clearLoopIntroEndpointWidgets()
-                        onChange()
-                    },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.music_choice", "Music Choice").string,
-                    {
-                        musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
-                            .union(
-                                Registries.SOUND_EVENT.ids
-                                    .map { id -> id.toString() }
-                                    .filter { path -> path.contains("music.") }
-                            )
-                            .sorted()
-                    },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select tracks").string,
-                    selectedMusicPaths,
-                    onHoverOption = { option ->
-                        TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
-                    tooltipText = Text.translatableWithFallback(
-                        "trueadaptivemusic.music_choice.description",
-                        "Select any amount of music to be chosen randomly to play"
+                if (restricted) {
+                    DropdownWidget(
+                        listOf(),
+                        { selected ->
+                            selectedMusicPaths = mutableListOf(selected)
+                            clearLoopIntroEndpointWidgets()
+                            onChange()
+                        },
+                        width,
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.music_choice", "Music Choice"
+                        ).string,
+                        null,
+                        {
+                            musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
+                                .union(
+                                    Registries.SOUND_EVENT.ids
+                                        .map { id -> id.toString() }
+                                        .filter { path -> path.contains("music.") }
+                                )
+                                .sorted()
+                        },
+                        selectedMusicPaths.firstOrNull() ?: Text.translatableWithFallback(
+                            "trueadaptivemusic.select_track", "Select tracks").string,
+                        onHoverOption = { option ->
+                            TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
+                        },
+                        tooltipText = Text.translatableWithFallback(
+                            "trueadaptivemusic.music_choice.description",
+                            "Select any amount of music to be chosen randomly to play"
+                        )
                     )
-                )
+                }
+                else {
+                    MultiSelectDropdownWidget(
+                        listOf(),
+                        width,
+                        null,
+                        { selected ->
+                            selectedMusicPaths = selected.toMutableList()
+                            clearLoopIntroEndpointWidgets()
+                            onChange()
+                        },
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.music_choice", "Music Choice"
+                        ).string,
+                        {
+                            musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
+                                .union(
+                                    Registries.SOUND_EVENT.ids
+                                        .map { id -> id.toString() }
+                                        .filter { path -> path.contains("music.") }
+                                )
+                                .sorted()
+                        },
+                        Text.translatableWithFallback(
+                            "trueadaptivemusic.select_track", "Select tracks"
+                        ).string,
+                        selectedMusicPaths,
+                        onHoverOption = { option ->
+                            TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
+                        },
+                        tooltipText = Text.translatableWithFallback(
+                            "trueadaptivemusic.music_choice.description",
+                            "Select any amount of music to be chosen randomly to play"
+                        )
+                    )
+                }
             },
             "musicChoice"
         )
@@ -164,7 +229,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.dropLast(1).forEach { param ->
+        requiredNodeParams.dropLast(1).filter { !restricted || it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
@@ -180,8 +245,31 @@ class NodeViewWidget(
         }
 
         selectedNode?.let { node ->
-            if (!node.parameters.loopMusic) {
+            if (!node.parameters.loopMusic || "loopStartPoints" in restrictedParameters) {
                 clearLoopIntroEndpointWidgets()
+                return@let
+            }
+
+            val loopStartPointsParam = requiredNodeParams.last()
+            if (node.parameters.parallelMusic) {
+                clearLoopIntroEndpointWidgets()
+                addWidgetFromRender(
+                    {
+                        val outArg = mutableListOf(node.parameters.loopStartPoints.values.firstOrNull() as Any?)
+                        TAMClient.makeInputWidget(
+                            screen!!,
+                            outArg,
+                            InputWidgetMaker.WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
+                            Text.literal("Parallel loop start point"),
+                            null
+                        ) {
+                            nodeParams[loopStartPointsParam.index] = mapOf("parallel" to outArg[0] as UInt)
+                            onChange()
+                        }
+                    },
+                    "loopStartPoint: parallel"
+                )
+
                 return@let
             }
 
@@ -201,7 +289,6 @@ class NodeViewWidget(
                 }, "loopStartPoints"
             )
 
-            val loopStartPointsParam = requiredNodeParams.last()
             val soundNames = node.music
                 .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
                 .flatMap { sound ->
@@ -211,6 +298,8 @@ class NodeViewWidget(
                         ?: emptyList()
                 }
 
+            queueClearWidgetsFromRender { it.id != "loopStartPoint: parallel" }
+
             soundNames.sorted().forEach { soundName ->
                 addWidgetFromRender(
                     {
@@ -218,8 +307,7 @@ class NodeViewWidget(
                         TAMClient.makeInputWidget(
                             screen!!,
                             outArg,
-                            InputWidgetMaker.WidgetArg(
-                                typeOf<UInt>(), "loopStartPoints", 0),
+                            InputWidgetMaker.WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
                             Text.literal(soundName),
                             null
                         ) {
@@ -295,7 +383,8 @@ class NodeViewWidget(
                 )
                 result
             },
-            "Add Event")
+            "Add Event"
+        )
 
         addWidgetFromRender(
             {
@@ -448,5 +537,30 @@ class NodeViewWidget(
 
     private fun clearLoopIntroEndpointWidgets() {
         queueClearWidgetsFromRender { !it.id.startsWith("loopStartPoints") }
+    }
+
+    private fun clearRestrictedWidgets() {
+        queueClearWidgetsFromRender { widget -> restrictedParameters.none { widget.id.contains(it) } }
+    }
+
+    companion object {
+        private fun enforceParameterConstraints(node: MusicTree.Node): Boolean {
+            node.parent?.let {
+                if (it.parameters.parallelMusic) {
+                    node.parameters.parallelMusic = true
+                }
+            }
+
+            if (node.parameters.parallelMusic) {
+                node.children.forEach { enforceParameterConstraints(it) }
+                node.parameters.inheritMusic = false
+                node.parameters.trackDelay = 0U
+                node.parameters.trackDelayNoise = 0U
+                node.parameters.enterDelay = 0U
+                node.parameters.loopMusic = true
+            }
+
+            return node.parameters.parallelMusic
+        }
     }
 }

@@ -24,11 +24,13 @@ abstract class MusicPredicate: MusicTrigger() {
 
     fun testPredicate(): Boolean {
         val tickRate = getFixedTickRate()
-        if (ticksSinceResult++ == tickRate) {
+        if (ticksSinceResult == 0 || ticksSinceResult == tickRate) {
             ticksSinceResult = 1
 
             lastResult = test()
         }
+
+        ticksSinceResult++
 
         return lastResult
     }
@@ -39,7 +41,7 @@ abstract class MusicPredicate: MusicTrigger() {
 
     private fun getFixedTickRate(): Int {
         val desiredTickRate = getTickRate()
-        return if (desiredTickRate < 1) 0 else desiredTickRate
+        return if (desiredTickRate < 1) 1 else desiredTickRate
     }
 
 

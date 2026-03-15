@@ -51,10 +51,6 @@ class CombatPredicate(
         return isAggro
     }
 
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 2
-    }
-
     private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
         val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
         val relativeMobEntityPosN = relativeMobEntityPos.normalize()
