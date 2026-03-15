@@ -51,7 +51,14 @@ class CombatPredicate(
         return isAggro
     }
 
-    private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
+    private fun processMob(
+        mobEntity: MobEntity,
+        playerEntity: PlayerEntity,
+        verticalAngle: Double,
+        horizontalAngle: Double,
+        verticalFov: Double,
+        horizontalFov: Double
+    ): Boolean {
         val relativeMobEntityPos = mobEntity.entityPos.subtract(playerEntity.entityPos)
         val relativeMobEntityPosN = relativeMobEntityPos.normalize()
 
