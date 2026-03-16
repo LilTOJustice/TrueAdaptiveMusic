@@ -1,11 +1,14 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.Gson
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
+import liltojustice.trueadaptivemusic.client.music.pack.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -22,6 +25,7 @@ import net.minecraft.client.toast.SystemToast
 import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -145,6 +149,31 @@ object TAMClient {
 
     fun <T: MusicEvent> invokeMusicEvent(eventType: Class<T>, vararg eventArgs: Any?) {
         invokeMusicEvent(eventType.kotlin, *eventArgs)
+    }
+
+    fun fetchPacksFromRepository(): List<BrowsableMusicPack> {
+        CurlHelper.curl(
+            Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + Constants.MANIFEST_FILE_ID, Constants.MANIFEST_PATH)
+
+        if (!Constants.MANIFEST_PATH.exists()) {
+            Logger.logError("Failed to fetch pack manifest.")
+        }
+
+        val manifest = Constants.MANIFEST_PATH.toFile().readText().split("\n")
+
+        // TODO: Parallelize this
+        return manifest.mapNotNull { id ->
+            val outputPath = Path("${Constants.PACK_BROWSER_CACHE_DIR}/${id}")
+            CurlHelper.curl(Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + id, outputPath)
+            if (!outputPath.exists()) {
+                null
+            }
+            else {
+                val json = outputPath.toFile().readText()
+
+                Gson().fromJson(json, BrowsableMusicPack::class.java)
+            }
+        }
     }
 
     private fun initialize(client: MinecraftClient) {

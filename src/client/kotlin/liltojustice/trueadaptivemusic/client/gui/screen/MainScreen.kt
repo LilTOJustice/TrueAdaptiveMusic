@@ -27,6 +27,7 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var wikiButton: ButtonWidget
     private lateinit var optionsButton: ButtonWidget
     private lateinit var ffmpegInstallButton: ButtonWidget
+    private lateinit var packBrowserButton: ButtonWidget
 
     override fun init() {
         createNewPackButton = ButtonWidget.Builder(CREATE_PACK_TEXT)
@@ -41,7 +42,8 @@ class MainScreen(private val parent: Screen): Screen(
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width
 
-        packListWidget = PackListWidget(client!!, this.width, this.height - 96, 48, 36)
+        packListWidget = PackListWidget(
+            client!!, this.width, this.height - 96, 48, 36)
         { musicPack ->
             TAMClient.musicPack = musicPack
             editButton.visible = musicPack != null
@@ -90,6 +92,12 @@ class MainScreen(private val parent: Screen): Screen(
         ffmpegInstallButton.width = textRenderer.getWidth(INSTALL_FFMPEG_TEXT) + 10
         ffmpegInstallButton.x = wikiButton.x - ffmpegInstallButton.width - 5
 
+        packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(PackBrowserScreen(this)) }.build()
+        packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = this.height - 24
+        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
@@ -98,6 +106,7 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(refreshButton)
         addDrawableChild(wikiButton)
         addDrawableChild(optionsButton)
+        addDrawableChild(packBrowserButton)
 
         if (!TAMClient.hasFFmpeg) {
             addDrawableChild(ffmpegInstallButton)
@@ -135,5 +144,7 @@ class MainScreen(private val parent: Screen): Screen(
         private val OPTIONS_TEXT = Text.translatableWithFallback("trueadaptivemusic.options", "Options")
         private val INSTALL_FFMPEG_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.ffmpeg_install", "Install FFmpeg")
+        private val PACK_BROWSER_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.open_pack_browser", "GET MORE PACKS!!!")
     }
 }
