@@ -2,17 +2,21 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.widget.LoadingWidget
+import net.minecraft.client.gui.screen.LoadingDisplay
 import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Colors
+import net.minecraft.util.Util
 import kotlin.coroutines.EmptyCoroutineContext
 
 class DownloadButtonWidget(
+    downloaded: Boolean,
     private val downloadAction: () -> Unit,
 ): ClickableTextWidget(DOWNLOAD_TEXT.string, 0, 0, true) {
-    private var downloadStatus: RenderState? = null
-    private val loadingWidget = LoadingWidget(textRenderer, DOWNLOADING_TEXT)
+    private var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
 
     init {
@@ -22,7 +26,8 @@ class DownloadButtonWidget(
                     downloadStatus = RenderState.Loading
                     downloadAction()
                     downloadStatus = RenderState.Success
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    Logger.logError("Download failed:\n$e")
                     downloadStatus = RenderState.Failure
                 }
             }
@@ -30,10 +35,12 @@ class DownloadButtonWidget(
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        active = true
         when (downloadStatus) {
             RenderState.Loading -> {
-                loadingWidget.setPosition(x, y)
-                loadingWidget.render(context, mouseX, mouseY, delta)
+                val loadingText = LoadingDisplay.get(Util.getMeasuringTimeMs())
+                context?.drawTextWithShadow(
+                    textRenderer, loadingText, x + width - textRenderer.getWidth(loadingText) - 2, y, Colors.GRAY)
                 active = false
 
                 return
@@ -44,28 +51,24 @@ class DownloadButtonWidget(
             }
             RenderState.Failure -> {
                 message = DOWNLOAD_FAILED_TEXT
-                active = true
             }
             null -> {
                 message = DOWNLOAD_TEXT
-                active = true
             }
         }
+        width = textRenderer.getWidth(message)
 
         super.renderWidget(context, mouseX, mouseY, delta)
     }
 
     companion object {
-        private val DOWNLOAD_TEXT: MutableText = net.minecraft.text.Text.translatableWithFallback(
+        private val DOWNLOAD_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.download", "Download")
-        private val DOWNLOADING_TEXT: MutableText =
-            net.minecraft.text.Text.translatableWithFallback(
-                "trueadaptivemusic.downloading_pack", "Downloading pack")
         private val DOWNLOADED_TEXT: MutableText =
-            net.minecraft.text.Text.translatableWithFallback(
+            Text.translatableWithFallback(
                 "trueadaptivemusic.downloaded", "Downloaded")
         private val DOWNLOAD_FAILED_TEXT: MutableText =
-            net.minecraft.text.Text.translatableWithFallback(
+            Text.translatableWithFallback(
                 "trueadaptivemusic.download_failed", "Download Failed")
     }
 }

@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.coroutineScope
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
@@ -10,7 +10,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.music.pack.PackManifest
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -154,15 +154,17 @@ object TAMClient {
     }
 
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
+        val gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
         if (!ignoreCache && Constants.MANIFEST_PATH.exists()) {
-            return Gson()
+            return gson
                 .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
-                .copy(timestamp = Calendar.getInstance().time)
         }
 
         coroutineScope {
             CurlHelper.curl(
-                Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + Constants.MANIFEST_FILE_ID,
+                Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX +
+                        Constants.MANIFEST_FILE_ID +
+                        Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX,
                 Constants.MANIFEST_PATH
             )
         }
@@ -173,9 +175,14 @@ object TAMClient {
             return null
         }
 
-        return Gson()
-            .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
+        val manifestFile = Constants.MANIFEST_PATH.toFile()
+        val manifest = gson
+            .fromJson(manifestFile.readText(), PackManifest::class.java)
             .copy(timestamp = Calendar.getInstance().time)
+
+        manifestFile.writeText(gson.toJson(manifest))
+
+        return manifest
     }
 
 

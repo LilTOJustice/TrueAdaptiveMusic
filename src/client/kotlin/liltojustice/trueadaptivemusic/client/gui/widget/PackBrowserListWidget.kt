@@ -4,13 +4,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
-import liltojustice.trueadaptivemusic.client.music.pack.BrowsableMusicPack
-import liltojustice.trueadaptivemusic.client.music.pack.PackManifest
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPackDownloader
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
@@ -22,8 +22,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.Date
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.io.path.Path
-import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.name
 
 class PackBrowserListWidget(
     client: MinecraftClient,
@@ -42,6 +41,8 @@ class PackBrowserListWidget(
     private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
     private val noPacksFoundWidget = TextWidget(NO_PACKS_TEXT, client.textRenderer)
     private val loadFailureWidget = TextWidget(LOAD_FAILURE_TEXT, client.textRenderer)
+    private val downloadedPacks
+        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().map { it.name }
 
     init {
         reload()
@@ -58,7 +59,7 @@ class PackBrowserListWidget(
                 renderState = RenderState.Success
             }
             catch (e: Exception) {
-                Logger.logError("Failed to load packs: $e")
+                Logger.logError("Failed to load packs:\n$e")
                 renderState = RenderState.Failure
             }
         }
@@ -105,26 +106,9 @@ class PackBrowserListWidget(
 
     inner class Entry(private val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val downloadButton =
-            DownloadButtonWidget {
-                val curlUrl =
-                    if (musicPack.source.startsWith(Constants.DISCORD_SOURCE_PREFIX))
-                        musicPack.source
-                    else if (musicPack.source.startsWith(Constants.DRIVE_SOURCE_PREFIX))
-                        "${Constants.GOOGLE_DRIVE_LINK}/" +
-                                musicPack.source.split("/").takeLast(2).first()
-                    else
-                        null
-
+            DownloadButtonWidget(musicPack.getFilePath().name in downloadedPacks) {
                 runBlocking {
-                    curlUrl?.let {
-                        CurlHelper.curl(
-                            curlUrl,
-                            Path(
-                                Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString,
-                                "${musicPack.name}-${musicPack.version}.zip"
-                            )
-                        )
-                    } ?: throw Exception("Failed to get curl target for pack.")
+                    BrowsableMusicPackDownloader.downloadMusicPack(musicPack)
                 }
             }
 
@@ -139,7 +123,7 @@ class PackBrowserListWidget(
                 client.textRenderer, musicPack.name, x + 3, y + 6, Colors.WHITE, false)
             context.drawText(
                 client.textRenderer,
-                musicPack.description,
+                musicPack.version,
                 x + 3, y + 17,
                 Colors.GRAY,
                 false

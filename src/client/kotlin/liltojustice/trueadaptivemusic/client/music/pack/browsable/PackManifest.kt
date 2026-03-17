@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic.client.music.pack
+package liltojustice.trueadaptivemusic.client.music.pack.browsable
 
 import java.util.Date
 

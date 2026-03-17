@@ -9,7 +9,7 @@ object CurlHelper {
         coroutineScope {
             Runtime
                 .getRuntime()
-                .exec(arrayOf("curl", "-L", "-o", outputPath.invariantSeparatorsPathString, "\"${url}\""))
+                .exec(arrayOf("curl", "-Ls", "-o", outputPath.invariantSeparatorsPathString, "\"${url}\""))
                 .waitFor()
         }
     }

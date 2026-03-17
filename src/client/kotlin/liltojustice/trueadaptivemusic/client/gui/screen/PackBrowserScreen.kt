@@ -4,7 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.widget.PackBrowserListWidget
-import liltojustice.trueadaptivemusic.client.music.pack.BrowsableMusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
