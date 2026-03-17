@@ -1,9 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
@@ -12,8 +9,8 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
-import liltojustice.trueadaptivemusic.client.music.pack.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -29,7 +26,6 @@ import net.minecraft.client.toast.SystemToast
 import net.minecraft.text.Text
 import java.io.IOException
 import java.util.Calendar
-import java.util.TimeZone
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
@@ -157,51 +153,29 @@ object TAMClient {
         invokeMusicEvent(eventType.kotlin, *eventArgs)
     }
 
-    suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): List<BrowsableMusicPack> {
+    suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
         if (!ignoreCache && Constants.MANIFEST_PATH.exists()) {
-            val manifest = Constants.MANIFEST_PATH.toFile().readText().split("\n")
-            return manifest.mapNotNull { id ->
-                val outputPath = Path("${Constants.PACK_BROWSER_CACHE_DIR}/${id}")
-                if (!outputPath.exists()) {
-                    null
-                } else {
-                    val json = outputPath.toFile().readText()
-
-                    Gson().fromJson(json, BrowsableMusicPack::class.java)
-                }
-            }
+            return Gson()
+                .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
+                .copy(timestamp = Calendar.getInstance().time)
         }
 
-        CurlHelper.curl(
-            Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + Constants.MANIFEST_FILE_ID, Constants.MANIFEST_PATH)
+        coroutineScope {
+            CurlHelper.curl(
+                Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + Constants.MANIFEST_FILE_ID,
+                Constants.MANIFEST_PATH
+            )
+        }
 
         if (!Constants.MANIFEST_PATH.exists()) {
             Logger.logError("Failed to fetch pack manifest.")
 
-            return emptyList()
+            return null
         }
 
-        Constants.MANIFEST_PATH
-            .toFile().appendText("\n${Calendar.getInstance(TimeZone.getDefault()).time.time}")
-        val manifest = Constants.MANIFEST_PATH.toFile().readLines().dropLast(1)
-
-        return coroutineScope {
-            manifest.map { id ->
-                async(Dispatchers.IO) {
-                    val outputPath = Path("${Constants.PACK_BROWSER_CACHE_DIR}/${id}")
-                    CurlHelper.curl(Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + id, outputPath)
-                    if (!outputPath.exists()) {
-                        null
-                    } else {
-                        val json = outputPath.toFile().readText()
-
-                        Gson().fromJson(json, BrowsableMusicPack::class.java)
-                    }
-                }
-            }
-                .awaitAll()
-                .filterNotNull()
-        }
+        return Gson()
+            .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
+            .copy(timestamp = Calendar.getInstance().time)
     }
 
 

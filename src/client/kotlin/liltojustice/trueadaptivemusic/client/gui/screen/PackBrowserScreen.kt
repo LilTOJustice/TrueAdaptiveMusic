@@ -16,7 +16,6 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Util
-import java.util.Date
 
 @Environment(EnvType.CLIENT)
 class PackBrowserScreen(private val parent: Screen): Screen(
@@ -64,8 +63,12 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        this.packListWidget.refreshTime?.let {
-            lastRefreshedWidget.message = Text.literal("${LAST_REFRESHED_TEXT.string}: ${Date(it)}")
+        lastRefreshedWidget.message = this.packListWidget.refreshTime?.let {
+            lastRefreshedWidget.active = true
+            Text.literal("${LAST_REFRESHED_TEXT.string}: $it")
+        } ?: run {
+            lastRefreshedWidget.active = false
+            REFRESHING_TEXT
         }
 
         super.render(context, mouseX, mouseY, delta)
@@ -82,6 +85,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         private val OPEN_MUSIC_PACKS_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.open_pack_folder", "Open Pack Folder")
         private val REFRESH_TEXT = Text.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
+        private val REFRESHING_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.refreshing", "Refreshing")
         val LAST_REFRESHED_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.last_refreshed", "Last Refreshed")
     }

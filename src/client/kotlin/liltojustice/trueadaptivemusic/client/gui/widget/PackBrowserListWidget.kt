@@ -2,24 +2,27 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
 import liltojustice.trueadaptivemusic.client.music.pack.BrowsableMusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.PackManifest
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
-import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.LoadingWidget
 import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import java.util.Date
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 
 class PackBrowserListWidget(
@@ -30,10 +33,10 @@ class PackBrowserListWidget(
     itemHeight: Int,
     private val onSelectPack: (selectedPack: BrowsableMusicPack) -> Unit = {}
 ) : AlwaysSelectedEntryListWidget<PackBrowserListWidget.Entry>(client, width, height, top, itemHeight) {
-    var packs: List<BrowsableMusicPack> = emptyList()
-    var renderState = RenderState.Loading
-    var refreshTime: Long? = null
-        private set
+    private var packManifest: PackManifest? = null
+    private var renderState = RenderState.Loading
+    val refreshTime: Date?
+        get() = packManifest?.timestamp
 
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
@@ -49,15 +52,13 @@ class PackBrowserListWidget(
         clearEntries()
         backgroundScope.launch {
             try {
-                packs = TAMClient.fetchPacksFromRepository(ignoreCache)
+                packManifest = TAMClient.fetchPacksFromRepository(ignoreCache)
                 initEntries()
-                Constants.MANIFEST_PATH.takeIf { it.exists() }?.toFile()?.readLines()?.lastOrNull()?.let {
-                    refreshTime = it.toLong()
-                }
 
                 renderState = RenderState.Success
             }
-            catch (_: Exception) {
+            catch (e: Exception) {
+                Logger.logError("Failed to load packs: $e")
                 renderState = RenderState.Failure
             }
         }
@@ -80,7 +81,7 @@ class PackBrowserListWidget(
             return
         }
 
-        if (packs.isEmpty()) {
+        if (packManifest == null) {
             noPacksFoundWidget.setPosition(
                 x + (width - noPacksFoundWidget.width) / 2, y + (height - noPacksFoundWidget.height) / 2)
             noPacksFoundWidget.renderWidget(context, mouseX, mouseY, deltaTicks)
@@ -90,7 +91,7 @@ class PackBrowserListWidget(
     }
 
     private fun initEntries() {
-        packs.forEach { addEntry(Entry(it)) }
+        packManifest?.packs?.forEach { addEntry(Entry(it)) }
     }
 
     companion object {
@@ -100,13 +101,11 @@ class PackBrowserListWidget(
             "trueadaptivemusic.no_packs_found", "No packs found")
         val LOAD_FAILURE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.load_failed", "Failed to load packs")
-        val DOWNLOAD_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.download", "Download")
     }
 
     inner class Entry(private val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val downloadButton =
-            ButtonWidget.Builder(DOWNLOAD_TEXT) {
+            DownloadButtonWidget {
                 val curlUrl =
                     if (musicPack.source.startsWith(Constants.DISCORD_SOURCE_PREFIX))
                         musicPack.source
@@ -116,8 +115,8 @@ class PackBrowserListWidget(
                     else
                         null
 
-                curlUrl?.let {
-                    backgroundScope.launch {
+                runBlocking {
+                    curlUrl?.let {
                         CurlHelper.curl(
                             curlUrl,
                             Path(
@@ -125,11 +124,9 @@ class PackBrowserListWidget(
                                 "${musicPack.name}-${musicPack.version}.zip"
                             )
                         )
-                    }
+                    } ?: throw Exception("Failed to get curl target for pack.")
                 }
             }
-                .width(client.textRenderer.getWidth(DOWNLOAD_TEXT) + 5)
-                .build()
 
         override fun render(
             context: DrawContext,
@@ -143,7 +140,7 @@ class PackBrowserListWidget(
             context.drawText(
                 client.textRenderer,
                 musicPack.description,
-                x + 3, y + 14 + 3,
+                x + 3, y + 17,
                 Colors.GRAY,
                 false
             )
