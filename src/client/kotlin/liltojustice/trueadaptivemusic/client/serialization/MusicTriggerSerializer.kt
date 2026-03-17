@@ -8,6 +8,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
@@ -20,6 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import net.minecraft.util.Identifier
 import net.minecraft.util.JsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
@@ -105,6 +107,7 @@ object MusicTriggerSerializer {
                 PlayableSound::class.java,
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
             )
+            .registerTypeAdapter(Identifier::class.java, IdentifierTypeAdapter)
             .create()
     }
 
@@ -129,6 +132,32 @@ object MusicTriggerSerializer {
 
         override fun shouldSkipClass(clazz: Class<*>?): Boolean {
             return false
+        }
+    }
+
+    private object IdentifierTypeAdapter: TypeAdapter<Identifier>() {
+        override fun write(writer: JsonWriter, id: Identifier) {
+            writer.beginObject()
+            writer.name("namespace").value(id.namespace)
+            writer.name("path").value(id.path)
+            writer.endObject()
+        }
+
+        override fun read(reader: JsonReader): Identifier? {
+            reader.beginObject()
+            reader.nextName()
+            val namespace = reader.nextString()
+            reader.nextName()
+            val path = reader.nextString()
+            val next = reader.peek()
+            if (next == JsonToken.NAME) {
+                reader.nextName()
+                reader.nextString()
+            }
+
+            reader.endObject()
+
+            return Identifier.of(namespace, path)
         }
     }
 }
