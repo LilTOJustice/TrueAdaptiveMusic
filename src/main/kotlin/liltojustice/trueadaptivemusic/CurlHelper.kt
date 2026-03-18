@@ -8,7 +8,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 object CurlHelper {
     suspend fun curl(url: String, outputPath: Path, progressOutput: Reference<Float>? = null) {
         coroutineScope {
-            val p = Runtime
+            val process = Runtime
                 .getRuntime()
                 .exec(
                     arrayOf(
@@ -16,7 +16,7 @@ object CurlHelper {
                 )
 
             val progressReaderThread = Thread {
-                p.errorReader().use { reader ->
+                process.errorReader().use { reader ->
                     try {
                         while (true) {
                             reader.readLine()?.filter { char -> char.isDigit() || char == '.' }?.toFloatOrNull()?.let {
@@ -30,8 +30,8 @@ object CurlHelper {
 
             progressReaderThread.start()
 
-            p.waitFor()
-            p.errorStream.close()
+            process.waitFor()
+            process.errorStream.close()
             progressReaderThread.join()
         }
     }
