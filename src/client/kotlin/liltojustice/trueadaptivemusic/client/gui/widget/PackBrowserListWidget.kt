@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.ImageProcessor
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
@@ -21,13 +22,13 @@ import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
 import net.minecraft.client.gui.widget.LoadingWidget
 import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.NativeImageBackedTexture
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
+import java.nio.file.Path
 import java.util.Date
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.exists
@@ -59,6 +60,7 @@ class PackBrowserListWidget(
     }
 
     fun reload(ignoreCache: Boolean = false) {
+        loadedPackImages.clear()
         renderState = RenderState.Loading
         clearEntries()
         backgroundScope.launch {
@@ -117,86 +119,98 @@ class PackBrowserListWidget(
             return
         }
 
-        selectedOrNull?.let {
-            val panelX = scrollbarX + 9
-            val panelWidth = width - panelX
-            context?.drawBorder(panelX, y, panelWidth, height)
-            context?.drawTextWithShadow(
-                client.textRenderer,
-                it.musicPack.name,
-                panelX + (panelWidth - client.textRenderer.getWidth(it.musicPack.name)) / 2,
-                y + 3,
-                Colors.WHITE
-            )
-            it.musicPack.description?.let { description ->
-                context?.drawWrappedText(
-                    client.textRenderer,
-                    Text.literal(description),
-                    panelX + 3,
-                    y + client.textRenderer.fontHeight + 6,
-                    panelWidth / 3,
-                    Colors.WHITE,
-                    false
-                )
-            }
-
-            it.musicPack.getImagePath()?.let { imagePath ->
-                if (!imagePath.exists()) {
-                    return@let
-                }
-
-                val identifier = Identifier.of(
-                    "trueadaptivemusic",
-                    Util.replaceInvalidChars(imagePath.name, Identifier::isPathCharacterValid)
-                )
-
-                if (identifier !in loadedPackImages) {
-                    val nativeImage = NativeImage.read(imagePath.toFile().inputStream())
-                    client.textureManager.registerTexture(
-                        identifier,
-                        NativeImageBackedTexture(identifier::toString, nativeImage)
-                    )
-                }
-
-                val image = (client.textureManager.getTexture(identifier) as? NativeImageBackedTexture)?.image
-                    ?: return@let
-
-                val imageY = y + client.textRenderer.fontHeight + 6
-                val aspectRatio = image.width.toFloat() / image.height
-                val maxImageWidth = panelWidth * 2 / 3 - 6
-                val maxImageHeight = y + height - imageY - 3
-                var finalImageWidth = image.width
-                var finalImageHeight = image.height
-                val widthDiff = (image.width - maxImageWidth)
-                val heightDiff = (image.height - maxImageHeight)
-
-                if (widthDiff > heightDiff && widthDiff > 0) {
-                    finalImageWidth = maxImageWidth
-                    finalImageHeight = (finalImageWidth / aspectRatio).toInt()
-                }
-                else if (heightDiff > 0) {
-                    finalImageHeight = maxImageHeight
-                    finalImageWidth = (finalImageHeight * aspectRatio).toInt()
-                }
-
-                context?.drawTexture(
-                    RenderPipelines.GUI_TEXTURED,
-                    identifier,
-                    panelX + 3 + panelWidth / 3,
-                    imageY,
-                    0F,
-                    0F,
-                    finalImageWidth,
-                    finalImageHeight,
-                    finalImageWidth,
-                    finalImageHeight
-                )
-            }
-        }
+        selectedOrNull?.let { renderSelectedPack(context, it.musicPack) }
     }
 
     private fun initEntries() {
         packManifest?.packs?.forEach { addEntry(Entry(it)) }
+    }
+
+    private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {
+        val panelX = scrollbarX + 9
+        val panelWidth = width - panelX
+        context?.drawBorder(panelX, y, panelWidth, height)
+        context?.drawTextWithShadow(
+            client.textRenderer,
+            musicPack.name,
+            panelX + (panelWidth - client.textRenderer.getWidth(musicPack.name)) / 2,
+            y + 3,
+            Colors.WHITE
+        )
+
+        val restrictDescription = musicPack.getImagePath()?.let { imagePath ->
+            if (!imagePath.exists()) {
+                return@let false
+            }
+
+            renderPackImage(context, panelX, panelWidth, imagePath)
+        } == true
+
+        musicPack.description?.let { description ->
+            context?.drawWrappedText(
+                client.textRenderer,
+                Text.literal(description),
+                panelX + 3,
+                y + client.textRenderer.fontHeight + 6,
+                (if (restrictDescription) panelWidth / 3 else panelWidth) - 3,
+                Colors.WHITE,
+                false
+            )
+        }
+    }
+
+    private fun renderPackImage(context: DrawContext?, panelX: Int, panelWidth: Int, imagePath: Path): Boolean {
+        val identifier = Identifier.of(
+            "trueadaptivemusic",
+            "image/" +
+                    Util.replaceInvalidChars(imagePath.name, Identifier::isPathCharacterValid)
+        )
+
+        if (identifier !in loadedPackImages) {
+            ImageProcessor.getNativeImage(imagePath)?.let { image ->
+                client.textureManager.registerTexture(
+                    identifier,
+                    NativeImageBackedTexture(identifier::toString, image)
+                )
+                loadedPackImages.add(identifier)
+            } ?: return false
+        }
+
+        val image = (client.textureManager.getTexture(identifier) as? NativeImageBackedTexture)?.image
+            ?: return false
+
+        val imageY = y + client.textRenderer.fontHeight + 6
+        val aspectRatio = image.width.toFloat() / image.height
+        val maxImageWidth = panelWidth * 2 / 3 - 6
+        val maxImageHeight = y + height - imageY - 3
+        var finalImageWidth = image.width
+        var finalImageHeight = image.height
+        val widthDiff = (image.width - maxImageWidth)
+        val heightDiff = (image.height - maxImageHeight)
+
+        if (widthDiff > heightDiff && widthDiff > 0) {
+            finalImageWidth = maxImageWidth
+            finalImageHeight = (finalImageWidth / aspectRatio).toInt()
+        }
+        else if (heightDiff > 0) {
+            finalImageHeight = maxImageHeight
+            finalImageWidth = (finalImageHeight * aspectRatio).toInt()
+        }
+
+        context?.drawTexture(
+            RenderPipelines.GUI_TEXTURED,
+            identifier,
+            panelX + 3 + panelWidth / 3,
+            imageY,
+            0F,
+            0F,
+            finalImageWidth,
+            finalImageHeight,
+            finalImageWidth,
+            finalImageHeight
+        )
+
+        return true
     }
 
     companion object {
