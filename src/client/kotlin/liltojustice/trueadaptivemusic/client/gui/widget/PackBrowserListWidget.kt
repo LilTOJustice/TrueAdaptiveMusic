@@ -30,6 +30,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import java.nio.file.Path
 import java.util.Date
+import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -246,11 +247,23 @@ class PackBrowserListWidget(
             downloadButton.y = y + height - downloadButton.height - 5
             downloadButton.render(context, mouseX, mouseY, tickDelta)
 
+            val sizeText = Text.literal(
+                String.format(Locale.ROOT, "%.2f", musicPack.size / 1000000F) + " MB")
+            val sizeTextX = downloadButton.x - client.textRenderer.getWidth(sizeText) - 3
+            context.drawText(
+                client.textRenderer,
+                sizeText,
+                sizeTextX,
+                y + height - client.textRenderer.fontHeight - 4,
+                Colors.GRAY,
+                false
+            )
+
             context.textConsumer.marqueedText(
                 versionText,
                 x + 3,
                 x + 3,
-                downloadButton.x - 3,
+                sizeTextX - 3,
                 y + 17,
                 y + height
             )

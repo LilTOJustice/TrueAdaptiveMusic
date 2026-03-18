@@ -6,7 +6,13 @@ import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
 data class BrowsableMusicPack(
-    val name: String, val version: String?, val description: String?, val source: String, val image: Image?) {
+    val name: String,
+    val version: String?,
+    val description: String?,
+    val source: String,
+    val image: Image?,
+    val size: Int
+) {
     fun getFilePath(): Path {
         return Path(
             Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString,
