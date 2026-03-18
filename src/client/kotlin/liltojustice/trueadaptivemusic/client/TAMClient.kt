@@ -180,11 +180,18 @@ object TAMClient {
             .fromJson(manifestFile.readText(), PackManifest::class.java)
             .copy(timestamp = Calendar.getInstance().time)
 
+        manifest.packs.forEach { pack ->
+            pack.getImagePath()?.let { imagePath ->
+                pack.image?.source?.let { source ->
+                    CurlHelper.curl(source, imagePath)
+                }
+            }
+        }
+
         manifestFile.writeText(gson.toJson(manifest))
 
         return manifest
     }
-
 
     private fun initialize(client: MinecraftClient) {
         if (initialized || !client.soundManager.soundSystem.started) {

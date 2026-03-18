@@ -48,7 +48,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
         lastRefreshedWidget = TextWidget(Text.empty(), textRenderer)
-        lastRefreshedWidget.y = refreshButton.y + refreshButton.height + 5
+        lastRefreshedWidget.y = refreshButton.y + refreshButton.height + 3
         lastRefreshedWidget.x = 2
 
         addSelectableChild(packListWidget)
@@ -65,7 +65,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         lastRefreshedWidget.message = this.packListWidget.refreshTime?.let {
             lastRefreshedWidget.active = true
-            Text.literal("${LAST_REFRESHED_TEXT.string}: $it")
+            Text.literal("${LAST_REFRESHED_TEXT.string}: $it").withColor(Colors.GRAY)
         } ?: run {
             lastRefreshedWidget.active = false
             REFRESHING_TEXT
