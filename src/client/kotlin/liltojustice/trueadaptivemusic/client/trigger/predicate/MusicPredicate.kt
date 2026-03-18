@@ -52,13 +52,13 @@ abstract class MusicPredicate: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",
-                (TAMClient.predicateRegistry[triggerName].companionObjectInstance as? MusicPredicateCompanion)
+                (TAMClient.predicateRegistry[triggerName]?.companionObjectInstance as? MusicPredicateCompanion)
                     ?.displayName ?: triggerName.prettify()
             )
         }
 
         override fun getArgDisplayName(triggerName: String, argName: String): Text? {
-            val predicateType = TAMClient.predicateRegistry[triggerName]
+            val predicateType = TAMClient.predicateRegistry[triggerName] ?: return null
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                 TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
@@ -70,10 +70,11 @@ abstract class MusicPredicate: MusicTrigger() {
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Text? {
+            val predicateClass = TAMClient.predicateRegistry[triggerName] ?: return null
+
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.description",
-                TriggerReflectionHelper.getMusicTriggerArgDescriptions(
-                    TAMClient.predicateRegistry[triggerName])[argName]
+                TriggerReflectionHelper.getMusicTriggerArgDescriptions(predicateClass)[argName]
             )
         }
     }
