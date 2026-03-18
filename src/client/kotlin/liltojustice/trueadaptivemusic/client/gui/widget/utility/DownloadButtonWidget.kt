@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.LoadingDisplay
@@ -15,6 +16,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class DownloadButtonWidget(
     downloaded: Boolean,
+    private val progress: Reference<Float>? = null,
     private val downloadAction: () -> Unit,
 ): ClickableTextWidget(DOWNLOAD_TEXT.string, 0, 0, true) {
     private var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
@@ -46,6 +48,9 @@ class DownloadButtonWidget(
                 context?.drawTextWithShadow(
                     textRenderer, loadingText, x + width - textRenderer.getWidth(loadingText) - 2, y, Colors.GRAY)
                 active = false
+                progress?.value?.let {
+                    context?.drawHorizontalLine(x, (x + width * it).toInt(), y + height, Colors.WHITE)
+                }
 
                 return
             }

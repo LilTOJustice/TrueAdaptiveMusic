@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
@@ -105,10 +106,11 @@ class PackBrowserListWidget(
     }
 
     inner class Entry(private val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
+        private val progress = Reference(0F)
         private val downloadButton =
-            DownloadButtonWidget(musicPack.getFilePath().name in downloadedPacks) {
+            DownloadButtonWidget(musicPack.getFilePath().name in downloadedPacks, progress) {
                 runBlocking {
-                    BrowsableMusicPackDownloader.downloadMusicPack(musicPack)
+                    BrowsableMusicPackDownloader.downloadMusicPack(musicPack, progress)
                 }
             }
 
