@@ -2,6 +2,10 @@ package liltojustice.trueadaptivemusic.client.music.pack.browsable
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
+import java.nio.file.Path
+import java.util.zip.ZipException
+import java.util.zip.ZipFile
+import kotlin.io.path.deleteIfExists
 
 object BrowsableMusicPackDownloader {
     suspend fun downloadMusicPack(musicPack: BrowsableMusicPack) {
@@ -15,7 +19,7 @@ object BrowsableMusicPackDownloader {
     }
 
     private suspend fun downloadFromDiscord(musicPack: BrowsableMusicPack) {
-        CurlHelper.curl(musicPack.source, musicPack.getFilePath())
+        downloadPack(musicPack.source, musicPack.getFilePath())
     }
 
     private suspend fun downloadFromGoogleDrive(musicPack: BrowsableMusicPack) {
@@ -23,6 +27,17 @@ object BrowsableMusicPackDownloader {
             Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX +
                     musicPack.source.split("/").takeLast(2).first() +
                     Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX
-        CurlHelper.curl(targetUrl, musicPack.getFilePath())
+        downloadPack(targetUrl, musicPack.getFilePath())
+    }
+
+    private suspend fun downloadPack(url: String, outputPath: Path) {
+        CurlHelper.curl(url, outputPath)
+        try {
+            ZipFile(outputPath.toFile())
+        }
+        catch (e: ZipException) {
+            outputPath.deleteIfExists()
+            throw MusicPackDownloadException("Downloaded file was not a valid zip file.", e)
+        }
     }
 }

@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.LoadingDisplay
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -18,6 +19,7 @@ class DownloadButtonWidget(
 ): ClickableTextWidget(DOWNLOAD_TEXT.string, 0, 0, true) {
     private var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
+    private var lastException: Exception? = null
 
     init {
         onClick = {
@@ -28,6 +30,7 @@ class DownloadButtonWidget(
                     downloadStatus = RenderState.Success
                 } catch (e: Exception) {
                     Logger.logError("Download failed:\n$e")
+                    lastException = e
                     downloadStatus = RenderState.Failure
                 }
             }
@@ -36,6 +39,7 @@ class DownloadButtonWidget(
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         active = true
+        setTooltip(null)
         when (downloadStatus) {
             RenderState.Loading -> {
                 val loadingText = LoadingDisplay.get(Util.getMeasuringTimeMs())
@@ -51,6 +55,7 @@ class DownloadButtonWidget(
             }
             RenderState.Failure -> {
                 message = DOWNLOAD_FAILED_TEXT
+                lastException?.message?.let { setTooltip(Tooltip.of(Text.literal(it))) }
             }
             null -> {
                 message = DOWNLOAD_TEXT

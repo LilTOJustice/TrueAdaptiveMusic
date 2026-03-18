@@ -68,7 +68,7 @@ object MusicTriggerSerializer {
         return try {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMClient.predicateRegistry[typeName]
-                ?: return ErrorPredicate(json, "Predicate type not found")
+                ?: return ErrorPredicate(json, "Unknown predicate type '$typeName'")
 
             val stateless = getGson(soundLibrary).fromJson(json, type.java)
             val result = stateless::class.constructors.firstOrNull()
@@ -86,7 +86,7 @@ object MusicTriggerSerializer {
         return try {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMClient.eventRegistry[typeName]
-                ?: return ErrorEvent(json, "Event type not found")
+                ?: return ErrorEvent(json, "Unknown event type '$typeName'")
 
             val stateless = getGson(soundLibrary).fromJson(json, type.java)
             val result = stateless::class.constructors.firstOrNull()
