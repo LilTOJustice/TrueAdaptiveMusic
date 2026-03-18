@@ -19,7 +19,7 @@ object CurlHelper {
                 p.errorReader().use { reader ->
                     try {
                         while (true) {
-                            reader.readLine().filter { char -> char.isDigit() || char == '.' }.toFloatOrNull()?.let {
+                            reader.readLine()?.filter { char -> char.isDigit() || char == '.' }?.toFloatOrNull()?.let {
                                 progressOutput?.value = it / 100F
                             }
                         }
