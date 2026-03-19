@@ -130,14 +130,7 @@ class PackBrowserListWidget(
     private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {
         val panelX = scrollbarX + 9
         val panelWidth = width - panelX
-        context?.drawBorder(panelX, y, panelWidth, height)
-        context?.drawTextWithShadow(
-            client.textRenderer,
-            musicPack.name,
-            panelX + (panelWidth - client.textRenderer.getWidth(musicPack.name)) / 2,
-            y + 3,
-            Colors.WHITE
-        )
+        context?.drawBorder(panelX, y, panelWidth - 1, height)
 
         val restrictDescription = musicPack.getImagePath()?.let { imagePath ->
             if (!imagePath.exists()) {
@@ -147,17 +140,44 @@ class PackBrowserListWidget(
             renderPackImage(context, panelX, panelWidth, imagePath)
         } == true
 
-        musicPack.description?.let { description ->
-            context?.drawWrappedText(
-                client.textRenderer,
-                Text.literal(description),
-                panelX + 3,
-                y + client.textRenderer.fontHeight + 6,
-                (if (restrictDescription) panelWidth / 3 else panelWidth) - 3,
-                Colors.WHITE,
-                false
-            )
+        if (restrictDescription) {
+            context?.drawVerticalLine(panelX + panelWidth / 3, y, y + height, Colors.WHITE)
         }
+
+        context?.drawTextWithShadow(
+            client.textRenderer,
+            musicPack.name,
+            panelX +
+                    ((if (restrictDescription) panelWidth + panelWidth / 3 else panelWidth) -
+                            client.textRenderer.getWidth(musicPack.name)) / 2,
+            y + 3,
+            Colors.WHITE
+        )
+
+        val flavorText = Text.empty()
+        flavorText.append(Text.literal("Title:\n").withColor(Colors.GRAY))
+            .append(musicPack.name)
+
+        musicPack.version?.let {
+            flavorText
+                .append(Text.literal("\n\nVersion:\n").withColor(Colors.GRAY))
+                .append(it)
+        }
+
+        musicPack.description?.let {
+            flavorText.append(Text.literal("\n\nDescription:\n").withColor(Colors.GRAY))
+                .append(it)
+        }
+
+        context?.drawWrappedText(
+            client.textRenderer,
+            flavorText,
+            panelX + 3,
+            y + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
+            (if (restrictDescription) panelWidth / 3 else panelWidth) - 3,
+            Colors.WHITE,
+            false
+        )
     }
 
     private fun renderPackImage(context: DrawContext?, panelX: Int, panelWidth: Int, imagePath: Path): Boolean {
@@ -188,21 +208,25 @@ class PackBrowserListWidget(
         var finalImageHeight = image.height
         val widthDiff = (image.width - maxImageWidth)
         val heightDiff = (image.height - maxImageHeight)
+        var xOffset = 0
+        var yOffset = 0
 
         if (widthDiff > heightDiff && widthDiff > 0) {
             finalImageWidth = maxImageWidth
             finalImageHeight = (finalImageWidth / aspectRatio).toInt()
+            yOffset = (height - finalImageHeight) / 2
         }
         else if (heightDiff > 0) {
             finalImageHeight = maxImageHeight
             finalImageWidth = (finalImageHeight * aspectRatio).toInt()
+            xOffset = (panelWidth * 2 / 3 - finalImageWidth) / 2
         }
 
         context?.drawTexture(
             RenderPipelines.GUI_TEXTURED,
             identifier,
-            panelX + 3 + panelWidth / 3,
-            imageY,
+            panelX + 3 + panelWidth / 3 + xOffset,//(panelWidth * 2 / 3 - finalImageWidth) / 2,
+            imageY + yOffset,
             0F,
             0F,
             finalImageWidth,
@@ -240,21 +264,25 @@ class PackBrowserListWidget(
             hovered: Boolean,
             tickDelta: Float
         ) {
-            context.drawText(
-                client.textRenderer, musicPack.name, x + 3, y + 6, Colors.WHITE, false)
-
+            context.textConsumer.marqueedText(
+                Text.literal(musicPack.name),
+                x + 3,
+                x + 3,
+                rowRight,
+                y + 3,
+                y + client.textRenderer.fontHeight + 3,
+            )
             downloadButton.x = x + width - downloadButton.width - 5
             downloadButton.y = y + height - downloadButton.height - 5
             downloadButton.render(context, mouseX, mouseY, tickDelta)
 
             val sizeText = Text.literal(
                 String.format(Locale.ROOT, "%.2f", musicPack.size / 1000000F) + " MB")
-            val sizeTextX = downloadButton.x - client.textRenderer.getWidth(sizeText) - 3
             context.drawText(
                 client.textRenderer,
                 sizeText,
-                sizeTextX,
-                y + height - client.textRenderer.fontHeight - 4,
+                x + width - client.textRenderer.getWidth(sizeText) - 5,
+                downloadButton.y - client.textRenderer.fontHeight,
                 Colors.GRAY,
                 false
             )
@@ -263,7 +291,7 @@ class PackBrowserListWidget(
                 versionText,
                 x + 3,
                 x + 3,
-                sizeTextX - 3,
+                downloadButton.x - 3,
                 y + 17,
                 y + height
             )
