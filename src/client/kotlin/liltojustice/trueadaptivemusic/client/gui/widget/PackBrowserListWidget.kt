@@ -165,9 +165,14 @@ class PackBrowserListWidget(
         }
 
         musicPack.description?.let {
-            flavorText.append(Text.literal("\n\nDescription:\n").withColor(Colors.GRAY))
+            flavorText
+                .append(Text.literal("\n\nDescription:\n").withColor(Colors.GRAY))
                 .append(it)
         }
+
+        flavorText
+            .append(Text.literal("\n\nSize:\n").withColor(Colors.GRAY))
+            .append(Text.literal(String.format(Locale.ROOT, "%.2f", musicPack.size / 1000000F) + " MB"))
 
         context?.drawWrappedText(
             client.textRenderer,
