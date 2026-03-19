@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.DataSizeHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
@@ -30,7 +31,6 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import java.nio.file.Path
 import java.util.Date
-import java.util.Locale
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -172,7 +172,7 @@ class PackBrowserListWidget(
 
         flavorText
             .append(Text.literal("\n\nSize:\n").withColor(Colors.GRAY))
-            .append(Text.literal(String.format(Locale.ROOT, "%.2f", musicPack.size / 1000000F) + " MB"))
+            .append(Text.literal(DataSizeHelper.getDataSizeString(musicPack.size)))
 
         context?.drawWrappedText(
             client.textRenderer,
@@ -281,16 +281,32 @@ class PackBrowserListWidget(
             downloadButton.y = y + height - downloadButton.height - 5
             downloadButton.render(context, mouseX, mouseY, tickDelta)
 
-            val sizeText = Text.literal(
-                String.format(Locale.ROOT, "%.2f", musicPack.size / 1000000F) + " MB")
-            context.drawText(
-                client.textRenderer,
-                sizeText,
-                x + width - client.textRenderer.getWidth(sizeText) - 5,
-                downloadButton.y - client.textRenderer.fontHeight,
-                Colors.GRAY,
-                false
-            )
+            if (downloadButton.downloadStatus == RenderState.Loading) {
+                val currentBytes = (progress.value * musicPack.size).toLong()
+                val currentString = DataSizeHelper.getDataSizeString(currentBytes)
+                val totalString = DataSizeHelper.getDataSizeString(musicPack.size)
+                val percentString = String.format("%.2f", currentBytes.toFloat() / musicPack.size * 100) + '%'
+                val progressText = Text.literal("$currentString/$totalString ($percentString)")
+                context.drawText(
+                    client.textRenderer,
+                    progressText,
+                    x + width - client.textRenderer.getWidth(progressText) - 5,
+                    downloadButton.y - client.textRenderer.fontHeight,
+                    Colors.GRAY,
+                    false
+                )
+            }
+            else {
+                val sizeText = Text.literal(DataSizeHelper.getDataSizeString(musicPack.size))
+                context.drawText(
+                    client.textRenderer,
+                    sizeText,
+                    x + width - client.textRenderer.getWidth(sizeText) - 5,
+                    downloadButton.y - client.textRenderer.fontHeight,
+                    Colors.GRAY,
+                    false
+                )
+            }
 
             context.textConsumer.marqueedText(
                 versionText,

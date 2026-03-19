@@ -19,7 +19,7 @@ class DownloadButtonWidget(
     private val progress: Reference<Float>? = null,
     private val downloadAction: () -> Unit,
 ): ClickableTextWidget(DOWNLOAD_TEXT.string, 0, 0, true) {
-    private var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
+    var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private var lastException: Exception? = null
 
@@ -46,9 +46,10 @@ class DownloadButtonWidget(
             RenderState.Loading -> {
                 val loadingText = LoadingDisplay.get(Util.getMeasuringTimeMs())
                 context?.drawTextWithShadow(
-                    textRenderer, loadingText, x + width - textRenderer.getWidth(loadingText) - 2, y, Colors.GRAY)
+                    textRenderer, loadingText, x + (width - textRenderer.getWidth(loadingText)) / 2, y, Colors.GRAY)
                 active = false
                 progress?.value?.let {
+                    context?.drawHorizontalLine(x, x + width, y + height, Colors.GRAY)
                     context?.drawHorizontalLine(x, (x + width * it).toInt(), y + height, Colors.WHITE)
                 }
 

@@ -10,8 +10,9 @@ data class BrowsableMusicPack(
     val version: String?,
     val description: String?,
     val source: String,
+    val sourceType: SourceType,
     val image: Image?,
-    val size: Int
+    val size: Long
 ) {
     fun getFilePath(): Path {
         return Path(
@@ -31,5 +32,10 @@ data class BrowsableMusicPack(
 
     companion object {
         private val fileNameRegex = Regex("[^ a-zA-Z0-9.\\-_/\\\\]")
+    }
+
+    enum class SourceType {
+        Discord,
+        GDrive
     }
 }

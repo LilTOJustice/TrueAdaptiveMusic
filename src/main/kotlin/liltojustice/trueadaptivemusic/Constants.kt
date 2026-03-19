@@ -21,8 +21,6 @@ class Constants {
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val FFMPEG_DOWNLOAD_LINK = "https://www.gyan.dev/ffmpeg/builds/"
-        const val DISCORD_SOURCE_PREFIX = "https://cdn.discordapp.com"
-        const val DRIVE_SOURCE_PREFIX = "https://drive.google.com"
         const val DRIVE_SOURCE_DOWNLOAD_PREFIX = "https://drive.usercontent.google.com/download?id="
         const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
         const val MANIFEST_FILE_URL =

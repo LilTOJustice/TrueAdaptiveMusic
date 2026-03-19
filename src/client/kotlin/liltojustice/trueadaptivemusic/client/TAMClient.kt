@@ -11,6 +11,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -20,6 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -156,7 +158,13 @@ object TAMClient {
     }
 
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
-        val gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .registerTypeAdapter(
+                BrowsableMusicPack.SourceType::class.java,
+                EnumTypeAdapter(BrowsableMusicPack.SourceType::class)
+            ).create()
         if (!ignoreCache && Constants.MANIFEST_PATH.exists()) {
             return gson
                 .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)

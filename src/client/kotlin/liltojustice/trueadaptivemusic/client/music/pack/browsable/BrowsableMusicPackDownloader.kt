@@ -10,13 +10,10 @@ import kotlin.io.path.deleteIfExists
 
 object BrowsableMusicPackDownloader {
     suspend fun downloadMusicPack(musicPack: BrowsableMusicPack, progressOutput: Reference<Float>) {
-        if (musicPack.source.startsWith(Constants.DISCORD_SOURCE_PREFIX))
-            downloadFromDiscord(musicPack, progressOutput)
-        else if (musicPack.source.startsWith(Constants.DRIVE_SOURCE_PREFIX))
-            downloadFromGoogleDrive(musicPack, progressOutput)
-        else
-            throw Exception(
-                "Failed to get curl target for pack ${musicPack.name} with source ${musicPack.source}.")
+        when (musicPack.sourceType) {
+            BrowsableMusicPack.SourceType.Discord -> downloadFromDiscord(musicPack, progressOutput)
+            BrowsableMusicPack.SourceType.GDrive -> downloadFromGoogleDrive(musicPack, progressOutput)
+        }
     }
 
     private suspend fun downloadFromDiscord(musicPack: BrowsableMusicPack, progressOutput: Reference<Float>) {
@@ -25,9 +22,7 @@ object BrowsableMusicPackDownloader {
 
     private suspend fun downloadFromGoogleDrive(musicPack: BrowsableMusicPack, progressOutput: Reference<Float>) {
         val targetUrl =
-            Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX +
-                    musicPack.source.split("/").takeLast(2).first() +
-                    Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX
+            Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + musicPack.source + Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX
         downloadPack(targetUrl, musicPack.getFilePath(), progressOutput)
     }
 
