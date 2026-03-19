@@ -155,7 +155,7 @@ class PackBrowserListWidget(
         )
 
         val flavorText = Text.empty()
-        flavorText.append(Text.literal("Title:\n").withColor(Colors.GRAY))
+            .append(Text.literal("Title:\n").withColor(Colors.GRAY))
             .append(musicPack.name)
 
         musicPack.version?.let {
@@ -268,7 +268,7 @@ class PackBrowserListWidget(
                 Text.literal(musicPack.name),
                 x + 3,
                 x + 3,
-                rowRight,
+                rowRight - 3,
                 y + 3,
                 y + client.textRenderer.fontHeight + 3,
             )
