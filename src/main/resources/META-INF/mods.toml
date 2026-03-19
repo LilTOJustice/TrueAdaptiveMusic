@@ -2,9 +2,6 @@ modLoader="javafml"
 loaderVersion="[47,)"
 license="gplv3"
 
-[properties]
-"connector:placeholder"=true
-
 [[mods]]
 modId="trueadaptivemusic"
 version="${mod_version}"
