@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.coroutineScope
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
@@ -28,6 +29,7 @@ import java.io.IOException
 import java.util.Calendar
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -165,20 +167,29 @@ object TAMClient {
                 Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX +
                         Constants.MANIFEST_FILE_ID +
                         Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX,
-                Constants.MANIFEST_PATH
+                Constants.MANIFEST_PATH_TEMP
             )
         }
 
-        if (!Constants.MANIFEST_PATH.exists()) {
+        if (!Constants.MANIFEST_PATH_TEMP.exists()) {
             Logger.logError("Failed to fetch pack manifest.")
 
             return null
         }
 
-        val manifestFile = Constants.MANIFEST_PATH.toFile()
-        val manifest = gson
-            .fromJson(manifestFile.readText(), PackManifest::class.java)
-            .copy(timestamp = Calendar.getInstance().time)
+        val manifest = try {
+            gson
+                .fromJson(Constants.MANIFEST_PATH_TEMP.toFile().readText(), PackManifest::class.java)
+                .copy(timestamp = Calendar.getInstance().time)
+        }
+        catch (_: JsonSyntaxException) {
+            Logger.logError("Failed to parse manifest json.")
+
+            return null
+        }
+
+        Constants.MANIFEST_PATH_TEMP.moveTo(Constants.MANIFEST_PATH, true)
+        Constants.MANIFEST_PATH.toFile().writeText(gson.toJson(manifest))
 
         manifest.packs.forEach { pack ->
             pack.getImagePath()?.let { imagePath ->
@@ -187,8 +198,6 @@ object TAMClient {
                 }
             }
         }
-
-        manifestFile.writeText(gson.toJson(manifest))
 
         return manifest
     }

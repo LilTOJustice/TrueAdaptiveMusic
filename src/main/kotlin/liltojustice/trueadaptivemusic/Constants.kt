@@ -13,6 +13,8 @@ class Constants {
         val FFPROBE_PATH = Path(OPTIONS_DIR.pathString, "ffprobe.exe")
         val PACK_BROWSER_CACHE_DIR = Path(".trueadaptivemusiccache")
         val MANIFEST_PATH = Path(PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json")
+        val MANIFEST_PATH_TEMP = Path(
+            PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json.tmp")
         const val RULES_FILENAME = "rules.json"
         const val PACK_OPTIONS_FILENAME = "options.json"
         const val META_FILENAME = "meta.json"
