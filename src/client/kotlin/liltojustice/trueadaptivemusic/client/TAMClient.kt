@@ -162,14 +162,7 @@ object TAMClient {
                 .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
         }
 
-        coroutineScope {
-            CurlHelper.curl(
-                Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX +
-                        Constants.MANIFEST_FILE_ID +
-                        Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX,
-                Constants.MANIFEST_PATH_TEMP
-            )
-        }
+        coroutineScope { CurlHelper.curl(Constants.MANIFEST_FILE_URL, Constants.MANIFEST_PATH_TEMP) }
 
         if (!Constants.MANIFEST_PATH_TEMP.exists()) {
             Logger.logError("Failed to fetch pack manifest.")

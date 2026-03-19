@@ -25,6 +25,7 @@ class Constants {
         const val DRIVE_SOURCE_PREFIX = "https://drive.google.com"
         const val DRIVE_SOURCE_DOWNLOAD_PREFIX = "https://drive.usercontent.google.com/download?id="
         const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
-        const val MANIFEST_FILE_ID = "1G-GrdKkoHXDc_KtmUsPFWZAdaw_lpeGK"
+        const val MANIFEST_FILE_URL =
+            "https://gist.githubusercontent.com/LilTOJustice/d591ee8817ee4051acdc76ed5ff092b1/raw/manifest.json"
     }
 }
