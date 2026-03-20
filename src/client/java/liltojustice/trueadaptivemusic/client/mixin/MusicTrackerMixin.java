@@ -30,7 +30,11 @@ public class MusicTrackerMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo ci) {
-        if (TAMClient.INSTANCE.getMusicPack() != null) {
+       var result = TAMClient.INSTANCE.getCurrentPredicateResult();
+        if (TAMClient.INSTANCE.getMusicPack() != null &&
+                result != null &&
+                !result.getParameters().getVanillaBehavior()
+        ) {
             ci.cancel();
         }
     }

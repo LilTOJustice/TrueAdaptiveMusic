@@ -30,8 +30,8 @@ class NodeViewWidget(
     private val onEventClick: (event: MusicEvent?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
-    y: Int = 0)
-    : ContainerWidget(
+    y: Int = 0
+) : ContainerWidget(
     width,
     height,
     Text.translatableWithFallback(
@@ -58,8 +58,19 @@ class NodeViewWidget(
     private var shouldExit = false
     private var lastRestricted = false
     private val restrictedParameters
-        get() = if (selectedNode?.parent?.parameters?.parallelMusic == true)
+        get() = if (selectedNode?.parameters?.vanillaBehavior == true)
             listOf(
+                "trackDelay",
+                "trackDelayNoise",
+                "enterDelay",
+                "inheritMusic",
+                "parallelMusic",
+                "loopMusic",
+                "loopStartPoints"
+            )
+            else if (selectedNode?.parent?.parameters?.parallelMusic == true)
+            listOf(
+                "vanillaBehavior",
                 "parallelMusic",
                 "trackDelay",
                 "trackDelayNoise",
@@ -69,7 +80,7 @@ class NodeViewWidget(
                 "loopStartPoints"
             )
         else if (selectedNode?.parameters?.parallelMusic == true)
-            listOf("trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
+            listOf("vanillaBehavior", "trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
         else
             listOf()
 
@@ -123,7 +134,10 @@ class NodeViewWidget(
 
         addWidgetFromRender(
             {
-                if (restricted) {
+                if (selectedNode?.parameters?.vanillaBehavior == true) {
+                    EmptyClickableWidget()
+                }
+                else if (restricted) {
                     DropdownWidget(
                         listOf(),
                         { selected ->
@@ -560,7 +574,7 @@ class NodeViewWidget(
                 node.parameters.loopMusic = true
             }
 
-            return node.parameters.parallelMusic
+            return node.parameters.parallelMusic || node.parameters.vanillaBehavior
         }
     }
 }

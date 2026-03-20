@@ -57,7 +57,8 @@ class PackBrowserListWidget(
     private val noPacksFoundWidget = TextWidget(NO_PACKS_TEXT, client.textRenderer)
     private val loadFailureWidget = TextWidget(LOAD_FAILURE_TEXT, client.textRenderer)
     private val downloadedPacks
-        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().map { Path(it.path) }
+        get() = Constants.MUSIC_PACK_DIR
+            .toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
     private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {

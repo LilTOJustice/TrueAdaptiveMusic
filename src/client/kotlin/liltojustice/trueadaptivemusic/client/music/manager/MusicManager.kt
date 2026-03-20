@@ -63,7 +63,7 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun stop() {
-        client.musicTracker.setCurrent(null)
+        client.musicTracker.current = null
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
@@ -73,7 +73,9 @@ class MusicManager(private val client: MinecraftClient) {
 
     fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
         musicPlayer.getPlayingInstance(mainTrack)?.let {
-            client.musicTracker.setCurrent(it)
+            if (!treeResult.parameters.vanillaBehavior) {
+                client.musicTracker.current = it
+            }
 
             if (it != lastInstance) {
                 client.toastManager.onMusicTrackStart()
@@ -101,8 +103,12 @@ class MusicManager(private val client: MinecraftClient) {
 
         eventPool = treeResult.accumulatedEvents
 
+        if (!parameters.vanillaBehavior) {
+            musicPlayer.stopVanillaMusic()
+        }
+
         val isPaused = isPaused(client)
-        val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
+        val shouldStop = parameters.vanillaBehavior || shouldStopMain(client, musicPlayer, musicToPlay)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
@@ -159,7 +165,11 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         if (shouldStop) {
-            client.musicTracker.setCurrent(null)
+            updatePredicateId(identifier)
+            if (!parameters.vanillaBehavior) {
+                client.musicTracker.current = null
+            }
+
             closeParallelMusic()
 
             return
