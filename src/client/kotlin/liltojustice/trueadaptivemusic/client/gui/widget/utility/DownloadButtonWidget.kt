@@ -16,9 +16,10 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class DownloadButtonWidget(
     downloaded: Boolean,
+    private val isUpdate: Boolean,
     private val progress: Reference<Float>? = null,
     private val downloadAction: () -> Unit,
-): ClickableTextWidget(DOWNLOAD_TEXT.string, 0, 0, true) {
+): ClickableTextWidget("", 0, 0, true) {
     var downloadStatus: RenderState? = if (downloaded) RenderState.Success else null
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private var lastException: Exception? = null
@@ -60,11 +61,11 @@ class DownloadButtonWidget(
                 active = false
             }
             RenderState.Failure -> {
-                message = DOWNLOAD_FAILED_TEXT
+                message = if (isUpdate) UPDATE_FAILED_TEXT else DOWNLOAD_FAILED_TEXT
                 lastException?.message?.let { setTooltip(Tooltip.of(Text.literal(it))) }
             }
             null -> {
-                message = DOWNLOAD_TEXT
+                message = if (isUpdate) UPDATE_TEXT else DOWNLOAD_TEXT
             }
         }
         width = textRenderer.getWidth(message)
@@ -75,11 +76,13 @@ class DownloadButtonWidget(
     companion object {
         private val DOWNLOAD_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.download", "Download")
-        private val DOWNLOADED_TEXT: MutableText =
-            Text.translatableWithFallback(
-                "trueadaptivemusic.downloaded", "Downloaded")
-        private val DOWNLOAD_FAILED_TEXT: MutableText =
-            Text.translatableWithFallback(
-                "trueadaptivemusic.download_failed", "Download Failed")
+        private val UPDATE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.update", "Update")
+        private val DOWNLOADED_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.downloaded", "Downloaded")
+        private val DOWNLOAD_FAILED_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.download_failed", "Download Failed")
+        private val UPDATE_FAILED_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.update_failed", "Update Failed")
     }
 }

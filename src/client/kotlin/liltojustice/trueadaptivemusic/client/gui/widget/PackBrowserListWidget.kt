@@ -30,8 +30,12 @@ import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import java.nio.file.Path
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 import kotlin.io.path.name
 
@@ -53,7 +57,7 @@ class PackBrowserListWidget(
     private val noPacksFoundWidget = TextWidget(NO_PACKS_TEXT, client.textRenderer)
     private val loadFailureWidget = TextWidget(LOAD_FAILURE_TEXT, client.textRenderer)
     private val downloadedPacks
-        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().map { it.name }
+        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().map { Path(it.path) }
     private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {
@@ -174,6 +178,15 @@ class PackBrowserListWidget(
             .append(Text.literal("\n\nSize:\n").withColor(Colors.GRAY))
             .append(Text.literal(DataSizeHelper.getDataSizeString(musicPack.size)))
 
+        val localDateTime = Date(
+            Calendar.getInstance().timeZone.getOffset(musicPack.lastUpdated.time) +
+                    musicPack.lastUpdated.time
+        )
+        flavorText
+            .append(Text.literal("\n\nUpdated:\n").withColor(Colors.GRAY))
+            .append(Text.literal(SimpleDateFormat("EEE MMM dd yyyy").format(localDateTime)))
+            .append(Text.literal("\n" + SimpleDateFormat("hh:mm:ss aa zzz").format(localDateTime)))
+
         context?.drawWrappedText(
             client.textRenderer,
             flavorText,
@@ -255,12 +268,22 @@ class PackBrowserListWidget(
     inner class Entry(val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val progress = Reference(0F)
         private val versionText = Text.literal("Ver ${musicPack.version}").withColor(Colors.GRAY)
-        private val downloadButton =
-            DownloadButtonWidget(musicPack.getFilePath().name in downloadedPacks, progress) {
+        private val packPath = musicPack.getFilePath()
+        private val downloadButton = run {
+            val isDownloaded = packPath in downloadedPacks
+            val oldPack = downloadedPacks
+                .takeIf { !isDownloaded }
+                ?.firstOrNull { it.name.contains(musicPack.name) }
+                ?.takeIf { it.toFile().lastModified() < musicPack.lastUpdated.time }
+
+            DownloadButtonWidget(
+                packPath in downloadedPacks, oldPack != null, progress) {
                 runBlocking {
                     BrowsableMusicPackDownloader.downloadMusicPack(musicPack, progress)
+                    oldPack?.let { oldPack.deleteIfExists() }
                 }
             }
+        }
 
         override fun render(
             context: DrawContext,

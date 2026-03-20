@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.music.pack.browsable
 
 import liltojustice.trueadaptivemusic.Constants
 import java.nio.file.Path
+import java.util.Date
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -12,7 +13,8 @@ data class BrowsableMusicPack(
     val source: String,
     val sourceType: SourceType,
     val image: Image?,
-    val size: Long
+    val size: Long,
+    val lastUpdated: Date
 ) {
     fun getFilePath(): Path {
         return Path(
