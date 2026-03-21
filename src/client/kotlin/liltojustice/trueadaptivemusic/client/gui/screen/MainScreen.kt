@@ -45,7 +45,7 @@ class MainScreen(private val parent: Screen): Screen(
         openMusicPacksButton.x = width - openMusicPacksButton.width
 
         packListWidget = PackListWidget(
-            client!!, this.width, this.height - 96, 48, 36)
+            this, client!!, this.width, this.height - 96, 48, 36)
         { musicPack ->
             TAMClient.musicPack = musicPack
             editButton.visible = musicPack != null
@@ -97,7 +97,7 @@ class MainScreen(private val parent: Screen): Screen(
         packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
         { _: ButtonWidget? -> client?.setScreen(PackBrowserScreen(this)) }.build()
         packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
-        packBrowserButton.y = this.height - 24
+        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
         packBrowserButton.x = (this.width - packBrowserButton.width) / 2
 
         discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
@@ -167,6 +167,6 @@ class MainScreen(private val parent: Screen): Screen(
         private val INSTALL_FFMPEG_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.ffmpeg_install", "Install FFmpeg")
         private val PACK_BROWSER_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.open_pack_browser", "GET MORE PACKS!!!")
+            "trueadaptivemusic.open_pack_browser", "Get More Packs")
     }
 }

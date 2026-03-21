@@ -1,6 +1,10 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.screen.PackBrowserScreen
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextDisplayWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
@@ -8,20 +12,31 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
+import net.minecraft.client.gui.widget.LoadingWidget
+import net.minecraft.text.MutableText
+import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import kotlin.coroutines.EmptyCoroutineContext
 
 class PackListWidget(
+    private val screen: Screen,
     client: MinecraftClient,
     width: Int,
     height: Int,
     top: Int,
     itemHeight: Int,
-    private val onSelectPack: (selectedPack: MusicPack?) -> Unit = {})
-    : AlwaysSelectedEntryListWidget<PackListWidget.Entry>(client, width, height, top, itemHeight) {
+    private val onSelectPack: (selectedPack: MusicPack?) -> Unit = {}
+): AlwaysSelectedEntryListWidget<PackListWidget.Entry>(
+    client, width, height, top, itemHeight) {
+    private var renderState = RenderState.Loading
+    private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
+    private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
+
     init {
         init()
     }
@@ -40,26 +55,47 @@ class PackListWidget(
             32
         )
         super.renderWidget(context, mouseX, mouseY, deltaTicks)
+        if (renderState == RenderState.Loading) {
+            loadingWidget.setPosition(
+                x + (width - loadingWidget.width) / 2, y + (height - loadingWidget.height) / 2)
+            loadingWidget.render(context, mouseX, mouseY, deltaTicks)
+
+            return
+        }
     }
 
     fun init() {
-        clearEntries()
-        val vanillaEntry = Entry(this, client, null, onSelectPack)
-        addEntry(vanillaEntry)
-        setSelected(vanillaEntry)
-        MusicPack.loadAllPacks()
-            .forEach { musicPack ->
-                val newEntry = Entry(this, client, musicPack, onSelectPack)
-                addEntry(newEntry)
-                if (musicPack.packName == TAMClient.musicPack?.packName) {
-                    setSelected(newEntry)
+        backgroundScope.launch {
+            renderState = RenderState.Loading
+            clearEntries()
+            val packs = MusicPack.loadAllPacks()
+            val vanillaEntry = VanillaEntry()
+            addEntry(vanillaEntry)
+            setSelected(vanillaEntry)
+                packs.forEach { musicPack ->
+                    val newEntry = Entry(musicPack)
+                    addEntry(newEntry)
+                    if (musicPack.packName == TAMClient.musicPack?.packName) {
+                        setSelected(newEntry)
+                    }
                 }
-            }
+            addEntry(
+                PackBrowserEntry { client.setScreen(PackBrowserScreen(screen)) })
+            renderState = RenderState.Success
+        }
     }
 
     companion object {
-        private val issuesText = Text.translatableWithFallback(
+        private val VANILLA_TEXT = Text.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla")
+        private val DISABLE_TAM_TEXT = Text.translatableWithFallback(
+        "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
+        private val ISSUES_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.issues_found", "Issues Found")
+        private val PACK_BROWSER_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.open_pack_browser", "Get More Packs")
+            .setStyle(Style.EMPTY.withBold(true).withItalic(true).withUnderline(true))
+        private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.loading_packs", "Loading Packs")
         private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
             val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
             val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
@@ -98,18 +134,13 @@ class PackListWidget(
         }
     }
 
-    inner class Entry(
-        private val packListWidget: PackListWidget,
-        private val client: MinecraftClient,
-        private val musicPack: MusicPack?,
-        private val onSelectPack: (selectedPack: MusicPack?) -> Unit)
-        : AlwaysSelectedEntryListWidget.Entry<Entry>() {
+    open inner class Entry(private val musicPack: MusicPack?): AlwaysSelectedEntryListWidget.Entry<Entry>() {
         private val issuesButton =
             if (musicPack?.validationMessages?.isEmpty() != false) {
                 null
             }
             else {
-                val result = ClickableTextDisplayWidget(issuesText.string)
+                val result = ClickableTextDisplayWidget(ISSUES_TEXT.string)
                 result.setTooltip(Tooltip.of(getValidationText(musicPack.validationMessages)))
 
                 result
@@ -122,52 +153,32 @@ class PackListWidget(
             hovered: Boolean,
             tickDelta: Float
         ) {
-            musicPack?.let {
-                context.textConsumer.marqueedText(
-                    Text.literal(it.packName),
-                    x + 3,
-                    x + 3,
-                    rowRight - 3,
-                    y + 3,
-                    y + client.textRenderer.fontHeight + 3,
-                )
-                issuesButton?.let {
-                    issuesButton.x = x + width - issuesButton.width - 5
-                    issuesButton.y = y + height - issuesButton.height - 5
-                    issuesButton.render(context, mouseX, mouseY, tickDelta)
-                }
-                context.textConsumer.marqueedText(
-                    Text.literal(it.options.description).withColor(Colors.GRAY),
-                    x + 3,
-                    x + 3,
-                    (issuesButton?.x ?: rowRight) - 3,
-                    y + 17,
-                    y + height
-                )
+            musicPack ?: return
+            context.textConsumer.marqueedText(
+                Text.literal(musicPack.packName),
+                x + 3,
+                x + 3,
+                rowRight - 3,
+                y + 3,
+                y + client.textRenderer.fontHeight + 3,
+            )
+            issuesButton?.let {
+                issuesButton.x = x + width - issuesButton.width - 5
+                issuesButton.y = y + height - issuesButton.height - 5
+                issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
-
-            if (musicPack == null) {
-                context.drawText(
-                    client.textRenderer,
-                    Text.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla"),
-                    x + 3,
-                    y + 6,
-                    Colors.WHITE,
-                    false
-                )
-                context.drawText(
-                    client.textRenderer,
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.disable_tam", "Disable TrueAdaptiveMusic"),
-                    x + 3, y + 14 + 3,
-                    Colors.GRAY,
-                    false
-                )
-            }
+            context.textConsumer.marqueedText(
+                Text.literal(musicPack.options.description).withColor(Colors.GRAY),
+                x + 3,
+                x + 3,
+                (issuesButton?.x ?: rowRight) - 3,
+                y + 17,
+                y + height
+            )
         }
 
         override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-            if (packListWidget.selectedOrNull == this) {
+            if (selectedOrNull == this) {
                 return true
             }
 
@@ -176,7 +187,7 @@ class PackListWidget(
                 return false
             }
 
-            packListWidget.setSelected(this)
+            setSelected(this)
             onSelectPack(musicPack)
 
             return true
@@ -184,6 +195,45 @@ class PackListWidget(
 
         override fun getNarration(): Text {
             return Text.empty()
+        }
+    }
+
+    inner class VanillaEntry(): Entry(null) {
+        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
+            context.drawText(
+                client.textRenderer,
+                VANILLA_TEXT,
+                x + 3,
+                y + 6,
+                Colors.WHITE,
+                false
+            )
+            context.drawText(
+                client.textRenderer,
+                DISABLE_TAM_TEXT,
+                x + 3, y + 14 + 3,
+                Colors.GRAY,
+                false
+            )
+        }
+    }
+
+    inner class PackBrowserEntry(private val onClick: () -> Unit): Entry(null) {
+        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+            onClick()
+
+            return true
+        }
+
+        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
+            context.drawText(
+                client.textRenderer,
+                PACK_BROWSER_TEXT,
+                x + 3,
+                y + 6,
+                Colors.WHITE,
+                true
+            )
         }
     }
 }

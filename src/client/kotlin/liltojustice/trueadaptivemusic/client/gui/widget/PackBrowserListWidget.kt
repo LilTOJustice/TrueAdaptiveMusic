@@ -258,12 +258,12 @@ class PackBrowserListWidget(
     }
 
     companion object {
-        val LOADING_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.downloading_packs", "Downloading pack list")
-        val NO_PACKS_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.no_packs_found", "No packs found")
-        val LOAD_FAILURE_TEXT: MutableText = Text.translatableWithFallback(
-            "trueadaptivemusic.load_failed", "Failed to load packs")
+        private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.downloading_packs", "Downloading Pack List")
+        private val NO_PACKS_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.no_packs_found", "No Packs Found")
+        private val LOAD_FAILURE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.load_failed", "Failed to Load Packs")
     }
 
     inner class Entry(val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
