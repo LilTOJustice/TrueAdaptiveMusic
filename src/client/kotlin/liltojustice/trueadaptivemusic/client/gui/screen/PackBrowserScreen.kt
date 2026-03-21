@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusic
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.TextWidget
@@ -24,6 +25,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     private lateinit var openMusicPacksButton: ButtonWidget
     private lateinit var doneButton: ButtonWidget
     private lateinit var refreshButton: ButtonWidget
+    private lateinit var discordButton: ButtonWidget
     private lateinit var lastRefreshedWidget: TextWidget
     private var selectedPack: BrowsableMusicPack? = null
 
@@ -51,11 +53,30 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         lastRefreshedWidget.y = refreshButton.y + refreshButton.height + 3
         lastRefreshedWidget.x = 2
 
+        discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(
+            ConfirmLinkScreen(
+                { confirmed ->
+                    if (confirmed) {
+                        Util.getOperatingSystem().open(Constants.DISCORD_JOIN_URL)
+                    }
+
+                    client?.setScreen(this)
+                },
+                Constants.DISCORD_JOIN_URL,
+                true
+            )
+        ) }.build()
+        discordButton.width = textRenderer.getWidth(Constants.DISCORD_JOIN_TEXT) + 10
+        discordButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 2
+        discordButton.x = width - discordButton.width
+
         addSelectableChild(packListWidget)
         addDrawableChild(openMusicPacksButton)
         addDrawableChild(doneButton)
         addDrawableChild(refreshButton)
         addDrawableChild(lastRefreshedWidget)
+        addDrawableChild(discordButton)
     }
 
     override fun close() {

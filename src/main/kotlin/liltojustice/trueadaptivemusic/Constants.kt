@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic
 
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.pathString
@@ -15,6 +17,8 @@ class Constants {
         val MANIFEST_PATH = Path(PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json")
         val MANIFEST_PATH_TEMP = Path(
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json.tmp")
+        val DISCORD_JOIN_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.join_discord", "Join the Discord!")
         const val RULES_FILENAME = "rules.json"
         const val PACK_OPTIONS_FILENAME = "options.json"
         const val META_FILENAME = "meta.json"
@@ -25,5 +29,6 @@ class Constants {
         const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
         const val MANIFEST_FILE_URL =
             "https://gist.githubusercontent.com/LilTOJustice/d591ee8817ee4051acdc76ed5ff092b1/raw/manifest.json"
+        const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
     }
 }

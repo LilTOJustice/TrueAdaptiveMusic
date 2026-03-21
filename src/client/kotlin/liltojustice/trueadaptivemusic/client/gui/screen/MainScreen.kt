@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.screen.ScreenTexts
@@ -28,6 +29,7 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var optionsButton: ButtonWidget
     private lateinit var ffmpegInstallButton: ButtonWidget
     private lateinit var packBrowserButton: ButtonWidget
+    private lateinit var discordButton: ButtonWidget
 
     override fun init() {
         createNewPackButton = ButtonWidget.Builder(CREATE_PACK_TEXT)
@@ -98,6 +100,25 @@ class MainScreen(private val parent: Screen): Screen(
         packBrowserButton.y = this.height - 24
         packBrowserButton.x = (this.width - packBrowserButton.width) / 2
 
+        discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(
+            ConfirmLinkScreen(
+                { confirmed ->
+                    if (confirmed) {
+                        Util.getOperatingSystem().open(Constants.DISCORD_JOIN_URL)
+                    }
+
+                    client?.setScreen(this)
+                },
+                Constants.DISCORD_JOIN_URL,
+                true
+            )
+        ) }.build()
+        discordButton.width = textRenderer.getWidth(Constants.DISCORD_JOIN_TEXT) + 10
+        discordButton.y = wikiButton.y
+        discordButton.x = wikiButton.x - discordButton.width - 5
+
+
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)
         addDrawableChild(openMusicPacksButton)
@@ -107,6 +128,7 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(wikiButton)
         addDrawableChild(optionsButton)
         addDrawableChild(packBrowserButton)
+        addDrawableChild(discordButton)
 
         if (!TAMClient.hasFFmpeg) {
             addDrawableChild(ffmpegInstallButton)
