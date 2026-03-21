@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MusicTrackerMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     public void play(MusicSound sound, CallbackInfo ci) {
+        TAMClient.INSTANCE.setDesiredVanillaSoundEvent(sound.sound().value());
         if (MusicTrackerMixinHelper.shouldIgnore(sound)) {
             ci.cancel();
         }
@@ -33,8 +34,7 @@ public class MusicTrackerMixin {
        var result = TAMClient.INSTANCE.getCurrentPredicateResult();
         if (TAMClient.INSTANCE.getMusicPack() != null &&
                 result != null &&
-                !result.getParameters().getVanillaBehavior()
-        ) {
+                !result.getParameters().getVanillaBehavior()) {
             ci.cancel();
         }
     }

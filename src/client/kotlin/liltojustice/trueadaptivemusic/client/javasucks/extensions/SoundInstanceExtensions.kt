@@ -8,16 +8,14 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 
 fun SoundInstance.shouldIgnore(): Boolean {
-    return TAMClient.musicPack != null &&
-            TAMClient.currentPredicateResult?.parameters?.vanillaBehavior == false &&
-            (category == SoundCategory.MUSIC || uiToastCheck(this))
+    return TAMClient.musicPack != null && (category == SoundCategory.MUSIC || uiToastCheck(this))
 }
 
 private fun uiToastCheck(sound: SoundInstance): Boolean {
     val events = TAMClient.currentPredicateResult?.accumulatedEvents ?: return false
 
-    return sound.id.toString() == CHALLENGE_COMPLETE
-            && events.stream().anyMatch { event: MusicEvent? -> event is OnAdvancementGetEvent }
+    return sound.id.toString() == CHALLENGE_COMPLETE &&
+            events.stream().anyMatch { event: MusicEvent? -> event is OnAdvancementGetEvent }
 }
 
 private val CHALLENGE_COMPLETE = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.id().toString()

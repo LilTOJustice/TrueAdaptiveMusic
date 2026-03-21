@@ -60,15 +60,12 @@ class NodeViewWidget(
     private val restrictedParameters
         get() = if (selectedNode?.parameters?.vanillaBehavior == true)
             listOf(
-                "trackDelay",
-                "trackDelayNoise",
-                "enterDelay",
                 "inheritMusic",
                 "parallelMusic",
                 "loopMusic",
                 "loopStartPoints"
             )
-            else if (selectedNode?.parent?.parameters?.parallelMusic == true)
+        else if (selectedNode?.parent?.parameters?.parallelMusic == true)
             listOf(
                 "vanillaBehavior",
                 "parallelMusic",
@@ -132,82 +129,81 @@ class NodeViewWidget(
 
         lastRestricted = restricted
 
-        addWidgetFromRender(
-            {
-                if (selectedNode?.parameters?.vanillaBehavior == true) {
-                    EmptyClickableWidget()
-                }
-                else if (restricted) {
-                    DropdownWidget(
-                        listOf(),
-                        { selected ->
-                            selectedMusicPaths = mutableListOf(selected)
-                            clearLoopIntroEndpointWidgets()
-                            onChange()
-                        },
-                        width,
-                        Text.translatableWithFallback(
-                            "trueadaptivemusic.music_choice", "Music Choice"
-                        ).string,
-                        null,
-                        {
-                            musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
-                                .union(
-                                    Registries.SOUND_EVENT.ids
-                                        .map { id -> id.toString() }
-                                        .filter { path -> path.contains("music.") }
-                                )
-                                .sorted()
-                        },
-                        selectedMusicPaths.firstOrNull() ?: Text.translatableWithFallback(
-                            "trueadaptivemusic.select_track", "Select tracks").string,
-                        onHoverOption = { option ->
-                            TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
-                        },
-                        tooltipText = Text.translatableWithFallback(
-                            "trueadaptivemusic.music_choice.description",
-                            "Select any amount of music to be chosen randomly to play"
+        if (selectedNode?.parameters?.vanillaBehavior == false) {
+            addWidgetFromRender(
+                {
+                    if (restricted) {
+                        DropdownWidget(
+                            listOf(),
+                            { selected ->
+                                selectedMusicPaths = mutableListOf(selected)
+                                clearLoopIntroEndpointWidgets()
+                                onChange()
+                            },
+                            width,
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.music_choice", "Music Choice"
+                            ).string,
+                            null,
+                            {
+                                musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
+                                    .union(
+                                        Registries.SOUND_EVENT.ids
+                                            .map { id -> id.toString() }
+                                            .filter { path -> path.contains("music.") }
+                                    )
+                                    .sorted()
+                            },
+                            selectedMusicPaths.firstOrNull() ?: Text.translatableWithFallback(
+                                "trueadaptivemusic.select_track", "Select tracks").string,
+                            onHoverOption = { option ->
+                                TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
+                            },
+                            tooltipText = Text.translatableWithFallback(
+                                "trueadaptivemusic.music_choice.description",
+                                "Select any amount of music to be chosen randomly to play"
+                            )
                         )
-                    )
-                }
-                else {
-                    MultiSelectDropdownWidget(
-                        listOf(),
-                        width,
-                        null,
-                        { selected ->
-                            selectedMusicPaths = selected.toMutableList()
-                            clearLoopIntroEndpointWidgets()
-                            onChange()
-                        },
-                        Text.translatableWithFallback(
-                            "trueadaptivemusic.music_choice", "Music Choice"
-                        ).string,
-                        {
-                            musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
-                                .union(
-                                    Registries.SOUND_EVENT.ids
-                                        .map { id -> id.toString() }
-                                        .filter { path -> path.contains("music.") }
-                                )
-                                .sorted()
-                        },
-                        Text.translatableWithFallback(
-                            "trueadaptivemusic.select_track", "Select tracks"
-                        ).string,
-                        selectedMusicPaths,
-                        onHoverOption = { option ->
-                            TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
-                        },
-                        tooltipText = Text.translatableWithFallback(
-                            "trueadaptivemusic.music_choice.description",
-                            "Select any amount of music to be chosen randomly to play"
+                    }
+                    else {
+                        MultiSelectDropdownWidget(
+                            listOf(),
+                            width,
+                            null,
+                            { selected ->
+                                selectedMusicPaths = selected.toMutableList()
+                                clearLoopIntroEndpointWidgets()
+                                onChange()
+                            },
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.music_choice", "Music Choice"
+                            ).string,
+                            {
+                                musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
+                                    .union(
+                                        Registries.SOUND_EVENT.ids
+                                            .map { id -> id.toString() }
+                                            .filter { path -> path.contains("music.") }
+                                    )
+                                    .sorted()
+                            },
+                            Text.translatableWithFallback(
+                                "trueadaptivemusic.select_track", "Select tracks"
+                            ).string,
+                            selectedMusicPaths,
+                            onHoverOption = { option ->
+                                TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
+                            },
+                            tooltipText = Text.translatableWithFallback(
+                                "trueadaptivemusic.music_choice.description",
+                                "Select any amount of music to be chosen randomly to play"
+                            )
                         )
-                    )
-                }
-            },
-            "musicChoice"
-        )
+                    }
+                },
+                "musicChoice"
+            )
+        }
 
         addWidgetFromRender(
             {

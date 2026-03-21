@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
-import net.minecraft.sound.SoundCategory
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -17,13 +16,6 @@ internal class MusicPlayer(private val client: MinecraftClient) {
     private val soundSystem = SoundSystem(client.options)
     private val volumeManager = VolumeManager(soundSystem)
     private val tracks = mutableMapOf<String, Track>()
-
-    fun stopVanillaMusic() {
-        client.soundManager.soundSystem.sources
-            .map { it.key }
-            .filter { it.category == SoundCategory.MUSIC }
-            .forEach { client.soundManager.stop(it) }
-    }
 
     fun refreshSoundVolume() {
         soundSystem.refreshSoundVolume()

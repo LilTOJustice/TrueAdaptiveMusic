@@ -26,6 +26,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.toast.SystemToast
+import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import java.io.IOException
 import java.util.Calendar
@@ -152,6 +153,21 @@ object TAMClient {
         invokeMusicEvent(eventType.kotlin, *eventArgs)
     }
 
+    fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
+        musicManager?.setDesiredVanillaSoundEvent(soundEvent)
+    }
+
+    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
+        minecraftClient.toastManager.add(
+            SystemToast.create(
+                minecraftClient,
+                SystemToast.Type.FILE_DROP_FAILURE,
+                errorMessage,
+                Text.literal(exceptionMessage ?: "")
+            )
+        )
+    }
+
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
         val gson = GsonBuilder()
             .setPrettyPrinting()
@@ -227,17 +243,6 @@ object TAMClient {
         }
 
         initialized = true
-    }
-
-    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
-        minecraftClient.toastManager.add(
-            SystemToast.create(
-                minecraftClient,
-                SystemToast.Type.FILE_DROP_FAILURE,
-                errorMessage,
-                Text.literal(exceptionMessage ?: "")
-            )
-        )
     }
 
     private fun getHasFFMpeg() {

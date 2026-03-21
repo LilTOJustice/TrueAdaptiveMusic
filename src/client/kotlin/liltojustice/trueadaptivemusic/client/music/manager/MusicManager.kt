@@ -5,11 +5,13 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
 import net.minecraft.util.math.Vec3d
 import kotlin.math.max
 import kotlin.reflect.KClass
@@ -36,6 +38,7 @@ class MusicManager(private val client: MinecraftClient) {
     private val parallelTracks = mutableMapOf<PlayableSound, String>()
     private var musicPool = mutableSetOf<PlayableSound>()
     private var ambiencePool = mutableSetOf<PlayableSound>()
+    private var vanillaSoundEvent: PlayableSoundEvent? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -75,11 +78,13 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusic = null
     }
 
+    fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
+        vanillaSoundEvent = PlayableSoundEvent(soundEvent.id)
+    }
+
     fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
         musicPlayer.getPlayingInstance(mainTrack)?.let {
-            if (!treeResult.parameters.vanillaBehavior) {
-                client.musicTracker.current = it
-            }
+            client.musicTracker.current = it
 
             if (it != lastInstance) {
                 client.toastManager.onMusicTrackStart()
@@ -93,13 +98,16 @@ class MusicManager(private val client: MinecraftClient) {
 
         val identifier = treeResult.path
         val parameters = treeResult.parameters
-        val musicToPlay = treeResult.accumulatedMusic
+        val vanillaBehavior = parameters.vanillaBehavior
+        val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaBehavior }
+            ?: vanillaSoundEvent?.let { listOf(it) }
+            ?: emptyList()
         val ambienceToPlay = treeResult.accumulatedAmbience
         val parallelMusic = parameters.parallelMusic
         val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
         val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
         val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
-        val loopMusic = parameters.loopMusic || parallelMusic
+        val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaBehavior
         val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
@@ -112,12 +120,8 @@ class MusicManager(private val client: MinecraftClient) {
 
         eventPool = treeResult.accumulatedEvents
 
-        if (!parameters.vanillaBehavior) {
-            musicPlayer.stopVanillaMusic()
-        }
-
         val isPaused = isPaused(client)
-        val shouldStop = parameters.vanillaBehavior || shouldStopMain(client, musicPlayer, musicToPlay)
+        val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
@@ -172,16 +176,6 @@ class MusicManager(private val client: MinecraftClient) {
             playNextAmbience(newAmbience)
         }
 
-        if (shouldStop) {
-            updatePredicateId(identifier)
-            if (!parameters.vanillaBehavior) {
-                client.musicTracker.current = null
-            }
-
-            closeParallelMusic()
-
-            return
-        }
 
         if (playingEvent != null && !musicPlayer.isTrackPlaying(EVENT_TRACK)) {
             playingEvent = null
@@ -193,6 +187,12 @@ class MusicManager(private val client: MinecraftClient) {
 
         if (isEnter && treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
             invokeMusicEvent(OnEnterPredicateEvent::class)
+        }
+
+        if (shouldStop) {
+            closeParallelMusic()
+
+            return
         }
 
         treeResult.parallelMusicContext?.let { context ->
