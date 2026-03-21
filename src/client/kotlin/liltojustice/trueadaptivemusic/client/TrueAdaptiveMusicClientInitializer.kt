@@ -53,7 +53,6 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 import kotlin.reflect.KClass
@@ -109,10 +108,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
         TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
         TAMClient.registerEvent("on_pause", OnPauseEvent::class)
-
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            TAMClient.tick(client)
-        }
 
         TAMClient.registerInputWidget(
             typeOf<String>()
@@ -394,6 +389,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
             result
         }
+
+        TAMClient.start()
     }
 
     companion object {

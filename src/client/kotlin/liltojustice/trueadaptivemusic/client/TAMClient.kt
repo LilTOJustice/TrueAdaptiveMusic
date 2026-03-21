@@ -2,7 +2,10 @@ package liltojustice.trueadaptivemusic.client
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
@@ -31,6 +34,7 @@ import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import java.io.IOException
 import java.util.Calendar
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.moveTo
@@ -69,20 +73,30 @@ object TAMClient {
             }
         }
 
+    private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private val inputWidgetMaker = InputWidgetMaker()
-
     private var initialized = false
     private var musicManager: MusicManager? = null
 
-    fun tick(client: MinecraftClient) {
-        if (!initialized) {
-            initialize(client)
-        }
+    private const val TPS = 20
+    private const val TICK_MS = (1.0 / TPS * 1000).toLong()
 
-        musicPack?.let { pack ->
-            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
-            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
-        } ?: { currentPredicateResult = null }
+    fun start() {
+        val client = MinecraftClient.getInstance()
+        backgroundScope.launch {
+            while (true) {
+                try {
+                    tick(client)
+                }
+                catch (e: Exception) {
+                    Logger.logError("TAM Processor thread encountered an error: ${e.message}\n" +
+                            e.stackTraceToString()
+                    )
+                }
+
+                delay(TICK_MS)
+            }
+        }
     }
 
     fun resetSound() {
@@ -219,8 +233,19 @@ object TAMClient {
         return manifest
     }
 
+    private fun tick(client: MinecraftClient) {
+        if (!initialized) {
+            initialize(client)
+        }
+
+        musicPack?.let { pack ->
+            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
+            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
+        } ?: { currentPredicateResult = null }
+    }
+
     private fun initialize(client: MinecraftClient) {
-        if (initialized || !client.soundManager.soundSystem.started) {
+        if (initialized || client.soundManager?.soundSystem?.started != true) {
             return
         }
 
