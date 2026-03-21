@@ -22,6 +22,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFac
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -92,15 +93,15 @@ object TAMClient {
         musicManager?.playNow(sound)
     }
 
-    fun getCurrentMusic(): PlayableSound? {
+    fun getCurrentMusic(): TAMSoundInstance? {
         return musicManager?.currentMusic
     }
 
-    fun getCurrentAmbience(): PlayableSound? {
+    fun getCurrentAmbience(): TAMSoundInstance? {
         return musicManager?.currentAmbience
     }
 
-    fun getCurrentEventMusic(): PlayableSound? {
+    fun getCurrentEventMusic(): TAMSoundInstance? {
         return musicManager?.currentEventMusic
     }
 

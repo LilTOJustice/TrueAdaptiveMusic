@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.javasucks.MusicTrackerMixinHelper;
-import liltojustice.trueadaptivemusic.client.sound.instance.AudioFileSoundInstance;
 import net.minecraft.client.sound.*;
 import net.minecraft.sound.MusicSound;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,9 +22,9 @@ public class MusicTrackerMixin {
 
     @Inject(method = "getCurrentMusicTranslationKey", at = @At("HEAD"), cancellable = true)
     public void getCurrentMusicTranslationKey(CallbackInfoReturnable<String> cir) {
-        MusicTracker thisObject = (MusicTracker)(Object)this;
-        if (thisObject.current instanceof AudioFileSoundInstance sound) {
-            cir.setReturnValue(sound.getFileName());
+        var currentTAMMusic = TAMClient.INSTANCE.getCurrentMusic();
+        if (currentTAMMusic != null) {
+            cir.setReturnValue(currentTAMMusic.getSoundString());
         }
     }
 

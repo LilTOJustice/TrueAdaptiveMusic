@@ -24,6 +24,8 @@ abstract class TAMSoundInstance(
 ): SoundInstance {
     var desiredVolume = 1F
     abstract fun getAudioStream(): AudioStream?
+    abstract fun getSoundString(): String
+
     override fun getId(): Identifier? {
         return null
     }

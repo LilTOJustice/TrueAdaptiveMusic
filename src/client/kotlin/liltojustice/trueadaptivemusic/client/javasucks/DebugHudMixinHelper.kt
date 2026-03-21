@@ -69,7 +69,7 @@ object DebugHudMixinHelper {
                 textRenderer,
                 "${Text.translatableWithFallback(
                     "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
-                        "(${eventMusic?.getSoundName()})",
+                        "(${eventMusic?.getSoundString()})",
                 1,
                 getY(rowOffset++, fontHeight),
                 Colors.WHITE,
@@ -82,7 +82,7 @@ object DebugHudMixinHelper {
             context.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
-                    "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundName()}",
+                    "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
                 1,
                 getY(rowOffset++, fontHeight),
                 Colors.WHITE,
@@ -96,7 +96,7 @@ object DebugHudMixinHelper {
                 textRenderer,
                 "${Text.translatableWithFallback(
                     "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
-                        it.getSoundName(),
+                        it.getSoundString(),
                 1,
                 getY(rowOffset++, fontHeight),
                 Colors.WHITE,

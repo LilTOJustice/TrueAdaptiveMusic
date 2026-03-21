@@ -8,6 +8,7 @@ import net.minecraft.client.sound.Sound
 import net.minecraft.client.sound.SoundManager
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.random.Random
 
@@ -39,6 +40,12 @@ class SoundEventSoundInstance(
         val inputStreamGetter = { soundManager.soundSystem.soundLoader.resourceFactory.open(sound.location) }
 
         return getAudioStream(sound.location.toString(), "ogg", inputStreamGetter, isAmbient)
+    }
+
+    override fun getSoundString(): String {
+        return sound?.identifier?.let { id ->
+            Text.translatable(id.toShortTranslationKey().replace("/", ".")).string
+        } ?: "Missing Sound"
     }
 
     override fun getSound(): Sound? {

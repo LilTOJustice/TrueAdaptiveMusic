@@ -22,4 +22,8 @@ class AudioFileSoundInstance(
             isAmbient
         )
     }
+
+    override fun getSoundString(): String {
+        return fileName
+    }
 }
