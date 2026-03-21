@@ -26,12 +26,14 @@ class MusicManager(private val client: MinecraftClient) {
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var eventPool: List<MusicEvent> = emptyList()
-    private var lastMusic: PlayableSound? = null
-    private var lastAmbience: PlayableSound? = null
+    private var currentMusic: PlayableSound? = null
+    private var currentAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private var lastInstance: TAMSoundInstance? = null
     private val parallelTracks = mutableMapOf<PlayableSound, String>()
+    private var musicPool = mutableSetOf<PlayableSound>()
+    private var ambiencePool = mutableSetOf<PlayableSound>()
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -68,7 +70,7 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
         eventPool = emptyList()
-        lastMusic = null
+        currentMusic = null
     }
 
     fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
@@ -100,6 +102,11 @@ class MusicManager(private val client: MinecraftClient) {
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
         val persistentNodeMusic = packOptions.persistentNodeMusic && !loopMusic
+
+        if (isEnter) {
+            musicPool.clear()
+            ambiencePool.clear()
+        }
 
         eventPool = treeResult.accumulatedEvents
 
@@ -158,10 +165,9 @@ class MusicManager(private val client: MinecraftClient) {
 
         if (!ambienceToPlay.isEmpty() &&
             client.player != null &&
-            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience) || isAmbienceAlmostDone)) {
-            val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
+            (!isAmbiencePlaying || !ambienceToPlay.contains(currentAmbience) || isAmbienceAlmostDone)) {
+            val newAmbience = getPseudoRandomAmbience(ambienceToPlay)
             playNextAmbience(newAmbience)
-            lastAmbience = newAmbience
         }
 
         if (shouldStop) {
@@ -208,7 +214,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-        val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
+        val newMusic = getPseudoRandomMusic(musicToPlay)
         playNextMusic(
             newMusic,
             delay,
@@ -261,10 +267,9 @@ class MusicManager(private val client: MinecraftClient) {
     private fun shouldKeepPlaying(
         musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean, persistentNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
-        return mainTrackPlaying && (
-                (musicToPlay.contains(lastMusic) && enterDelay != 0U)
-                        || (persistentNodeMusic && isEnter)
-                )
+        return mainTrackPlaying &&
+                ((musicToPlay.contains(currentMusic) && enterDelay != 0U)
+                        || (persistentNodeMusic && isEnter))
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
@@ -316,7 +321,7 @@ class MusicManager(private val client: MinecraftClient) {
             mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
 
-        lastMusic = newMusic
+        currentMusic = newMusic
     }
 
     private fun playNextAmbience(newAmbience: PlayableSound) {
@@ -326,7 +331,7 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.startNew(ambienceTrack, newAmbience, fadeIn = true)
         musicPlayer.crossfadeTracks(oldTrack, ambienceTrack)
 
-        lastAmbience = newAmbience
+        currentAmbience = newAmbience
     }
 
     private fun swapMainTrack() {
@@ -354,6 +359,28 @@ class MusicManager(private val client: MinecraftClient) {
         else {
             AMBIENCE_TRACK_1
         }
+    }
+
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>): PlayableSound {
+        if (musicPool.isEmpty()) {
+            musicPool = musicToPlay.toMutableSet()
+        }
+
+        val randomSound = musicPool.random()
+        musicPool.remove(randomSound)
+
+        return randomSound
+    }
+
+    private fun getPseudoRandomAmbience(ambienceToPlay: List<PlayableSound>): PlayableSound {
+        if (ambiencePool.isEmpty()) {
+            ambiencePool = ambienceToPlay.toMutableSet()
+        }
+
+        val randomSound = ambiencePool.random()
+        ambiencePool.remove(randomSound)
+
+        return randomSound
     }
 
     companion object {
@@ -391,14 +418,6 @@ class MusicManager(private val client: MinecraftClient) {
                             (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
                 } ?: false))
             }
-        }
-
-        private fun getPseudoRandomTrack(musicToPlay: List<PlayableSound>, lastMusic: PlayableSound?): PlayableSound {
-            if (musicToPlay.size == 1) {
-                return musicToPlay.first()
-            }
-
-            return (lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay).random()
         }
 
         private fun parallelTrack(sound: PlayableSound): String {
