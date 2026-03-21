@@ -104,6 +104,14 @@ object TAMClient {
         musicManager?.playNow(sound)
     }
 
+    fun getCurrentMusic(): PlayableSound? {
+        return musicManager?.currentMusic
+    }
+
+    fun getCurrentAmbience(): PlayableSound? {
+        return musicManager?.currentAmbience
+    }
+
     fun getPlayingEvent(): MusicEvent? {
         return musicManager?.playingEvent
     }

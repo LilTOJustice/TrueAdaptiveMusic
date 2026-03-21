@@ -17,6 +17,10 @@ import kotlin.reflect.KClass
 class MusicManager(private val client: MinecraftClient) {
     var playingEvent: MusicEvent? = null
         private set
+    var currentMusic: PlayableSound? = null
+        private set
+    var currentAmbience: PlayableSound? = null
+        private set
 
     private val musicPlayer = MusicPlayer(client)
     private var currentMusicPredicateId: String = ""
@@ -26,8 +30,6 @@ class MusicManager(private val client: MinecraftClient) {
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var eventPool: List<MusicEvent> = emptyList()
-    private var currentMusic: PlayableSound? = null
-    private var currentAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private var lastInstance: TAMSoundInstance? = null
