@@ -49,8 +49,10 @@ This is a rather large update. Hope you all enjoy it <3
 
 True Adaptive Music is now "feature complete" but that doesn't mean that work on it stops here.
 
-I will still be adding more features and fixing bugs as they come up (please keep the reports/suggestions coming!), as well as maintaining support for all current and new versions of minecraft as they release.
+I will still be adding more features and fixing bugs as they come up (please keep the reports/suggestions coming!), as well as maintaining support for all current minecraft versions and new ones as they release.
 
 Maybe I'll support forge/neoforge officially sometime but no promises!
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
+
+Early planning is on for [2.1](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/11)!
