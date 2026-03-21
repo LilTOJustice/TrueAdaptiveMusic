@@ -31,7 +31,6 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import java.nio.file.Path
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
@@ -179,14 +178,12 @@ class PackBrowserListWidget(
             .append(Text.literal("\n\nSize:\n").withColor(Colors.GRAY))
             .append(Text.literal(DataSizeHelper.getDataSizeString(musicPack.size)))
 
-        val localDateTime = Date(
-            Calendar.getInstance().timeZone.getOffset(musicPack.lastUpdated.time) +
-                    musicPack.lastUpdated.time
-        )
         flavorText
             .append(Text.literal("\n\nUpdated:\n").withColor(Colors.GRAY))
-            .append(Text.literal(SimpleDateFormat("EEE MMM dd yyyy").format(localDateTime)))
-            .append(Text.literal("\n" + SimpleDateFormat("hh:mm:ss aa zzz").format(localDateTime)))
+            .append(
+                Text.literal(SimpleDateFormat("EEE MMM dd yyyy").format(musicPack.lastUpdated)))
+            .append(
+                Text.literal("\n" + SimpleDateFormat("hh:mm aa zzz").format(musicPack.lastUpdated)))
 
         context?.drawWrappedText(
             client.textRenderer,
