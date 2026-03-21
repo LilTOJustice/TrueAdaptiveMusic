@@ -29,7 +29,7 @@ object BrowsableMusicPackDownloader {
     private suspend fun downloadPack(url: String, outputPath: Path, progressOutput: Reference<Float>) {
         CurlHelper.curl(url, outputPath, progressOutput)
         try {
-            ZipFile(outputPath.toFile())
+            ZipFile(outputPath.toFile()).close()
         }
         catch (e: ZipException) {
             outputPath.deleteIfExists()

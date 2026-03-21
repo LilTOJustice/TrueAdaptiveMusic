@@ -161,7 +161,8 @@ class PackListWidget(
                         "trueadaptivemusic.disable_tam", "Disable TrueAdaptiveMusic"),
                     x + 3, y + 14 + 3,
                     Colors.GRAY,
-                    false)
+                    false
+                )
             }
         }
 
