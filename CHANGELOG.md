@@ -1,27 +1,56 @@
-True Adaptive Music v1.8 - The Loopy Update
+True Adaptive Music v2.0 - Going Gold
 
-**True Adaptive Music will now appear in the Forge/Neoforge environment for Modrinth/Curseforge with a dependency on Sinytra Connector. Since Sinytra is limited to 1.20.1 and 1.21.1, those will be the only available versions until they port to other versions of Minecraft.**
+This is a rather large update. Hope you all enjoy it <3
 
-New Features:
-- Music Looping
-  - Music can be set to loop within a node
-  - Support for "intros" where the loop doesn't start until a specific point in the song
-  - The music file must be edited to have the end match the start for looping to work properly
-- Persistent Node Music
-  - Music can be set as "persistent" on a per-pack basis in the pack options (where the description is set)
-  - If set to true, music will finish before changing after the active node changes
-  - Naturally, this disables fading between nodes
+### New Features:
+#### Parallel Music
+  - A big feature that I have wanted to make since I started working on this mod
+  - Allows for music to work how it does in games that have multiple versions of the same music that transitions as the situation changes
+    - Some examples: FF7 Remakes, Ultrakill, Banjo Kazooie, Deus Ex: Human Revolution
+  - You can designate a node as "parallel" which will make all music in that node and all children's music run in parallel, so when the node changes, the music is already in the correct spot to seamlessly transition
+    - This allows you to make sections of your pack be parallel separately from other sections
+  - Some rules:
+    - Only one track is allowed
+    - Tracks must be exactly the same length to work properly
+    - Recommended that tracks have proper looping as well - Start perfectly matches the end or the start point for the loop.
+#### In-game Pack Browser
+  - Another massive feature that I only thought of more recently
+  - In the pack selection UI, hit the "Get more packs" button to open the browser
+  - Music packs are pulled from the community discord and updates are synced every 10 minutes
+  - See details on each pack, and download with one click!
+#### TAM Logic Thread Separation
+  - This one is an optimization to allow predicates to react faster without hurting performance.
+  - Theoretically this should increase the performance of TAM, but let me know if you run into performance issues!
+#### Vanilla Music Override
+  - Allows setting a node to fall back to music that would play without TAM enabled when selected.
 
-UI Improvements:
-- Horizontal Scrolling in the Pack Structure Panel
-- Collapsible/Expandable nodes
+### New Predicate Types:
+#### Scoreboard
+  - Probably the most powerful predicate type
+  - Tracks the value of a given scoreboard id, allowing virtually any game data to influence music!
+  - Works no matter what in singleplayer, but only works in multiplayer servers if the scoreboard has a slot assigned
+#### Team
+  - Triggers while the player is on the given team
+#### PvP
+  - The combat predicate now works with Minecraft - Player. A player is considered hostile if they are not on your team.
+#### Player Attribute
+  - Triggers while the player has the given [attribute](https://minecraft.wiki/w/Attribute).
 
-Other Improvements:
-- Music fading and clamping sounds better
-- Required bridge mods are now stored in pack metadata
-  - If you load a pack that requires a mod you don't have, the pack selection UI will show a warning.
+### UI Improvements:
+- Pack export now shows in a new screen (I promise your game didn't freeze before)
+- Discord link in pack browser/selection UI
+- Comparators (Greater, Lesser, etc.) are now language agnostic
 
-Additional Notes:
-- **Attention Pack Creators:** Your pack descriptions will be cleared and need to be set again
+### Other Improvements:
+- All node music/ambience will now play before it starts to repeat
+- Zip file locking is fixed, so hopefully no more export errors
+- Improve performance of loading music from legacy packs
+- Removed the overworld_caves biome/dimension since they don't work anyway
 
-[2.0](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/10) is up next :)
+True Adaptive Music is now "feature complete" but that doesn't mean that work on it stops here.
+
+I will still be adding more features and fixing bugs as they come up (please keep the reports/suggestions coming!), as well as maintaining support for all current and new versions of minecraft as they release.
+
+Maybe I'll support forge/neoforge officially sometime but no promises!
+
+Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
