@@ -18,11 +18,13 @@ import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
     var playingEvent: MusicEvent? = null
-        private set
-    var currentMusic: PlayableSound? = null
-        private set
-    var currentAmbience: PlayableSound? = null
-        private set
+    val currentMusic: PlayableSound?
+        get() = musicPlayer.getPlayingInstance(mainTrack)?.playableSound
+    val currentAmbience: PlayableSound?
+        get() = musicPlayer.getPlayingInstance(ambienceTrack)?.playableSound
+    val currentEventMusic: PlayableSound?
+        get() = musicPlayer.getPlayingInstance(EVENT_TRACK)?.playableSound
+
 
     private val musicPlayer = MusicPlayer(client)
     private var currentMusicPredicateId: String = ""
@@ -75,7 +77,6 @@ class MusicManager(private val client: MinecraftClient) {
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
         eventPool = emptyList()
-        currentMusic = null
     }
 
     fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
@@ -322,8 +323,6 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.startNew(
             mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
-
-        currentMusic = newMusic
     }
 
     private fun playNextAmbience(newAmbience: PlayableSound) {
@@ -332,8 +331,6 @@ class MusicManager(private val client: MinecraftClient) {
 
         musicPlayer.startNew(ambienceTrack, newAmbience, fadeIn = true)
         musicPlayer.crossfadeTracks(oldTrack, ambienceTrack)
-
-        currentAmbience = newAmbience
     }
 
     private fun swapMainTrack() {

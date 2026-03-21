@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.sound.AudioStream
 import net.minecraft.client.sound.PositionedSoundInstance
@@ -11,10 +12,11 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.random.Random
 
 class SoundEventSoundInstance(
+    playableSound: PlayableSound,
     identifier: Identifier,
     isAmbient: Boolean,
     isLooping: Boolean
-): TAMSoundInstance(isAmbient, isLooping, 0U) {
+): TAMSoundInstance(playableSound, isAmbient, isLooping, 0U) {
     private val soundManager: SoundManager = MinecraftClient.getInstance().soundManager
     private val instance = PositionedSoundInstance(
         SoundEvent.of(identifier),
@@ -44,6 +46,6 @@ class SoundEventSoundInstance(
     }
 
     companion object {
-        val random = Random.create()
+        val random: Random = Random.create()
     }
 }

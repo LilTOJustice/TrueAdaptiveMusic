@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.sound.instance
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.FFmpeg
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.sound.AudioStream
@@ -16,7 +17,11 @@ import net.minecraft.util.Identifier
 import java.io.InputStream
 
 abstract class TAMSoundInstance(
-    val isAmbient: Boolean, val isLooping: Boolean, val loopStartPoint: UInt): SoundInstance {
+    val playableSound: PlayableSound,
+    val isAmbient: Boolean,
+    val isLooping: Boolean,
+    val loopStartPoint: UInt
+): SoundInstance {
     var desiredVolume = 1F
     abstract fun getAudioStream(): AudioStream?
     override fun getId(): Identifier? {

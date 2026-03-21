@@ -63,12 +63,13 @@ object DebugHudMixinHelper {
         var rowOffset = 0
         val fontHeight = textRenderer.fontHeight
         val playingEvent = TAMClient.getPlayingEvent()
+        val eventMusic = TAMClient.getCurrentEventMusic()
         playingEvent?.let {
             context.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
-                    "trueadaptivemusic.playing_event", "Playing event").string}: " +
-                        it.getTriggerId(),
+                    "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
+                        "(${eventMusic?.getSoundName()})",
                 1,
                 getY(rowOffset++, fontHeight),
                 Colors.WHITE,
@@ -81,8 +82,7 @@ object DebugHudMixinHelper {
             context.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
-                    "trueadaptivemusic.playing_music", "Playing music").string}: " +
-                        it.getSoundName(),
+                    "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundName()}",
                 1,
                 getY(rowOffset++, fontHeight),
                 Colors.WHITE,
