@@ -14,8 +14,10 @@ import net.minecraft.util.Colors
 import kotlin.coroutines.EmptyCoroutineContext
 
 @Environment(EnvType.CLIENT)
-class ExportPackScreen(private val musicPack: MusicPack, destination: Screen): Screen(Text.literal("")) {
+class ExportPackScreen(
+    private val musicPack: MusicPack, private val destination: Screen): Screen(Text.literal("")) {
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
+    private var done = false
     init {
         backgroundScope.launch {
             TAMClient.musicPack = null
@@ -25,7 +27,7 @@ class ExportPackScreen(private val musicPack: MusicPack, destination: Screen): S
                 destination.reload()
             }
 
-            client?.setScreen(destination)
+            done = true
         }
     }
 
@@ -33,6 +35,12 @@ class ExportPackScreen(private val musicPack: MusicPack, destination: Screen): S
     }
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        if (done) {
+            client?.setScreen(destination)
+
+            return
+        }
+
         super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
             client?.textRenderer,

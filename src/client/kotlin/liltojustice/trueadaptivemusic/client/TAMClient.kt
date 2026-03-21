@@ -42,23 +42,10 @@ object TAMClient {
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    val hasFFmpegGlobal
-        get() =
-            try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
-            catch (_: IOException) { false }
-    val hasFFmpegLocal
-        get() =
-            try {
-                Runtime.getRuntime()
-                    .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
-                        Runtime.getRuntime()
-                            .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
-            } catch (_: IOException) {
-                false
-            }
-    var hasFFmpeg = false
-        private set
-
+    val hasFFmpeg
+        get() = hasFFmpegLocal || hasFFmpegGlobal
+    var hasFFmpegGlobal = false
+    var hasFFmpegLocal = false
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -69,8 +56,8 @@ object TAMClient {
         set(value) {
             field = value
             minecraftClient.soundManager.soundSystem.reloadSounds()
-            hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.stop()
+            getHasFFMpeg()
 
             val packName = value?.packName ?: ""
             try {
@@ -251,5 +238,19 @@ object TAMClient {
                 Text.literal(exceptionMessage ?: "")
             )
         )
+    }
+
+    private fun getHasFFMpeg() {
+        hasFFmpegGlobal =  try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
+        catch (_: IOException) { false }
+
+        hasFFmpegLocal = try {
+            Runtime.getRuntime()
+                .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
+                    Runtime.getRuntime()
+                        .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
+        } catch (_: IOException) {
+            false
+        }
     }
 }
