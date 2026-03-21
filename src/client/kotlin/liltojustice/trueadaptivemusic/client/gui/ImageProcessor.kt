@@ -29,7 +29,7 @@ object ImageProcessor {
             )
         }
         catch (e: Exception) {
-            Logger.logError("Failed to load image at $filePath.\n${e.message}", true)
+            Logger.logError("Failed to load image at $filePath.\n${e.message}")
 
             null
         }

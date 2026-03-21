@@ -212,8 +212,8 @@ class PackBrowserListWidget(
                     identifier,
                     NativeImageBackedTexture(identifier::toString, image)
                 )
-                loadedPackImages.add(identifier)
             } ?: return false
+            loadedPackImages.add(identifier)
         }
 
         val image = (client.textureManager.getTexture(identifier) as? NativeImageBackedTexture)?.image
