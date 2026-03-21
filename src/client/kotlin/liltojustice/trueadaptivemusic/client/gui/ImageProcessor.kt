@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui
 
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import net.minecraft.client.texture.NativeImage
 import java.io.InputStream
@@ -11,14 +12,21 @@ import kotlin.io.path.pathString
 
 object ImageProcessor {
     fun getNativeImage(filePath: Path): NativeImage? {
-        return NativeImage.read(
-            if (filePath.extension == "png")
-                filePath.toFile().inputStream()
-            else if (TAMClient.hasFFmpeg)
-                convertToPNG(filePath)
-            else
-                return null
-        )
+        return try {
+            NativeImage.read(
+                if (filePath.extension == "png")
+                    filePath.toFile().inputStream()
+                else if (TAMClient.hasFFmpeg)
+                    convertToPNG(filePath)
+                else
+                    return null
+            )
+        }
+        catch (e: Exception) {
+            Logger.logError("Failed to load image at $filePath.\n${e.message}", true)
+
+            null
+        }
     }
 
     private fun convertToPNG(filePath: Path): InputStream {
