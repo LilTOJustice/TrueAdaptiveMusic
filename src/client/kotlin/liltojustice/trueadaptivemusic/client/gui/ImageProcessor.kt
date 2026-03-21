@@ -14,12 +14,18 @@ object ImageProcessor {
     fun getNativeImage(filePath: Path): NativeImage? {
         return try {
             NativeImage.read(
-                if (filePath.extension == "png")
+                if (filePath.extension == "png") {
                     filePath.toFile().inputStream()
-                else if (TAMClient.hasFFmpeg)
+                }
+                else if (TAMClient.hasFFmpeg) {
                     convertToPNG(filePath)
-                else
+                }
+                else {
+                    Logger.logWarning("Image is not PNG and client doesn't have FFmpeg installed, " +
+                            "so image cannot be displayed.")
+
                     return null
+                }
             )
         }
         catch (e: Exception) {
