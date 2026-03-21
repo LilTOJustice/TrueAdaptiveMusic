@@ -15,6 +15,7 @@ class ScoreboardPredicate(
         val matchingObjective = scoreboard.objectives.firstOrNull { objective ->
             objective.name == objectiveId
         } ?: return false
+
         val matchingEntries = scoreboard.getScoreboardEntries(matchingObjective).filter { entry ->
             entry.owner == playerName || scoreboard.teams.any { team -> team.playerList.any { it == playerName } }
         }
