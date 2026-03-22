@@ -14,6 +14,8 @@ class TrueAdaptiveMusic: ModInitializer {
         if (!Constants.OPTIONS_PATH.exists()) {
             Files.createFile(Constants.OPTIONS_PATH)
         }
+
+        Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
     }
 
     companion object {
