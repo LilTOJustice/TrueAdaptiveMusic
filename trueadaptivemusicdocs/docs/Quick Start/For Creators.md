@@ -127,6 +127,12 @@ Nodes can have more than one predicate, which can be achieved by hitting the + s
 
 When a node has multiple predicates, it will be satisfied as long as at least one of the predicates within it is satisfied, equivalent to a logical "OR".
 
+#### Vanilla Music
+
+By enabling the Vanilla Music option for a node, the music that would normally play in a vanilla context will play instead of a list of selected tracks.
+
+This option is good if you want to allow modded music to play in certain contexts.
+
 #### Music Looping
 
 By enabling the Music Looping option for a node, that node's music will now loop until the node is left. This renders track delay/noise options useless for that node.
@@ -134,6 +140,18 @@ By enabling the Music Looping option for a node, that node's music will now loop
 You are responsible for clipping the audio file for the end of the file to match the start of the loop perfectly.
 
 You can also set a timestamp (in milliseconds) for when the loop should start from in the music. This is useful if the looping music has an intro section before the loop.
+
+#### Parallel Music
+
+By enabling the Parallel Music option for a node, that node and all of its children's music will play in parallel.
+
+This allows recreating the effect of different versions of the same music transitioning as the game state changes.
+
+For example, in the game Banjo Kazooie, the music will change depending on whether you are fighting or underwater, but the music that it changes to is the same song at the same point in that song, just with different instrumentation.
+
+Only one track per node is allowed within the parallel context, and all music in that context must have the exact same length. It is also recommended that the music files loop perfectly, since most games with this feature do that.
+
+Some other games that use this system are Ultrakill, Final Fantasy 7 Remakes, and Deus Ex: Human Revolution/Mankind Divided.
 
 #### Persistent Node Music
 

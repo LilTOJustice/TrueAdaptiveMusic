@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.minecraft.text.Text
+import kotlin.reflect.full.companionObjectInstance
 
 abstract class MusicPredicate: MusicTrigger() {
     private var lastResult = false
@@ -23,22 +24,24 @@ abstract class MusicPredicate: MusicTrigger() {
 
     fun testPredicate(): Boolean {
         val tickRate = getFixedTickRate()
-        if (ticksSinceResult++ == tickRate) {
+        if (ticksSinceResult == 0 || ticksSinceResult >= tickRate) {
             ticksSinceResult = 1
 
             lastResult = test()
         }
 
+        ticksSinceResult++
+
         return lastResult
     }
 
     open fun getTickRate(): Int {
-        return 20
+        return 1
     }
 
     private fun getFixedTickRate(): Int {
         val desiredTickRate = getTickRate()
-        return if (desiredTickRate < 1) 0 else desiredTickRate
+        return if (desiredTickRate < 1) 1 else desiredTickRate
     }
 
 
@@ -49,12 +52,13 @@ abstract class MusicPredicate: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Text {
             return Text.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",
-                displayName ?: triggerName.prettify()
+                (TAMClient.predicateRegistry[triggerName]?.companionObjectInstance as? MusicPredicateCompanion)
+                    ?.displayName ?: triggerName.prettify()
             )
         }
 
         override fun getArgDisplayName(triggerName: String, argName: String): Text? {
-            val predicateType = TAMClient.predicateRegistry[triggerName]
+            val predicateType = TAMClient.predicateRegistry[triggerName] ?: return null
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
                 TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
@@ -66,10 +70,11 @@ abstract class MusicPredicate: MusicTrigger() {
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Text? {
+            val predicateClass = TAMClient.predicateRegistry[triggerName] ?: return null
+
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.description",
-                TriggerReflectionHelper.getMusicTriggerArgDescriptions(
-                    TAMClient.predicateRegistry[triggerName])[argName]
+                TriggerReflectionHelper.getMusicTriggerArgDescriptions(predicateClass)[argName]
             )
         }
     }
