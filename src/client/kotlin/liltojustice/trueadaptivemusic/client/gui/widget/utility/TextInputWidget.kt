@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -48,6 +49,10 @@ class TextInputWidget(
 
     override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
         return fieldWidget.keyReleased(keyCode, scanCode, modifiers)
+    }
+
+    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+        return fieldWidget.mouseClicked(click, doubled)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {

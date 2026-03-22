@@ -1,6 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.widget.ClickableWidget
@@ -12,16 +14,16 @@ open class ClickableTextWidget(
     text: String,
     x: Int = 0,
     y: Int = 0,
-    private val showHighlight: Boolean = true,
-    private val onClick: ((ClickableTextWidget) -> Unit)? = null,
-    private val isSelected: (ClickableTextWidget) -> Boolean = { false },
-    private val onMouseOn: (ClickableTextWidget) -> Unit = {},
-    private val onMouseOff: (ClickableTextWidget) -> Unit = {}
+    protected val showHighlight: Boolean = true,
+    protected var onClick: ((ClickableTextWidget) -> Unit)? = null,
+    protected val isSelected: (ClickableTextWidget) -> Boolean = { false },
+    protected val onMouseOn: (ClickableTextWidget) -> Unit = {},
+    protected val onMouseOff: (ClickableTextWidget) -> Unit = {}
 ): ClickableWidget(x, y, 0, 0, Text.literal(text)) {
     var color: Int = Colors.WHITE
     val text: String
         get() = message.string
-    private val textRenderer = MinecraftClient.getInstance().textRenderer
+    protected val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
     private var disableBold = false
     private var enableItalic = false
     private val styledText: Text

@@ -76,8 +76,7 @@ class Channel private constructor(
             }
 
             while (true) {
-                val action = tasks.removeFirstOrNull() ?: break
-                action.accept(source)
+                tasks.removeFirstOrNull()?.accept(source) ?: break
             }
 
             LockSupport.parkNanos("Sleeping for a bit", 1000000L)
