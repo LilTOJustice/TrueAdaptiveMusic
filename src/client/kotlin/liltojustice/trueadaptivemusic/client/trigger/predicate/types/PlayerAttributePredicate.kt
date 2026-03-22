@@ -13,7 +13,7 @@ class PlayerAttributePredicate(
 ): MusicPredicate() {
     override fun test(): Boolean {
         val player = MinecraftClient.getInstance().player ?: return false
-        val registry = player.entityWorld.registryManager.getOptional(RegistryKeys.ATTRIBUTE).getOrNull()
+        val registry = player.world.registryManager.getOptional(RegistryKeys.ATTRIBUTE).getOrNull()
             ?: return false
         val entityAttributeEntry =
             registry
