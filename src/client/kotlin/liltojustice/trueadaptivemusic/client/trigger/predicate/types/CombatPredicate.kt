@@ -65,7 +65,7 @@ class CombatPredicate(
         verticalFov: Double,
         horizontalFov: Double
     ): Boolean {
-        val relativeEntityPos = entity.entityPos.subtract(playerEntity.entityPos)
+        val relativeEntityPos = entity.pos.subtract(playerEntity.pos)
         val relativeEntityPosN = relativeEntityPos.normalize()
 
         val entityVerticalAngle = acos(relativeEntityPosN.y)

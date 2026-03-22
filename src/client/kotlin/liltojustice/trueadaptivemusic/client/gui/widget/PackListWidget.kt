@@ -10,7 +10,6 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gl.RenderPipelines
-import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
@@ -159,30 +158,36 @@ class PackListWidget(
             tickDelta: Float
         ) {
             musicPack ?: return
-            context.textConsumer.marqueedText(
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 Text.literal(musicPack.packName),
                 x + 3,
                 x + 3,
-                rowRight - 3,
                 y + 3,
+                rowRight - 3,
                 y + client.textRenderer.fontHeight + 3,
+                Colors.WHITE
             )
             issuesButton?.let {
-                issuesButton.x = x + width - issuesButton.width - 5
-                issuesButton.y = y + height - issuesButton.height - 5
+                issuesButton.x = x + entryWidth - issuesButton.width - 5
+                issuesButton.y = y + entryHeight - issuesButton.height - 5
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
-            context.textConsumer.marqueedText(
-                Text.literal(musicPack.options.description).withColor(Colors.GRAY),
+            drawScrollableText(
+                context,
+                client.textRenderer,
+                Text.literal(musicPack.options.description),
                 x + 3,
                 x + 3,
-                (issuesButton?.x ?: rowRight) - 3,
                 y + 17,
-                y + height
+                (issuesButton?.x ?: rowRight) - 3,
+                y + entryHeight,
+                Colors.GRAY
             )
         }
 
-        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
             if (selectedOrNull == this) {
                 return true
             }
@@ -204,8 +209,19 @@ class PackListWidget(
     }
 
     inner class VanillaEntry(): Entry(null) {
-        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
-            context.drawText(
+        override fun render(
+            context: DrawContext?,
+            index: Int,
+            y: Int,
+            x: Int,
+            entryWidth: Int,
+            entryHeight: Int,
+            mouseX: Int,
+            mouseY: Int,
+            hovered: Boolean,
+            tickDelta: Float
+        ) {
+            context?.drawText(
                 client.textRenderer,
                 VANILLA_TEXT,
                 x + 3,
@@ -213,7 +229,7 @@ class PackListWidget(
                 Colors.WHITE,
                 false
             )
-            context.drawText(
+            context?.drawText(
                 client.textRenderer,
                 DISABLE_TAM_TEXT,
                 x + 3, y + 14 + 3,
@@ -224,14 +240,25 @@ class PackListWidget(
     }
 
     inner class PackBrowserEntry(private val onClick: () -> Unit): Entry(null) {
-        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+        override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
             onClick()
 
             return true
         }
 
-        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
-            context.drawText(
+        override fun render(
+            context: DrawContext?,
+            index: Int,
+            y: Int,
+            x: Int,
+            entryWidth: Int,
+            entryHeight: Int,
+            mouseX: Int,
+            mouseY: Int,
+            hovered: Boolean,
+            tickDelta: Float
+        ) {
+            context?.drawText(
                 client.textRenderer,
                 PACK_BROWSER_TEXT,
                 x + 3,
