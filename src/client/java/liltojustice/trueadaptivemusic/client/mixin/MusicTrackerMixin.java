@@ -12,9 +12,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MusicTracker.class)
 public class MusicTrackerMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
-    public void play(MusicSound sound, CallbackInfo ci) {
-        TAMClient.INSTANCE.setDesiredVanillaSoundEvent(sound.sound().value());
-        if (MusicTrackerMixinHelper.shouldIgnore(sound)) {
+    public void play(MusicInstance instance, CallbackInfo ci) {
+        var music = instance.music();
+        if (music == null) {
+            return;
+        }
+
+        var sound = music.sound().value();
+        TAMClient.INSTANCE.setDesiredVanillaSoundEvent(sound);
+        if (MusicTrackerMixinHelper.shouldIgnore(music)) {
             ci.cancel();
         }
     }

@@ -88,8 +88,8 @@ class DropdownWidget<TKey>(
         close()
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        val result = super.mouseClicked(mouseX, mouseY, button)
         if (focusedWidget == selectedOptionWidget) {
             open()
         }
