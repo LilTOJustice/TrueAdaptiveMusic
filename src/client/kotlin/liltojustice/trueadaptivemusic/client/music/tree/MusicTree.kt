@@ -328,7 +328,7 @@ class MusicTree {
         )
 
         data class Parameters(
-            var vanillaBehavior: Boolean = false,
+            var vanillaMusic: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
             var enterDelay: UInt = 0U,
@@ -345,10 +345,9 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
-                        "vanillaBehavior" to "When this node is selected, all of TAMs systems will halt.\n\nUse this if " +
-                                "you want music to fallback to vanilla behavior in this node, (i.e. you want " +
-                                "mod-specific music to play).\n\nNo other music-related parameters can be used with " +
-                                "this enabled.",
+                        "vanillaMusic" to "When this node is selected, TAM will use vanilla music.\n\nUse this if " +
+                                "you want music to fallback to vanilla in this node, (i.e. you want mod-specific " +
+                                "music to play).\n\nCertain music-related parameters can't be used with this enabled.",
                         "trackDelay" to "After a track finishes, wait this many seconds before playing the next.",
                         "trackDelayNoise" to "Add randomly + or - this many seconds to track delay.",
                         "enterDelay" to "Wait this many seconds before starting music when entering this predicate. " +

@@ -87,8 +87,8 @@ class MusicManager(private val client: MinecraftClient) {
 
         val identifier = treeResult.path
         val parameters = treeResult.parameters
-        val vanillaBehavior = parameters.vanillaBehavior
-        val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaBehavior }
+        val vanillaMusic = parameters.vanillaMusic
+        val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaMusic }
             ?: vanillaSoundEvent?.let { listOf(it) }
             ?: emptyList()
         val ambienceToPlay = treeResult.accumulatedAmbience
@@ -96,7 +96,7 @@ class MusicManager(private val client: MinecraftClient) {
         val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
         val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
         val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
-        val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaBehavior
+        val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaMusic
         val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier

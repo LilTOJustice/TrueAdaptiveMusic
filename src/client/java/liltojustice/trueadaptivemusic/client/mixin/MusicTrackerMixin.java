@@ -33,7 +33,7 @@ public class MusicTrackerMixin {
        var result = TAMClient.INSTANCE.getCurrentPredicateResult();
         if (TAMClient.INSTANCE.getMusicPack() != null &&
                 result != null &&
-                !result.getParameters().getVanillaBehavior()) {
+                !result.getParameters().getVanillaMusic()) {
             ci.cancel();
         }
     }

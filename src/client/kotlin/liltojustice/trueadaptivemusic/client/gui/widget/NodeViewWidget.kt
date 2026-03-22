@@ -58,7 +58,7 @@ class NodeViewWidget(
     private var shouldExit = false
     private var lastRestricted = false
     private val restrictedParameters
-        get() = if (selectedNode?.parameters?.vanillaBehavior == true)
+        get() = if (selectedNode?.parameters?.vanillaMusic == true)
             listOf(
                 "inheritMusic",
                 "parallelMusic",
@@ -67,7 +67,7 @@ class NodeViewWidget(
             )
         else if (selectedNode?.parent?.parameters?.parallelMusic == true)
             listOf(
-                "vanillaBehavior",
+                "vanillaMusic",
                 "parallelMusic",
                 "trackDelay",
                 "trackDelayNoise",
@@ -77,7 +77,7 @@ class NodeViewWidget(
                 "loopStartPoints"
             )
         else if (selectedNode?.parameters?.parallelMusic == true)
-            listOf("vanillaBehavior", "trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
+            listOf("vanillaMusic", "trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
         else
             listOf()
 
@@ -129,7 +129,7 @@ class NodeViewWidget(
 
         lastRestricted = restricted
 
-        if (selectedNode?.parameters?.vanillaBehavior == false) {
+        if (selectedNode?.parameters?.vanillaMusic == false) {
             addWidgetFromRender(
                 {
                     if (restricted) {
@@ -570,7 +570,7 @@ class NodeViewWidget(
                 node.parameters.loopMusic = true
             }
 
-            return node.parameters.parallelMusic || node.parameters.vanillaBehavior
+            return node.parameters.parallelMusic || node.parameters.vanillaMusic
         }
     }
 }
