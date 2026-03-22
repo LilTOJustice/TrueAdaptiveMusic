@@ -45,14 +45,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     private fun exportAndClose() {
-        TAMClient.musicPack = null
-        val path = musicPack.save()
-        TAMClient.musicPack = MusicPack.fromFile(path)
-        if (parent is MainScreen) {
-            parent.reload()
-        }
-
-        client?.setScreen(parent)
+        client.setScreen(ExportPackScreen(musicPack, parent))
     }
 
     override fun init() {

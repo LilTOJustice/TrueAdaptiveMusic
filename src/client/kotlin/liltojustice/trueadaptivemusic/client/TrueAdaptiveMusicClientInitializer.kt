@@ -41,16 +41,18 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePr
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PlayerAttributePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TeamPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.text.Text
 import kotlin.reflect.KClass
@@ -91,6 +93,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
         TAMClient.registerPredicate("hunger", HungerPredicate::class)
         TAMClient.registerPredicate("entity_nearby", EntityNearbyPredicate::class)
+        TAMClient.registerPredicate("scoreboard", ScoreboardPredicate::class)
+        TAMClient.registerPredicate("team", TeamPredicate::class)
+        TAMClient.registerPredicate("player_attribute", PlayerAttributePredicate::class)
 
         TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
         TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
@@ -103,10 +108,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
         TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
         TAMClient.registerEvent("on_pause", OnPauseEvent::class)
-
-        ClientTickEvents.END_CLIENT_TICK.register { client ->
-            TAMClient.tick(client)
-        }
 
         TAMClient.registerInputWidget(
             typeOf<String>()
@@ -194,6 +195,69 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
+            typeOf<Double>()
+        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
+                prompt,
+                { widget, text ->
+                    if (text.isBlank() || text == "-") {
+                        return@TextInputWidget "0"
+                    }
+
+                    if (text.endsWith('-')) {
+                        return@TextInputWidget if (text.startsWith('-')) {
+                            text.dropWhile { it == '-' }.dropLastWhile { it == '-' }
+                        }
+                        else {
+                            "-${text.dropLast(1).dropWhile { it == '-' }}"
+                        }
+                    }
+
+                    if (text.endsWith(".")) {
+                        if (text.count { it == '.' } > 1) {
+                            return@TextInputWidget text.dropLast(1)
+                        }
+
+                        val newText = "${text.dropLastWhile { it == '.' }}."
+                        newText.dropLast(1).toDoubleOrNull()?.let {
+                            outArgs[arg.index] = it
+                            onChange()
+                        }
+
+                        return@TextInputWidget newText
+                    }
+
+                    if (!text.contains('.') && text.startsWith('0') && text.length > 1) {
+                        return@TextInputWidget text.dropWhile { it == '0' }
+                    }
+
+                    if (!text.contains('.')) {
+                        text.toDoubleOrNull()?.let {
+                            outArgs[arg.index] = it
+                            onChange()
+                        }
+
+                        return@TextInputWidget text
+                    }
+
+                    val value = text.toDoubleOrNull()
+                    if (text != "-0" && value == null) {
+                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
+                    }
+
+                    outArgs[arg.index] = value
+                    onChange()
+                    ""
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+            tooltipText?.let {
+                result.setTooltip(Tooltip.of(it))
+            }
+            result
+        }
+
+        TAMClient.registerInputWidget(
             typeOf<Boolean>()
         ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
             val result = CheckboxWidget(
@@ -211,7 +275,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         TAMClient.registerInputWidget(
-            { type -> type.isSubtypeOf(typeOf<Enum<*>>())},
+            { type -> type.isSubtypeOf(typeOf<Enum<*>>()) },
             { prompt, screen, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
                 val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
@@ -227,7 +291,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         },
                         getDisplay = {
                             Text.translatableWithFallback(
-                                "trueadaptivemusic.enum.$it", it.toString().prettify()).string },
+                                "trueadaptivemusic.enum.$it", prettifyEnum(it)).string },
                         title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
@@ -245,7 +309,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 MultiSelectDropdownWidget(
                     options,
                     0,
-                    { it.toString().prettify() },
+                    { prettifyEnum(it) },
                     { selected ->
                         outArgs[arg.index] = selected
                         onChange()
@@ -266,11 +330,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 val prettify = TAMClient.options.prettifyIdentifiers
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(arg.type)
-                    .map { id ->
-                        val key = TypedIdentifier.initializeFromIdString(arg.type, id.toString())
-                        key to (if (prettify) key.prettify() else id.toString())
-                    }
-                    .sortedBy { pair -> pair.second }
+                    .map { id -> TypedIdentifier.initializeFromIdString(arg.type, id.toString()) }
                 val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
                 DropdownWidget(
                     options,
@@ -278,6 +338,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         outArgs[arg.index] = id
                         onChange()
                     },
+                    getDisplay = { if (prettify) it.prettify() else it.toString() },
                     title = prompt,
                     startingOption = outArgs[arg.index] as? TypedIdentifier,
                     tooltipText = actualTooltipText
@@ -328,6 +389,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
             result
         }
+
+        TAMClient.start()
     }
 
     companion object {
@@ -345,6 +408,19 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         private fun isTypedIdentifierList(type: KType): Boolean {
             return type.isSubtypeOf(typeOf<List<*>>())
                     && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
+        }
+
+        private fun prettifyEnum(enum: Enum<*>): String {
+            val enumString = enum.toString()
+            return when(enumString) {
+                "Equal" -> "="
+                "NotEqual" -> "!="
+                "Greater" -> ">"
+                "GreaterOrEqual" -> ">="
+                "Lesser" -> "<"
+                "LesserOrEqual" -> "<="
+                else -> enumString.prettify()
+            }
         }
     }
 }
