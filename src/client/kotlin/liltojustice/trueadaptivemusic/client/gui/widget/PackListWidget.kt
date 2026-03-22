@@ -154,26 +154,32 @@ class PackListWidget(
             tickDelta: Float
         ) {
             musicPack ?: return
-            context.textConsumer.marqueedText(
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 Text.literal(musicPack.packName),
                 x + 3,
                 x + 3,
-                rowRight - 3,
                 y + 3,
+                rowRight - 3,
                 y + client.textRenderer.fontHeight + 3,
+                Colors.WHITE
             )
             issuesButton?.let {
                 issuesButton.x = x + width - issuesButton.width - 5
                 issuesButton.y = y + height - issuesButton.height - 5
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
-            context.textConsumer.marqueedText(
-                Text.literal(musicPack.options.description).withColor(Colors.GRAY),
+            drawScrollableText(
+                context,
+                client.textRenderer,
+                Text.literal(musicPack.options.description),
                 x + 3,
                 x + 3,
-                (issuesButton?.x ?: rowRight) - 3,
                 y + 17,
-                y + height
+                (issuesButton?.x ?: rowRight) - 3,
+                y + height,
+                Colors.GRAY
             )
         }
 
