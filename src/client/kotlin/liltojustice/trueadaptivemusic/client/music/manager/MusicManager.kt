@@ -396,8 +396,8 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         private fun jukeboxPlaying(client: MinecraftClient): Boolean {
-            return client.soundManager.soundSystem.sources.keys.any {
-                    instance ->
+            val instances = client.soundManager.soundSystem.sources.keys.toMutableSet()
+            return instances.any { instance ->
                 ((instance.category == SoundCategory.RECORDS)
                         && (instance is PositionedSoundInstance)
                         && (client.player?.let {
