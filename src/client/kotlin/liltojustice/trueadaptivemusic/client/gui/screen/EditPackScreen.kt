@@ -49,7 +49,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     private fun exportAndClose() {
-        client.setScreen(ExportPackScreen(musicPack, parent))
+        client?.setScreen(ExportPackScreen(musicPack, parent))
     }
 
     override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
