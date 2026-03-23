@@ -35,8 +35,8 @@ class SoundSystem(private val options: GameOptions) {
         return !(channels[soundInstance]?.isStopped ?: true)
     }
 
-    fun isAlmostDone(soundInstance: TAMSoundInstance?): Boolean {
-        return channels[soundInstance]?.almostDone ?: false
+    fun instanceHasSecondsLeft(soundInstance: TAMSoundInstance?, seconds: Float): Boolean {
+        return channels[soundInstance]?.hasSecondsLeft(seconds) ?: false
     }
 
     fun play(soundInstance: TAMSoundInstance) {
