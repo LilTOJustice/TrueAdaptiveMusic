@@ -81,6 +81,10 @@ class PackBrowserListWidget(
         }
     }
 
+    override fun getScrollbarX(): Int {
+        return rowRight + 3
+    }
+
     override fun getRowLeft(): Int {
         return x + 3
     }
@@ -151,6 +155,7 @@ class PackBrowserListWidget(
     }
 
     private fun initEntries() {
+        packManifest?.packs?.forEach { addEntry(Entry(it)) }
         packManifest?.packs?.forEach { addEntry(Entry(it)) }
     }
 
