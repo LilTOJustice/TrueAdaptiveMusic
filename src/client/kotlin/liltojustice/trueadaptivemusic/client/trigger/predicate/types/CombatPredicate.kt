@@ -41,7 +41,8 @@ class CombatPredicate(
 
         entityGroups.add(world.entities.mapNotNull { it as? HostileEntity }.filter { filterEntity(it) })
         entityGroups.add(world.entities.mapNotNull { it as? PhantomEntity }.filter { filterEntity(it) })
-        entityGroups.add(world.entities.mapNotNull { it as? PlayerEntity }.filter { filterEntity(it) })
+        entityGroups.add(
+            world.entities.mapNotNull { it as? PlayerEntity }.filter { it != playerEntity && filterEntity(it) })
 
         for (validEntities in entityGroups) {
             for (livingEntity: LivingEntity in validEntities) {
