@@ -156,7 +156,6 @@ class PackBrowserListWidget(
 
     private fun initEntries() {
         packManifest?.packs?.forEach { addEntry(Entry(it)) }
-        packManifest?.packs?.forEach { addEntry(Entry(it)) }
     }
 
     private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {
