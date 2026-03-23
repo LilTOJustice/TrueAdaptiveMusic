@@ -70,6 +70,7 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun stop() {
+        closeParallelMusic()
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
@@ -87,12 +88,12 @@ class MusicManager(private val client: MinecraftClient) {
 
         val identifier = treeResult.path
         val parameters = treeResult.parameters
-        val vanillaMusic = parameters.vanillaMusic
+        val parallelMusic = parameters.parallelMusic
+        val vanillaMusic = parameters.vanillaMusic && !parallelMusic
         val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaMusic }
             ?: vanillaSoundEvent?.let { listOf(it) }
             ?: emptyList()
         val ambienceToPlay = treeResult.accumulatedAmbience
-        val parallelMusic = parameters.parallelMusic
         val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
         val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
         val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
