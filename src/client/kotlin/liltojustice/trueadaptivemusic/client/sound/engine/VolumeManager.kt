@@ -7,14 +7,22 @@ class VolumeManager(private val soundSystem: SoundSystem) {
     private val fades: MutableMap<TAMSoundInstance, Fade> = mutableMapOf()
 
     fun startFade(
-        soundInstance: TAMSoundInstance, ticksToComplete: Int, targetVolume: Float, stopWhenDone: Boolean = false) {
-        soundSystem.resumeInstance(soundInstance)
+        soundInstance: TAMSoundInstance,
+        ticksToComplete: Int,
+        targetVolume: Float,
+        stopWhenDone: Boolean = false,
+        allowPause: Boolean = true
+    ) {
+        if (soundSystem.isInstancePaused(soundInstance)) {
+            soundSystem.resumeInstance(soundInstance)
+        }
+
         val existingFade = fades[soundInstance]
         if (existingFade != null) {
             existingFade.redirect(targetVolume, ticksToComplete, stopWhenDone)
         } else {
             fades[soundInstance] =
-                Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone, soundSystem)
+                Fade(soundInstance, ticksToComplete, targetVolume, stopWhenDone, allowPause, soundSystem)
         }
     }
 
@@ -37,7 +45,7 @@ class VolumeManager(private val soundSystem: SoundSystem) {
     }
 
     private fun processFade(fade: Fade) {
-        setInstanceVolume(fade.soundInstance, fade.tick())
+        setInstanceVolume(fade.soundInstance, fade.tick(), fade.allowPause)
         if (!fade.done()) {
             return
         }
@@ -62,6 +70,7 @@ class VolumeManager(private val soundSystem: SoundSystem) {
         private var totalTicks: Int,
         var targetVolume: Float,
         var stopWhenDone: Boolean,
+        var allowPause: Boolean,
         soundSystem: SoundSystem
     ) {
         private var fadeTicks: Int = 0
@@ -92,7 +101,7 @@ class VolumeManager(private val soundSystem: SoundSystem) {
         }
 
         fun done(): Boolean {
-            return fadeTicks == totalTicks
+            return fadeTicks >= totalTicks
         }
     }
 }

@@ -1,4 +1,4 @@
-# TrueAdaptiveMusic
+# True Adaptive Music
 
 ![True adaptive music logo](src/main/resources/assets/trueadaptivemusic/icon.png)
 

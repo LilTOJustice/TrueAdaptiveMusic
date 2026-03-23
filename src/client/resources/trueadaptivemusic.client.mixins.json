@@ -4,8 +4,10 @@
   "package": "liltojustice.trueadaptivemusic.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "ClientPlayNetworkHandlerMixin",
     "DebugHudMixin",
     "GameOptionsScreenMixin",
+    "MusicTrackerMixin",
     "SoundEngineMixin",
     "SoundManagerMixin",
     "SoundSystemMixin",
@@ -20,5 +22,9 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "PlayerManagerMixin",
+    "ServerScoreboardMixin"
+  ]
 }
