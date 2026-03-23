@@ -17,8 +17,6 @@ class Channel private constructor(
         get() = soundInstance.isAmbient
     var isStopped: Boolean = false
         private set
-    val almostDone: Boolean
-        get() = source.lastRead == 0
 
     fun close() {
         stop()
@@ -33,6 +31,10 @@ class Channel private constructor(
         }
 
         tasks.add(action)
+    }
+
+    fun hasSecondsLeft(seconds: Float): Boolean {
+        return source.hasSecondsLeft(seconds)
     }
 
     private fun stop() {
