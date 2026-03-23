@@ -7,7 +7,7 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 
 class PlayableSoundDirectory(private val directoryName: String, private val files: List<SoundFile>): PlayableSound {
     override fun makeSoundInstance(isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
-        return AudioFileSoundInstance(files.random(), isAmbient, isLooping, loopStartPoint)
+        return AudioFileSoundInstance(this, files.random(), isAmbient, isLooping, loopStartPoint)
     }
 
     override fun getSoundName(): String {
