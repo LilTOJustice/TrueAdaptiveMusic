@@ -69,17 +69,20 @@ class Source private constructor(private val pointer: Int) {
 
     fun play() {
         AL10.alSourcePlay(this.pointer)
+        AlUtil.checkErrors("Play")
     }
 
     fun pause() {
         if (this.sourceState == AL_PLAYING) {
             AL10.alSourcePause(this.pointer)
+            AlUtil.checkErrors("Pause")
         }
     }
 
     fun resume() {
         if (this.sourceState == AL_PAUSED) {
             AL10.alSourcePlay(this.pointer)
+            AlUtil.checkErrors("Resume")
         }
     }
 
@@ -92,6 +95,7 @@ class Source private constructor(private val pointer: Int) {
 
     fun setVolume(volume: Float) {
         AL10.alSourcef(this.pointer, AL_GAIN, volume)
+        AlUtil.checkErrors("Set Volume")
     }
 
     fun setStream(stream: AudioStream) {
@@ -104,6 +108,7 @@ class Source private constructor(private val pointer: Int) {
     fun setLooping(looping: Boolean, loopStartPoint: UInt) {
         this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
         AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
+        AlUtil.checkErrors("Set Looping")
     }
 
     private fun read() {
@@ -134,7 +139,7 @@ class Source private constructor(private val pointer: Int) {
             val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
             if (newTimestamp < lastTimestamp) {
                 AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
-                AlUtil.checkErrors("seek")
+                AlUtil.checkErrors("Seek")
             }
 
             lastTimestamp = newTimestamp
