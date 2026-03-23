@@ -36,12 +36,25 @@ class MusicTree {
 
     fun getMusicToPlay(client: MinecraftClient): Result {
         val result = root.getSatisfiedNode(client)
+        val parallel = result.node.parameters.parallelMusic
+        val parallelMusic = result.music
+            .takeIf { parallel }
+            ?.let { music ->
+                result.parallelRoot?.let { parallelRoot ->
+                    ParallelMusicContext(
+                        music + result.node.getMusicRecursive(),
+                        parallelRoot.parameters.loopStartPoints.values.firstOrNull() ?: 0U
+                    )
+                }
+            }
+
         return Result(
             result.path.joinToString(PATH_SEPARATOR),
             result.node.parameters,
             result.music,
             result.ambience,
-            result.events.values.toList()
+            result.events.values.toList(),
+            parallelMusic,
         )
     }
 
@@ -120,7 +133,10 @@ class MusicTree {
             path: List<String> = emptyList(),
             eventCollection: Map<String, MusicEvent> = emptyMap(),
             musicCollection: Set<PlayableSound> = emptySet(),
-            ambienceCollection: Set<PlayableSound> = emptySet()): Result {
+            ambienceCollection: Set<PlayableSound> = emptySet(),
+            parallelRoot: Node? = null
+        ): Result {
+            val parallelRoot = this.takeIf { parallelRoot == null } ?: parallelRoot
             predicates.forEach { predicate ->
                 try {
                     if (!predicate.testPredicate()) {
@@ -134,19 +150,32 @@ class MusicTree {
                         true)
 
                     return Result(
-                        this, emptyList(), emptyMap(), emptyList(), emptyList())
+                        this,
+                        emptyList(),
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        parallelRoot
+                    )
                 }
                 catch (e: Exception) {
                     Logger.logError("Testing predicates threw an exception.\nError: $e", true)
 
                     return Result(
-                        this, emptyList(), emptyMap(), emptyList(), emptyList())
+                        this,
+                        emptyList(),
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        parallelRoot
+                    )
                 }
 
-                val newPath = path + predicate.getTriggerId()
-                val newEvents = eventCollection + this.events.map { event -> Pair(event.getTriggerId(), event) }
+                val newPath = path + predicates.joinToString(", ") { it.getTriggerId() }
+                val newEvents = eventCollection +
+                        this.events.map { event -> Pair(event.getTriggerId(), event) }
                 val newMusic = this.music.toSet() +
-                        if (parameters.inheritMusic)
+                        if (parameters.inheritMusic || parent?.parameters?.parallelMusic == true)
                             musicCollection
                         else
                             emptySet()
@@ -157,24 +186,46 @@ class MusicTree {
                             emptySet()
 
                 for (child in children) {
-                    val result = child.getSatisfiedNode(client, newPath, newEvents, newMusic, newAmbience)
+                    val result = child.getSatisfiedNode(
+                        client,
+                        newPath,
+                        newEvents,
+                        newMusic,
+                        newAmbience,
+                        parallelRoot
+                    )
 
                     if (result.path.isNotEmpty()) {
                         return result
                     }
                 }
 
-                return Result(this, newPath, newEvents, newMusic.toList(), newAmbience.toList())
+                return Result(
+                    this,
+                    newPath,
+                    newEvents,
+                    newMusic.toList(),
+                    newAmbience.toList(),
+                    parallelRoot
+                )
             }
 
-            return Result(this, emptyList(), emptyMap(), emptyList(), emptyList())
+            return Result(
+                this,
+                emptyList(),
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                parallelRoot
+            )
         }
 
         fun newChild(
             parameters: List<Any>,
             events: List<MusicEvent>,
             music: List<PlayableSound>,
-            ambience: List<PlayableSound>): Node {
+            ambience: List<PlayableSound>
+        ): Node {
             val child = Node(music, ambience, mutableListOf(), events, Parameters.fromArgs(parameters))
             child.parent = this
             children.add(child)
@@ -251,6 +302,10 @@ class MusicTree {
             return false
         }
 
+        fun getMusicRecursive(): Set<PlayableSound> {
+            return music.toSet() + children.flatMap { it.getMusicRecursive() }.toSet()
+        }
+
         companion object {
             fun makeRoot(): Node {
                 return Node(
@@ -268,17 +323,20 @@ class MusicTree {
             val path: List<String>,
             val events: Map<String, MusicEvent>,
             val music: List<PlayableSound>,
-            val ambience: List<PlayableSound>
+            val ambience: List<PlayableSound>,
+            val parallelRoot: Node?
         )
 
         data class Parameters(
+            var vanillaMusic: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
             var enterDelay: UInt = 0U,
             var inheritMusic: Boolean = false,
             var inheritAmbience: Boolean = true,
+            var parallelMusic: Boolean = false,
             var loopMusic: Boolean = false,
-            var loopStartPoints: Map<String, UInt> = mapOf()
+            var loopStartPoints: Map<String, UInt> = mapOf(),
         ): MusicTrigger.Parameters() {
             companion object: ParametersCompanion<Parameters> {
                 override val displayNames: Map<String, String>
@@ -287,6 +345,9 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
+                        "vanillaMusic" to "When this node is selected, TAM will use vanilla music.\n\nUse this if " +
+                                "you want music to fallback to vanilla in this node, (i.e. you want mod-specific " +
+                                "music to play).\n\nCertain music-related parameters can't be used with this enabled.",
                         "trackDelay" to "After a track finishes, wait this many seconds before playing the next.",
                         "trackDelayNoise" to "Add randomly + or - this many seconds to track delay.",
                         "enterDelay" to "Wait this many seconds before starting music when entering this predicate. " +
@@ -294,6 +355,11 @@ class MusicTree {
                         "inheritMusic" to "Include this predicate's parent's music along with this predicate's music.",
                         "inheritAmbience" to "Include this predicate's parent's ambience along with this predicate's " +
                                 "ambience.",
+                        "parallelMusic" to "Allow music across nodes to be played in parallel and transition between " +
+                                "music as the active node changes.\n\nSelecting this makes all descendants " +
+                                "automatically have this checked to participate in the parallelism.\n\nOnly one " +
+                                "track is allowed per node with this property.\n\nMusic inheritance and delays " +
+                                "are disabled, and looping is forced on.",
                         "loopMusic" to "A random selected track is picked once, and then looped forever until the" +
                                 " node is left.",
                         "loopStartPoints" to "Some looping music has an intro before the loop starts.\n\nThis " +
@@ -336,6 +402,9 @@ class MusicTree {
         val parameters: Node.Parameters,
         val accumulatedMusic: List<PlayableSound>,
         val accumulatedAmbience: List<PlayableSound>,
-        val accumulatedEvents: List<MusicEvent>
+        val accumulatedEvents: List<MusicEvent>,
+        val parallelMusicContext: ParallelMusicContext?
     )
+
+    data class ParallelMusicContext(val parallelMusic: List<PlayableSound>, val loopStartPoint: UInt)
 }

@@ -6,6 +6,7 @@
   "client": [
     "DebugHudMixin",
     "GameOptionsScreenMixin",
+    "MusicTrackerMixin",
     "SoundEngineMixin",
     "SoundManagerMixin",
     "SoundSystemMixin",
