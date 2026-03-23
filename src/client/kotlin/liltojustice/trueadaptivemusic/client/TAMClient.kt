@@ -43,6 +43,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 object TAMClient {
+    const val TPS = 20
+    const val TICK_MS = (1.0 / TPS * 1000).toLong()
     val minecraftClient: MinecraftClient = MinecraftClient.getInstance()
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
@@ -77,9 +79,6 @@ object TAMClient {
     private val inputWidgetMaker = InputWidgetMaker()
     private var initialized = false
     private var musicManager: MusicManager? = null
-
-    private const val TPS = 20
-    private const val TICK_MS = (1.0 / TPS * 1000).toLong()
 
     fun start() {
         val client = MinecraftClient.getInstance()
