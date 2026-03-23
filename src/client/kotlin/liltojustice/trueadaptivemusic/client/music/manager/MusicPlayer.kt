@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.engine.VolumeManager
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
@@ -178,7 +179,8 @@ internal class MusicPlayer(private val client: MinecraftClient) {
     }
 
     private fun isTrackAlmostDone(track: Track): Boolean {
-        return soundSystem.isAlmostDone(track.currentSoundInstance)
+        return soundSystem.instanceHasSecondsLeft(
+            track.currentSoundInstance, track.crossFadeTicks.toFloat() / TAMClient.TPS)
     }
 
     private fun playInstance(soundInstance: TAMSoundInstance) {
