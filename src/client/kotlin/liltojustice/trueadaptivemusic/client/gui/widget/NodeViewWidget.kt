@@ -545,7 +545,7 @@ class NodeViewWidget(
     }
 
     private fun clearLoopIntroEndpointWidgets() {
-        queueClearWidgetsFromRender { !it.id.startsWith("loopStartPoints") }
+        queueClearWidgetsFromRender { !it.id.startsWith("loopStartPoint") }
     }
 
     private fun clearRestrictedWidgets() {
