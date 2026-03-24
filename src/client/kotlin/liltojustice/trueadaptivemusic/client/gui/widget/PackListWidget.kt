@@ -17,10 +17,14 @@ import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
 import net.minecraft.client.gui.widget.LoadingWidget
+import net.minecraft.client.texture.NativeImage
+import net.minecraft.client.texture.NativeImageBackedTexture
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import net.minecraft.util.Identifier
+import net.minecraft.util.Util
 import kotlin.coroutines.EmptyCoroutineContext
 
 class PackListWidget(
@@ -36,6 +40,7 @@ class PackListWidget(
     private var renderState = RenderState.Loading
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
+    private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {
         init()
@@ -135,6 +140,8 @@ class PackListWidget(
     }
 
     open inner class Entry(private val musicPack: MusicPack?): AlwaysSelectedEntryListWidget.Entry<Entry>() {
+        private val imageSize
+            get() = height
         private val issuesButton =
             if (musicPack?.validationMessages?.isEmpty() != false) {
                 null
@@ -154,10 +161,11 @@ class PackListWidget(
             tickDelta: Float
         ) {
             musicPack ?: return
+            renderPackImage(context)
             context.textConsumer.marqueedText(
                 Text.literal(musicPack.packName),
-                x + 3,
-                x + 3,
+                x + 5 + imageSize,
+                x + 5 + imageSize,
                 rowRight - 3,
                 y + 3,
                 y + client.textRenderer.fontHeight + 3,
@@ -167,10 +175,11 @@ class PackListWidget(
                 issuesButton.y = y + height - issuesButton.height - 5
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
+
             context.textConsumer.marqueedText(
                 Text.literal(musicPack.options.description).withColor(Colors.GRAY),
-                x + 3,
-                x + 3,
+                x + 5 + imageSize,
+                x + 5 + imageSize,
                 (issuesButton?.x ?: rowRight) - 3,
                 y + 17,
                 y + height
@@ -195,6 +204,41 @@ class PackListWidget(
 
         override fun getNarration(): Text {
             return Text.empty()
+        }
+
+        private fun renderPackImage(context: DrawContext) {
+            musicPack ?: return
+            val identifier = Identifier.of(
+                "trueadaptivemusic",
+                "logo/" +
+                        Util.replaceInvalidChars(musicPack.packName, Identifier::isPathCharacterValid)
+            )
+
+            if (identifier !in loadedPackImages) {
+                musicPack.getLogoStream()
+                    .use {
+                        client.textureManager.registerTexture(
+                            identifier,
+                            NativeImageBackedTexture(
+                                identifier::toString, NativeImage.read(it)
+                            )
+                        )
+                        loadedPackImages.add(identifier)
+                    }
+            }
+
+            context.drawTexture(
+                RenderPipelines.GUI_TEXTURED,
+                identifier,
+                x + 2,
+                y,
+                0F,
+                0F,
+                imageSize,
+                imageSize,
+                imageSize,
+                imageSize
+            )
         }
     }
 

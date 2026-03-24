@@ -16,10 +16,12 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.sound.stream.ZipInputStream
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.text.Text
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -33,8 +35,11 @@ class MusicPack private constructor(
     var meta: MusicPackMeta,
     val rules: MusicTree,
     val packName: String,
-    preValidation: MusicPackValidation? = null) {
-    private val packPath = Path(Constants.MUSIC_PACK_DIR.pathString, packName)
+    preValidation: MusicPackValidation? = null
+) {
+    val packPath = Path(Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString, packName)
+    val isZip = packPath.extension == "zip"
+
     private val validation = MusicPackValidation(preValidation)
 
     val validationMessages
@@ -52,26 +57,26 @@ class MusicPack private constructor(
         val assetsDir = Path(packDir.pathString, Constants.ASSETS_DIRNAME)
         if (!assetsDir.exists()) {
             assetsDir.createDirectory()
-            if (packWithAssets?.isZipped() == true) {
+            if (packWithAssets?.isZip == true) {
                 ZipFile(
                     Path(
                         Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString
-                )
-                    .use { zipFile ->
-                        zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
-                            .forEach { entry ->
-                                val path = Path(
-                                    assetsDir.pathString,
-                                    *Path(entry.name).drop(1).map { it.name }.toTypedArray())
-                                path.createParentDirectories()
-                                if (path.isDirectory()) {
-                                    return@forEach
-                                }
-
-                                FileOutputStream(path.pathString)
-                                    .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                ).use { zipFile ->
+                    zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
+                        .forEach { entry ->
+                            val path = Path(
+                                assetsDir.pathString,
+                                *Path(entry.name).drop(1).map { it.name }.toTypedArray()
+                            )
+                            path.createParentDirectories()
+                            if (path.isDirectory()) {
+                                return@forEach
                             }
-                    }
+
+                            FileOutputStream(path.pathString)
+                                .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                        }
+                }
             }
             else if (packWithAssets != null) {
                 val existingAssets = Path(
@@ -82,6 +87,15 @@ class MusicPack private constructor(
 
                 if (existingAssets.exists()) {
                     existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
+                }
+            }
+        }
+
+        val logoFile = Path(packDir.invariantSeparatorsPathString, Constants.LOGO_FILENAME)
+        if (!logoFile.exists()) {
+            getLogoStream(false)?.use { logoStream ->
+                logoFile.createFile().toFile().outputStream().use {
+                    logoStream.copyTo(it)
                 }
             }
         }
@@ -100,6 +114,25 @@ class MusicPack private constructor(
         return getEditPackAssetsPath().listDirectoryEntriesRecursive()
             .map { file -> makePlayableSound(file) }
             .associateBy { file -> file.getSoundName() }
+    }
+
+    fun getLogoStream(allowDefault: Boolean = true): InputStream? {
+        return (if (isZip) {
+            ZipFile(packPath.toFile()).use { zipFile ->
+                zipFile.entries().toList().firstOrNull { it.name == Constants.LOGO_FILENAME }
+            }?.let {
+                ZipInputStream(packPath, it)
+            }
+        }
+        else {
+            Path(packPath.invariantSeparatorsPathString, Constants.LOGO_FILENAME)
+                .takeIf { it.exists() }?.toFile()?.inputStream()
+        })
+            ?:
+            if (allowDefault)
+                this::class.java.classLoader.getResourceAsStream("assets/trueadaptivemusic/icon.png")
+            else
+                null
     }
 
     private fun getZipAssetNames(): List<String> {
@@ -170,6 +203,7 @@ class MusicPack private constructor(
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
         val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
+        val logoFile = Path(packOngoingDir.pathString, Constants.LOGO_FILENAME).takeIf { it.exists() }
 
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
@@ -188,6 +222,10 @@ class MusicPack private constructor(
                 metaFile.inputStream().use { it.copyTo(out) }
                 out.putNextEntry(ZipEntry(optionsFile.name))
                 optionsFile.inputStream().use { it.copyTo(out) }
+                logoFile?.let { logoFile ->
+                    out.putNextEntry(ZipEntry(logoFile.name))
+                    logoFile.inputStream().use { it.copyTo(out) }
+                }
 
                 assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
                     out.putNextEntry(
@@ -241,7 +279,7 @@ class MusicPack private constructor(
         }
 
 
-        if (isZipped()) {
+        if (isZip) {
             ZipFile(packPath.toFile()).use { zipFile ->
                 if (zipFile.entries().toList().any { it.name.contains("\\") }) {
                     validation.addWarning(
@@ -277,10 +315,6 @@ class MusicPack private constructor(
     private fun getEditPackDir(): Path {
         return Path(
             Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
-    }
-
-    private fun isZipped(): Boolean {
-        return Path(packName).extension == "zip"
     }
 
     companion object {

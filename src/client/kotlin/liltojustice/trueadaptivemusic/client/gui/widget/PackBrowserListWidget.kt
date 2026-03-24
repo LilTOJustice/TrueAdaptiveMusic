@@ -241,7 +241,7 @@ class PackBrowserListWidget(
         context?.drawTexture(
             RenderPipelines.GUI_TEXTURED,
             identifier,
-            panelX + 3 + panelWidth / 3 + xOffset,//(panelWidth * 2 / 3 - finalImageWidth) / 2,
+            panelX + 3 + panelWidth / 3 + xOffset,
             imageY + yOffset,
             0F,
             0F,
