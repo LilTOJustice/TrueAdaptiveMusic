@@ -14,8 +14,8 @@ fun SoundInstance.shouldIgnore(): Boolean {
 private fun uiToastCheck(sound: SoundInstance): Boolean {
     val events = TAMClient.currentPredicateResult?.accumulatedEvents ?: return false
 
-    return sound.id.toString() == CHALLENGE_COMPLETE
-            && events.stream().anyMatch { event: MusicEvent? -> event is OnAdvancementGetEvent }
+    return sound.id.toString() == CHALLENGE_COMPLETE &&
+            events.stream().anyMatch { event: MusicEvent? -> event is OnAdvancementGetEvent }
 }
 
 private val CHALLENGE_COMPLETE = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.id.toString()
