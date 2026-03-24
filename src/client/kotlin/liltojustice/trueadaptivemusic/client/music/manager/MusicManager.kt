@@ -5,18 +5,25 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
 import net.minecraft.util.math.Vec3d
 import kotlin.math.max
 import kotlin.reflect.KClass
 
 class MusicManager(private val client: MinecraftClient) {
     var playingEvent: MusicEvent? = null
-        private set
+    val currentMusic: TAMSoundInstance?
+        get() = musicPlayer.getPlayingInstance(mainTrack)
+    val currentAmbience: TAMSoundInstance?
+        get() = musicPlayer.getPlayingInstance(ambienceTrack)
+    val currentEventMusic: TAMSoundInstance?
+        get() = musicPlayer.getPlayingInstance(EVENT_TRACK)
 
     private val musicPlayer = MusicPlayer(client)
     private var currentMusicPredicateId: String = ""
@@ -26,11 +33,12 @@ class MusicManager(private val client: MinecraftClient) {
     private var masterVolumeOption: SimpleOption<Double> =
         client.options.getSoundVolumeOption(SoundCategory.MASTER)
     private var eventPool: List<MusicEvent> = emptyList()
-    private var lastMusic: PlayableSound? = null
-    private var lastAmbience: PlayableSound? = null
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
-    private var lastInstance: TAMSoundInstance? = null
+    private val parallelTracks = mutableMapOf<PlayableSound, String>()
+    private var musicPool = mutableSetOf<PlayableSound>()
+    private var ambiencePool = mutableSetOf<PlayableSound>()
+    private var vanillaSoundEvent: PlayableSoundEvent? = null
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -62,40 +70,43 @@ class MusicManager(private val client: MinecraftClient) {
     }
 
     fun stop() {
-        client.musicTracker.setCurrent(null)
+        closeParallelMusic()
         musicPlayer.stopAll()
         currentMusicPredicateId = ""
         oldMusicPredicateId = ""
         eventPool = emptyList()
-        lastMusic = null
+    }
+
+    fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
+        vanillaSoundEvent = PlayableSoundEvent(soundEvent.id)
     }
 
     fun tick(treeResult: MusicTree.Result, packOptions: MusicPackOptions) {
-        musicPlayer.getPlayingInstance(mainTrack)?.let {
-            client.musicTracker.setCurrent(it)
-
-            if (it != lastInstance) {
-                client.toastManager.onMusicTrackStart()
-                lastInstance = it
-            }
-        }
-
         if (masterVolumeOption.value == 0.0) {
             return
         }
 
         val identifier = treeResult.path
         val parameters = treeResult.parameters
-        val musicToPlay = treeResult.accumulatedMusic
+        val parallelMusic = parameters.parallelMusic
+        val vanillaMusic = parameters.vanillaMusic && !parallelMusic
+        val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaMusic }
+            ?: vanillaSoundEvent?.let { listOf(it) }
+            ?: emptyList()
         val ambienceToPlay = treeResult.accumulatedAmbience
-        val trackDelayNoise = parameters.trackDelayNoise
-        val trackDelay = parameters.trackDelay
-        val enterDelay = parameters.enterDelay
-        val loopMusic = parameters.loopMusic
+        val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
+        val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
+        val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
+        val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaMusic
         val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldMusicPredicateId == identifier && enterDelay == 0U
         val isEnter = currentMusicPredicateId != identifier
         val persistentNodeMusic = packOptions.persistentNodeMusic && !loopMusic
+
+        if (isEnter) {
+            musicPool.clear()
+            ambiencePool.clear()
+        }
 
         eventPool = treeResult.accumulatedEvents
 
@@ -126,8 +137,9 @@ class MusicManager(private val client: MinecraftClient) {
                 1F
             }
 
-        musicPlayer.clampTrackVolume(mainTrack, mainTrackClamp)
-        musicPlayer.clampTrackVolume(getOldMainTrack(), mainTrackClamp)
+        val finalClamp = mainTrackClamp.takeIf { parallelTracks.isEmpty() } ?: 0F
+        musicPlayer.clampTrackVolume(mainTrack, finalClamp)
+        musicPlayer.clampTrackVolume(getOldMainTrack(), finalClamp)
 
         musicPlayer.clampTrackVolume(
             ambienceTrack,
@@ -143,22 +155,17 @@ class MusicManager(private val client: MinecraftClient) {
 
         val isAmbiencePlaying = musicPlayer.isTrackPlaying(ambienceTrack)
         val isAmbienceAlmostDone = musicPlayer.isTrackAlmostDone(ambienceTrack)
-            if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
+        if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
             musicPlayer.stop(ambienceTrack)
         }
 
         if (!ambienceToPlay.isEmpty() &&
             client.player != null &&
-            (!isAmbiencePlaying || !ambienceToPlay.contains(lastAmbience) || isAmbienceAlmostDone)) {
-            val newAmbience = getPseudoRandomTrack(ambienceToPlay, lastAmbience)
+            (!isAmbiencePlaying || !ambienceToPlay.contains(currentAmbience?.playableSound) || isAmbienceAlmostDone)) {
+            val newAmbience = getPseudoRandomAmbience(ambienceToPlay)
             playNextAmbience(newAmbience)
-            lastAmbience = newAmbience
         }
 
-        if (shouldStop) {
-            client.musicTracker.setCurrent(null)
-            return
-        }
 
         if (playingEvent != null && !musicPlayer.isTrackPlaying(EVENT_TRACK)) {
             playingEvent = null
@@ -168,13 +175,28 @@ class MusicManager(private val client: MinecraftClient) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
-        if (!shouldPlay(identifier)) {
+        if (isEnter && treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
+            invokeMusicEvent(OnEnterPredicateEvent::class)
+        }
+
+        if (shouldStop) {
+            closeParallelMusic()
+
             return
         }
 
-        if (identifier != currentMusicPredicateId &&
-            treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
-            invokeMusicEvent(OnEnterPredicateEvent::class)
+        treeResult.parallelMusicContext?.let { context ->
+            musicToPlay.firstOrNull()?.let {
+                handleParallelMusic(it, context, mainTrackClamp)
+
+                return
+            }
+        }
+
+        closeParallelMusic()
+
+        if (!shouldPlay(identifier)) {
+            return
         }
 
         updatePredicateId(identifier)
@@ -184,7 +206,7 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-        val newMusic = getPseudoRandomTrack(musicToPlay, lastMusic)
+        val newMusic = getPseudoRandomMusic(musicToPlay)
         playNextMusic(
             newMusic,
             delay,
@@ -195,20 +217,51 @@ class MusicManager(private val client: MinecraftClient) {
         )
     }
 
+    private fun handleParallelMusic(
+        currentMusic: PlayableSound, context: MusicTree.ParallelMusicContext, mainTrackClamp: Float) {
+        context.parallelMusic.forEach { music ->
+            val trackName = parallelTrack(music)
+            if (music in parallelTracks) {
+                return@forEach
+            }
+
+            parallelTracks[music] = trackName
+            musicPlayer.createTrack(trackName, false, PARALLEL_CROSSFADE_TICKS, false)
+            musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
+
+            if (music != currentMusic) {
+                musicPlayer.setTrackVolume(trackName, 0F)
+            }
+        }
+
+        parallelTracks.forEach { music, trackName ->
+            if (music != currentMusic) {
+                musicPlayer.clampTrackVolume(trackName, 0F)
+            }
+            else {
+                musicPlayer.clampTrackVolume(trackName, mainTrackClamp)
+            }
+        }
+    }
+
+    private fun closeParallelMusic() {
+        parallelTracks.values.forEach { musicPlayer.removeTrack(it) }
+        parallelTracks.clear()
+    }
+
     private fun shouldPlay(identifier: String): Boolean {
         return (identifier != currentMusicPredicateId
                 || (!musicPlayer.isTrackPlaying(mainTrack)
-                        && !musicPlayer.isTrackDelayed(mainTrack)))
+                && !musicPlayer.isTrackDelayed(mainTrack)))
                 && musicVolumeOption.value > 0
     }
 
     private fun shouldKeepPlaying(
         musicToPlay: List<PlayableSound>, enterDelay: UInt, isEnter: Boolean, persistentNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
-        return mainTrackPlaying && (
-                (musicToPlay.contains(lastMusic) && enterDelay != 0U)
-                        || (persistentNodeMusic && isEnter)
-                )
+        return mainTrackPlaying &&
+                ((musicToPlay.contains(currentMusic?.playableSound) && enterDelay != 0U)
+                        || (persistentNodeMusic && isEnter))
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
@@ -259,8 +312,7 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.startNew(
             mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
         musicPlayer.crossfadeTracks(oldTrack, mainTrack)
-
-        lastMusic = newMusic
+        client.toastManager.onMusicTrackStart()
     }
 
     private fun playNextAmbience(newAmbience: PlayableSound) {
@@ -269,8 +321,6 @@ class MusicManager(private val client: MinecraftClient) {
 
         musicPlayer.startNew(ambienceTrack, newAmbience, fadeIn = true)
         musicPlayer.crossfadeTracks(oldTrack, ambienceTrack)
-
-        lastAmbience = newAmbience
     }
 
     private fun swapMainTrack() {
@@ -300,6 +350,28 @@ class MusicManager(private val client: MinecraftClient) {
         }
     }
 
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>): PlayableSound {
+        if (musicPool.isEmpty()) {
+            musicPool = musicToPlay.toMutableSet()
+        }
+
+        val randomSound = musicPool.random()
+        musicPool.remove(randomSound)
+
+        return randomSound
+    }
+
+    private fun getPseudoRandomAmbience(ambienceToPlay: List<PlayableSound>): PlayableSound {
+        if (ambiencePool.isEmpty()) {
+            ambiencePool = ambienceToPlay.toMutableSet()
+        }
+
+        val randomSound = ambiencePool.random()
+        ambiencePool.remove(randomSound)
+
+        return randomSound
+    }
+
     companion object {
         private const val MAIN_TRACK_1 = "main1"
         private const val MAIN_TRACK_2 = "main2"
@@ -308,6 +380,7 @@ class MusicManager(private val client: MinecraftClient) {
         private const val EVENT_TRACK = "event"
         private const val ON_DEMAND_TRACK = "on_demand"
         private const val MAIN_CROSSFADE_TICKS = 75
+        private const val PARALLEL_CROSSFADE_TICKS = 30
         private const val ON_DEMAND_CROSSFADE_TICKS = 10
         private const val PAUSE_VOLUME = 0.3F
         private const val BACKGROUND_VOLUME = 0.1F
@@ -324,8 +397,8 @@ class MusicManager(private val client: MinecraftClient) {
         }
 
         private fun jukeboxPlaying(client: MinecraftClient): Boolean {
-            return client.soundManager.soundSystem.sources.keys.any {
-                    instance ->
+            val instances = client.soundManager.soundSystem.sources.keys.toMutableSet()
+            return instances.any { instance ->
                 ((instance.category == SoundCategory.RECORDS)
                         && (instance is PositionedSoundInstance)
                         && (client.player?.let {
@@ -336,12 +409,8 @@ class MusicManager(private val client: MinecraftClient) {
             }
         }
 
-        private fun getPseudoRandomTrack(musicToPlay: List<PlayableSound>, lastMusic: PlayableSound?): PlayableSound {
-            if (musicToPlay.size == 1) {
-                return musicToPlay.first()
-            }
-
-            return (lastMusic?.let { musicToPlay.filterNot { it == lastMusic } } ?: musicToPlay).random()
+        private fun parallelTrack(sound: PlayableSound): String {
+            return "Parallel: ${sound.getSoundName()}"
         }
     }
 }
