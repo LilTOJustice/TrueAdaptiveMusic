@@ -10,6 +10,8 @@ Clicking this will take you to the main menu for True Adaptive Music:
 
 ![Main Menu](main_menu.png)
 
-But you don't have any Music Packs yet (probably)! Join the [community discord](https://discord.gg/v64K4hNdXu) to check out the community's creations!
+But you don't have any Music Packs yet (probably)! Just click the "Get More Packs" button in the pack list to open up the pack browser!
+
+Also, join the [community discord](https://discord.gg/v64K4hNdXu) to check out the community's creations!
 
 Once you have a pack, head over to [Quick Start: For Users](For%20Users.md). If you are want to make a Music Pack yourself and already have used the mod before, you can skip over to [Quick Start: For Creators](For%20Creators.md).

@@ -56,7 +56,7 @@ class DropdownWidget<TKey>(
         ClickableTextDisplayWidget(
             notSelectedPlaceholder
                 ?: (combinedOptions.firstOrNull { it == startingOption } ?: combinedOptions.firstOrNull())
-                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: ""
+                    ?.let { option -> getDisplay?.invoke(option) ?: option.toString() } ?: "No Options"
         )
     }
     private val titleTextWidget = ClickableTextWidget(titleText.string)
@@ -90,11 +90,11 @@ class DropdownWidget<TKey>(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         val result = super.mouseClicked(mouseX, mouseY, button)
-        textInputWidget.text = ""
         if (focusedWidget == selectedOptionWidget) {
             open()
         }
-        else if (focusedWidget != dropdownResultsWidget || dropdownResultsWidget.focusedWidget != null || !result) {
+        else if ((focusedWidget != dropdownResultsWidget && focusedWidget != textInputWidget) ||
+            dropdownResultsWidget.focusedWidget != null || !result) {
             close()
         }
 
@@ -110,6 +110,7 @@ class DropdownWidget<TKey>(
     }
 
     private fun open() {
+        textInputWidget.text = ""
         focusedWidget = textInputWidget
         onHoverOption(null)
         textInputWidget.visible = true
