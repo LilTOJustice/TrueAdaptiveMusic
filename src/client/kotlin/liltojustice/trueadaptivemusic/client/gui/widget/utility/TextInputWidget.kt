@@ -50,6 +50,10 @@ class TextInputWidget(
         return fieldWidget.keyReleased(keyCode, scanCode, modifiers)
     }
 
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        return fieldWidget.mouseClicked(mouseX, mouseY, button)
+    }
+
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         if (fieldWidget.isFocused != isFocused) {
             fieldWidget.isFocused = isFocused

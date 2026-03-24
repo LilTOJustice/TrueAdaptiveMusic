@@ -21,3 +21,4 @@ accessible method net/minecraft/client/sound/Source create ()Lnet/minecraft/clie
 accessible field net/minecraft/client/sound/Source pointer I
 accessible method net/minecraft/client/sound/AlUtil checkErrors (Ljava/lang/String;)Z
 accessible method net/minecraft/client/sound/StaticSound getStreamBufferPointer ()Ljava/util/OptionalInt;
+extendable method net/minecraft/client/gui/widget/EntryListWidget getEntryAtPosition (DD)Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
