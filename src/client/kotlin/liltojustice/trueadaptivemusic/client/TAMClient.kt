@@ -1,12 +1,21 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
+import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
@@ -15,40 +24,36 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
+import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.toast.SystemToast
+import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import java.io.IOException
+import java.util.Calendar
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 object TAMClient {
+    const val TPS = 20
+    const val TICK_MS = (1.0 / TPS * 1000).toLong()
     val minecraftClient: MinecraftClient = MinecraftClient.getInstance()
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    val hasFFmpegGlobal
-        get() =
-            try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
-            catch (_: IOException) { false }
-    val hasFFmpegLocal
-        get() =
-            try {
-                Runtime.getRuntime()
-                    .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
-                        Runtime.getRuntime()
-                            .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
-            } catch (_: IOException) {
-                false
-            }
-    var hasFFmpeg = false
-        private set
-
+    val hasFFmpeg
+        get() = hasFFmpegLocal || hasFFmpegGlobal
+    var hasFFmpegGlobal = false
+    var hasFFmpegLocal = false
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -59,8 +64,8 @@ object TAMClient {
         set(value) {
             field = value
             minecraftClient.soundManager.soundSystem.reloadSounds()
-            hasFFmpeg = hasFFmpegGlobal || hasFFmpegLocal
             musicManager?.stop()
+            getHasFFMpeg()
 
             val packName = value?.packName ?: ""
             try {
@@ -70,20 +75,27 @@ object TAMClient {
             }
         }
 
+    private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private val inputWidgetMaker = InputWidgetMaker()
-
     private var initialized = false
     private var musicManager: MusicManager? = null
 
-    fun tick(client: MinecraftClient) {
-        if (!initialized) {
-            initialize(client)
-        }
+    fun start() {
+        val client = MinecraftClient.getInstance()
+        backgroundScope.launch {
+            while (true) {
+                try {
+                    tick(client)
+                }
+                catch (e: Exception) {
+                    Logger.logError("TAM Processor thread encountered an error: ${e.message}\n" +
+                            e.stackTraceToString()
+                    )
+                }
 
-        musicPack?.let { pack ->
-            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
-            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
-        } ?: { currentPredicateResult = null }
+                delay(TICK_MS)
+            }
+        }
     }
 
     fun resetSound() {
@@ -92,6 +104,18 @@ object TAMClient {
 
     fun playSoundNow(sound: PlayableSound?) {
         musicManager?.playNow(sound)
+    }
+
+    fun getCurrentMusic(): TAMSoundInstance? {
+        return musicManager?.currentMusic
+    }
+
+    fun getCurrentAmbience(): TAMSoundInstance? {
+        return musicManager?.currentAmbience
+    }
+
+    fun getCurrentEventMusic(): TAMSoundInstance? {
+        return musicManager?.currentEventMusic
     }
 
     fun getPlayingEvent(): MusicEvent? {
@@ -131,7 +155,7 @@ object TAMClient {
         displayName: Text?,
         tooltipText: Text?,
         onChange: () -> Unit = {})
-    : ClickableWidget {
+            : ClickableWidget {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
@@ -147,8 +171,80 @@ object TAMClient {
         invokeMusicEvent(eventType.kotlin, *eventArgs)
     }
 
+    fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
+        musicManager?.setDesiredVanillaSoundEvent(soundEvent)
+    }
+
+    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
+        minecraftClient.toastManager.add(
+            SystemToast.create(
+                minecraftClient,
+                SystemToast.Type.FILE_DROP_FAILURE,
+                errorMessage,
+                Text.literal(exceptionMessage ?: "")
+            )
+        )
+    }
+
+    suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .registerTypeAdapter(
+                BrowsableMusicPack.SourceType::class.java,
+                EnumTypeAdapter(BrowsableMusicPack.SourceType::class)
+            ).create()
+        if (!ignoreCache && Constants.MANIFEST_PATH.exists()) {
+            return gson
+                .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
+        }
+
+        coroutineScope { CurlHelper.curl(Constants.MANIFEST_FILE_URL, Constants.MANIFEST_PATH_TEMP) }
+
+        if (!Constants.MANIFEST_PATH_TEMP.exists()) {
+            Logger.logError("Failed to fetch pack manifest.")
+
+            return null
+        }
+
+        val manifest = try {
+            gson
+                .fromJson(Constants.MANIFEST_PATH_TEMP.toFile().readText(), PackManifest::class.java)
+                .copy(timestamp = Calendar.getInstance().time)
+        }
+        catch (_: JsonSyntaxException) {
+            Logger.logError("Failed to parse manifest json.")
+
+            return null
+        }
+
+        Constants.MANIFEST_PATH_TEMP.moveTo(Constants.MANIFEST_PATH, true)
+        Constants.MANIFEST_PATH.toFile().writeText(gson.toJson(manifest))
+
+        manifest.packs.forEach { pack ->
+            pack.getImagePath()?.let { imagePath ->
+                pack.image?.source?.let { source ->
+                    CurlHelper.curl(source, imagePath)
+                }
+            }
+        }
+
+        return manifest
+    }
+
+    private fun tick(client: MinecraftClient) {
+        if (!initialized) {
+            initialize(client)
+        }
+
+        musicPack?.let { pack ->
+            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
+            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
+        } ?: { currentPredicateResult = null }
+    }
+
     private fun initialize(client: MinecraftClient) {
-        if (initialized || !client.soundManager.soundSystem.started) {
+        if (initialized || client.soundManager?.soundSystem?.started != true) {
             return
         }
 
@@ -178,14 +274,17 @@ object TAMClient {
         initialized = true
     }
 
-    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
-        minecraftClient.toastManager.add(
-            SystemToast.create(
-                minecraftClient,
-                SystemToast.Type.FILE_DROP_FAILURE,
-                errorMessage,
-                Text.literal(exceptionMessage ?: "")
-            )
-        )
+    private fun getHasFFMpeg() {
+        hasFFmpegGlobal =  try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
+        catch (_: IOException) { false }
+
+        hasFFmpegLocal = try {
+            Runtime.getRuntime()
+                .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
+                    Runtime.getRuntime()
+                        .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
+        } catch (_: IOException) {
+            false
+        }
     }
 }

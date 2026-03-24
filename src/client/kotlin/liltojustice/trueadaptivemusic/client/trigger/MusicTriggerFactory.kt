@@ -17,7 +17,7 @@ abstract class MusicTriggerFactory<T: MusicTrigger> (private val registry: Music
     }
 
     private fun getConstructorFromTypeName(typeName: String): KFunction<Any> {
-        return registry[typeName].primaryConstructor
+        return registry[typeName]?.primaryConstructor
             ?: throw MusicTriggerException(
                 "Trigger type with name \"$typeName\" has no primary constructor.")
     }
