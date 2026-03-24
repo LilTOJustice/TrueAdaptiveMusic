@@ -55,7 +55,8 @@ class MusicPack private constructor(
             if (packWithAssets?.isZipped() == true) {
                 ZipFile(
                     Path(
-                        Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString)
+                        Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString
+                )
                     .use { zipFile ->
                         zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
                             .forEach { entry ->
@@ -241,12 +242,13 @@ class MusicPack private constructor(
 
 
         if (isZipped()) {
-            val zipFile = ZipFile(packPath.toFile())
-            if (zipFile.entries().toList().any { it.name.contains("\\") }) {
-                validation.addWarning(
-                    "This pack has not been zipped properly, likely because it is old. " +
-                            "If you are the pack creator, you should re-export it before releasing it."
-                )
+            ZipFile(packPath.toFile()).use { zipFile ->
+                if (zipFile.entries().toList().any { it.name.contains("\\") }) {
+                    validation.addWarning(
+                        "This pack has not been zipped properly, likely because it is old. " +
+                                "If you are the pack creator, you should re-export it before releasing it."
+                    )
+                }
             }
         }
 

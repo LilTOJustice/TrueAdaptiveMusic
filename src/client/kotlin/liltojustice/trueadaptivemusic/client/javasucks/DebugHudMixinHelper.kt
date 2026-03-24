@@ -33,7 +33,7 @@ object DebugHudMixinHelper {
         val currentNodeDepth = currentNodePathElements.size
 
         rules.preorderTraverse { _, path ->
-            val text = MusicTrigger.getTruncatedTriggerId(path.last())
+            val text = MusicTrigger.getTruncatedTriggerId(path.last()).takeIf { it.isNotEmpty() } ?: "empty"
 
             if (path.all { pathElement -> currentNodePathElements.contains(pathElement) }) {
                 predicateTreeLines.add(
@@ -61,25 +61,56 @@ object DebugHudMixinHelper {
         }
 
         var rowOffset = 0
+        val fontHeight = textRenderer.fontHeight
         val playingEvent = TAMClient.getPlayingEvent()
+        val eventMusic = TAMClient.getCurrentEventMusic()
         playingEvent?.let {
             context.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
-                    "trueadaptivemusic.playing_event", "Playing event").string}: " +
-                        playingEvent.getTriggerId(),
+                    "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
+                        "(${eventMusic?.getSoundString()})",
                 1,
-                1,
+                getY(rowOffset++, fontHeight),
                 Colors.WHITE,
                 true
             )
-            rowOffset += 2
+        }
+
+        val playingMusic = TAMClient.getCurrentMusic()
+        playingMusic?.let {
+            context.drawText(
+                textRenderer,
+                "${Text.translatableWithFallback(
+                    "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
+                1,
+                getY(rowOffset++, fontHeight),
+                Colors.WHITE,
+                true
+            )
+        }
+
+        val playingAmbience = TAMClient.getCurrentAmbience()
+        playingAmbience?.let {
+            context.drawText(
+                textRenderer,
+                "${Text.translatableWithFallback(
+                    "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
+                        it.getSoundString(),
+                1,
+                getY(rowOffset++, fontHeight),
+                Colors.WHITE,
+                true
+            )
+        }
+
+        if (playingEvent != null || playingMusic != null || playingAmbience != null) {
+            rowOffset++
         }
 
         predicateTreeLines.forEachIndexed { row, line ->
-            val fontHeight = textRenderer.fontHeight
             val x: Int = line.indent * INDENT + 1
-            val y: Int = (row + rowOffset) * (fontHeight + 2) + 1
+            val y: Int = getY(row + rowOffset, fontHeight)
 
             context.drawText(textRenderer, line.text, x, y, line.color, true)
 
@@ -90,6 +121,10 @@ object DebugHudMixinHelper {
         }
     }
 
-    data class Line(val indent: Int, val text: String, val color: Int = Colors.WHITE, val selected: Boolean = false)
+    private fun getY(row: Int, fontHeight: Int): Int {
+        return row * (fontHeight + 2) + 1
+    }
+
+    private data class Line(val indent: Int, val text: String, val color: Int = Colors.WHITE, val selected: Boolean = false)
 }
 
