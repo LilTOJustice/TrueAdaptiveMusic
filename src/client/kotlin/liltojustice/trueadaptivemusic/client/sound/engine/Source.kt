@@ -16,10 +16,10 @@ class Source private constructor(private val pointer: Int) {
     private var stream: AudioStream? = null
     private var loopStartPointSeconds = 0F
     private var lastTimestamp = 0F
+    private var totalSeconds: Float? = null
+    private var totalBytes: ULong = 0UL
     val isStopped: Boolean
         get() = this.sourceState == AL_STOPPED
-    var lastRead: Int? = null
-        private set
     val sourceState: Int
         get() = if (!this.playing) AL_STOPPED else AL10.alGetSourcei(this.pointer, AL_SOURCE_STATE)
 
@@ -69,17 +69,20 @@ class Source private constructor(private val pointer: Int) {
 
     fun play() {
         AL10.alSourcePlay(this.pointer)
+        AlUtil.checkErrors("Play")
     }
 
     fun pause() {
         if (this.sourceState == AL_PLAYING) {
             AL10.alSourcePause(this.pointer)
+            AlUtil.checkErrors("Pause")
         }
     }
 
     fun resume() {
         if (this.sourceState == AL_PAUSED) {
             AL10.alSourcePlay(this.pointer)
+            AlUtil.checkErrors("Resume")
         }
     }
 
@@ -92,6 +95,7 @@ class Source private constructor(private val pointer: Int) {
 
     fun setVolume(volume: Float) {
         AL10.alSourcef(this.pointer, AL_GAIN, volume)
+        AlUtil.checkErrors("Set Volume")
     }
 
     fun setStream(stream: AudioStream) {
@@ -104,16 +108,38 @@ class Source private constructor(private val pointer: Int) {
     fun setLooping(looping: Boolean, loopStartPoint: UInt) {
         this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
         AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
+        AlUtil.checkErrors("Set Looping")
     }
 
-    private fun read() {
+    fun tick() {
+        if (this.stream != null && this.playing) {
+            val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
+            if (newTimestamp < lastTimestamp) {
+                AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
+                AlUtil.checkErrors("Seek")
+            }
+
+            lastTimestamp = newTimestamp
+
+            if (!this.read() && totalSeconds == null) {
+                totalSeconds = (totalBytes.toFloat() / bufferSize)
+            }
+        }
+    }
+
+    fun hasSecondsLeft(seconds: Float): Boolean {
+        return totalSeconds?.let { it - lastTimestamp < seconds } ?: false
+    }
+
+    private fun read(): Boolean {
         this.stream?.let { stream ->
             try {
                 val byteBuffer = stream.getBuffer(this.bufferSize)
                 if (byteBuffer == null) {
-                    this.lastRead = 0
-                    return
+                    return false
                 }
+
+                totalBytes += byteBuffer.remaining().toULong()
 
                 StaticSound(byteBuffer, stream.format)
                     .takeStreamBufferPointer()
@@ -126,21 +152,11 @@ class Source private constructor(private val pointer: Int) {
             } catch (e: IOException) {
                 Logger.logError("Failed to read from audio stream:\n${e.message}")
             }
+
+            return true
         }
-    }
 
-    fun tick() {
-        if (this.stream != null && this.playing) {
-            val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
-            if (newTimestamp < lastTimestamp) {
-                AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
-                AlUtil.checkErrors("seek")
-            }
-
-            lastTimestamp = newTimestamp
-
-            this.read()
-        }
+        return true
     }
 
     private fun removeProcessedBuffers() {
