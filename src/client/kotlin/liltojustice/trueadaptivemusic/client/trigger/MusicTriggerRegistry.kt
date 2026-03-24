@@ -35,8 +35,8 @@ abstract class MusicTriggerRegistry<T: MusicTrigger> {
         classNameToName[qualifiedName] = name
     }
 
-    operator fun get(name: String): KClass<out T> {
-        return nameToClass[name] ?: throw MusicTriggerException("Unknown trigger name \"$name\"")
+    operator fun get(name: String): KClass<out T>? {
+        return nameToClass[name]
     }
 
     operator fun get(triggerType: Class<out T>): String {
