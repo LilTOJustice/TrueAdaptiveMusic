@@ -6,7 +6,7 @@ import net.minecraft.util.Identifier
 
 class PlayableSoundEvent(private val identifier: Identifier): PlayableSound {
     override fun makeSoundInstance(isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
-        return SoundEventSoundInstance(identifier, isAmbient, isLooping)
+        return SoundEventSoundInstance(this, identifier, isAmbient, isLooping)
     }
 
     override fun getSoundName(): String {
