@@ -3,7 +3,9 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.entity.Entity
+import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.mob.GuardianEntity
 import net.minecraft.entity.mob.HostileEntity
 import net.minecraft.entity.mob.MobEntity
@@ -24,7 +26,7 @@ class CombatPredicate(
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
-    private val mobEntityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
+    private val entityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
 
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
@@ -35,14 +37,18 @@ class CombatPredicate(
         val verticalAngle = acos(playerEntity.rotationVecClient.y)
         val horizontalAngle = acos(playerEntity.rotationVecClient.x)
 
-        val entityGroups = mutableListOf<List<MobEntity>>()
+        val entityGroups = mutableListOf<List<LivingEntity>>()
 
         entityGroups.add(world.entities.mapNotNull { it as? HostileEntity }.filter { filterEntity(it) })
         entityGroups.add(world.entities.mapNotNull { it as? PhantomEntity }.filter { filterEntity(it) })
+        entityGroups.add(
+            world.entities.mapNotNull { it as? PlayerEntity }.filter { it != playerEntity && filterEntity(it) })
 
         for (validEntities in entityGroups) {
-            for (mobEntity: MobEntity in validEntities) {
-                if (processMob(mobEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
+            for (livingEntity: LivingEntity in validEntities) {
+                if (processEntity(
+                        world, livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)
+                    ) {
                     return true
                 }
             }
@@ -51,23 +57,27 @@ class CombatPredicate(
         return isAggro
     }
 
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 2
-    }
+    private fun processEntity(
+        world: ClientWorld,
+        entity: LivingEntity,
+        playerEntity: PlayerEntity,
+        verticalAngle: Double,
+        horizontalAngle: Double,
+        verticalFov: Double,
+        horizontalFov: Double
+    ): Boolean {
+        val relativeEntityPos = entity.pos.subtract(playerEntity.pos)
+        val relativeEntityPosN = relativeEntityPos.normalize()
 
-    private fun processMob(mobEntity: MobEntity, playerEntity: PlayerEntity, verticalAngle: Double, horizontalAngle: Double, verticalFov: Double, horizontalFov: Double): Boolean {
-        val relativeMobEntityPos = mobEntity.pos.subtract(playerEntity.pos)
-        val relativeMobEntityPosN = relativeMobEntityPos.normalize()
+        val entityVerticalAngle = acos(relativeEntityPosN.y)
+        val entityHorizontalAngle = acos(relativeEntityPosN.x)
 
-        val mobVerticalAngle = acos(relativeMobEntityPosN.y)
-        val mobHorizontalAngle = acos(relativeMobEntityPosN.x)
-
-        if (!isAggro && (abs(mobVerticalAngle - verticalAngle) > verticalFov / 2
-                    || abs(mobHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
+        if (!isAggro && (abs(entityVerticalAngle - verticalAngle) > verticalFov / 2
+                    || abs(entityHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
             return false
         }
 
-        if (isValidAttacker(mobEntity, playerEntity, relativeMobEntityPos)) {
+        if (isValidAttacker(world, entity, playerEntity, relativeEntityPos)) {
             isAggro = true
             aggroTimerTask?.cancel()
             aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
@@ -82,7 +92,7 @@ class CombatPredicate(
     }
 
     private fun filterEntity(entity: Entity): Boolean {
-        return mobEntityTranslationKeys
+        return entityTranslationKeys
             .takeIf { it.isNotEmpty() }
             ?.let {
                 if (blacklist)
@@ -106,17 +116,26 @@ class CombatPredicate(
             )
 
         private fun isValidAttacker(
-            mobEntity: MobEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
+            world: ClientWorld, entity: LivingEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
             val closeEnough = closeEnough(
                     displacement,
-                    Vec3d(mobEntity.boundingBox.lengthX,
-                        mobEntity.boundingBox.lengthY,
-                        mobEntity.boundingBox.lengthZ
+                    Vec3d(entity.boundingBox.lengthX,
+                        entity.boundingBox.lengthY,
+                        entity.boundingBox.lengthZ
                     )
             )
-            return (mobEntity.isAttacking && closeEnough) ||
-                    ((mobEntity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true) ||
-                    ((mobEntity is PhantomEntity) && closeEnough)
+
+            return ((entity as? MobEntity)?.isAttacking == true && closeEnough) ||
+                    (entity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true ||
+                    entity is PhantomEntity && closeEnough ||
+                    (entity as? PlayerEntity)
+                        ?.let { isEnemyPlayer(world, playerEntity, it) } == true && closeEnough
+        }
+
+        private fun isEnemyPlayer(world: ClientWorld, player: PlayerEntity, otherPlayer: PlayerEntity): Boolean {
+            val teams = world.scoreboard.teams.filter { it.playerList.contains(player.name.string) }
+
+            return teams.none { team -> team.playerList.contains(otherPlayer.name.string) }
         }
 
         private fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
