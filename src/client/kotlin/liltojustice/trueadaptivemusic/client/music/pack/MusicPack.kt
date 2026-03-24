@@ -293,7 +293,7 @@ class MusicPack private constructor(
         val loader = FabricLoader.getInstance()
         meta.requiredBridgeMods.forEach { mod ->
             if (!loader.isModLoaded(mod.id)) {
-                validation.addWarning("This pack requires the mod ${mod.name} (${mod.id}) which could not be found.")
+                validation.addWarning("This pack uses the mod ${mod.name} (${mod.id}) which could not be found.")
             }
         }
 

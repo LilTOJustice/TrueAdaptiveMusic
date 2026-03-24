@@ -128,7 +128,9 @@ class PackBrowserListWidget(
     }
 
     private fun initEntries() {
-        packManifest?.packs?.forEach { addEntry(Entry(it)) }
+        val entries = packManifest?.packs?.map { Entry(it) }
+        entries?.forEach { addEntry(it) }
+        setSelected(entries?.firstOrNull())
     }
 
     private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {

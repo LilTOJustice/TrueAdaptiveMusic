@@ -37,12 +37,15 @@ class MainScreen(private val parent: Screen): Screen(
             client?.setScreen(PackNameScreen(this))
         }.build()
         createNewPackButton.width = textRenderer.getWidth(CREATE_PACK_TEXT) + 10
+        createNewPackButton.x = 1
+        createNewPackButton.y = 1
 
         openMusicPacksButton = ButtonWidget.Builder(OPEN_MUSIC_PACKS_TEXT) {
             Util.getOperatingSystem().open(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
-        openMusicPacksButton.x = width - openMusicPacksButton.width
+        openMusicPacksButton.x = width - openMusicPacksButton.width - 1
+        openMusicPacksButton.y = 1
 
         packListWidget = PackListWidget(
             this, client!!, this.width, this.height - 96, 48, 36)
@@ -53,7 +56,7 @@ class MainScreen(private val parent: Screen): Screen(
 
         doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
         doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
-        doneButton.x = width - doneButton.width
+        doneButton.x = width - doneButton.width - 1
         doneButton.y = height - doneButton.height - 2
 
         editButton = ButtonWidget.Builder(EDIT_TEXT)
@@ -71,28 +74,30 @@ class MainScreen(private val parent: Screen): Screen(
         editButton.width = textRenderer.getWidth(EDIT_TEXT) + 10
         editButton.y = height - editButton.height - 2
         editButton.visible = TAMClient.musicPack != null
+        editButton.x = 1
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> reload() }.build()
-        refreshButton.y = createNewPackButton.y + createNewPackButton.height + 5
+        refreshButton.y = createNewPackButton.y + createNewPackButton.height + 4
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
+        refreshButton.x = 1
 
         wikiButton = ButtonWidget.builder(WIKI_TEXT)
         { _: ButtonWidget? -> Util.getOperatingSystem().open(Constants.WIKI_LINK) }.build()
-        wikiButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 5
+        wikiButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 4
         wikiButton.width = textRenderer.getWidth(WIKI_TEXT) + 10
-        wikiButton.x = width - wikiButton.width
+        wikiButton.x = width - wikiButton.width - 1
 
         optionsButton = ButtonWidget.builder(OPTIONS_TEXT)
         { _: ButtonWidget? -> client?.setScreen(OptionsScreen(this)) }.build()
         optionsButton.y = doneButton.y - doneButton.height - 3
         optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
-        optionsButton.x = width - optionsButton.width
+        optionsButton.x = width - optionsButton.width - 1
 
         ffmpegInstallButton = ButtonWidget.builder(INSTALL_FFMPEG_TEXT)
         { _: ButtonWidget? -> client?.setScreen(ConfirmFFmpegInstallScreen(this)) }.build()
         ffmpegInstallButton.y = wikiButton.y
         ffmpegInstallButton.width = textRenderer.getWidth(INSTALL_FFMPEG_TEXT) + 10
-        ffmpegInstallButton.x = wikiButton.x - ffmpegInstallButton.width - 5
+        ffmpegInstallButton.x = wikiButton.x - ffmpegInstallButton.width - 4
 
         packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
         { _: ButtonWidget? -> client?.setScreen(PackBrowserScreen(this)) }.build()

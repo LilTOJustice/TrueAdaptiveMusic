@@ -34,7 +34,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             Util.getOperatingSystem().open(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
-        openMusicPacksButton.x = width - openMusicPacksButton.width
+        openMusicPacksButton.x = width - openMusicPacksButton.width - 1
+        openMusicPacksButton.y = 1
 
         packListWidget = PackBrowserListWidget(
             client!!, this.width, this.height - 96, 48, 36)
@@ -42,11 +43,12 @@ class PackBrowserScreen(private val parent: Screen): Screen(
 
         doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
         doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
-        doneButton.x = width - doneButton.width
+        doneButton.x = width - doneButton.width - 1
         doneButton.y = height - doneButton.height - 2
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> runBlocking { coroutineScope { reload() } } }.build()
-        refreshButton.y
+        refreshButton.x = 1
+        refreshButton.y = 1
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
         lastRefreshedWidget = TextWidget(Text.empty(), textRenderer)
@@ -69,7 +71,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         ) }.build()
         discordButton.width = textRenderer.getWidth(Constants.DISCORD_JOIN_TEXT) + 10
         discordButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 2
-        discordButton.x = width - discordButton.width
+        discordButton.x = width - discordButton.width - 1
 
         addSelectableChild(packListWidget)
         addDrawableChild(openMusicPacksButton)

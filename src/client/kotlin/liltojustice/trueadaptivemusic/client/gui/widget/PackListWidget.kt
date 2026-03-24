@@ -26,6 +26,8 @@ import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
 
 class PackListWidget(
     private val screen: Screen,
@@ -44,6 +46,14 @@ class PackListWidget(
 
     init {
         init()
+    }
+
+    override fun getRowLeft(): Int {
+        return x + 3
+    }
+
+    override fun getRowRight(): Int {
+        return right - 16
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
@@ -101,6 +111,10 @@ class PackListWidget(
             .setStyle(Style.EMPTY.withBold(true).withItalic(true).withUnderline(true))
         private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.loading_packs", "Loading Packs")
+        private val EDIT_OF_PREFIX: Text = Text
+            .translatableWithFallback("trueadaptivemusic.edit_of", "Edit of ")
+            .getWithStyle(Style.EMPTY.withItalic(true))
+            .first()
         private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
             val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
             val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
@@ -137,6 +151,13 @@ class PackListWidget(
 
             return result
         }
+
+        private fun prettyPackNameText(isEdit: Boolean, packName: String): Text {
+            return if (isEdit)
+                EDIT_OF_PREFIX.copy().append(Text.literal(packName))
+            else
+                Text.literal(packName)
+        }
     }
 
     open inner class Entry(private val musicPack: MusicPack?): AlwaysSelectedEntryListWidget.Entry<Entry>() {
@@ -153,6 +174,10 @@ class PackListWidget(
                 result
             }
 
+        override fun getWidth(): Int {
+            return scrollbarX - rowLeft - 3
+        }
+
         override fun render(
             context: DrawContext,
             mouseX: Int,
@@ -162,8 +187,10 @@ class PackListWidget(
         ) {
             musicPack ?: return
             renderPackImage(context)
+            val packName = musicPack.packPath.nameWithoutExtension
+            val extension = musicPack.packPath.extension
             context.textConsumer.marqueedText(
-                Text.literal(musicPack.packName),
+                prettyPackNameText(extension != "zip", packName),
                 x + 5 + imageSize,
                 x + 5 + imageSize,
                 rowRight - 3,
