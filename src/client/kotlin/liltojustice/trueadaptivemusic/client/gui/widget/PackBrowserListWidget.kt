@@ -308,7 +308,7 @@ class PackBrowserListWidget(
                 val currentBytes = (progress.value * musicPack.size).toLong()
                 val currentString = DataSizeHelper.getDataSizeString(currentBytes)
                 val totalString = DataSizeHelper.getDataSizeString(musicPack.size)
-                val percentString = String.format("%.2f", currentBytes.toFloat() / musicPack.size * 100) + '%'
+                val percentString = String.format("%.1f", currentBytes.toFloat() / musicPack.size * 100) + '%'
                 val progressText = Text.literal("$currentString/$totalString ($percentString)")
                 context.drawText(
                     client.textRenderer,
