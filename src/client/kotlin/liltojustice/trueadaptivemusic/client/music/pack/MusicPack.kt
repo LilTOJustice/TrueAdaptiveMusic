@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.meta.MusicPackMeta
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
@@ -194,7 +195,7 @@ class MusicPack private constructor(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun save(): Path {
+    fun save(progress: Reference<Double>? = null): Path {
         val packOngoingDir = Path(
             Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
         val packDir = Path(
@@ -214,18 +215,29 @@ class MusicPack private constructor(
         val newZipPath = Path(outputPath.pathString + ".new")
 
         val newZip = newZipPath.createFile()
+        val assets = assetsDir.listDirectoryEntriesRecursive()
+        val totalFiles = 4 + assets.size
+        var filesSaved = 0
+        val increaseProgress = {
+            filesSaved++
+            progress?.value = filesSaved.toDouble() / totalFiles
+        }
         FileOutputStream(newZip.pathString).use { file ->
             ZipOutputStream(file).use { out ->
                 out.putNextEntry(ZipEntry(rulesFile.name))
                 rulesFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
                 out.putNextEntry(ZipEntry(metaFile.name))
                 metaFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
                 out.putNextEntry(ZipEntry(optionsFile.name))
                 optionsFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
                 logoFile?.let { logoFile ->
                     out.putNextEntry(ZipEntry(logoFile.name))
                     logoFile.inputStream().use { it.copyTo(out) }
                 }
+                increaseProgress()
 
                 assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
                     out.putNextEntry(
@@ -243,6 +255,7 @@ class MusicPack private constructor(
                     else {
                         entry.inputStream().use { it.copyTo(out) }
                     }
+                    increaseProgress()
                 }
             }
         }
