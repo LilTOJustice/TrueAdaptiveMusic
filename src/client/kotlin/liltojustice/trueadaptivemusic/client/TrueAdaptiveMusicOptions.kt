@@ -13,15 +13,16 @@ data class TrueAdaptiveMusicOptions(
     val selectedPack: String = "",
     val useDebugHud: Boolean = false,
     val prettifyIdentifiers: Boolean = true,
+    val audioNormalization: Boolean = true,
     val musicLoudnessBoost: LUFBoost = LUFBoost(0U),
     val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U)
 ) {
     fun save() {
-        Constants.Companion.OPTIONS_PATH.toFile().writeText(jsonEncode())
+        Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
     }
 
     fun getArgs(): List<Any?> {
-        return ReflectionHelper.Companion.getConstructorParameterValues(this).map { param -> param.value }
+        return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
     }
 
     private fun jsonEncode(): String {
@@ -39,6 +40,8 @@ data class TrueAdaptiveMusicOptions(
             "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music " +
                     "pack.",
             "prettifyIdentifiers" to "Enable or disable \"prettified\" identifiers (makes them more human friendly).",
+            "audioNormalization" to "Enable or disable audio normalization. This will make all tracks be similar" +
+                    "volume levels, and allow usage of the loudness boost options.",
             "musicLoudnessBoost" to "Increase the music volume by passing a higher LUFS value to FFmpeg. " +
                     "Requires FFmpeg.",
             "ambienceLoudnessBoost" to "Increase the ambience volume by passing a higher LUFS value to FFmpeg. " +

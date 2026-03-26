@@ -10,16 +10,27 @@ import javax.sound.sampled.AudioFormat
 class FFmpegAudioStream(inputStream: InputStream, private val format: AudioFormat, loudnessUnits: Int): AudioStream {
     private lateinit var thread: Thread
     private val ffmpeg = run {
-        val ffmpeg = ProcessBuilder(
-            TAMClient.getFFmpegCommand(),
-            "-v", "panic",
-            "-i", "pipe:0",
-            "-f", "s16le",
-            "-af", "loudnorm=I=${loudnessUnits}",
-            "-ar", "${format.sampleRate.toInt()}",
-            "-acodec", "pcm_s16le",
-            "-"
-        ).start()
+        val ffmpeg = (if (TAMClient.options.audioNormalization)
+            ProcessBuilder(
+                TAMClient.getFFmpegCommand(),
+                "-v", "panic",
+                "-i", "pipe:0",
+                "-f", "s16le",
+                "-af", "loudnorm=I=${loudnessUnits}",
+                "-ar", "${format.sampleRate.toInt()}",
+                "-acodec", "pcm_s16le",
+                "-"
+            )
+        else
+            ProcessBuilder(
+                TAMClient.getFFmpegCommand(),
+                "-v", "panic",
+                "-i", "pipe:0",
+                "-f", "s16le",
+                "-ar", "${format.sampleRate.toInt()}",
+                "-acodec", "pcm_s16le",
+                "-"
+            )).start()
 
         thread = Thread {
             try {
