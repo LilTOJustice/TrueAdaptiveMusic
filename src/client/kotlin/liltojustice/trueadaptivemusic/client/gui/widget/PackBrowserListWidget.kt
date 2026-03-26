@@ -11,6 +11,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.ImageProcessor
 import liltojustice.trueadaptivemusic.client.gui.RenderState
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
+import liltojustice.trueadaptivemusic.client.gui.text.drawMarqueedWrappedText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPackDownloader
@@ -187,14 +188,15 @@ class PackBrowserListWidget(
             .append(
                 Text.literal("\n" + SimpleDateFormat("hh:mm aa zzz").format(musicPack.lastUpdated)))
 
-        context?.drawWrappedText(
+        val flavorTextWidth = (if (restrictDescription) panelWidth / 3 else panelWidth) - 3
+        val flavorTextX = panelX + 3
+        context?.drawMarqueedWrappedText(
             client.textRenderer,
             flavorText,
-            panelX + 3,
+            flavorTextX,
+            flavorTextX + flavorTextWidth,
             y + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
-            (if (restrictDescription) panelWidth / 3 else panelWidth) - 3,
-            Colors.WHITE,
-            false
+            y + height - 3
         )
     }
 
