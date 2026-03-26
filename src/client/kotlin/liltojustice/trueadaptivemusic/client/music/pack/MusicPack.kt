@@ -131,35 +131,9 @@ class MusicPack private constructor(
         })
             ?:
             if (allowDefault)
-                this::class.java.classLoader.getResourceAsStream("assets/trueadaptivemusic/icon.png")
+                this::class.java.classLoader.getResourceAsStream(Constants.TAM_ICON_RESOURCE_PATH)
             else
                 null
-    }
-
-    private fun getZipAssetNames(): List<String> {
-        return ZipFile(packPath.toFile()).use { zipFile ->
-            zipFile
-                .entries()
-                .toList()
-                .filter { entry -> isZipAsset(entry.name) }
-                .map { entry -> Path(entry.name).name }
-        }
-    }
-
-    private fun getDirAssetNames(): List<String> {
-        return Path(packPath.pathString, Constants.ASSETS_DIRNAME)
-            .toFile()
-            .listFiles()
-            ?.map { file -> file.name }
-            ?: emptyList()
-    }
-
-    private fun getPackAssetNames(): List<String> {
-        return if (packPath.extension == "zip") {
-            getZipAssetNames()
-        } else {
-            getDirAssetNames()
-        }
     }
 
     fun initRules() {
@@ -278,20 +252,6 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
-        val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
-        if (!TAMClient.hasFFmpeg && nonOggFiles.isNotEmpty()) {
-            validation.addWarning(
-                Text.translatableWithFallback(
-                    "trueadaptivemusic.ogg_warning",
-                    "This pack contains music that is not 'ogg' type (the only type supported by " +
-                            "minecraft). This music will not play unless FFmpeg is installed on your system. You " +
-                            "can install it at the top right of your screen. If you already did, you may just need " +
-                            "to restart your system."
-                ).string
-            )
-        }
-
-
         if (isZip) {
             ZipFile(packPath.toFile()).use { zipFile ->
                 if (zipFile.entries().toList().any { it.name.contains("\\") }) {

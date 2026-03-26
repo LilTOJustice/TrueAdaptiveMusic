@@ -247,8 +247,7 @@ class PackListWidget(
                         client.textureManager.registerTexture(
                             identifier,
                             NativeImageBackedTexture(
-                                identifier::toString, NativeImage.read(it)
-                            )
+                                identifier::toString, NativeImage.read(it))
                         )
                         loadedPackImages.add(identifier)
                     }
@@ -269,7 +268,7 @@ class PackListWidget(
         }
     }
 
-    inner class VanillaEntry(): Entry(null) {
+    inner class VanillaEntry: Entry(null) {
         override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
             context.drawText(
                 client.textRenderer,

@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.widget.PackBrowserListWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.makeDoneButton
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
@@ -41,10 +41,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             client!!, this.width, this.height - 96, 48, 36)
         { musicPack -> selectedPack = musicPack }
 
-        doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
-        doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
-        doneButton.x = width - doneButton.width - 1
-        doneButton.y = height - doneButton.height - 2
+        doneButton = makeDoneButton(textRenderer, width, height) { client?.setScreen(parent) }
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> runBlocking { coroutineScope { reload() } } }.build()
         refreshButton.x = 1

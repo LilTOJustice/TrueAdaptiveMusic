@@ -1,30 +1,27 @@
 package liltojustice.trueadaptivemusic.client.sound.stream
 
-import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import net.minecraft.client.sound.AudioStream
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
-import kotlin.io.path.pathString
 
 class FFmpegAudioStream(inputStream: InputStream, private val format: AudioFormat, loudnessUnits: Int): AudioStream {
     private lateinit var thread: Thread
     private val ffmpeg = run {
-        val command = if (TAMClient.hasFFmpegGlobal) "ffmpeg" else Constants.FFMPEG_PATH.pathString
         val ffmpeg = ProcessBuilder(
-            command,
+            TAMClient.getFFmpegCommand(),
             "-v", "panic",
             "-i", "pipe:0",
             "-f", "s16le",
             "-af", "loudnorm=I=${loudnessUnits}",
             "-ar", "${format.sampleRate.toInt()}",
             "-acodec", "pcm_s16le",
-            "-")
-            .start()
+            "-"
+        ).start()
 
-        thread = Thread() {
+        thread = Thread {
             try {
                 inputStream.use {
                     it.copyTo(ffmpeg.outputStream)

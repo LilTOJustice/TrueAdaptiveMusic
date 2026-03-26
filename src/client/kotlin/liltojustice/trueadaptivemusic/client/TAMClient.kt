@@ -37,6 +37,7 @@ import java.util.Calendar
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
@@ -50,10 +51,7 @@ object TAMClient {
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    val hasFFmpeg
-        get() = hasFFmpegLocal || hasFFmpegGlobal
-    var hasFFmpegGlobal = false
-    var hasFFmpegLocal = false
+    val isWindows = "windows" in System.getProperty("os.name")
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -65,7 +63,6 @@ object TAMClient {
             field = value
             minecraftClient.soundManager.soundSystem.reloadSounds()
             musicManager?.stop()
-            getHasFFMpeg()
 
             val packName = value?.packName ?: ""
             try {
@@ -186,6 +183,14 @@ object TAMClient {
         )
     }
 
+    fun getFFProbeCommand(): String {
+        return (if (isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH).invariantSeparatorsPathString
+    }
+
+    fun getFFmpegCommand(): String {
+        return (if (isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH).invariantSeparatorsPathString
+    }
+
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
         val gson = GsonBuilder()
             .setPrettyPrinting()
@@ -272,19 +277,5 @@ object TAMClient {
         }
 
         initialized = true
-    }
-
-    private fun getHasFFMpeg() {
-        hasFFmpegGlobal =  try { Runtime.getRuntime().exec(arrayOf("ffmpeg")).waitFor() in listOf(0, 1) }
-        catch (_: IOException) { false }
-
-        hasFFmpegLocal = try {
-            Runtime.getRuntime()
-                .exec(arrayOf(Constants.FFMPEG_PATH.pathString)).waitFor() in listOf(0, 1) &&
-                    Runtime.getRuntime()
-                        .exec(arrayOf(Constants.FFPROBE_PATH.pathString)).waitFor() in listOf(0, 1)
-        } catch (_: IOException) {
-            false
-        }
     }
 }

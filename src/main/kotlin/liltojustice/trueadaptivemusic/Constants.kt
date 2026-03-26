@@ -4,21 +4,27 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.pathString
 
 class Constants {
     companion object {
         val MUSIC_PACK_DIR = Path("trueadaptivemusicpacks")
         val OPTIONS_DIR = Path("config", "trueadaptivemusic")
-        val OPTIONS_PATH = Path(OPTIONS_DIR.pathString, "trueadaptivemusic.json")
-        val FFMPEG_PATH = Path(OPTIONS_DIR.pathString, "ffmpeg.exe")
-        val FFPROBE_PATH = Path(OPTIONS_DIR.pathString, "ffprobe.exe")
+        val OPTIONS_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "trueadaptivemusic.json")
+        val FFMPEG_WINDOWS_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffmpeg.exe")
+        val FFPROBE_WINDOWS_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffprobe.exe")
+        val FFMPEG_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffmpeg")
+        val FFPROBE_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffprobe")
         val PACK_BROWSER_CACHE_DIR = Path(".trueadaptivemusiccache")
         val MANIFEST_PATH = Path(PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json")
         val MANIFEST_PATH_TEMP = Path(
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json.tmp")
         val DISCORD_JOIN_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.join_discord", "Join the Discord!")
+        const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
+        const val FFMPEG_WINDOWS_RESOURCE_PATH = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
+        const val FFPROBE_WINDOWS_RESOURCE_PATH = "assets/trueadaptivemusic/ffmpeg/ffprobe.exe"
+        const val FFMPEG_RESOURCE_PATH = "assets/trueadaptivemusic/ffmpeg/ffmpeg"
+        const val FFPROBE_RESOURCE_PATH = "assets/trueadaptivemusic/ffmpeg/ffprobe"
         const val RULES_FILENAME = "rules.json"
         const val PACK_OPTIONS_FILENAME = "options.json"
         const val META_FILENAME = "meta.json"

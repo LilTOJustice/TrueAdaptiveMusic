@@ -3,13 +3,13 @@ package liltojustice.trueadaptivemusic.client.gui.screen
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.makeDoneButton
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Util
@@ -27,7 +27,6 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var refreshButton: ButtonWidget
     private lateinit var wikiButton: ButtonWidget
     private lateinit var optionsButton: ButtonWidget
-    private lateinit var ffmpegInstallButton: ButtonWidget
     private lateinit var packBrowserButton: ButtonWidget
     private lateinit var discordButton: ButtonWidget
 
@@ -54,10 +53,7 @@ class MainScreen(private val parent: Screen): Screen(
             editButton.visible = musicPack != null
         }
 
-        doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
-        doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
-        doneButton.x = width - doneButton.width - 1
-        doneButton.y = height - doneButton.height - 2
+        doneButton = makeDoneButton(textRenderer, width, height) { client?.setScreen(parent) }
 
         editButton = ButtonWidget.Builder(EDIT_TEXT)
         {
@@ -92,12 +88,6 @@ class MainScreen(private val parent: Screen): Screen(
         optionsButton.y = doneButton.y - doneButton.height - 3
         optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
         optionsButton.x = width - optionsButton.width - 1
-
-        ffmpegInstallButton = ButtonWidget.builder(INSTALL_FFMPEG_TEXT)
-        { _: ButtonWidget? -> client?.setScreen(ConfirmFFmpegInstallScreen(this)) }.build()
-        ffmpegInstallButton.y = wikiButton.y
-        ffmpegInstallButton.width = textRenderer.getWidth(INSTALL_FFMPEG_TEXT) + 10
-        ffmpegInstallButton.x = wikiButton.x - ffmpegInstallButton.width - 4
 
         packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
         { _: ButtonWidget? -> client?.setScreen(PackBrowserScreen(this)) }.build()
@@ -134,10 +124,6 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(optionsButton)
         addDrawableChild(packBrowserButton)
         addDrawableChild(discordButton)
-
-        if (!TAMClient.hasFFmpeg) {
-            addDrawableChild(ffmpegInstallButton)
-        }
     }
 
     override fun close() {
@@ -169,8 +155,6 @@ class MainScreen(private val parent: Screen): Screen(
         private val EDIT_TEXT = Text.translatableWithFallback("trueadaptivemusic.edit_pack", "Edit Pack")
         private val WIKI_TEXT = Text.translatableWithFallback("trueadaptivemusic.open_wiki", "Open Wiki")
         private val OPTIONS_TEXT = Text.translatableWithFallback("trueadaptivemusic.options", "Options")
-        private val INSTALL_FFMPEG_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.ffmpeg_install", "Install FFmpeg")
         private val PACK_BROWSER_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.open_pack_browser", "Get More Packs")
     }
