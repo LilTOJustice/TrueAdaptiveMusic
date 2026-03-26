@@ -165,6 +165,12 @@ class PackBrowserListWidget(
             .append(Text.literal("Title:\n").withColor(Colors.GRAY))
             .append(musicPack.name)
 
+        musicPack.author?.let {
+            flavorText
+                .append(Text.literal("\n\nAuthor:\n").withColor(Colors.GRAY))
+                .append(it)
+        }
+
         musicPack.version?.let {
             flavorText
                 .append(Text.literal("\n\nVersion:\n").withColor(Colors.GRAY))
