@@ -92,11 +92,11 @@ class MusicPack private constructor(
             }
         }
 
-        val logoFile = Path(packDir.invariantSeparatorsPathString, Constants.LOGO_FILENAME)
-        if (!logoFile.exists()) {
-            getLogoStream(false)?.use { logoStream ->
-                logoFile.createFile().toFile().outputStream().use {
-                    logoStream.copyTo(it)
+        val iconFile = Path(packDir.invariantSeparatorsPathString, Constants.ICON_FILENAME)
+        if (!iconFile.exists()) {
+            getIconStream(false)?.use { iconStream ->
+                iconFile.createFile().toFile().outputStream().use {
+                    iconStream.copyTo(it)
                 }
             }
         }
@@ -117,16 +117,16 @@ class MusicPack private constructor(
             .associateBy { file -> file.getSoundName() }
     }
 
-    fun getLogoStream(allowDefault: Boolean = true): InputStream? {
+    fun getIconStream(allowDefault: Boolean = true): InputStream? {
         return (if (isZip) {
             ZipFile(packPath.toFile()).use { zipFile ->
-                zipFile.entries().toList().firstOrNull { it.name == Constants.LOGO_FILENAME }
+                zipFile.entries().toList().firstOrNull { it.name == Constants.ICON_FILENAME }
             }?.let {
                 ZipInputStream(packPath, it)
             }
         }
         else {
-            Path(packPath.invariantSeparatorsPathString, Constants.LOGO_FILENAME)
+            Path(packPath.invariantSeparatorsPathString, Constants.ICON_FILENAME)
                 .takeIf { it.exists() }?.toFile()?.inputStream()
         })
             ?:
@@ -178,7 +178,7 @@ class MusicPack private constructor(
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
         val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
-        val logoFile = Path(packOngoingDir.pathString, Constants.LOGO_FILENAME).takeIf { it.exists() }
+        val iconFile = Path(packOngoingDir.pathString, Constants.ICON_FILENAME).takeIf { it.exists() }
 
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
@@ -207,9 +207,9 @@ class MusicPack private constructor(
                 out.putNextEntry(ZipEntry(optionsFile.name))
                 optionsFile.inputStream().use { it.copyTo(out) }
                 increaseProgress()
-                logoFile?.let { logoFile ->
-                    out.putNextEntry(ZipEntry(logoFile.name))
-                    logoFile.inputStream().use { it.copyTo(out) }
+                iconFile?.let { iconFile ->
+                    out.putNextEntry(ZipEntry(iconFile.name))
+                    iconFile.inputStream().use { it.copyTo(out) }
                 }
                 increaseProgress()
 

@@ -237,12 +237,12 @@ class PackListWidget(
             musicPack ?: return
             val identifier = Identifier.of(
                 "trueadaptivemusic",
-                "logo/" +
+                "icon/" +
                         Util.replaceInvalidChars(musicPack.packName, Identifier::isPathCharacterValid)
             )
 
             if (identifier !in loadedPackImages) {
-                musicPack.getLogoStream()
+                musicPack.getIconStream()
                     .use {
                         client.textureManager.registerTexture(
                             identifier,
