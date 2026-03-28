@@ -42,16 +42,17 @@ import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.time.Duration.Companion.milliseconds
 
 object TAMClient {
     const val TPS = 20
-    const val TICK_MS = (1.0 / TPS * 1000).toLong()
+    val TICK_MS = (1.0 / TPS * 1000).milliseconds
     val minecraftClient: MinecraftClient = MinecraftClient.getInstance()
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    val isWindows = "windows" in System.getProperty("os.name")
+    val isWindows = "windows" in System.getProperty("os.name").lowercase()
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -151,8 +152,8 @@ object TAMClient {
         arg: InputWidgetMaker.WidgetArg,
         displayName: Text?,
         tooltipText: Text?,
-        onChange: () -> Unit = {})
-            : ClickableWidget {
+        onChange: () -> Unit = {}
+    ): ClickableWidget {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
