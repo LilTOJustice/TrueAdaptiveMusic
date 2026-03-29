@@ -10,7 +10,6 @@ import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.ImageProcessor
 import liltojustice.trueadaptivemusic.client.gui.RenderState
-import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import liltojustice.trueadaptivemusic.client.gui.text.drawMarqueedWrappedText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
@@ -186,7 +185,7 @@ class PackBrowserListWidget(
 
         musicPack.author?.let {
             flavorText
-                .append(Text.literal("\n\nAuthor:\n").withColor(Colors.GRAY))
+                .append(Text.literal("\n\nAuthor:\n").setStyle(Style.EMPTY.withColor(Colors.GRAY)))
                 .append(it)
         }
 
@@ -227,8 +226,8 @@ class PackBrowserListWidget(
             flavorText,
             flavorTextX,
             flavorTextX + flavorTextWidth,
-            y + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
-            y + height - 3
+            top + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
+            bottom - 3
         )
     }
 

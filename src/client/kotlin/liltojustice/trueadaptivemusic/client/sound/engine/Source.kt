@@ -136,7 +136,7 @@ class Source private constructor(private val pointer: Int) {
     private fun read(): Boolean {
         this.stream?.let { stream ->
             try {
-                val byteBuffer = stream.read(this.bufferSize) ?: return false
+                val byteBuffer = stream.getBuffer(this.bufferSize) ?: return false
 
                 totalBytes += byteBuffer.remaining().toULong()
 
