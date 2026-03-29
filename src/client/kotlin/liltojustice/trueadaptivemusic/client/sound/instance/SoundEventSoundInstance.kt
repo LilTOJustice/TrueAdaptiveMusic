@@ -39,7 +39,7 @@ class SoundEventSoundInstance(
         val sound = sound ?: return null
         val inputStreamGetter = { soundManager.soundSystem.soundLoader.resourceFactory.open(sound.location) }
 
-        return getAudioStream(sound.location.toString(), "ogg", inputStreamGetter, isAmbient)
+        return getAudioStream(sound.location.toString(), inputStreamGetter, isAmbient)
     }
 
     override fun getSoundString(): String {
