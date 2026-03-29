@@ -8,6 +8,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 
 data class BrowsableMusicPack(
     val name: String,
+    val author: String?,
     val version: String?,
     val description: String?,
     val source: String,
