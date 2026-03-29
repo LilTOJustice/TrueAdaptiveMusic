@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.widget.PackBrowserListWidget
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.makeDoneButton
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.screen.ScreenTexts
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
@@ -35,7 +35,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             Util.getOperatingSystem().open(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
-        openMusicPacksButton.x = width - openMusicPacksButton.width
+        openMusicPacksButton.x = width - openMusicPacksButton.width - 1
+        openMusicPacksButton.y = 1
 
         packListWidget = PackBrowserListWidget(
             client!!,
@@ -46,13 +47,11 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             36
         ) { musicPack -> selectedPack = musicPack }
 
-        doneButton = ButtonWidget.builder(ScreenTexts.DONE) { _: ButtonWidget? -> client?.setScreen(parent) }.build()
-        doneButton.width = textRenderer.getWidth(ScreenTexts.DONE) + 10
-        doneButton.x = width - doneButton.width
-        doneButton.y = height - doneButton.height - 2
+        doneButton = makeDoneButton(textRenderer, width, height) { client?.setScreen(parent) }
 
         refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> runBlocking { coroutineScope { reload() } } }.build()
-        refreshButton.y
+        refreshButton.x = 1
+        refreshButton.y = 1
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
         lastRefreshedWidget = TextWidget(Text.empty(), textRenderer)
@@ -76,7 +75,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         ) }.build()
         discordButton.width = textRenderer.getWidth(Constants.DISCORD_JOIN_TEXT) + 10
         discordButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 2
-        discordButton.x = width - discordButton.width
+        discordButton.x = width - discordButton.width - 1
 
         addSelectableChild(packListWidget)
         addDrawableChild(openMusicPacksButton)

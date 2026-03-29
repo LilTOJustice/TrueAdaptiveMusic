@@ -15,6 +15,21 @@ import kotlin.math.max
 import kotlin.math.min
 
 class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
+    override fun test(): Boolean {
+        val client = MinecraftClient.getInstance()
+        val serverWorld = client.server?.worlds?.firstOrNull { world ->
+            world.registryKey == client.world?.registryKey } ?: return false
+        val x: Double = client.player?.x ?: return false
+        val y: Double = client.player?.y ?: return false
+        val z: Double = client.player?.z ?: return false
+
+        return fullStructureTest(serverWorld, x, y, z)
+    }
+
+    override fun getTickRate(): Int {
+        return super.getTickRate() * 20
+    }
+
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.ofFloored(x, y, z)
         val structureAccessor = world.structureAccessor
@@ -27,21 +42,6 @@ class StructurePredicate internal constructor(private val structures: List<Struc
 
                 testStructure(structureAccessor, structure, blockPos)
             }
-    }
-
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 2
-    }
-
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val serverWorld = client.server?.worlds?.firstOrNull { world ->
-            world.registryKey == client.world?.registryKey } ?: return false
-        val x: Double = client.player?.x ?: return false
-        val y: Double = client.player?.y ?: return false
-        val z: Double = client.player?.z ?: return false
-
-        return serverWorld.canSetBlock(BlockPos.ofFloored(x, y, z)) && fullStructureTest(serverWorld, x, y, z)
     }
 
     companion object: MusicPredicateCompanion {

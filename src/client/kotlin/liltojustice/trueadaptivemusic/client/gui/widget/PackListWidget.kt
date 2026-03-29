@@ -13,11 +13,18 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
+import net.minecraft.client.gui.widget.LoadingWidget
+import net.minecraft.client.texture.NativeImage
+import net.minecraft.client.texture.NativeImageBackedTexture
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import net.minecraft.util.Identifier
+import net.minecraft.util.Util
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
 
 class PackListWidget(
     private val screen: Screen,
@@ -32,13 +39,35 @@ class PackListWidget(
     client, width, height, top, bottom, itemHeight) {
     private var renderState = RenderState.Loading
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
+    private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
+    private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {
         init()
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
-        super.render(context, mouseX, mouseY, deltaTicks)
+    override fun getRowLeft(): Int {
+        return x + 3
+    }
+
+    override fun getRowRight(): Int {
+        return right - 16
+    }
+
+    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
+        context?.drawTexture(
+            RenderPipelines.GUI_TEXTURED,
+            MENU_BACKGROUND_TEXTURE,
+            x,
+            y,
+            0F,
+            0F,
+            width,
+            height,
+            32,
+            32
+        )
+        super.renderWidget(context, mouseX, mouseY, deltaTicks)
         if (renderState == RenderState.Loading) {
             context?.drawText(
                 client.textRenderer,
@@ -89,6 +118,10 @@ class PackListWidget(
             .setStyle(Style.EMPTY.withBold(true).withItalic(true).withUnderline(true))
         private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.loading_packs", "Loading Packs")
+        private val EDIT_OF_PREFIX: Text = Text
+            .translatableWithFallback("trueadaptivemusic.edit_of", "Edit of ")
+            .getWithStyle(Style.EMPTY.withItalic(true))
+            .first()
         private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
             val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
             val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
@@ -125,9 +158,18 @@ class PackListWidget(
 
             return result
         }
+
+        private fun prettyPackNameText(isEdit: Boolean, packName: String): Text {
+            return if (isEdit)
+                EDIT_OF_PREFIX.copy().append(Text.literal(packName))
+            else
+                Text.literal(packName)
+        }
     }
 
     open inner class Entry(private val musicPack: MusicPack?): AlwaysSelectedEntryListWidget.Entry<Entry>() {
+        private val imageSize
+            get() = height
         private val issuesButton =
             if (musicPack?.validationMessages?.isEmpty() != false) {
                 null
@@ -138,6 +180,10 @@ class PackListWidget(
 
                 result
             }
+
+        override fun getWidth(): Int {
+            return scrollbarX - rowLeft - 3
+        }
 
         override fun render(
             context: DrawContext,
@@ -152,11 +198,14 @@ class PackListWidget(
             tickDelta: Float
         ) {
             musicPack ?: return
-            drawScrollableText(
-                context,
-                client.textRenderer,
-                Text.literal(musicPack.packName),
-                x + 3,
+            renderPackImage(context)
+            val packName = musicPack.packPath.nameWithoutExtension
+            val extension = musicPack.packPath.extension
+            context.textConsumer.marqueedText(
+                prettyPackNameText(extension != "zip", packName),
+                x + 5 + imageSize,
+                x + 5 + imageSize,
+                rowRight - 3,
                 y + 3,
                 rowRight - 3,
                 y + client.textRenderer.fontHeight + 3,
@@ -167,11 +216,12 @@ class PackListWidget(
                 issuesButton.y = y + entryHeight - issuesButton.height - 5
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
-            drawScrollableText(
-                context,
-                client.textRenderer,
-                Text.literal(musicPack.options.description),
-                x + 3,
+
+            context.textConsumer.marqueedText(
+                Text.literal(musicPack.options.description).withColor(Colors.GRAY),
+                x + 5 + imageSize,
+                x + 5 + imageSize,
+                (issuesButton?.x ?: rowRight) - 3,
                 y + 17,
                 (issuesButton?.x ?: rowRight) - 3,
                 y + entryHeight,
@@ -198,21 +248,44 @@ class PackListWidget(
         override fun getNarration(): Text {
             return Text.empty()
         }
+
+        private fun renderPackImage(context: DrawContext) {
+            musicPack ?: return
+            val identifier = Identifier.of(
+                "trueadaptivemusic",
+                "icon/" +
+                        Util.replaceInvalidChars(musicPack.packName, Identifier::isPathCharacterValid)
+            )
+
+            if (identifier !in loadedPackImages) {
+                musicPack.getIconStream()
+                    .use {
+                        client.textureManager.registerTexture(
+                            identifier,
+                            NativeImageBackedTexture(
+                                identifier::toString, NativeImage.read(it))
+                        )
+                        loadedPackImages.add(identifier)
+                    }
+            }
+
+            context.drawTexture(
+                RenderPipelines.GUI_TEXTURED,
+                identifier,
+                x + 2,
+                y,
+                0F,
+                0F,
+                imageSize,
+                imageSize,
+                imageSize,
+                imageSize
+            )
+        }
     }
 
-    inner class VanillaEntry(): Entry(null) {
-        override fun render(
-            context: DrawContext,
-            index: Int,
-            y: Int,
-            x: Int,
-            entryWidth: Int,
-            entryHeight: Int,
-            mouseX: Int,
-            mouseY: Int,
-            hovered: Boolean,
-            tickDelta: Float
-        ) {
+    inner class VanillaEntry: Entry(null) {
+        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
             context.drawText(
                 client.textRenderer,
                 VANILLA_TEXT,

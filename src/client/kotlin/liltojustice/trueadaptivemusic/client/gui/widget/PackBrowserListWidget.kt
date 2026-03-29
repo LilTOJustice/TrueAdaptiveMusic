@@ -10,6 +10,8 @@ import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.ImageProcessor
 import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
+import liltojustice.trueadaptivemusic.client.gui.text.drawMarqueedWrappedText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWidget
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPackDownloader
@@ -146,7 +148,9 @@ class PackBrowserListWidget(
     }
 
     private fun initEntries() {
-        packManifest?.packs?.forEach { addEntry(Entry(it)) }
+        val entries = packManifest?.packs?.map { Entry(it) }
+        entries?.forEach { addEntry(it) }
+        setSelected(entries?.firstOrNull())
     }
 
     private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {
@@ -180,6 +184,12 @@ class PackBrowserListWidget(
             .append(Text.literal("Title:\n").getWithStyle(Style.EMPTY.withColor(Colors.GRAY)).first())
             .append(musicPack.name)
 
+        musicPack.author?.let {
+            flavorText
+                .append(Text.literal("\n\nAuthor:\n").withColor(Colors.GRAY))
+                .append(it)
+        }
+
         musicPack.version?.let {
             flavorText
                 .append(
@@ -210,13 +220,15 @@ class PackBrowserListWidget(
             .append(
                 Text.literal("\n" + SimpleDateFormat("hh:mm aa zzz").format(musicPack.lastUpdated)))
 
-        context?.drawTextWrapped(
+        val flavorTextWidth = (if (restrictDescription) panelWidth / 3 else panelWidth) - 3
+        val flavorTextX = panelX + 3
+        context?.drawMarqueedWrappedText(
             client.textRenderer,
             flavorText,
-            panelX + 3,
-            top + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
-            (if (restrictDescription) panelWidth / 3 else panelWidth) - 3,
-            Colors.WHITE
+            flavorTextX,
+            flavorTextX + flavorTextWidth,
+            y + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
+            y + height - 3
         )
     }
 
@@ -264,7 +276,7 @@ class PackBrowserListWidget(
 
         context?.drawTexture(
             identifier,
-            panelX + 3 + panelWidth / 3 + xOffset,//(panelWidth * 2 / 3 - finalImageWidth) / 2,
+            panelX + 3 + panelWidth / 3 + xOffset,
             imageY + yOffset,
             0F,
             0F,
@@ -337,7 +349,7 @@ class PackBrowserListWidget(
                 val currentBytes = (progress.value * musicPack.size).toLong()
                 val currentString = DataSizeHelper.getDataSizeString(currentBytes)
                 val totalString = DataSizeHelper.getDataSizeString(musicPack.size)
-                val percentString = String.format("%.2f", currentBytes.toFloat() / musicPack.size * 100) + '%'
+                val percentString = String.format("%.1f", currentBytes.toFloat() / musicPack.size * 100) + '%'
                 val progressText = Text.literal("$currentString/$totalString ($percentString)")
                 context.drawText(
                     client.textRenderer,
