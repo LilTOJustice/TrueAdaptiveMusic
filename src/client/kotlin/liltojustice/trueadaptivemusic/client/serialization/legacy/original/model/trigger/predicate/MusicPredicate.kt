@@ -13,6 +13,7 @@ import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.StructureSetPredicate
+import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types.WeatherPredicate
 
 object MusicPredicate: Convertible {
     override fun convert(json: JsonElement): JsonObject {
@@ -44,6 +45,7 @@ object MusicPredicate: Convertible {
             "status_effect" -> StatusEffectPredicate
             "structure" -> StructurePredicate
             "structure_set" -> StructureSetPredicate
+            "weather" -> WeatherPredicate
             else -> null
         }
     }
