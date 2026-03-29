@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
 import net.minecraft.client.gui.widget.LoadingWidget
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.texture.NativeImage
 import net.minecraft.client.texture.NativeImageBackedTexture
 import net.minecraft.text.MutableText
@@ -23,6 +24,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
+import net.minecraft.util.math.MathHelper
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
@@ -52,6 +54,30 @@ class PackListWidget(
 
     override fun getRowRight(): Int {
         return right - 16
+    }
+
+    override fun drawSelectionHighlight(
+        context: DrawContext,
+        y: Int,
+        entryWidth: Int,
+        entryHeight: Int,
+        borderColor: Int,
+        fillColor: Int
+    ) {
+        val i = rowLeft
+        val j = rowRight
+        context.fill(i, y - 2, j, y + entryHeight + 2, borderColor)
+        context.fill(i + 1, y - 1, j - 1, y + entryHeight + 1, fillColor)
+    }
+
+    override fun getEntryAtPosition(x: Double, y: Double): Entry? {
+        val j = rowLeft
+        val k = rowRight
+        val m = MathHelper.floor(y - this.y.toDouble()) - this.headerHeight + this.scrollAmount.toInt() - 4
+        val n = m / this.itemHeight
+        return this.children().takeIf {
+            x >= j.toDouble() && x <= k.toDouble() && m >= 0 && n < this.entryCount
+        }?.get(n)
     }
 
     override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
@@ -113,6 +139,7 @@ class PackListWidget(
             .translatableWithFallback("trueadaptivemusic.edit_of", "Edit of ")
             .getWithStyle(Style.EMPTY.withItalic(true))
             .first()
+
         private fun getValidationText(validation: List<MusicPackValidation.ValidationMessage>): Text {
             val warnings = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Warning }
             val errors = validation.filter { it.type == MusicPackValidation.ValidationMessage.Type.Error }
@@ -159,8 +186,6 @@ class PackListWidget(
     }
 
     open inner class Entry(private val musicPack: MusicPack?): AlwaysSelectedEntryListWidget.Entry<Entry>() {
-        private val imageSize
-            get() = height
         private val issuesButton =
             if (musicPack?.validationMessages?.isEmpty() != false) {
                 null
@@ -172,7 +197,7 @@ class PackListWidget(
                 result
             }
 
-        override fun getWidth(): Int {
+        fun getWidth(): Int {
             return scrollbarX - rowLeft - 3
         }
 
@@ -189,14 +214,16 @@ class PackListWidget(
             tickDelta: Float
         ) {
             musicPack ?: return
-            renderPackImage(context)
+            val entryWidth = getWidth()
             val packName = musicPack.packPath.nameWithoutExtension
             val extension = musicPack.packPath.extension
-            context.textConsumer.marqueedText(
+            renderPackImage(context,  x, y, entryHeight)
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 prettyPackNameText(extension != "zip", packName),
-                x + 5 + imageSize,
-                x + 5 + imageSize,
-                rowRight - 3,
+                x + 5 + entryHeight,
+                x + 5 + entryHeight,
                 y + 3,
                 rowRight - 3,
                 y + client.textRenderer.fontHeight + 3,
@@ -208,11 +235,12 @@ class PackListWidget(
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
 
-            context.textConsumer.marqueedText(
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 Text.literal(musicPack.options.description).withColor(Colors.GRAY),
-                x + 5 + imageSize,
-                x + 5 + imageSize,
-                (issuesButton?.x ?: rowRight) - 3,
+                x + 5 + entryHeight,
+                x + 5 + entryHeight,
                 y + 17,
                 (issuesButton?.x ?: rowRight) - 3,
                 y + entryHeight,
@@ -240,7 +268,7 @@ class PackListWidget(
             return Text.empty()
         }
 
-        private fun renderPackImage(context: DrawContext) {
+        private fun renderPackImage(context: DrawContext, entryX: Int, entryY: Int, imageSize: Int) {
             musicPack ?: return
             val identifier = Identifier.of(
                 "trueadaptivemusic",
@@ -253,18 +281,17 @@ class PackListWidget(
                     .use {
                         client.textureManager.registerTexture(
                             identifier,
-                            NativeImageBackedTexture(
-                                identifier::toString, NativeImage.read(it))
+                            NativeImageBackedTexture(NativeImage.read(it))
                         )
                         loadedPackImages.add(identifier)
                     }
             }
 
             context.drawTexture(
-                RenderPipelines.GUI_TEXTURED,
+                RenderLayer::getGuiTextured,
                 identifier,
-                x + 2,
-                y,
+                entryX + 2,
+                entryY,
                 0F,
                 0F,
                 imageSize,
@@ -276,7 +303,18 @@ class PackListWidget(
     }
 
     inner class VanillaEntry: Entry(null) {
-        override fun render(context: DrawContext, mouseX: Int, mouseY: Int, hovered: Boolean, tickDelta: Float) {
+        override fun render(
+            context: DrawContext,
+            index: Int,
+            y: Int,
+            x: Int,
+            entryWidth: Int,
+            entryHeight: Int,
+            mouseX: Int,
+            mouseY: Int,
+            hovered: Boolean,
+            tickDelta: Float
+        ) {
             context.drawText(
                 client.textRenderer,
                 VANILLA_TEXT,
