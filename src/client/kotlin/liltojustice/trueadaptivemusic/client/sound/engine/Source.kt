@@ -11,13 +11,14 @@ import javax.sound.sampled.AudioFormat
 import kotlin.math.PI
 
 class Source private constructor(private val pointer: Int) {
-    var playing: Boolean = true
+    var playing = true
     private var bufferSize = 0
     private var stream: AudioStream? = null
+    private var looping = false
     private var loopStartPointSeconds = 0F
     private var lastTimestamp = 0F
     private var totalSeconds: Float? = null
-    private var totalBytes: ULong = 0UL
+    private var totalBytes = 0UL
     val isStopped: Boolean
         get() = this.sourceState == AL_STOPPED
     val sourceState: Int
@@ -103,27 +104,28 @@ class Source private constructor(private val pointer: Int) {
         val audioFormat = stream.format
         this.bufferSize = getBufferSize(audioFormat)
         this.read()
+
+        if (!looping) {
+            repeat(3) { this.read() }
+        }
     }
 
     fun setLooping(looping: Boolean, loopStartPoint: UInt) {
         this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
+        this.looping = looping
         AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
         AlUtil.checkErrors("Set Looping")
     }
 
     fun tick() {
-        if (this.stream != null && this.playing) {
-            val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
-            if (newTimestamp < lastTimestamp) {
-                AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
-                AlUtil.checkErrors("Seek")
-            }
-
-            lastTimestamp = newTimestamp
-
-            if (!this.read() && totalSeconds == null) {
-                totalSeconds = (totalBytes.toFloat() / bufferSize)
-            }
+        if (this.stream == null || !this.playing) {
+            return
+        }
+        else if (looping) {
+            tickLooping()
+        }
+        else {
+            repeat(removeProcessedBuffers()) { read() }
         }
     }
 
@@ -134,10 +136,7 @@ class Source private constructor(private val pointer: Int) {
     private fun read(): Boolean {
         this.stream?.let { stream ->
             try {
-                val byteBuffer = stream.read(this.bufferSize)
-                if (byteBuffer == null) {
-                    return false
-                }
+                val byteBuffer = stream.read(this.bufferSize) ?: return false
 
                 totalBytes += byteBuffer.remaining().toULong()
 
@@ -159,7 +158,22 @@ class Source private constructor(private val pointer: Int) {
         return true
     }
 
-    private fun removeProcessedBuffers() {
+    private fun tickLooping() {
+        val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
+        if (newTimestamp < lastTimestamp) {
+            AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
+            AlUtil.checkErrors("Seek")
+        }
+
+        lastTimestamp = newTimestamp
+
+        if (!read() && totalSeconds == null) {
+            totalSeconds = (totalBytes.toFloat() / bufferSize)
+        }
+
+    }
+
+    private fun removeProcessedBuffers(): Int {
         val finished = AL10.alGetSourcei(this.pointer, AL_BUFFERS_PROCESSED)
         if (finished > 0) {
             val buffers = IntArray(finished)
@@ -168,6 +182,8 @@ class Source private constructor(private val pointer: Int) {
             AL10.alDeleteBuffers(buffers)
             AlUtil.checkErrors("Remove processed buffers")
         }
+
+        return finished
     }
 
     companion object {
