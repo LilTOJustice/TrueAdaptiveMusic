@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.meta.MusicPackMeta
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
@@ -16,10 +17,12 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.sound.stream.ZipInputStream
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.text.Text
 import net.minecraft.util.JsonHelper
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -33,8 +36,11 @@ class MusicPack private constructor(
     var meta: MusicPackMeta,
     val rules: MusicTree,
     val packName: String,
-    preValidation: MusicPackValidation? = null) {
-    private val packPath = Path(Constants.MUSIC_PACK_DIR.pathString, packName)
+    preValidation: MusicPackValidation? = null
+) {
+    val packPath = Path(Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString, packName)
+    val isZip = packPath.extension == "zip"
+
     private val validation = MusicPackValidation(preValidation)
 
     val validationMessages
@@ -52,26 +58,26 @@ class MusicPack private constructor(
         val assetsDir = Path(packDir.pathString, Constants.ASSETS_DIRNAME)
         if (!assetsDir.exists()) {
             assetsDir.createDirectory()
-            if (packWithAssets?.isZipped() == true) {
+            if (packWithAssets?.isZip == true) {
                 ZipFile(
                     Path(
                         Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString
-                )
-                    .use { zipFile ->
-                        zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
-                            .forEach { entry ->
-                                val path = Path(
-                                    assetsDir.pathString,
-                                    *Path(entry.name).drop(1).map { it.name }.toTypedArray())
-                                path.createParentDirectories()
-                                if (path.isDirectory()) {
-                                    return@forEach
-                                }
-
-                                FileOutputStream(path.pathString)
-                                    .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                ).use { zipFile ->
+                    zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
+                        .forEach { entry ->
+                            val path = Path(
+                                assetsDir.pathString,
+                                *Path(entry.name).drop(1).map { it.name }.toTypedArray()
+                            )
+                            path.createParentDirectories()
+                            if (path.isDirectory()) {
+                                return@forEach
                             }
-                    }
+
+                            FileOutputStream(path.pathString)
+                                .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                        }
+                }
             }
             else if (packWithAssets != null) {
                 val existingAssets = Path(
@@ -82,6 +88,15 @@ class MusicPack private constructor(
 
                 if (existingAssets.exists()) {
                     existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
+                }
+            }
+        }
+
+        val iconFile = Path(packDir.invariantSeparatorsPathString, Constants.ICON_FILENAME)
+        if (!iconFile.exists()) {
+            getIconStream(false)?.use { iconStream ->
+                iconFile.createFile().toFile().outputStream().use {
+                    iconStream.copyTo(it)
                 }
             }
         }
@@ -102,30 +117,23 @@ class MusicPack private constructor(
             .associateBy { file -> file.getSoundName() }
     }
 
-    private fun getZipAssetNames(): List<String> {
-        return ZipFile(packPath.toFile()).use { zipFile ->
-            zipFile
-                .entries()
-                .toList()
-                .filter { entry -> isZipAsset(entry.name) }
-                .map { entry -> Path(entry.name).name }
+    fun getIconStream(allowDefault: Boolean = true): InputStream? {
+        return (if (isZip) {
+            ZipFile(packPath.toFile()).use { zipFile ->
+                zipFile.entries().toList().firstOrNull { it.name == Constants.ICON_FILENAME }
+            }?.let {
+                ZipInputStream(packPath, it)
+            }
         }
-    }
-
-    private fun getDirAssetNames(): List<String> {
-        return Path(packPath.pathString, Constants.ASSETS_DIRNAME)
-            .toFile()
-            .listFiles()
-            ?.map { file -> file.name }
-            ?: emptyList()
-    }
-
-    private fun getPackAssetNames(): List<String> {
-        return if (packPath.extension == "zip") {
-            getZipAssetNames()
-        } else {
-            getDirAssetNames()
-        }
+        else {
+            Path(packPath.invariantSeparatorsPathString, Constants.ICON_FILENAME)
+                .takeIf { it.exists() }?.toFile()?.inputStream()
+        })
+            ?:
+            if (allowDefault)
+                this::class.java.classLoader.getResourceAsStream(Constants.TAM_ICON_RESOURCE_PATH)
+            else
+                null
     }
 
     fun initRules() {
@@ -161,7 +169,7 @@ class MusicPack private constructor(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun save(): Path {
+    fun save(progress: Reference<Double>? = null): Path {
         val packOngoingDir = Path(
             Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
         val packDir = Path(
@@ -170,6 +178,7 @@ class MusicPack private constructor(
         val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
         val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
         val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
+        val iconFile = Path(packOngoingDir.pathString, Constants.ICON_FILENAME).takeIf { it.exists() }
 
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
@@ -180,14 +189,29 @@ class MusicPack private constructor(
         val newZipPath = Path(outputPath.pathString + ".new")
 
         val newZip = newZipPath.createFile()
+        val assets = assetsDir.listDirectoryEntriesRecursive()
+        val totalFiles = 4 + assets.size
+        var filesSaved = 0
+        val increaseProgress = {
+            filesSaved++
+            progress?.value = filesSaved.toDouble() / totalFiles
+        }
         FileOutputStream(newZip.pathString).use { file ->
             ZipOutputStream(file).use { out ->
                 out.putNextEntry(ZipEntry(rulesFile.name))
                 rulesFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
                 out.putNextEntry(ZipEntry(metaFile.name))
                 metaFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
                 out.putNextEntry(ZipEntry(optionsFile.name))
                 optionsFile.inputStream().use { it.copyTo(out) }
+                increaseProgress()
+                iconFile?.let { iconFile ->
+                    out.putNextEntry(ZipEntry(iconFile.name))
+                    iconFile.inputStream().use { it.copyTo(out) }
+                }
+                increaseProgress()
 
                 assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
                     out.putNextEntry(
@@ -205,6 +229,7 @@ class MusicPack private constructor(
                     else {
                         entry.inputStream().use { it.copyTo(out) }
                     }
+                    increaseProgress()
                 }
             }
         }
@@ -227,21 +252,7 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
-        val nonOggFiles = getPackAssetNames().filter { name -> Path(name).extension != "ogg" }
-        if (!TAMClient.hasFFmpeg && nonOggFiles.isNotEmpty()) {
-            validation.addWarning(
-                Text.translatableWithFallback(
-                    "trueadaptivemusic.ogg_warning",
-                    "This pack contains music that is not 'ogg' type (the only type supported by " +
-                            "minecraft). This music will not play unless FFmpeg is installed on your system. You " +
-                            "can install it at the top right of your screen. If you already did, you may just need " +
-                            "to restart your system."
-                ).string
-            )
-        }
-
-
-        if (isZipped()) {
+        if (isZip) {
             ZipFile(packPath.toFile()).use { zipFile ->
                 if (zipFile.entries().toList().any { it.name.contains("\\") }) {
                     validation.addWarning(
@@ -255,7 +266,7 @@ class MusicPack private constructor(
         val loader = FabricLoader.getInstance()
         meta.requiredBridgeMods.forEach { mod ->
             if (!loader.isModLoaded(mod.id)) {
-                validation.addWarning("This pack requires the mod ${mod.name} (${mod.id}) which could not be found.")
+                validation.addWarning("This pack uses the mod ${mod.name} (${mod.id}) which could not be found.")
             }
         }
 
@@ -277,10 +288,6 @@ class MusicPack private constructor(
     private fun getEditPackDir(): Path {
         return Path(
             Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
-    }
-
-    private fun isZipped(): Boolean {
-        return Path(packName).extension == "zip"
     }
 
     companion object {
