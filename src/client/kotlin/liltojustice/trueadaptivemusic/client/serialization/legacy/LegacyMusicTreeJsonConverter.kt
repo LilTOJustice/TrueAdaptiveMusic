@@ -10,7 +10,7 @@ object LegacyMusicTreeJsonConverter {
         return when (serializationVersion) {
             null -> OriginalMusicTreeJsonConverter.convert(json)
             else -> throw RulesParserException(
-                "${Constants.Companion.RULES_FILENAME} has unknown version tag: $serializationVersion")
+                "${Constants.RULES_FILENAME} has unknown version tag: $serializationVersion")
         }
     }
 }
