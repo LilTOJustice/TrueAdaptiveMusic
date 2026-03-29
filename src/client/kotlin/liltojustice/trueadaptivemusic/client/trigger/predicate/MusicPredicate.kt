@@ -11,7 +11,7 @@ import kotlin.reflect.full.companionObjectInstance
 
 abstract class MusicPredicate: MusicTrigger() {
     private var lastResult = false
-    private var ticksSinceResult = getFixedTickRate()
+    private var ticksSinceResult = 0
 
     protected abstract fun test(): Boolean
 
@@ -44,9 +44,7 @@ abstract class MusicPredicate: MusicTrigger() {
         return if (desiredTickRate < 1) 1 else desiredTickRate
     }
 
-
-    companion object: MusicPredicateCompanion {
-    }
+    companion object: MusicPredicateCompanion
 
     interface MusicPredicateCompanion: MusicTriggerCompanion {
         override fun getDisplayName(triggerName: String): Text {

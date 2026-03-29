@@ -39,10 +39,10 @@ class CombatPredicate(
 
         val entityGroups = mutableListOf<List<LivingEntity>>()
 
-        entityGroups.add(world.entities.mapNotNull { it as? HostileEntity }.filter { filterEntity(it) })
-        entityGroups.add(world.entities.mapNotNull { it as? PhantomEntity }.filter { filterEntity(it) })
+        entityGroups.add(world.entities.filterIsInstance<HostileEntity>().filter { filterEntity(it) })
+        entityGroups.add(world.entities.filterIsInstance<PhantomEntity>().filter { filterEntity(it) })
         entityGroups.add(
-            world.entities.mapNotNull { it as? PlayerEntity }.filter { it != playerEntity && filterEntity(it) })
+            world.entities.filterIsInstance<PlayerEntity>().filter { it != playerEntity && filterEntity(it) })
 
         for (validEntities in entityGroups) {
             for (livingEntity: LivingEntity in validEntities) {
@@ -55,6 +55,10 @@ class CombatPredicate(
         }
 
         return isAggro
+    }
+
+    override fun getTickRate(): Int {
+        return super.getTickRate() * 10
     }
 
     private fun processEntity(
