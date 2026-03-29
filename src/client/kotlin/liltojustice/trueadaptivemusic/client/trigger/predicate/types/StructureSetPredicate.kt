@@ -24,7 +24,7 @@ class StructureSetPredicate internal constructor(
     }
 
     override fun getTickRate(): Int {
-        return super.getTickRate() * 2
+        return super.getTickRate() * 20
     }
 
     private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
