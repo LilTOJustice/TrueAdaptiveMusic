@@ -189,11 +189,12 @@ class PackListWidget(
             renderPackImage(context)
             val packName = musicPack.packPath.nameWithoutExtension
             val extension = musicPack.packPath.extension
-            context.textConsumer.marqueedText(
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 prettyPackNameText(extension != "zip", packName),
                 x + 5 + imageSize,
                 x + 5 + imageSize,
-                rowRight - 3,
                 y + 3,
                 rowRight - 3,
                 y + client.textRenderer.fontHeight + 3,
@@ -205,11 +206,12 @@ class PackListWidget(
                 issuesButton.render(context, mouseX, mouseY, tickDelta)
             }
 
-            context.textConsumer.marqueedText(
+            drawScrollableText(
+                context,
+                client.textRenderer,
                 Text.literal(musicPack.options.description).withColor(Colors.GRAY),
                 x + 5 + imageSize,
                 x + 5 + imageSize,
-                (issuesButton?.x ?: rowRight) - 3,
                 y + 17,
                 (issuesButton?.x ?: rowRight) - 3,
                 y + height,

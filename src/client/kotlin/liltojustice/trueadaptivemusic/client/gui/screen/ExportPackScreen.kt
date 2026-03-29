@@ -38,14 +38,14 @@ class ExportPackScreen(
 
     override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
         if (done) {
-            client.setScreen(destination)
+            client?.setScreen(destination)
 
             return
         }
 
         super.render(context, mouseX, mouseY, delta)
         context?.drawCenteredTextWithShadow(
-            client.textRenderer,
+            client?.textRenderer,
             EXPORTING_TEXT,
             width / 2,
             height / 2,
@@ -54,7 +54,7 @@ class ExportPackScreen(
 
         val start = 10
         val end = width - 10
-        val progressBarY = height / 2 + client.textRenderer.fontHeight
+        val progressBarY = height / 2 + (client?.textRenderer?.fontHeight ?: 0)
         context?.drawHorizontalLine(start, end, progressBarY, Colors.GRAY)
         context?.drawHorizontalLine(start, (end * progress.value).toInt(), progressBarY, Colors.WHITE)
     }
