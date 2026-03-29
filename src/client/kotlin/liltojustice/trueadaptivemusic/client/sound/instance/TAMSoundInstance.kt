@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.OggAudioStream
 import net.minecraft.client.sound.Sound
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundManager
@@ -90,29 +89,19 @@ abstract class TAMSoundInstance(
         private const val AMBIENT_LUFS = -36
         private const val MUSIC_LUFS = -26
 
-        fun getAudioStream(
-            name: String,
-            extension: String,
-            inputStreamGetter: () -> InputStream,
-            isAmbient: Boolean
-        ): AudioStream {
+        fun getAudioStream(name: String, inputStreamGetter: () -> InputStream, isAmbient: Boolean): AudioStream {
             try {
-                return if (!TAMClient.hasFFmpeg && extension == "ogg") {
-                    TruncatedAudioStream(OggAudioStream(inputStreamGetter()))
-                }
-                else {
-                    val loudnessUnits = if (isAmbient)
-                        AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
-                    else
-                        MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
-                    TruncatedAudioStream(
-                        FFmpegAudioStream(
-                            inputStreamGetter(),
-                            FFmpeg.getFileAudioFormat(inputStreamGetter()),
-                            loudnessUnits
-                        )
+                val loudnessUnits = if (isAmbient)
+                    AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
+                else
+                    MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
+                return TruncatedAudioStream(
+                    FFmpegAudioStream(
+                        inputStreamGetter(),
+                        FFmpeg.getFileAudioFormat(inputStreamGetter()),
+                        loudnessUnits
                     )
-                }
+                )
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to load audio stream for '$name'", e)

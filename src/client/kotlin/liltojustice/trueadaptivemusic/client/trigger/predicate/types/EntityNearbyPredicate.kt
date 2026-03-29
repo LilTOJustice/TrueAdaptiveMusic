@@ -24,7 +24,7 @@ class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, pr
     }
 
     override fun getTickRate(): Int {
-        return super.getTickRate() * 2
+        return super.getTickRate() * 5
     }
 
     companion object: MusicPredicateCompanion {
