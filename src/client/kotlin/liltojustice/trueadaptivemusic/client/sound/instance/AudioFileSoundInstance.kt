@@ -15,12 +15,7 @@ class AudioFileSoundInstance(
         get() = soundFile.getName().split('.').dropLast(1).joinToString(".")
 
     override fun getAudioStream(): AudioStream {
-        return getAudioStream(
-            soundFile.getName(),
-            soundFile.getExtension(),
-            { soundFile.getInputStream() },
-            isAmbient
-        )
+        return getAudioStream(soundFile.getName(), { soundFile.getInputStream() }, isAmbient)
     }
 
     override fun getSoundString(): String {
