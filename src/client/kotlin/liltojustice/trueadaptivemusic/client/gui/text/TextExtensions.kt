@@ -18,7 +18,7 @@ fun DrawContext.drawMarqueedWrappedText(
     val usableHeight = bottom - top
     val heightDiff = height - usableHeight
     if (heightDiff <= 0) {
-        drawWrappedText(textRenderer, text, left, top, width, Colors.WHITE, false)
+        drawTextWrapped(textRenderer, text, left, top, width, Colors.WHITE)
 
         return
     }
