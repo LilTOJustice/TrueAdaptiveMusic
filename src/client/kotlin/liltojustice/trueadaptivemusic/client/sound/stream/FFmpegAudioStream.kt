@@ -37,7 +37,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
                 inputStream.use { it.copyTo(ffmpeg.outputStream) }
             }
             catch (_: Exception) {
-                ffmpeg.destroy()
+                ffmpeg.destroyForcibly()
             }
             finally {
                 ffmpeg.outputStream.close()
@@ -51,7 +51,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
     }
 
     override fun close() {
-        ffmpeg.destroy()
+        ffmpeg.destroyForcibly()
         thread.interrupt()
         thread.join()
     }
