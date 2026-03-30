@@ -18,9 +18,9 @@ class Channel private constructor(
         private set
 
     fun close() {
-        stop()
         thread.interrupt()
         thread.join()
+        stop()
         tasks.clear()
     }
 
@@ -71,7 +71,7 @@ class Channel private constructor(
     }
 
     private fun waitForStop() {
-        while (!isStopped) {
+        while (!isStopped && !thread.isInterrupted) {
             source.tick()
             if (source.isStopped) {
                 stop()
