@@ -3,7 +3,6 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.world.ClientWorld
 import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.mob.GuardianEntity
@@ -47,8 +46,7 @@ class CombatPredicate(
         for (validEntities in entityGroups) {
             for (livingEntity: LivingEntity in validEntities) {
                 if (processEntity(
-                        world, livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)
-                    ) {
+                        livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
                     return true
                 }
             }
@@ -62,7 +60,6 @@ class CombatPredicate(
     }
 
     private fun processEntity(
-        world: ClientWorld,
         entity: LivingEntity,
         playerEntity: PlayerEntity,
         verticalAngle: Double,
@@ -81,7 +78,7 @@ class CombatPredicate(
             return false
         }
 
-        if (isValidAttacker(world, entity, playerEntity, relativeEntityPos)) {
+        if (isValidAttacker(entity, playerEntity, relativeEntityPos)) {
             isAggro = true
             aggroTimerTask?.cancel()
             aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
@@ -119,8 +116,7 @@ class CombatPredicate(
                 "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
             )
 
-        private fun isValidAttacker(
-            world: ClientWorld, entity: LivingEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
+        private fun isValidAttacker(entity: LivingEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {
             val closeEnough = closeEnough(
                     displacement,
                     Vec3d(entity.boundingBox.lengthX,
@@ -129,17 +125,18 @@ class CombatPredicate(
                     )
             )
 
-            return ((entity as? MobEntity)?.isAttacking == true && closeEnough) ||
-                    (entity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true ||
-                    entity is PhantomEntity && closeEnough ||
-                    (entity as? PlayerEntity)
-                        ?.let { isEnemyPlayer(world, playerEntity, it) } == true && closeEnough
+            return closeEnough && (
+                    (entity as? MobEntity)?.isAttacking == true ||
+                            (entity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true ||
+                            entity is PhantomEntity ||
+                            (entity as? PlayerEntity)?.let { isEnemyPlayer(playerEntity, it) } == true
+                    )
         }
 
-        private fun isEnemyPlayer(world: ClientWorld, player: PlayerEntity, otherPlayer: PlayerEntity): Boolean {
-            val teams = world.scoreboard.teams.filter { it.playerList.contains(player.name.string) }
-
-            return teams.none { team -> team.playerList.contains(otherPlayer.name.string) }
+        private fun isEnemyPlayer(player: PlayerEntity, otherPlayer: PlayerEntity): Boolean {
+            return player.scoreboardTeam != null &&
+                    otherPlayer.scoreboardTeam != null &&
+                    !player.isTeammate(otherPlayer)
         }
 
         private fun closeEnough(displacement: Vec3d, attackerSize: Vec3d): Boolean
@@ -147,7 +144,9 @@ class CombatPredicate(
             val axialDistance = Vec3d(
                 abs(displacement.x), abs(displacement.y), abs(displacement.z))
             val scaledAttackerMinDistance = baseAxialDistance
-                .multiply(Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
+                .multiply(
+                    Vec3d(cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z)))
+
             return axialDistance.x < scaledAttackerMinDistance.x
                     && axialDistance.y < scaledAttackerMinDistance.y
                     && axialDistance.z < scaledAttackerMinDistance.z
