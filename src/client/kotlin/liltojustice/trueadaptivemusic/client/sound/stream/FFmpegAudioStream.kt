@@ -34,17 +34,16 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
 
         thread = Thread {
             try {
-                inputStream.use {
-                    it.copyTo(ffmpeg.outputStream)
-                }
+                inputStream.use { it.copyTo(ffmpeg.outputStream) }
             }
             catch (_: Exception) {
-                ffmpeg.destroy()
+                ffmpeg.destroyForcibly()
             }
             finally {
                 ffmpeg.outputStream.close()
             }
         }
+
         thread.name = "FFmpeg stream handler: ${inputStream.hashCode()}"
         thread.start()
 
@@ -52,7 +51,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
     }
 
     override fun close() {
-        ffmpeg.destroy()
+        ffmpeg.destroyForcibly()
         thread.interrupt()
         thread.join()
     }
@@ -66,6 +65,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
         val buffer = ByteBuffer.allocateDirect(bytes.size)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(bytes)
+
         return buffer.flip()
     }
 }
