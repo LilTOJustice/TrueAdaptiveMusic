@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import java.util.concurrent.locks.LockSupport
 import java.util.function.Consumer
 
 class Channel private constructor(
@@ -67,6 +66,7 @@ class Channel private constructor(
         thread.setDaemon(true)
         thread.setName("TAM Sound Engine: ${soundInstance.hashCode()}")
         thread.start()
+
         return thread
     }
 
@@ -81,7 +81,7 @@ class Channel private constructor(
                 tasks.removeFirstOrNull()?.accept(source) ?: break
             }
 
-            LockSupport.parkNanos("Sleeping for a bit", 1000000L)
+            Thread.sleep(1)
         }
     }
 
