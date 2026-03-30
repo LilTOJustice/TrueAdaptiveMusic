@@ -28,6 +28,6 @@ class SoundEngine {
     }
 
     companion object {
-        private val lock = Object()
+        private val lock = Any()
     }
 }
