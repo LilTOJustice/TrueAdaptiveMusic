@@ -25,11 +25,12 @@ object FFmpeg {
         }
         catch (_: Exception) {}
 
-        val reader = BufferedReader(InputStreamReader(ffprobe.inputStream))
-        var line = ""
         val output = StringBuilder()
-        while (reader.readLine()?.also { line = it } != null) {
-            output.append(line)
+        BufferedReader(InputStreamReader(ffprobe.inputStream)).use { reader ->
+            var line = ""
+            while (reader.readLine()?.also { line = it } != null) {
+                output.append(line)
+            }
         }
 
         ffprobe.waitFor()
