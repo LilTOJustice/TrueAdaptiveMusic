@@ -43,9 +43,10 @@ jobs:
         run: env
 
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
+          lfs: true
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -66,6 +67,9 @@ jobs:
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
+          files: |
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+
           curseforge-id: true-adaptive-music
           curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
           
