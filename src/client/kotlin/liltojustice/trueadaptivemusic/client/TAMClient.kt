@@ -53,7 +53,6 @@ object TAMClient {
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
     val eventFactory = MusicEventFactory(eventRegistry)
-    val isWindows = TrueAdaptiveMusic.isWindows
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -186,11 +185,13 @@ object TAMClient {
     }
 
     fun getFFProbeCommand(): String {
-        return (if (isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH).invariantSeparatorsPathString
+        return (if (TrueAdaptiveMusic.isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
+            .invariantSeparatorsPathString
     }
 
     fun getFFmpegCommand(): String {
-        return (if (isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH).invariantSeparatorsPathString
+        return (if (TrueAdaptiveMusic.isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
+            .invariantSeparatorsPathString
     }
 
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
@@ -244,10 +245,12 @@ object TAMClient {
             initialize(client)
         }
 
-        musicPack?.let { pack ->
-            currentPredicateResult = pack.rules.getMusicToPlay(minecraftClient)
-            currentPredicateResult?.let { musicManager?.tick(it, pack.options) }
-        } ?: { currentPredicateResult = null }
+        currentPredicateResult = musicPack?.let { pack ->
+            val result = pack.rules.getMusicToPlay(minecraftClient)
+            musicManager?.tick(result, pack.options)
+
+            result
+        }
     }
 
     private fun initialize(client: MinecraftClient) {
