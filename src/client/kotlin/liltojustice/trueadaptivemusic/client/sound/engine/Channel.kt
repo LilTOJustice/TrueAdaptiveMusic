@@ -67,13 +67,14 @@ class Channel private constructor(
         thread.setDaemon(true)
         thread.setName("TAM Sound Engine: ${soundInstance.hashCode()}")
         thread.start()
+
         return thread
     }
 
     private fun waitForStop() {
         while (!isStopped) {
             source.tick()
-            if (source.isStopped) {
+            if (source.isStopped || thread.isInterrupted) {
                 stop()
             }
 
