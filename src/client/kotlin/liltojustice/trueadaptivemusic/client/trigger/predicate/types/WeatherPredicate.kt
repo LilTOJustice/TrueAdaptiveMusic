@@ -6,12 +6,12 @@ import net.minecraft.client.MinecraftClient
 class WeatherPredicate(private val weather: Weather): MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
-        val properties = client.world?.levelProperties ?: return false
+        val world = client.world ?: return false
 
         return when(weather) {
-            Weather.Clear -> !properties.isRaining
-            Weather.Rain -> properties.isRaining
-            Weather.Thunder -> properties.isThundering
+            Weather.Clear -> !world.isRaining
+            Weather.Rain -> world.isRaining
+            Weather.Thunder -> world.isThundering
         }
     }
 
