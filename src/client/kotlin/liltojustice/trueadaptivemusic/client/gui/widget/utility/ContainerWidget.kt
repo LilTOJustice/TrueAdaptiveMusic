@@ -213,6 +213,16 @@ abstract class ContainerWidget(
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == TAB_KEY) {
+            val sorted = children.values.sortedBy { it.row }
+            val currentFocused = sorted.firstOrNull { it.widget == focusedWidget } ?: return false
+            val newFocused = sorted.firstOrNull { it.row > currentFocused.row }?.widget ?: return false
+            focusedWidget?.isFocused = false
+            focusedWidget = newFocused
+
+            return true
+        }
+
         return focusedWidget?.keyPressed(keyCode, scanCode, modifiers) ?: false
     }
 
@@ -560,6 +570,7 @@ abstract class ContainerWidget(
         private const val TOP_MARGIN = 12
         private const val X_MARGIN = 5
         private const val SCROLLBAR_GRACE = 4
+        private const val TAB_KEY = 258
 
         fun getRowHeight(fontHeight: Int): Double {
             return (1.35 * fontHeight)
