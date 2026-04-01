@@ -17,8 +17,9 @@ class BossHealthPredicate(private val direction: Direction, private val healthPe
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "direction" to "Whether the music should play above or below the given health percentage.",
-                "healthPercentage" to "The threshold at which the predicate switches."
+                BossHealthPredicate::direction.name to "Whether the music should play above or below the given " +
+                        "health percentage.",
+                BossHealthPredicate::healthPercentage.name to "The threshold at which the predicate switches."
             )
 
         private fun healthTest(thresholdPercentage: Float, direction: Direction, currentPercentage: Float): Boolean {
