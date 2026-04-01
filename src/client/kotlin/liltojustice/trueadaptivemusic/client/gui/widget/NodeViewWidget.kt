@@ -158,7 +158,7 @@ class NodeViewWidget(
         if (selectedNode?.parameters?.vanillaMusic == false) {
             addWidgetFromRender(
                 {
-                    if (restricted) {
+                    if (restricted && selectedNode?.parameters?.parallelMusic == true) {
                         DropdownWidget(
                             listOf(),
                             { selected ->
@@ -265,7 +265,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.dropLast(1).filter { !restricted || it.name !in restrictedParameters }.forEach { param ->
+        requiredNodeParams.dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
@@ -596,10 +596,7 @@ class NodeViewWidget(
                 node.parameters.loopMusic = true
             }
 
-            return node.parameters.parallelMusic ||
-                    node.parameters.vanillaMusic ||
-                    node.parameters.loopMusic ||
-                    !musicPack.options.persistentNodeMusic
+            return node.parameters.parallelMusic || node.parameters.vanillaMusic || node.parameters.loopMusic
         }
     }
 }
