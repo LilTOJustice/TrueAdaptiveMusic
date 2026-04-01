@@ -16,8 +16,8 @@ class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): Mus
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
-            "dimensions" to "Select all dimensions the music should play for. If none, any dimension will trigger " +
-                    "the music."
+            DimensionPredicate::dimensions.name to "Select all dimensions the music should play for. If none, any " +
+                    "dimension will trigger the music."
         )
     }
 }

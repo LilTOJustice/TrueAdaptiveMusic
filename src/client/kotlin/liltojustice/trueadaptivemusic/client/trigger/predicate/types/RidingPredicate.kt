@@ -15,8 +15,8 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "entities" to "Which entities to ride for the music to play. If none, any entity will trigger the " +
-                        "music."
+                RidingPredicate::entities.name to "Which entities to ride for the music to play. If none, any entity " +
+                        "will trigger the music."
             )
     }
 }
