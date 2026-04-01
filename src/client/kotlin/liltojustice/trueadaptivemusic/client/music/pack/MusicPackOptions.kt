@@ -25,9 +25,9 @@ data class MusicPackOptions(val description: String = "", val persistentNodeMusi
             ?.associateWith { it.prettify() } ?: mapOf()
 
         private val descriptions = mapOf(
-            "description" to "Description of the Music Pack.",
-            "persistentNodeMusic" to "If checked, music from the current node will continue to play until it" +
-                    " finishes if another node is chosen. Disables music fading between nodes."
+            MusicPackOptions::description.name to "Description of the Music Pack.",
+            MusicPackOptions::persistentNodeMusic.name to "If checked, music from the current node will continue to " +
+                    "play until it finishes if another node is chosen. Disables music fading between nodes."
         )
 
         private val json = GsonBuilder()
