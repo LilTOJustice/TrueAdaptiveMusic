@@ -23,12 +23,13 @@ class HealthPredicate(private val healthType: HealthType, private val direction:
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "healthType" to "Whether the health setting is a value or percentage.",
-                "direction" to "Whether the music should play above or below the health setting.",
-                "health" to "Threshold at which the predicate should switch."
+                HealthPredicate::healthType.name to "Whether the health setting is a value or percentage.",
+                HealthPredicate::direction.name to "Whether the music should play above or below the health setting.",
+                HealthPredicate::health.name to "Threshold at which the predicate should switch."
             )
     }
 
+    @Suppress("unused")
     enum class HealthType {
         Value,
         Percentage
