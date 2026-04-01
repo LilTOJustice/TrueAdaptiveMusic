@@ -37,15 +37,16 @@ data class TrueAdaptiveMusicOptions(
             ?.associateWith { it.prettify() } ?: mapOf()
 
         private val descriptions = mapOf(
-            "useDebugHud" to "Enable or disable the True Adaptive Music debug hud. Good for when creating a music " +
-                    "pack.",
-            "prettifyIdentifiers" to "Enable or disable \"prettified\" identifiers (makes them more human friendly).",
-            "audioNormalization" to "Enable or disable audio normalization. This will make all tracks be similar" +
-                    "volume levels, and allow usage of the loudness boost options.",
-            "musicLoudnessBoost" to "Increase the music volume by passing a higher LUFS value to FFmpeg. " +
-                    "Requires FFmpeg.",
-            "ambienceLoudnessBoost" to "Increase the ambience volume by passing a higher LUFS value to FFmpeg. " +
-                    "Requires FFmpeg."
+            TrueAdaptiveMusicOptions::useDebugHud.name to "Enable or disable the True Adaptive Music debug hud. Good " +
+                    "for when creating a music pack.",
+            TrueAdaptiveMusicOptions::prettifyIdentifiers.name to "Enable or disable \"prettified\" identifiers " +
+                    "(makes them more human friendly).",
+            TrueAdaptiveMusicOptions::audioNormalization.name to "Enable or disable audio normalization. This will " +
+                    "make all tracks be similar volume levels, and allow usage of the loudness boost options.",
+            TrueAdaptiveMusicOptions::musicLoudnessBoost.name to "Increase the music volume by passing a higher " +
+                    "LUFS value to FFmpeg. Requires FFmpeg.",
+            TrueAdaptiveMusicOptions::ambienceLoudnessBoost.name to "Increase the ambience volume by passing a " +
+                    "higher LUFS value to FFmpeg. Requires FFmpeg."
         )
 
         private val json = GsonBuilder()
