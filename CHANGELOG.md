@@ -1,23 +1,15 @@
-True Adaptive Music v2.1 - FFmpeg for all!
+True Adaptive Music v2.1.1
 
 ### New Features:
-#### FFmpeg for all!
-- FFmpeg is now distributed alongside TAM, so everyone can use packs with non-ogg file types, no installation necessary.
-#### Normalization Toggle
-- If the volume feels weird to you, you can disable audio normalization in the mod options.
-#### Pack Icons
-- You can now include an "icon.png" in your main pack folder to have the icon show in the pack selection menu.
-#### Pack Author Credit
-- The author of the music pack will now show in the browser.
+#### Node Parameter: Persistent Node Music - Ignore Persistence
+- When toggled on with Persistent Node Music, music will not persist when the node is selected. The music in that node will also not persist.
+- This is great if you are using Persistent Node Music in your pack, but want certain situations like boss fights or combat to not follow the persistence rule.
+
 ### UI Improvements:
-- Vertical marquee if the pack info in the browser is too long.
-- Reworked pack selection UI
-- Exporting a pack now shows a progress bar
+- You can now navigate containers in the UI with tab :)
 
 ### Other Improvements/Fixes:
-- Improved predicate evaluation performance
-- Weather predicate now properly translates from legacy packs.
-- Only show 1 digit past the decimal for download percentages
-- Full track won't load if looping is disabled for it, leading to better performance and less memory usage in the pack editing UI.
+- Fixed thunder not being detected in the weather predicate
+- Fixed IsPersistent event parameter being erased when opening the pack edit screen
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
