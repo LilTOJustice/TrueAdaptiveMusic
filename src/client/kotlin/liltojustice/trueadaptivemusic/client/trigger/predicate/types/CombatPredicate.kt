@@ -111,9 +111,10 @@ class CombatPredicate(
 
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "blacklist" to "Whether the list of mob entities attacking should not (if checked) or should " +
-                        "(if not checked) make the music play.",
-                "mobEntities" to "Select mob entities for this predicate. If none, any entity will trigger the music."
+                CombatPredicate::blacklist.name to "Whether the list of mob entities attacking should not (if " +
+                        "checked) or should (if not checked) make the music play.",
+                CombatPredicate::mobEntities.name to "Select mob entities for this predicate. If none, any entity " +
+                        "will trigger the music."
             )
 
         private fun isValidAttacker(entity: LivingEntity, playerEntity: PlayerEntity, displacement: Vec3d): Boolean {

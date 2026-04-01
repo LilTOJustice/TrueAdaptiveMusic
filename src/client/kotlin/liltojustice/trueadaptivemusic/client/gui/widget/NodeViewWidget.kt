@@ -57,28 +57,54 @@ class NodeViewWidget(
     private var shouldExit = false
     private var lastRestricted = false
     private val restrictedParameters
-        get() = if (selectedNode?.parameters?.vanillaMusic == true)
-            listOf(
-                "inheritMusic",
-                "parallelMusic",
-                "loopMusic",
-                "loopStartPoints"
-            )
-        else if (selectedNode?.parent?.parameters?.parallelMusic == true)
-            listOf(
-                "vanillaMusic",
-                "parallelMusic",
-                "trackDelay",
-                "trackDelayNoise",
-                "enterDelay",
-                "inheritMusic",
-                "loopMusic",
-                "loopStartPoints"
-            )
-        else if (selectedNode?.parameters?.parallelMusic == true)
-            listOf("vanillaMusic", "trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
-        else
-            listOf()
+        get() = run {
+            val node = selectedNode ?: return emptySet<String>()
+            val result = mutableSetOf<String>()
+
+            if (!musicPack.options.persistentNodeMusic) {
+                result += MusicTree.Node.Parameters::ignorePersistence.name
+            }
+
+            if (node.parameters.vanillaMusic) {
+                result += listOf(
+                    MusicTree.Node.Parameters::inheritMusic.name,
+                    MusicTree.Node.Parameters::parallelMusic.name,
+                    MusicTree.Node.Parameters::loopMusic.name,
+                    MusicTree.Node.Parameters::loopStartPoints.name,
+                )
+            }
+
+            if (node.parameters.parallelMusic) {
+                result += listOf(
+                    MusicTree.Node.Parameters::ignorePersistence.name,
+                    MusicTree.Node.Parameters::vanillaMusic.name,
+                    MusicTree.Node.Parameters::trackDelay.name,
+                    MusicTree.Node.Parameters::trackDelayNoise.name,
+                    MusicTree.Node.Parameters::enterDelay.name,
+                    MusicTree.Node.Parameters::inheritMusic.name,
+                    MusicTree.Node.Parameters::loopMusic.name,
+                )
+            }
+
+            if (node.parameters.loopMusic) {
+                result += MusicTree.Node.Parameters::ignorePersistence.name
+            }
+
+            if (node.parent?.parameters?.parallelMusic == true) {
+                result += listOf(
+                    MusicTree.Node.Parameters::vanillaMusic.name,
+                    MusicTree.Node.Parameters::parallelMusic.name,
+                    MusicTree.Node.Parameters::trackDelay.name,
+                    MusicTree.Node.Parameters::trackDelayNoise.name,
+                    MusicTree.Node.Parameters::enterDelay.name,
+                    MusicTree.Node.Parameters::inheritMusic.name,
+                    MusicTree.Node.Parameters::loopMusic.name,
+                    MusicTree.Node.Parameters::loopStartPoints.name,
+                )
+            }
+
+            result.toSet()
+        }
 
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
@@ -119,7 +145,7 @@ class NodeViewWidget(
     }
 
     fun renderEditMode() {
-        val restricted = selectedNode?.let { enforceParameterConstraints(it) } ?: false
+        val restricted = selectedNode?.let { enforceParameterConstraints(musicPack, it) } ?: false
         if (restricted) {
             clearRestrictedWidgets()
         }
@@ -133,7 +159,7 @@ class NodeViewWidget(
         if (selectedNode?.parameters?.vanillaMusic == false) {
             addWidgetFromRender(
                 {
-                    if (restricted) {
+                    if (restricted && selectedNode?.parameters?.parallelMusic == true) {
                         DropdownWidget(
                             listOf(),
                             { selected ->
@@ -240,7 +266,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.dropLast(1).filter { !restricted || it.name !in restrictedParameters }.forEach { param ->
+        requiredNodeParams.dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
                     TAMClient.makeInputWidget(
@@ -555,7 +581,7 @@ class NodeViewWidget(
     }
 
     companion object {
-        private fun enforceParameterConstraints(node: MusicTree.Node): Boolean {
+        private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTree.Node): Boolean {
             node.parent?.let {
                 if (it.parameters.parallelMusic) {
                     node.parameters.parallelMusic = true
@@ -563,7 +589,7 @@ class NodeViewWidget(
             }
 
             if (node.parameters.parallelMusic) {
-                node.children.forEach { enforceParameterConstraints(it) }
+                node.children.forEach { enforceParameterConstraints(musicPack, it) }
                 node.parameters.inheritMusic = false
                 node.parameters.trackDelay = 0U
                 node.parameters.trackDelayNoise = 0U
@@ -571,7 +597,7 @@ class NodeViewWidget(
                 node.parameters.loopMusic = true
             }
 
-            return node.parameters.parallelMusic || node.parameters.vanillaMusic
+            return node.parameters.parallelMusic || node.parameters.vanillaMusic || node.parameters.loopMusic
         }
     }
 }

@@ -26,9 +26,9 @@ class HungerPredicate(private val direction: Direction, private val hungerPercen
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "direction" to "Whether the music should play when the player's hunger percentage is above or " +
-                        "below the given percentage.",
-                "hungerPercentage" to "Threshold at which the predicate should switch."
+                HungerPredicate::direction.name to "Whether the music should play when the player's hunger " +
+                        "percentage is above or below the given percentage.",
+                HungerPredicate::hungerPercentage.name to "Threshold at which the predicate should switch."
             )
     }
 
