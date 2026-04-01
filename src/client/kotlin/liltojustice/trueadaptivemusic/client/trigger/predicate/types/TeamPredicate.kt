@@ -15,7 +15,6 @@ class TeamPredicate(private val teamId: String): MusicPredicate() {
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "teamId" to "Id of the team to check if the player is on."
-            )
+                TeamPredicate::teamId.name to "Id of the team to check if the player is on.")
     }
 }
