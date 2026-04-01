@@ -60,24 +60,31 @@ class NodeViewWidget(
     private val restrictedParameters
         get() = if (selectedNode?.parameters?.vanillaMusic == true)
             listOf(
-                "inheritMusic",
-                "parallelMusic",
-                "loopMusic",
-                "loopStartPoints"
+                MusicTree.Node.Parameters::inheritMusic.name,
+                MusicTree.Node.Parameters::parallelMusic.name,
+                MusicTree.Node.Parameters::loopMusic.name,
+                MusicTree.Node.Parameters::loopStartPoints.name,
             )
         else if (selectedNode?.parent?.parameters?.parallelMusic == true)
             listOf(
-                "vanillaMusic",
-                "parallelMusic",
-                "trackDelay",
-                "trackDelayNoise",
-                "enterDelay",
-                "inheritMusic",
-                "loopMusic",
-                "loopStartPoints"
+                MusicTree.Node.Parameters::vanillaMusic.name,
+                MusicTree.Node.Parameters::parallelMusic.name,
+                MusicTree.Node.Parameters::trackDelay.name,
+                MusicTree.Node.Parameters::trackDelayNoise.name,
+                MusicTree.Node.Parameters::enterDelay.name,
+                MusicTree.Node.Parameters::inheritMusic.name,
+                MusicTree.Node.Parameters::loopMusic.name,
+                MusicTree.Node.Parameters::loopStartPoints.name,
             )
         else if (selectedNode?.parameters?.parallelMusic == true)
-            listOf("vanillaMusic", "trackDelay", "trackDelayNoise", "enterDelay", "inheritMusic", "loopMusic")
+            listOf(
+                MusicTree.Node.Parameters::vanillaMusic.name,
+                MusicTree.Node.Parameters::trackDelay.name,
+                MusicTree.Node.Parameters::trackDelayNoise.name,
+                MusicTree.Node.Parameters::enterDelay.name,
+                MusicTree.Node.Parameters::inheritMusic.name,
+                MusicTree.Node.Parameters::loopMusic.name,
+            )
         else
             listOf()
 
