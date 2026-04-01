@@ -1,5 +1,10 @@
 True Adaptive Music v2.1.1
 
+### New Features:
+#### Node Parameter: Persistent Node Music - Ignore Persistence
+- When toggled on with Persistent Node Music, music will not persist when the node is selected. The music in that node will also not persist.
+- This is great if you are using Persistent Node Music in your pack, but want certain situations like boss fights or combat to not follow the persistence rule.
+
 ### UI Improvements:
 - You can now navigate containers in the UI with tab :)
 
