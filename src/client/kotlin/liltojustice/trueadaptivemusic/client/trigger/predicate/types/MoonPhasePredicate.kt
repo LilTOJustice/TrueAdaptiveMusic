@@ -23,8 +23,7 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "moonPhase" to "What phase of the moon the music should play for."
-            )
+                MoonPhasePredicate::moonPhase.name to "What phase of the moon the music should play for.")
     }
 
     enum class MoonPhase {
