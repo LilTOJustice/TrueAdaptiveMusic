@@ -2,5 +2,4 @@ package liltojustice.trueadaptivemusic.client.trigger.event.types
 
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 
-class OnRecipeUnlockEvent(): MusicEvent() {
-}
+class OnRecipeUnlockEvent: MusicEvent()
