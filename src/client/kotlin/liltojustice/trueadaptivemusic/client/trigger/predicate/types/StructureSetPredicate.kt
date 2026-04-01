@@ -48,8 +48,8 @@ class StructureSetPredicate internal constructor(
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "structureSets" to "Which structure sets the player must be in for the music should play. If none, " +
-                        "any structure set will trigger the music."
+                StructureSetPredicate::structureSets.name to "Which structure sets the player must be in for the " +
+                        "music should play. If none, any structure set will trigger the music."
             )
     }
 }

@@ -41,9 +41,10 @@ class PlayerAttributePredicate(
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "attribute" to "Attribute to compare for the player.",
-                "value" to "Value to compare to the attribute's value.",
-                "comparison" to "Comparison to use between the player attribute value and the given value."
+                PlayerAttributePredicate::attribute.name to "Attribute to compare for the player.",
+                PlayerAttributePredicate::value.name to "Value to compare to the attribute's value.",
+                PlayerAttributePredicate::comparison.name to "Comparison to use between the player attribute value " +
+                        "and the given value."
             )
     }
 

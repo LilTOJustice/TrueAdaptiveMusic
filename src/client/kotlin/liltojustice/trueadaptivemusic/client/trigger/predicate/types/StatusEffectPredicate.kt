@@ -17,7 +17,8 @@ class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifi
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "statusEffects" to "Which status effects the player needs to have for the music to play."
+                StatusEffectPredicate::statusEffects.name to "Which status effects the player needs to have for the " +
+                        "music to play."
             )
     }
 }

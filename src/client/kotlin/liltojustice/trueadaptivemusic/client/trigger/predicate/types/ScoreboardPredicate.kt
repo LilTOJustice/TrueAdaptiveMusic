@@ -30,9 +30,9 @@ class ScoreboardPredicate(
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "objectiveId" to "Id of the scoreboard objective to track.",
-                "value" to "Value to compare to the objective value.",
-                "comparison" to "How to compare the objective value to the given value."
+                ScoreboardPredicate::objectiveId.name to "Id of the scoreboard objective to track.",
+                ScoreboardPredicate::value.name to "Value to compare to the objective value.",
+                ScoreboardPredicate::comparison.name to "How to compare the objective value to the given value."
             )
     }
 

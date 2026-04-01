@@ -94,6 +94,7 @@ object MusicTriggerSerializer {
                 ?: throw MusicLoadException(
                     "Failed to deserialize type '$type' with json $json due to constructor failure.")
             result.music = stateless.music
+            result.parameters = stateless.parameters
             result
         }
         catch (e: MusicTriggerException) {
