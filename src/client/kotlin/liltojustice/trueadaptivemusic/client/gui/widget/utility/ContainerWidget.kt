@@ -214,8 +214,8 @@ abstract class ContainerWidget(
         return focusedWidget?.charTyped(chr, modifiers) ?: false
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        if (input.key == TAB_KEY) {
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == TAB_KEY) {
             val sorted = children.values.sortedBy { it.row }
             val currentFocused = sorted.firstOrNull { it.widget == focusedWidget } ?: return false
             val newFocused = sorted.firstOrNull { it.row > currentFocused.row }?.widget ?: return false
@@ -225,7 +225,7 @@ abstract class ContainerWidget(
             return true
         }
 
-        return focusedWidget?.keyPressed(input) ?: false
+        return focusedWidget?.keyPressed(keyCode, scanCode, modifiers) ?: false
     }
 
     override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
