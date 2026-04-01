@@ -16,7 +16,8 @@ class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEv
     companion object: MusicEventCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "bosses" to "Which entities the music should play for when their boss bar hits zero."
+                OnBossDefeatEvent::bosses.name to "Which entities the music should play for when their boss bar " +
+                        "hits zero."
             )
     }
 }

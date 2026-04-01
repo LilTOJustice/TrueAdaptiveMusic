@@ -30,8 +30,9 @@ class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, pr
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "entities" to "List of entities the music should play for. If none, any entity will trigger the music.",
-                "blockRadius" to "Minimum radius for the entity to trigger the predicate."
+                EntityNearbyPredicate::entities.name to "List of entities the music should play for. If none, any " +
+                        "entity will trigger the music.",
+                EntityNearbyPredicate::blockRadius.name to "Minimum radius for the entity to trigger the predicate."
             )
     }
 }
