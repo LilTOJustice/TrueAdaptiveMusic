@@ -43,7 +43,7 @@ abstract class MusicEvent: MusicTrigger() {
 
             override val descriptions: Map<String, String>
                 get() = super.descriptions + mapOf(
-                    "isPersistent" to "Don't stop this event's music after leaving this predicate.")
+                    Parameters::isPersistent.name to "Don't stop this event's music after leaving this predicate.")
 
             override fun default(): Parameters {
                 return Parameters()

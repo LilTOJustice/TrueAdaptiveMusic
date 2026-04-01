@@ -14,8 +14,9 @@ class HeightPredicate(private val direction: Direction, private val y: Int): Mus
     companion object: MusicPredicateCompanion {
         override val argDescriptions: Map<String, String>
             get() = super.argDescriptions + mapOf(
-                "direction" to "Whether the music should play when the player is above or below the y value.",
-                "y" to "Threshold at which the predicate should switch."
+                HeightPredicate::direction.name to "Whether the music should play when the player is above or below " +
+                        "the y value.",
+                HeightPredicate::y.name to "Threshold at which the predicate should switch."
             )
     }
 

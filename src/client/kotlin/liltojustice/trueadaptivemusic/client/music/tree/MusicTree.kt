@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
@@ -329,6 +330,7 @@ class MusicTree {
 
         data class Parameters(
             var vanillaMusic: Boolean = false,
+            var ignorePersistence: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
             var enterDelay: UInt = 0U,
@@ -345,27 +347,34 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
-                        "vanillaMusic" to "When this node is selected, TAM will use vanilla music.\n\nUse this if " +
-                                "you want music to fallback to vanilla in this node, (i.e. you want mod-specific " +
-                                "music to play).\n\nCertain music-related parameters can't be used with this enabled.",
-                        "trackDelay" to "After a track finishes, wait this many seconds before playing the next.",
-                        "trackDelayNoise" to "Add randomly + or - this many seconds to track delay.",
-                        "enterDelay" to "Wait this many seconds before starting music when entering this predicate. " +
-                                "Disables music resuming for this predicate.",
-                        "inheritMusic" to "Include this predicate's parent's music along with this predicate's music.",
-                        "inheritAmbience" to "Include this predicate's parent's ambience along with this predicate's " +
-                                "ambience.",
-                        "parallelMusic" to "Allow music across nodes to be played in parallel and transition between " +
-                                "music as the active node changes.\n\nSelecting this makes all descendants " +
-                                "automatically have this checked to participate in the parallelism.\n\nOnly one " +
-                                "track is allowed per node with this property.\n\nMusic inheritance and delays " +
-                                "are disabled, and looping is forced on.",
-                        "loopMusic" to "A random selected track is picked once, and then looped forever until the" +
-                                " node is left.",
-                        "loopStartPoints" to "Some looping music has an intro before the loop starts.\n\nThis " +
-                                "denotes, for each looping track, where the intro ends and the loop starts." +
-                                "\n\nGive a value in milliseconds from the start. Leave this as 0 if " +
-                                "there is no intro.\n\n* Disables persistent node music for this node."
+                        Parameters::vanillaMusic.name to "When this node is selected, TAM will use vanilla music.\n\n" +
+                                "Use this if you want music to fallback to vanilla in this node, (i.e. you want " +
+                                "mod-specific music to play).\n\nCertain music-related parameters can't be used with " +
+                                "this enabled.",
+                        Parameters::ignorePersistence.name to "\"${MusicPackOptions.getArgDisplayName(
+                            MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
+                                "ignored when this node is selected. Music for this node will start playing right " +
+                                "when it is selected, and the music in this node will not persist.",
+                        Parameters::trackDelay.name to "After a track finishes, wait this many seconds before " +
+                                "playing the next.",
+                        Parameters::trackDelayNoise.name to "Add randomly + or - this many seconds to track delay.",
+                        Parameters::enterDelay.name to "Wait this many seconds before starting music when entering " +
+                                "this predicate. Disables music resuming for this predicate.",
+                        Parameters::inheritMusic.name to "Include this predicate's parent's music along with this " +
+                                "predicate's music.",
+                        Parameters::inheritAmbience.name to "Include this predicate's parent's ambience along with " +
+                                "this predicate's ambience.",
+                        Parameters::parallelMusic.name to "Allow music across nodes to be played in parallel and " +
+                                "transition between music as the active node changes.\n\nSelecting this makes all " +
+                                "descendants automatically have this checked to participate in the parallelism.\n\n" +
+                                "Only one track is allowed per node with this property.\n\nMusic inheritance and " +
+                                "delays are disabled, and looping is forced on.",
+                        Parameters::loopMusic.name to "A random selected track is picked once, and then looped " +
+                                "forever until the node is left.\n\n* Disables ${MusicPackOptions.getArgDisplayName(
+                                    MusicPackOptions::persistentNodeMusic.name)!!.string} for this node.",
+                        Parameters::loopStartPoints.name to "Some looping music has an intro before the loop starts." +
+                                "\n\nThis denotes, for each looping track, where the intro ends and the loop starts." +
+                                "\n\nGive a value in milliseconds from the start. Leave this as 0 if there is no intro."
                     )
                 private val json = GsonBuilder()
                     .setPrettyPrinting()
