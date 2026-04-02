@@ -10,32 +10,29 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.GridWidget
-import net.minecraft.client.gui.widget.SimplePositioningWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.ImageButton
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
 import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack)
-    : Screen(
-    Text.translatableWithFallback(
-        "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")) {
+class EditPackScreen(
+    private val parent: Screen,
+    private val musicPack: MusicPack
+): Screen(
+    Component.translatableWithFallback(
+        "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")
+) {
     private lateinit var packStructureWidget: PackStructureWidget
     private lateinit var nodeViewWidget: NodeViewWidget
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
-    private lateinit var saveButtonWidget: TextIconButtonWidget
-    private lateinit var closeButtonWidget: ButtonWidget
-    private lateinit var openAssetsFolderButtonWidget: ButtonWidget
-    private lateinit var optionsButtonWidget: ButtonWidget
+    private lateinit var saveButtonWidget: ImageButton
+    private lateinit var closeButtonWidget: Button
+    private lateinit var openAssetsFolderButtonWidget: Button
+    private lateinit var optionsButtonWidget: Button
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -49,17 +46,17 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     private fun exportAndClose() {
-        client.setScreen(ExportPackScreen(musicPack, parent))
+        minecraft.setScreen(ExportPackScreen(musicPack, parent))
     }
 
-    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
-        val optional = this.hoveredElement(click!!.x(), click.y())
+    override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
+        val optional = this.getChildAt(event.x, event.y)
         if (optional.isEmpty) {
             return false
         } else {
             val element = optional.get()
-            if (element.mouseClicked(click, doubled) && element.isClickable) {
-                if (click.button() == 0) {
+            if (element.mouseClicked(event, doubled)) {
+                if (event.button() == 0) {
                     this.isDragging = true
                 }
             }
@@ -74,7 +71,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
         catch (e: Exception) {
             TAMClient.errorToast(
-                Text.translatableWithFallback(
+                Component.translatableWithFallback(
                     "trueadaptivemusic.edit_load_error", "Failed to load pack to edit!"),
                 e.message
             )
@@ -82,26 +79,19 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             close()
         }
 
-        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
-            exportAndClose()
-        }, false)
+        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, { exportAndClose() }, false)
             .texture(CHECKMARK, 9, 8)
             .build()
 
-        closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
-            close()
-        }
-            .build()
+        closeButtonWidget = Button.Builder(CLOSE_BUTTON_TEXT) { close() }.build()
 
-        openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
-            Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
-        }
-            .build()
+        openAssetsFolderButtonWidget = Button.Builder(OPEN_ASSETS_TEXT) {
+            Util.getPlatform().openUri(musicPack.getEditPackAssetsPath().toUri())
+        }.build()
 
-        optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
-            client.setScreen(PackOptionsScreen(this, musicPack))
-        }
-            .build()
+        optionsButtonWidget = Button.Builder(OPTIONS_BUTTON_TEXT) {
+            minecraft.setScreen(PackOptionsScreen(this, musicPack))
+        }.build()
 
         val containerWidth = getContainerWidth()
         val containerHeight = getContainerHeight()

@@ -9,7 +9,7 @@ class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPr
         val client = MinecraftClient.getInstance()
         val vehicleKey = client.player?.vehicle?.type?.translationKey ?: return false
 
-        return entities.isEmpty() || entities.any { entity -> entity.toTranslationKey("entity") == vehicleKey }
+        return entities.isEmpty() || entities.any { entity -> entity.toLanguageKey("entity") == vehicleKey }
     }
 
     companion object: MusicPredicateCompanion {

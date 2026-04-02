@@ -1,11 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.math.max
 
 class DropdownWidget<TKey>(
@@ -18,7 +13,7 @@ class DropdownWidget<TKey>(
     notSelectedPlaceholder: String? = null,
     startingOption: TKey? = null,
     private val onHoverOption: (option: String?) -> Unit = {},
-    tooltipText: Text? = null,
+    tooltipText: Component? = null,
     x: Int = 0,
     y: Int = 0
 )
@@ -34,22 +29,22 @@ class DropdownWidget<TKey>(
     x,
     y,
     true) {
-    private val titleText = Text.literal(title)
+    private val titleText = Component.literal(title)
     private var dropdownResultsWidget: DropdownResultsWidget<TKey>
     private val realizedWidth = width.takeUnless { width == 0 }
         ?: (
                 max(
-                    textRenderer.getWidth(title),
+                    font.width(title),
                     (options + (getOptions?.invoke() ?: listOf()))
                         .map { getDisplay?.invoke(it) ?: it.toString() }
-                        .maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0
+                        .maxOfOrNull { option -> font.getWidth(option) } ?: 0
                 ) + TEXT_WIDTH_BUFFER)
     private val textInputWidget = TextFieldWidget(
-        textRenderer,
+        font,
         0,
         0,
         realizedWidth,
-        textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
+        font.fontHeight + TEXT_HEIGHT_BUFFER,
         Text.literal("Dropdown Search")
     )
     private val selectedOptionWidget = run {

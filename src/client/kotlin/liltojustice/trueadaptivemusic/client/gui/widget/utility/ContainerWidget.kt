@@ -1,22 +1,21 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gl.RenderPipelines
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.screen.ScreenTexts
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.max
@@ -35,13 +34,13 @@ abstract class ContainerWidget(
     x: Int = 0,
     y: Int = 0,
     private val translucentInteract: Boolean = false,
-    backButtonCallback: (() -> Unit)? = null)
-    : ClickableWidget(x, y, width, height, Text.literal(message)) {
+    backButtonCallback: (() -> Unit)? = null
+): AbstractWidget(x, y, width, height, Component.literal(message)) {
     private val children = mutableMapOf<String, ChildWidget>()
     private val renderChildren = mutableMapOf<String, ChildWidget>()
-    private val client = MinecraftClient.getInstance()
-    protected val textRenderer: TextRenderer = client.textRenderer
-    protected val screen: Screen? = client.currentScreen
+    private val client = Minecraft.getInstance()
+    protected val font: Font = client.font
+    protected val screen: Screen? = client.screen
     private var verticalScrollPosition = 0.0
     private var horizontalScrollPosition = 0.0
     private var verticalScrollHeld = false
@@ -49,24 +48,24 @@ abstract class ContainerWidget(
     private var backButton = backButtonCallback?.let { makeBackButton(it) }
     private var lastUsedWidth = 0
     private var renderWidgetClearQueue = mutableListOf<(ChildWidget) -> Boolean>()
-    var focusedWidget: ClickableWidget? = null
+    var focusedWidget: AbstractWidget? = null
         protected set
 
     fun addBackButton(backButtonCallback: (() -> Unit)) {
         backButton = makeBackButton(backButtonCallback)
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
-    override fun playDownSound(soundManager: SoundManager?) {
+    override fun playDownSound(soundManager: SoundManager) {
     }
 
     override fun setHeight(height: Int) {
         this.height = height
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         renderWidgetClearQueue.forEach { clearWidgetsFromRender(it) }
         renderWidgetClearQueue.clear()
         focusedWidget?.isFocused = true
@@ -77,21 +76,19 @@ abstract class ContainerWidget(
 
         if (showHeader)
         {
-            context?.let {
-                renderDarkening(it)
-                renderDarkening(it, this.width, TOP_MARGIN)
-            }
+            renderDarkening(graphics)
+            renderDarkening(graphics, this.width, TOP_MARGIN)
 
-            drawCenteredText(context, message.string, -1, width / 2, shadow = true)
+            drawCenteredText(graphics, message.string, -1, width / 2, shadow = true)
             backButton?.let {
                 it.x = x + 5
-                it.y = (y + getHeaderOffset() - getRowHeight(textRenderer.fontHeight)).toInt()
-                it.render(context, mouseX, mouseY, delta)
+                it.y = (y + getHeaderOffset() - getRowHeight(font.lineHeight)).toInt()
+                it.extractRenderState(graphics, mouseX, mouseY, a)
             }
         }
 
-       if (bordered) {
-            context?.drawBorder(x, y, width, height)
+        if (bordered) {
+            graphics.drawBorder(x, y, width, height)
         }
 
         val usedWidth = getMaxUsedWidth()
@@ -99,10 +96,10 @@ abstract class ContainerWidget(
             clampScrollPosition()
         }
 
-        val verticalExtent = drawVerticalScrollbar(context)
-        val horizontalExtent = drawHorizontalScrollbar(context)
+        val verticalExtent = drawVerticalScrollbar(graphics)
+        val horizontalExtent = drawHorizontalScrollbar(graphics)
 
-        context?.enableScissor(
+        graphics.enableScissor(
             x + if (indentChildren) X_MARGIN else 0,
             y + getHeaderOffset() - 2,
             (verticalExtent?.third ?: (x + width)) - 2,
@@ -119,24 +116,24 @@ abstract class ContainerWidget(
                     translated.widget.width, width - translated.xOffset - 2 * X_MARGIN)
             }
 
-            translated.widget.render(context, mouseX, mouseY, delta)
+            translated.widget.extractRenderState(graphics, mouseX, mouseY, a)
         }
 
-        context?.disableScissor()
+        graphics.disableScissor()
         lastUsedWidth = getMaxUsedWidth()
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
         if (!visible ||
             !active ||
-            !this.isValidClickButton(click.buttonInfo) ||
-            !isMouseOver(click.x, click.y)) {
+            !this.isValidClickButton(event.buttonInfo) ||
+            !isMouseOver(event.x, event.y)) {
             unfocus()
             return false
         }
 
         backButton?.let {
-            if (it.mouseClicked(click, doubled)) {
+            if (it.mouseClicked(event, doubleClick)) {
                 return true
             }
         }
@@ -145,9 +142,9 @@ abstract class ContainerWidget(
         val horizontalScrollExtent = getHorizontalScrollbarExtent()
 
         verticalScrollExtent?.let {
-            if (click.y >= it.first - SCROLLBAR_GRACE &&
-                click.y <= it.second + SCROLLBAR_GRACE &&
-                abs(click.x - it.third) <= SCROLLBAR_GRACE) {
+            if (event.y >= it.first - SCROLLBAR_GRACE &&
+                event.y <= it.second + SCROLLBAR_GRACE &&
+                abs(event.x - it.third) <= SCROLLBAR_GRACE) {
                 verticalScrollHeld = true
                 screen?.focused = this
 
@@ -156,9 +153,9 @@ abstract class ContainerWidget(
         }
 
         horizontalScrollExtent?.let {
-            if (click.x >= it.first - SCROLLBAR_GRACE &&
-                click.x <= it.second + SCROLLBAR_GRACE &&
-                abs(click.y - it.third) <= SCROLLBAR_GRACE) {
+            if (event.x >= it.first - SCROLLBAR_GRACE &&
+                event.x <= it.second + SCROLLBAR_GRACE &&
+                abs(event.y - it.third) <= SCROLLBAR_GRACE) {
                 horizontalScrollHeld = true
                 screen?.focused = this
 
@@ -170,7 +167,7 @@ abstract class ContainerWidget(
         // Copy to avoid concurrent modification
         val children = children.toList()
         children.forEach { (_, child) ->
-            if (child.widget.mouseClicked(click, doubled)) {
+            if (child.widget.mouseClicked(event, doubleClick)) {
                 focusedWidget = child.widget
             }
             else {
@@ -183,42 +180,42 @@ abstract class ContainerWidget(
         return true
     }
 
-    override fun mouseDragged(click: Click?, offsetX: Double, offsetY: Double): Boolean {
+    override fun mouseDragged(event: MouseButtonEvent, dx: Double, dy: Double): Boolean {
         if (verticalScrollHeld) {
             val usableHeight = getUsableHeight()
             getVerticalScrollbarExtent()?.let {
                 val ratio = usableHeight.toDouble() / (it.second - it.first)
-                verticalScrollPosition += (offsetY * ratio) / getRowHeight(textRenderer.fontHeight)
+                verticalScrollPosition += (dy * ratio) / getRowHeight(font.lineHeight)
             }
         }
         else if (horizontalScrollHeld) {
             val usableWidth = getUsableWidth()
             getHorizontalScrollbarExtent()?.let {
                 val ratio = usableWidth.toDouble() / (it.second - it.first)
-                horizontalScrollPosition += offsetX * ratio
+                horizontalScrollPosition += dx * ratio
             }
         }
 
-        return focusedWidget?.mouseDragged(click, offsetX, offsetY) ?: false
+        return focusedWidget?.mouseDragged(event, dx, dy) ?: false
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        if (!visible || !active || !this.isValidClickButton(click.buttonInfo)) {
+    override fun mouseReleased(event: MouseButtonEvent): Boolean {
+        if (!visible || !active || !this.isValidClickButton(event.buttonInfo)) {
             return false
         }
 
         verticalScrollHeld = false
         horizontalScrollHeld = false
 
-        return focusedWidget?.mouseReleased(click) ?: true
+        return focusedWidget?.mouseReleased(event) ?: true
     }
 
-    override fun charTyped(input: CharInput): Boolean {
-        return focusedWidget?.charTyped(input) ?: false
+    override fun charTyped(event: CharacterEvent): Boolean {
+        return focusedWidget?.charTyped(event) ?: false
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        if (input.key == TAB_KEY) {
+    override fun keyPressed(event: KeyEvent): Boolean {
+        if (event.key == TAB_KEY) {
             val sorted = children.values.sortedBy { it.row }
             val currentFocused = sorted.firstOrNull { it.widget == focusedWidget } ?: return false
             val newFocused = sorted.firstOrNull { it.row > currentFocused.row }?.widget ?: return false
@@ -228,11 +225,11 @@ abstract class ContainerWidget(
             return true
         }
 
-        return focusedWidget?.keyPressed(input) ?: false
+        return focusedWidget?.keyPressed(event) ?: false
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
-        return focusedWidget?.keyReleased(input) ?: false
+    override fun keyReleased(event: KeyEvent): Boolean {
+        return focusedWidget?.keyReleased(event) ?: false
     }
 
     override fun mouseScrolled(
@@ -269,16 +266,16 @@ abstract class ContainerWidget(
     }
 
     protected fun drawCenteredText(
-        drawContext: DrawContext?,
+        graphics: GuiGraphicsExtractor,
         text: String,
         row: Int,
         xOffset: Int = 0,
-        color: Int = Colors.WHITE,
+        color: Int = CommonColors.WHITE,
         shadow: Boolean = true) {
-        drawContext?.drawText(
-            textRenderer,
+        graphics.text(
+            font,
             text,
-            xOffset + x - textRenderer.getWidth(text) / 2,
+            xOffset + x - font.width(text) / 2,
             getTranslatedY(row),
             color,
             shadow)
@@ -286,11 +283,11 @@ abstract class ContainerWidget(
 
     // Use if the widget is created on render
     fun addWidgetFromRender(
-        widgetMaker: () -> ClickableWidget,
+        widgetMaker: () -> AbstractWidget,
         widgetId: String,
         row: Int? = null,
         xOffset: Int = 0,
-        shouldRecompute: () -> Boolean = { false }): ClickableWidget {
+        shouldRecompute: () -> Boolean = { false }): AbstractWidget {
         if (!children.containsKey(widgetId) || shouldRecompute()) {
             children[widgetId] = ChildWidget(widgetId, widgetMaker(), row ?: 0, xOffset, true)
         }
@@ -305,7 +302,7 @@ abstract class ContainerWidget(
         return children[widgetId]!!.widget
     }
 
-    fun addWidget(child: ClickableWidget, row: Int, xOffset: Int = 0): ClickableWidget {
+    fun addWidget(child: AbstractWidget, row: Int, xOffset: Int = 0): AbstractWidget {
         val hash = child.hashCode().toString()
         if (!children.containsKey(hash)) {
             children[hash] = ChildWidget(hash, child, row, xOffset)
@@ -347,7 +344,7 @@ abstract class ContainerWidget(
                     min(maxRows, getMaxUsedRow(countOffscreen = true) + 1)
                 else
                     getMaxUsedRow(countOffscreen = true) + 1)
-                        * getRowHeight(textRenderer.fontHeight)
+                        * getRowHeight(font.lineHeight)
                         + getHeaderOffset()).toInt()
     }
 
@@ -360,7 +357,7 @@ abstract class ContainerWidget(
                 max = max(max, getTranslatedY(translated.row) - y + translated.widget.height)
             }
 
-        height = (max + getRowHeight(textRenderer.fontHeight)).toInt()
+        height = (max + getRowHeight(font.lineHeight)).toInt()
     }
 
     fun resetScrolling() {
@@ -373,22 +370,22 @@ abstract class ContainerWidget(
         horizontalScrollPosition = 0.0
     }
 
-    override fun forEachChild(consumer: Consumer<ClickableWidget>?) {
-        children.values.map { child -> child.widget }.forEach(consumer)
+    override fun visitWidgets(widgetVisitor: Consumer<AbstractWidget>) {
+        children.values.map { child -> child.widget }.forEach(widgetVisitor)
     }
 
-    protected open fun renderDarkening(context: DrawContext) {
-        this.renderDarkening(context, this.width, this.height)
+    protected open fun renderDarkening(graphics: GuiGraphicsExtractor) {
+        this.renderDarkening(graphics, this.width, this.height)
     }
 
-    protected open fun renderDarkening(context: DrawContext, width: Int, height: Int) {
-        renderDarkening(context, this.x, this.y, width, height)
+    protected open fun renderDarkening(graphics: GuiGraphicsExtractor, width: Int, height: Int) {
+        renderDarkening(graphics, this.x, this.y, width, height)
     }
 
-    protected open fun renderDarkening(context: DrawContext, x: Int, y: Int, width: Int, height: Int) {
+    protected open fun renderDarkening(graphics: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int) {
         renderBackgroundTexture(
-            context,
-            MENU_BACKGROUND_TEXTURE,
+            graphics,
+            Screen.MENU_BACKGROUND,
             x,
             y,
             0.0f,
@@ -399,8 +396,8 @@ abstract class ContainerWidget(
     }
 
     fun renderBackgroundTexture(
-        context: DrawContext,
-        texture: Identifier?,
+        graphics: GuiGraphicsExtractor,
+        texture: Identifier,
         x: Int,
         y: Int,
         u: Float,
@@ -408,7 +405,7 @@ abstract class ContainerWidget(
         width: Int,
         height: Int
     ) {
-        context.drawTexture(
+        graphics.blit(
             RenderPipelines.GUI_TEXTURED,
             texture,
             x,
@@ -436,11 +433,11 @@ abstract class ContainerWidget(
     }
 
     private fun getTranslatedY(row: Int): Int {
-        return (row * getRowHeight(textRenderer.fontHeight)).toInt() + getHeaderOffset() + y
+        return (row * getRowHeight(font.lineHeight)).toInt() + getHeaderOffset() + y
     }
 
     private fun totalRows(): Int {
-        return ((height - getHeaderOffset()) / getRowHeight(textRenderer.fontHeight)).roundToInt() -
+        return ((height - getHeaderOffset()) / getRowHeight(font.lineHeight)).roundToInt() -
                 (if (horizontallyScrollable) 1 else 0)
     }
 
@@ -468,35 +465,26 @@ abstract class ContainerWidget(
         return children.values.maxOfOrNull { it.xOffset + it.widget.width + X_MARGIN } ?: width
     }
 
-    private fun drawVerticalScrollbar(context: DrawContext?): Triple<Int, Int, Int>? {
+    private fun drawVerticalScrollbar(graphics: GuiGraphicsExtractor): Triple<Int, Int, Int>? {
         val extent = getVerticalScrollbarExtent() ?: return null
         val headerOffset = getHeaderOffset()
         val adjustedHeight = height - headerOffset - 6
         val x = extent.third
 
-        context?.let {
-            renderDarkening(it, x, y + headerOffset, 1, adjustedHeight)
-            it.drawVerticalLine(
-                x,
-                extent.first,
-                extent.second,
-                Colors.WHITE
-            )
-        }
+        renderDarkening(graphics, x, y + headerOffset, 1, adjustedHeight)
+        graphics.verticalLine(x, extent.first, extent.second, CommonColors.WHITE)
 
         return extent
     }
 
-    private fun drawHorizontalScrollbar(context: DrawContext?): Triple<Int, Int, Int>? {
+    private fun drawHorizontalScrollbar(graphics: GuiGraphicsExtractor): Triple<Int, Int, Int>? {
         val extent = getHorizontalScrollbarExtent() ?: return null
         val usableWidth = getUsableWidth()
         val offset = width - usableWidth
         val y = extent.third
 
-        context?.let {
-            renderDarkening(it, x + offset, y, usableWidth - offset, 1)
-            it.drawHorizontalLine(extent.first, extent.second, y, Colors.WHITE)
-        }
+        renderDarkening(graphics, x + offset, y, usableWidth - offset, 1)
+        graphics.horizontalLine(extent.first, extent.second, y, CommonColors.WHITE)
 
         return extent
     }
@@ -592,13 +580,13 @@ abstract class ContainerWidget(
 
         private fun makeBackButton(backButtonCallback: () -> Unit): ClickableTextWidget {
             return backButtonCallback.let {
-                ClickableTextWidget("< ${ScreenTexts.BACK.string}", onClick = { it() })
+                ClickableTextWidget("< ${CommonComponents.GUI_BACK.string}", onClick = { it() })
             }
         }
     }
 
     data class ChildWidget(
-        val id: String, val widget: ClickableWidget, val row: Int, val xOffset: Int, val fromRender: Boolean = false) {
+        val id: String, val widget: AbstractWidget, val row: Int, val xOffset: Int, val fromRender: Boolean = false) {
         fun translated(row: Int, xOffset: Int = 0): ChildWidget {
             return copy(row = this.row - row, xOffset = this.xOffset + xOffset)
         }

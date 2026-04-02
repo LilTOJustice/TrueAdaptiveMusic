@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.gui.widget.SliderWidget
-import net.minecraft.text.Text
+import net.minecraft.client.gui.components.AbstractSliderButton
+import net.minecraft.network.chat.Component
 import kotlin.math.roundToInt
 
 class SliderWidget(
@@ -10,8 +10,14 @@ class SliderWidget(
     startingValue: Int = 0,
     private val title: String = "",
     private val onChange: (newValue: Int) -> Unit = {}
-) : SliderWidget(
-    0, 0, 150, 10, Text.literal(title), startingValue.toDouble() / maximum) {
+): AbstractSliderButton(
+    0,
+    0,
+    150,
+    10,
+    Component.literal(title),
+    startingValue.toDouble() / maximum
+) {
     val actualValue: Int
         get() = (minimum + value * maximum).roundToInt()
 
@@ -20,7 +26,7 @@ class SliderWidget(
     }
 
     override fun updateMessage() {
-        message = Text.literal("$title: $actualValue")
+        message = Component.literal("$title: $actualValue")
     }
 
     override fun applyValue() {

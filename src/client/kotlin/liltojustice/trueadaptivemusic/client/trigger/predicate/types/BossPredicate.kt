@@ -10,7 +10,7 @@ class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredic
         val client = MinecraftClient.getInstance()
         return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
             val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
-            bosses.isEmpty() || bosses.any { boss -> bossName == boss.toTranslationKey("entity") }
+            bosses.isEmpty() || bosses.any { boss -> bossName == boss.toLanguageKey("entity") }
         }
     }
 

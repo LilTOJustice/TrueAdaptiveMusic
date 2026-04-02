@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
 import kotlin.reflect.KType
 import kotlin.reflect.full.*
 import kotlin.text.split
@@ -19,13 +19,13 @@ sealed class TypedIdentifier(val id: Identifier) {
         return super.equals(other) || (other as? TypedIdentifier)?.id == id
     }
 
-    fun toTranslationKey(prefix: String): String {
-        return id.toTranslationKey(prefix)
+    fun toLanguageKey(prefix: String): String {
+        return id.toLanguageKey(prefix)
     }
 
     fun prettify(): String {
         val translationKey = toPrefixedTranslationKey()
-        val translatedString = Text.translatable(translationKey).string
+        val translatedString = Component.translatable(translationKey).string
         return if (translatedString != translationKey) {
             "${toString().split(":")[0].replaceFirstChar { it.uppercase() }} - $translatedString"
         }
@@ -62,7 +62,7 @@ sealed class TypedIdentifier(val id: Identifier) {
                 .firstOrNull { subclass ->
                     subclass.createType(
                         type.arguments, type.isMarkedNullable, type.annotations) == type }
-                ?.primaryConstructor?.call(Identifier.of(id))
+                ?.primaryConstructor?.call(Identifier.parse(id))
                 ?: throw TypedIdentifierException("Failed to initialize ${this::class.simpleName} from id $id")
         }
     }

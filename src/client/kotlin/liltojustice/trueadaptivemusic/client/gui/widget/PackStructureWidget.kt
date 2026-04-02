@@ -224,13 +224,13 @@ class PackStructureWidget(
             }
 
             val valid = targetedNode?.let { child.isValidDestination(it) || shiftHeld } == true
-            val rowHeight = getRowHeight(textRenderer.fontHeight)
+            val rowHeight = getRowHeight(font.fontHeight)
 
             if (spaceHeld && !child.targetNode.isParent) {
                 context?.drawText(
-                    textRenderer,
+                    font,
                     ARROW_TEXT,
-                    child.x + INDENT - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.x + INDENT - font.getWidth(ARROW_TEXT) - 2,
                     child.y + (rowHeight / 2).toInt(),
                     if (valid) Colors.WHITE else Colors.RED,
                     false
@@ -238,9 +238,9 @@ class PackStructureWidget(
             }
             else {
                 context?.drawText(
-                    textRenderer,
+                    font,
                     ARROW_TEXT,
-                    child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.x - font.getWidth(ARROW_TEXT) - 2,
                     child.y - (rowHeight / 2).toInt(),
                     if (valid) Colors.WHITE else Colors.RED,
                     false

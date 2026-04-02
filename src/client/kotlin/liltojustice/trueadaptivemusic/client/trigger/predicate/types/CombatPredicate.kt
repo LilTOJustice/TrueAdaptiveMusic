@@ -25,7 +25,7 @@ class CombatPredicate(
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
-    private val entityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
+    private val entityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toLanguageKey("entity") }
 
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
