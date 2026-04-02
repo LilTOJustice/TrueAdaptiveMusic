@@ -53,8 +53,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import net.fabricmc.api.ClientModInitializer
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.text.Text
+import net.minecraft.client.gui.components.Tooltip
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -122,7 +121,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 outArgs[arg.index]?.toString() ?: ""
             )
             tooltipText?.let {
-                result.setTooltip(Tooltip.of(it))
+                result.(Tooltip.create(it))
             }
 
             result

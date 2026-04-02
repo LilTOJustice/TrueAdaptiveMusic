@@ -27,12 +27,12 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateReg
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.toast.SystemToast
-import net.minecraft.sound.SoundEvent
-import net.minecraft.text.Text
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.toasts.SystemToast
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.sounds.SoundEvent
 import java.io.IOException
 import java.util.Calendar
 import kotlin.coroutines.EmptyCoroutineContext
@@ -48,7 +48,7 @@ import kotlin.time.Duration.Companion.milliseconds
 object TAMClient {
     const val TPS = 20
     val TICK_MS = (1.0 / TPS * 1000).milliseconds
-    val minecraftClient: MinecraftClient = MinecraftClient.getInstance()
+    val minecraftClient: Minecraft = Minecraft.getInstance()
     val predicateRegistry = MusicPredicateRegistry()
     val eventRegistry = MusicEventRegistry()
     val predicateFactory = MusicPredicateFactory(predicateRegistry)
@@ -62,7 +62,7 @@ object TAMClient {
     var musicPack: MusicPack? = null
         set(value) {
             field = value
-            minecraftClient.soundManager.soundSystem.reloadSounds()
+            minecraftClient.soundManager.soundEngine.reload()
             musicManager?.stop()
 
             val packName = value?.packName ?: ""
@@ -79,7 +79,7 @@ object TAMClient {
     private var musicManager: MusicManager? = null
 
     fun start() {
-        val client = MinecraftClient.getInstance()
+        val client = Minecraft.getInstance()
         backgroundScope.launch {
             while (true) {
                 try {
@@ -150,10 +150,10 @@ object TAMClient {
         screen: Screen,
         outArgs: MutableList<Any?>,
         arg: InputWidgetMaker.WidgetArg,
-        displayName: Text?,
-        tooltipText: Text?,
+        displayName: Component?,
+        tooltipText: Component?,
         onChange: () -> Unit = {}
-    ): ClickableWidget {
+    ): AbstractWidget {
         return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
@@ -173,13 +173,13 @@ object TAMClient {
         musicManager?.setDesiredVanillaSoundEvent(soundEvent)
     }
 
-    fun errorToast(errorMessage: Text, exceptionMessage: String? = null) {
-        minecraftClient.toastManager.add(
-            SystemToast.create(
+    fun errorToast(errorMessage: Component, exceptionMessage: String? = null) {
+        minecraftClient.toastManager.addToast(
+            SystemToast.multiline(
                 minecraftClient,
-                SystemToast.Type.FILE_DROP_FAILURE,
+                SystemToast.SystemToastId.FILE_DROP_FAILURE,
                 errorMessage,
-                Text.literal(exceptionMessage ?: "")
+                Component.literal(exceptionMessage ?: "")
             )
         )
     }
@@ -240,7 +240,7 @@ object TAMClient {
         return manifest
     }
 
-    private fun tick(client: MinecraftClient) {
+    private fun tick(client: Minecraft) {
         if (!initialized) {
             initialize(client)
         }
@@ -253,8 +253,8 @@ object TAMClient {
         }
     }
 
-    private fun initialize(client: MinecraftClient) {
-        if (initialized || client.soundManager?.soundSystem?.started != true) {
+    private fun initialize(client: Minecraft) {
+        if (initialized || !client.soundManager.soundEngine.loaded) {
             return
         }
 

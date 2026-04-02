@@ -8,93 +8,93 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.makeDoneButton
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.ConfirmLinkScreen
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.MultiLineTextWidget
+import net.minecraft.client.gui.screens.ConfirmLinkScreen
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.util.CommonColors
 import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
 class PackBrowserScreen(private val parent: Screen): Screen(
-    Text.translatableWithFallback("trueadaptivemusic.music_pack_browser", "Music Pack Browser")) {
+    Component.translatableWithFallback(
+        "trueadaptivemusic.music_pack_browser", "Music Pack Browser")) {
     private lateinit var packListWidget: PackBrowserListWidget
-    private lateinit var openMusicPacksButton: ButtonWidget
-    private lateinit var doneButton: ButtonWidget
-    private lateinit var refreshButton: ButtonWidget
-    private lateinit var discordButton: ButtonWidget
-    private lateinit var lastRefreshedWidget: TextWidget
+    private lateinit var openMusicPacksButton: Button
+    private lateinit var doneButton: Button
+    private lateinit var refreshButton: Button
+    private lateinit var discordButton: Button
+    private lateinit var lastRefreshedWidget: MultiLineTextWidget
     private var selectedPack: BrowsableMusicPack? = null
 
     override fun init() {
-        openMusicPacksButton = ButtonWidget.Builder(OPEN_MUSIC_PACKS_TEXT) {
-            Util.getOperatingSystem().open(Constants.MUSIC_PACK_DIR.toUri())
+        openMusicPacksButton = Button.Builder(OPEN_MUSIC_PACKS_TEXT) {
+            Util.getPlatform().openUri(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
-        openMusicPacksButton.width = textRenderer.getWidth(OPEN_MUSIC_PACKS_TEXT) + 10
+        openMusicPacksButton.width = font.width(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width - 1
         openMusicPacksButton.y = 1
 
         packListWidget = PackBrowserListWidget(
-            client!!, this.width, this.height - 96, 48, 36)
+            minecraft, this.width, this.height - 96, 48, 36)
         { musicPack -> selectedPack = musicPack }
 
-        doneButton = makeDoneButton(textRenderer, width, height) { client?.setScreen(parent) }
+        doneButton = makeDoneButton(font, width, height) { minecraft.setScreen(parent) }
 
-        refreshButton = ButtonWidget.builder(REFRESH_TEXT) { _: ButtonWidget? -> runBlocking { coroutineScope { reload() } } }.build()
+        refreshButton = Button.builder(REFRESH_TEXT) { _: Button? -> runBlocking { coroutineScope { reload() } } }.build()
         refreshButton.x = 1
         refreshButton.y = 1
-        refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
+        refreshButton.width = font.width(REFRESH_TEXT) + 10
 
-        lastRefreshedWidget = TextWidget(Text.empty(), textRenderer)
+        lastRefreshedWidget = MultiLineTextWidget(Component.empty(), font)
         lastRefreshedWidget.y = refreshButton.y + refreshButton.height + 3
         lastRefreshedWidget.x = 2
 
-        discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
-        { _: ButtonWidget? -> client?.setScreen(
+        discordButton = Button.builder(Constants.DISCORD_JOIN_TEXT)
+        { _: Button? -> minecraft.setScreen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
-                        Util.getOperatingSystem().open(Constants.DISCORD_JOIN_URL)
+                        Util.getPlatform().openUri(Constants.DISCORD_JOIN_URL)
                     }
 
-                    client?.setScreen(this)
+                    minecraft.setScreen(this)
                 },
                 Constants.DISCORD_JOIN_URL,
                 true
             )
         ) }.build()
-        discordButton.width = textRenderer.getWidth(Constants.DISCORD_JOIN_TEXT) + 10
+        discordButton.width = font.width(Constants.DISCORD_JOIN_TEXT) + 10
         discordButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 2
         discordButton.x = width - discordButton.width - 1
 
-        addSelectableChild(packListWidget)
-        addDrawableChild(openMusicPacksButton)
-        addDrawableChild(doneButton)
-        addDrawableChild(refreshButton)
-        addDrawableChild(lastRefreshedWidget)
-        addDrawableChild(discordButton)
+        addWidget(packListWidget)
+        addWidget(openMusicPacksButton)
+        addWidget(doneButton)
+        addWidget(refreshButton)
+        addWidget(lastRefreshedWidget)
+        addWidget(discordButton)
     }
 
-    override fun close() {
-        client?.setScreen(parent)
+    override fun onClose() {
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         lastRefreshedWidget.message = this.packListWidget.refreshTime?.let {
             lastRefreshedWidget.active = true
-            Text.literal("${LAST_REFRESHED_TEXT.string}: $it").withColor(Colors.GRAY)
+            Component.literal("${LAST_REFRESHED_TEXT.string}: $it").withColor(CommonColors.GRAY)
         } ?: run {
             lastRefreshedWidget.active = false
             REFRESHING_TEXT
         }
 
-        super.render(context, mouseX, mouseY, delta)
-        this.packListWidget.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, 28, Colors.WHITE)
+        super.extractRenderState(graphics, mouseX, mouseY, a)
+        packListWidget.extractRenderState(graphics, mouseX, mouseY, a)
+        graphics.centeredText(font, title, width / 2, 28, CommonColors.WHITE)
     }
 
     fun reload() {
@@ -102,12 +102,12 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     }
 
     companion object {
-        private val OPEN_MUSIC_PACKS_TEXT = Text.translatableWithFallback(
+        private val OPEN_MUSIC_PACKS_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.open_pack_folder", "Open Pack Folder")
-        private val REFRESH_TEXT = Text.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
-        private val REFRESHING_TEXT = Text.translatableWithFallback(
+        private val REFRESH_TEXT = Component.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
+        private val REFRESHING_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.refreshing", "Refreshing")
-        val LAST_REFRESHED_TEXT: MutableText = Text.translatableWithFallback(
+        val LAST_REFRESHED_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.last_refreshed", "Last Refreshed")
     }
 }

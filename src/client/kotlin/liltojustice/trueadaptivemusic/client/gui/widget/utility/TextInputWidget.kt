@@ -1,15 +1,14 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.text.Text
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.network.chat.Component
 import kotlin.math.min
 
 class TextInputWidget(
@@ -18,16 +17,17 @@ class TextInputWidget(
     placeholder: String = "",
     x: Int = 0,
     y: Int = 0)
-    : ClickableWidget(x, y, Int.MAX_VALUE, HEIGHT, Text.literal(prompt)) {
-    private val textRenderer = MinecraftClient.getInstance().textRenderer
+    : AbstractWidget(x, y, Int.MAX_VALUE, HEIGHT, Component.literal(prompt)) {
+    private val textRenderer = Minecraft.getInstance().gameRenderer
     private val promptWidget = run {
         val widget = ClickableTextWidget(prompt)
         widget.disableBold()
 
         widget
     }
+
     private val fieldWidget = TextFieldWidget(
-        textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Text.literal(placeholder))
+        textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Component.literal(placeholder))
     var text: String
         get() { return fieldWidget.text }
         set(value) { fieldWidget.text = value }
@@ -38,26 +38,26 @@ class TextInputWidget(
         text = placeholder
     }
 
-    override fun playDownSound(soundManager: SoundManager?) {
+    override fun playDownSound(soundManager: SoundManager) {
     }
 
-    override fun charTyped(input: CharInput): Boolean {
+    override fun charTyped(event: CharacterEvent): Boolean {
         return fieldWidget.charTyped(input)
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
+    override fun keyPressed(event: KeyEvent): Boolean {
         return fieldWidget.keyPressed(input)
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
+    override fun keyReleased(event: KeyEvent): Boolean {
         return fieldWidget.keyReleased(input)
     }
 
-    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
+    override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
         return fieldWidget.mouseClicked(click, doubled)
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         if (fieldWidget.isFocused != isFocused) {
             fieldWidget.isFocused = isFocused
         }
@@ -75,11 +75,11 @@ class TextInputWidget(
         fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
         fieldWidget.width = textRenderer.getWidth(text) + 30
 
-        promptWidget.render(context, mouseX, mouseY, delta)
-        fieldWidget.render(context, mouseX, mouseY, delta)
+        promptWidget.render(graphics, mouseX, mouseY, delta)
+        fieldWidget.render(graphics, mouseX, mouseY, delta)
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
     companion object {

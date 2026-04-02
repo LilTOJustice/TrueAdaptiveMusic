@@ -1,15 +1,15 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.util.Colors
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
+import net.minecraft.util.CommonColors
 
 open class ClickableTextWidget(
     text: String,
@@ -20,14 +20,14 @@ open class ClickableTextWidget(
     protected val isSelected: (ClickableTextWidget) -> Boolean = { false },
     protected val onMouseOn: (ClickableTextWidget) -> Unit = {},
     protected val onMouseOff: (ClickableTextWidget) -> Unit = {}
-): ClickableWidget(x, y, 0, 0, Text.literal(text)) {
-    var color: Int = Colors.WHITE
+): AbstractWidget(x, y, 0, 0, Component.literal(text)) {
+    var color: Int = CommonColors.WHITE
     val text: String
         get() = message.string
-    protected val textRenderer: TextRenderer = MinecraftClient.getInstance().textRenderer
+    protected val font: Font = Minecraft.getInstance().font
     private var disableBold = false
     private var enableItalic = false
-    private val coloredText: Text?
+    private val coloredText: Component?
         get() = run {
             var style = message.style.withColor(TextColor.fromRgb(color))
             if (onClick == null && !disableBold) {
@@ -38,19 +38,19 @@ open class ClickableTextWidget(
                 style = style.withItalic(true)
             }
 
-            val result = message.getWithStyle(style).firstOrNull()
+            val result = message.toFlatList(style).firstOrNull()
 
             result
         }
     var hovering = false
 
     init {
-        coloredText?.let { width = textRenderer.getWidth(it) }
-        height = textRenderer.fontHeight
+        coloredText?.let { width = font.width(it) }
+        height = font.lineHeight
         active = onClick != null
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         if (!visible) {
             return
         }
@@ -69,23 +69,22 @@ open class ClickableTextWidget(
         val selected = isSelected(this)
         if (selected) {
             x += BORDER_BUFFER / 2
-            context?.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
+            graphics.drawBorder(x, y, width, height, padding = BORDER_BUFFER)
         }
 
         if (!selected && showHighlight && isMouseOver) {
-            context?.drawHorizontalLine(x, x + width, y + textRenderer.fontHeight, Colors.WHITE)
+            graphics.horizontalLine(x, x + width, y + font.lineHeight, CommonColors.WHITE)
         }
 
-        context?.let {
-            coloredText?.let { text ->
-                it.getHoverListener(this, DrawContext.HoverType.NONE)
-                    .marqueedText(text, x, x, x + width, y, y + textRenderer.fontHeight)
-            }
+        coloredText?.let { text ->
+            graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE)
+                .acceptScrolling(
+                    text, x, x, x + width, y, y + font.lineHeight)
         }
     }
 
-    override fun onClick(click: Click, doubled: Boolean) {
-        super.onClick(click, doubled)
+    override fun onClick(event: MouseButtonEvent, doubleClick: Boolean) {
+        super.onClick(event, doubleClick)
 
         if (visible && active)
         {
@@ -93,27 +92,27 @@ open class ClickableTextWidget(
         }
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
     fun disableBold() {
         disableBold = true
         coloredText?.let {
-            this.width = textRenderer.getWidth(it)
+            this.width = font.width(it)
         }
     }
 
     fun enableItalic() {
         enableItalic = true
         coloredText?.let {
-            this.width = textRenderer.getWidth(it)
+            this.width = font.width(it)
         }
     }
 
     fun setText(text: String) {
-        message = Text.literal(text)
+        message = Component.literal(text)
         coloredText?.let {
-            this.width = textRenderer.getWidth(it)
+            this.width = font.width(it)
         }
     }
 
