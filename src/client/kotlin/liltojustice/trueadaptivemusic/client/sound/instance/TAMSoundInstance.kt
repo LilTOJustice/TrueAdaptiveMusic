@@ -18,7 +18,7 @@ import java.io.InputStream
 abstract class TAMSoundInstance(
     val playableSound: PlayableSound,
     val isAmbient: Boolean,
-    val isLooping: Boolean,
+    val isLoop: Boolean,
     val loopStartPoint: UInt
 ): SoundInstance {
     var desiredVolume = 1F

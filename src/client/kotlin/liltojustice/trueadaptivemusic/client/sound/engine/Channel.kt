@@ -50,7 +50,7 @@ class Channel private constructor(
                 soundInstance.getAudioStream()?.use {
                     source.setVolume(startingVolume)
                     source.setStream(it)
-                    source.setLooping(soundInstance.isLooping, soundInstance.loopStartPoint)
+                    source.setLooping(soundInstance.isLoop, soundInstance.loopStartPoint)
                     source.play()
                     waitForStop()
                 }
