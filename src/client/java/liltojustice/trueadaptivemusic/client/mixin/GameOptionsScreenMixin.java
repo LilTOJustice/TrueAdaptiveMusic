@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
+import com.mojang.datafixers.util.Unit;
 import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -18,14 +19,14 @@ public class GameOptionsScreenMixin {
         var trueAdaptiveMusicButton = new OptionInstance<>(
                 "trueadaptivemusic",
                 OptionInstance.noTooltip(),
-                (optionText, value) -> optionText,
-                new TrueAdaptiveMusicOptionCallback<>(Minecraft.getInstance()),
-                "",
-                option -> {}
+                (optionText, _) -> optionText,
+                new TrueAdaptiveMusicOptionCallback(Minecraft.getInstance()),
+                Unit.INSTANCE,
+                _ -> {}
         );
 
-        if (thisObject.body != null) {
-            thisObject.body.addSingleOptionEntry(trueAdaptiveMusicButton);
+        if (soundOptionsScreen.list != null) {
+            soundOptionsScreen.list.addSmall(trueAdaptiveMusicButton);
         }
     }
 }

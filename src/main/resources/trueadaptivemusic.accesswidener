@@ -9,3 +9,6 @@ accessible method com/mojang/blaze3d/audio/OpenAlUtil checkALError (Ljava/lang/S
 accessible field net/minecraft/client/sounds/SoundEngine soundBuffers Lnet/minecraft/client/sounds/SoundBufferLibrary;
 accessible field net/minecraft/client/sounds/SoundBufferLibrary resourceManager Lnet/minecraft/server/packs/resources/ResourceProvider;
 accessible field net/minecraft/client/multiplayer/ClientLevel environmentAttributes Lnet/minecraft/world/attribute/EnvironmentAttributeSystem;
+accessible class net/minecraft/client/OptionInstance$ValueSet
+accessible field net/minecraft/client/sounds/SoundEngine library Lcom/mojang/blaze3d/audio/Library;
+accessible field net/minecraft/client/gui/screens/options/OptionsSubScreen list Lnet/minecraft/client/gui/components/OptionsList;

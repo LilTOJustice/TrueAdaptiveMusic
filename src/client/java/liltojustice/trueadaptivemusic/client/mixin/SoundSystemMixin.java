@@ -1,16 +1,16 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
-import net.minecraft.client.sound.SoundSystem;
+import net.minecraft.client.sounds.SoundEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SoundSystem.class)
+@Mixin(SoundEngine.class)
 public class SoundSystemMixin {
-    @Inject(method = "stop()V", at = @At("HEAD"))
-    public void init(CallbackInfo ci) {
+    @Inject(method = "stopAll", at = @At("HEAD"))
+    public void stopAll(CallbackInfo ci) {
         TAMClient.INSTANCE.resetSound();
     }
 }
