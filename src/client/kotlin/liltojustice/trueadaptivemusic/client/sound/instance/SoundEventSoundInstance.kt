@@ -31,13 +31,13 @@ class SoundEventSoundInstance(
     private var sound: Sound? = null
 
     init {
-        instance.getSoundSet(soundManager)?.getSound(random)
-        sound = instance.sound?.takeIf { it != SoundManager.MISSING_SOUND }
+        instance.resolve(soundManager)?.getSound(random)
+        sound = instance.sound?.takeIf { it != SoundManager.EMPTY_SOUND }
     }
 
     override fun getAudioStream(): AudioStream? {
         val sound = sound ?: return null
-        val inputStreamGetter = { soundManager.soundEngine.soundLoader.resourceFactory.open(sound.location) }
+        val inputStreamGetter = { soundManager.soundEngine.soundBuffers.resourceManager.open(sound.location) }
 
         return getAudioStream(sound.location.toString(), inputStreamGetter, isAmbient)
     }

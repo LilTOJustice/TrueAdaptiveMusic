@@ -15,14 +15,15 @@ class DimensionIdentifier(id: Identifier): TypedIdentifier(id) {
         override fun getRegistryIds(): List<Identifier> {
             return Minecraft
                 .getInstance()
-                .world
-                ?.registryManager
-                ?.getOptional(Registries.DIMENSION_TYPE)
+                .level
+                ?.registryAccess()
+                ?.get(Registries.DIMENSION_TYPE)
                 ?.getOrNull()
-                ?.ids
+                ?.value()
+                ?.keySet()
                 ?.filter { it != BuiltinDimensionTypes.OVERWORLD_CAVES.identifier() }
                 ?.toList()
-                ?: listOf()
+                ?: emptyList()
         }
     }
 }

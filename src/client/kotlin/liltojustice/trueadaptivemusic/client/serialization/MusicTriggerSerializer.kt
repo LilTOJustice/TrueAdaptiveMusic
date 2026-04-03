@@ -21,6 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import net.minecraft.resources.Identifier
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
@@ -144,7 +145,7 @@ object MusicTriggerSerializer {
             writer.endObject()
         }
 
-        override fun read(reader: JsonReader): Identifier? {
+        override fun read(reader: JsonReader): Identifier {
             reader.beginObject()
             reader.nextName()
             val namespace = reader.nextString()
@@ -158,7 +159,7 @@ object MusicTriggerSerializer {
 
             reader.endObject()
 
-            return Identifier.of(namespace, path)
+            return Identifier.fromNamespaceAndPath(namespace, path)
         }
     }
 }

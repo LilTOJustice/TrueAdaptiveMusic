@@ -2,25 +2,17 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityAttributeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.RegistryKeys
+import net.minecraft.client.Minecraft
+import net.minecraft.core.registries.Registries
 import kotlin.jvm.optionals.getOrNull
 
 class PlayerAttributePredicate(
-    private val attribute: EntityAttributeIdentifier,
-    private val value: Double,
-    private val comparison: Comparison
+    private val attribute: EntityAttributeIdentifier, private val value: Double, private val comparison: Comparison
 ): MusicPredicate() {
     override fun test(): Boolean {
-        val player = MinecraftClient.getInstance().player ?: return false
-        val registry = player.entityWorld.registryManager.getOptional(RegistryKeys.ATTRIBUTE).getOrNull()
-            ?: return false
-        val entityAttributeEntry =
-            registry
-                .mapNotNull { registry.getEntry(it) }
-                .firstOrNull { entityAttributeEntry ->
-                    entityAttributeEntry.matchesId(attribute.id)
-                }
+        val player = Minecraft.getInstance().player ?: return false
+        val registry = player.level().registryAccess().get(Registries.ATTRIBUTE).getOrNull()?.value() ?: return false
+        val entityAttributeEntry = registry.get(attribute.id).getOrNull() ?: return false
         val entityAttributeValue = if (player.attributes.hasAttribute(entityAttributeEntry))
             player.attributes.getValue(entityAttributeEntry)
         else

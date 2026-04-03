@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.structure.StructureSet
+import kotlin.collections.any
 import kotlin.jvm.optionals.getOrNull
 
 class StructureSetPredicate internal constructor(
@@ -14,13 +15,13 @@ class StructureSetPredicate internal constructor(
 
     override fun test(): Boolean {
         val minecraft = Minecraft.getInstance()
-        val serverWorld = minecraft.server?.worlds?.firstOrNull { world ->
-            world.registryKey == minecraft.world?.registryKey } ?: return false
+        val dimensionKey = minecraft.level?.dimension() ?: return false
+        val serverLevel = minecraft.singleplayerServer?.getLevel(dimensionKey) ?: return false
         val x: Double = minecraft.player?.x ?: return false
         val y: Double = minecraft.player?.y ?: return false
         val z: Double = minecraft.player?.z ?: return false
 
-        return fullStructureTest(serverWorld, x, y, z)
+        return fullStructureTest(serverLevel, x, y, z)
     }
 
     override fun getTickRate(): Int {
@@ -29,19 +30,22 @@ class StructureSetPredicate internal constructor(
 
     private fun fullStructureTest(level: ServerLevel, x: Double, y: Double, z: Double): Boolean {
         val blockPos = BlockPos.containing(x, y, z)
-        val structureAccessor = level.structureManager()
+        val structureManager = level.structureManager()
+        val structuresNearby = structureManager.getAllStructuresAt(blockPos).keys
 
         return (structureSets.takeIf { structureSets.isNotEmpty() }?.map { structureSet -> structureSet.id }
             ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
-                    structureAccessor.registryAccess()
-                        .get(Registries.STRUCTURE_SET).getOrNull()?.value()?.get(structureSetId)
+                    structureManager.registryAccess()
+                        .get(Registries.STRUCTURE_SET).getOrNull()?.value()?.get(structureSetId)?.getOrNull()?.value()
                         ?: return false
 
-                structureSet.structures.any { structureWeightedEntry ->
-                    StructurePredicate.testStructure(
-                        structureAccessor, structureWeightedEntry.structure.value(), blockPos) }
+                structureSet.structures.any { structureSelectionEntry ->
+                    structuresNearby.any { structure ->
+                        structureSelectionEntry.structure.value().type() == structure.type()
+                    }
+                }
             }
     }
 

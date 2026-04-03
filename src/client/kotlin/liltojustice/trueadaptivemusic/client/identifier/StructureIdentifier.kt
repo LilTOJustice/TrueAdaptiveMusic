@@ -12,10 +12,17 @@ class StructureIdentifier(id: Identifier): TypedIdentifier(id) {
 
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
-            return Minecraft.getInstance().server?.worlds
-                ?.flatMap { world ->
-                    world.structureAccessor.registryManager
-                        .getOptional(Registries.STRUCTURE).getOrNull()?.ids ?: listOf() }
+            return Minecraft.getInstance().singleplayerServer?.allLevels
+                ?.flatMap { level ->
+                    level
+                        .structureManager()
+                        .registryAccess()
+                        .get(Registries.STRUCTURE)
+                        .getOrNull()
+                        ?.value()
+                        ?.keySet()
+                        ?: emptyList()
+                }
                 ?.toSet()
                 ?.toList()
                 ?: emptyList()

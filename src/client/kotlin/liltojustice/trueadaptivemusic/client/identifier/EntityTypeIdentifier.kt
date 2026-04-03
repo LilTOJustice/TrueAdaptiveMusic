@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.Identifier
 
 class EntityTypeIdentifier(id: Identifier): TypedIdentifier(id) {
@@ -9,7 +10,7 @@ class EntityTypeIdentifier(id: Identifier): TypedIdentifier(id) {
 
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
-            return Registries.ENTITY_TYPE.ids.toList()
+            return BuiltInRegistries.ENTITY_TYPE.keySet().toList()
         }
     }
 }

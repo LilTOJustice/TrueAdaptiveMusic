@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.Identifier
 
 class StatusEffectIdentifier(id: Identifier): TypedIdentifier(id) {
@@ -9,7 +10,7 @@ class StatusEffectIdentifier(id: Identifier): TypedIdentifier(id) {
 
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
-            return Registries.STATUS_EFFECT.ids.toList()
+            return BuiltInRegistries.CONSUME_EFFECT_TYPE.keySet().toList()
         }
     }
 }

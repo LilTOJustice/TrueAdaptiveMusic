@@ -5,6 +5,6 @@ import net.minecraft.client.Minecraft
 
 class FishingPredicate: MusicPredicate() {
     override fun test(): Boolean {
-        return Minecraft.getInstance().player?.fishHook != null
+        return Minecraft.getInstance().player?.fishing != null
     }
 }

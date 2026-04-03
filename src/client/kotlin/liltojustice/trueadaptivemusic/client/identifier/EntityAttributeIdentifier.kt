@@ -13,12 +13,13 @@ class EntityAttributeIdentifier(id: Identifier): TypedIdentifier(id) {
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             return Minecraft
-                .getInstance().world?.registryManager
-                ?.getOptional(Registries.ATTRIBUTE)
+                .getInstance().level?.registryAccess()
+                ?.get(Registries.ATTRIBUTE)
                 ?.getOrNull()
-                ?.ids
+                ?.value()
+                ?.keySet()
                 ?.toList()
-                ?: listOf()
+                ?: emptyList()
         }
     }
 }

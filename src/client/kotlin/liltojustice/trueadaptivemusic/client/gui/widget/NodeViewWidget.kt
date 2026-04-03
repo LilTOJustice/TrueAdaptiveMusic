@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 import java.util.Timer
@@ -173,7 +174,7 @@ class NodeViewWidget(
                             {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
-                                        Registries.SOUND_EVENT.ids
+                                        BuiltInRegistries.SOUND_EVENT.keySet()
                                             .map { id -> id.toString() }
                                             .filter { path -> path.contains("music.") }
                                     )
@@ -206,7 +207,7 @@ class NodeViewWidget(
                             {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
-                                        Registries.SOUND_EVENT.ids
+                                        BuiltInRegistries.SOUND_EVENT.keySet()
                                             .map { id -> id.toString() }
                                             .filter { path -> path.contains("music.") }
                                     )
@@ -245,7 +246,7 @@ class NodeViewWidget(
                     {
                         musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
-                                Registries.SOUND_EVENT.ids
+                                BuiltInRegistries.SOUND_EVENT.keySet()
                                     .map { id -> id.toString() }
                                     .filter { path -> path.contains("music.") }
                             )

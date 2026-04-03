@@ -1,19 +1,18 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 import net.minecraft.world.attribute.EnvironmentAttributes
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val world = client.world ?: return false
-        val currentPhase = world.environmentAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL)
-        val time = world.timeOfDay % 24000
+        val level = Minecraft.getInstance().level ?: return false
+        val currentPhase = level.environmentAttributes.getDimensionValue(EnvironmentAttributes.MOON_PHASE)
+        val time = level.gameTime % 24000
 
         return time in 13000..23999 && when(moonPhase) {
-            MoonPhase.Full -> currentPhase == net.minecraft.world.MoonPhase.FULL_MOON
-            MoonPhase.New -> currentPhase == net.minecraft.world.MoonPhase.NEW_MOON
+            MoonPhase.Full -> currentPhase == net.minecraft.world.level.MoonPhase.FULL_MOON
+            MoonPhase.New -> currentPhase == net.minecraft.world.level.MoonPhase.NEW_MOON
         }
     }
 

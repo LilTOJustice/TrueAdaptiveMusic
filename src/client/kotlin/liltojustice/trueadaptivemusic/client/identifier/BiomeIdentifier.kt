@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
 import net.minecraft.client.Minecraft
+import net.minecraft.core.registries.Registries
 import net.minecraft.resources.Identifier
 import kotlin.jvm.optionals.getOrNull
 
@@ -12,12 +13,13 @@ class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             return Minecraft
-                .getInstance().world?.registryManager
-                ?.getOptional(RegistryKeys.BIOME)
+                .getInstance().level?.registryAccess()
+                ?.get(Registries.BIOME)
                 ?.getOrNull()
-                ?.ids
+                ?.value()
+                ?.keySet()
                 ?.toList()
-                ?: listOf()
+                ?: emptyList()
         }
     }
 }
