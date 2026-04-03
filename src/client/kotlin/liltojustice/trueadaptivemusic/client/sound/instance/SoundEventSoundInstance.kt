@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
+import net.minecraft.util.RandomSource
 
 class SoundEventSoundInstance(
     playableSound: PlayableSound,
@@ -53,6 +54,6 @@ class SoundEventSoundInstance(
     }
 
     companion object {
-        val random: Random = Random.create()
+        val random: RandomSource = RandomSource.create()
     }
 }
