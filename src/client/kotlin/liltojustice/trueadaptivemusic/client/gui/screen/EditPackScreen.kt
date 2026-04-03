@@ -12,9 +12,9 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
-import net.minecraft.client.gui.components.ImageButton
 import net.minecraft.client.gui.components.SpriteIconButton
 import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.layouts.FrameLayout
 import net.minecraft.client.gui.layouts.GridLayout
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
@@ -239,7 +239,7 @@ class EditPackScreen(
         }
 
         gridLayout.arrangeElements()
-        SimplePositioningWidget.setPos(
+        FrameLayout.alignInRectangle(
             gridLayout,
             LEFT_PADDING,
             TOP_MARGIN,
