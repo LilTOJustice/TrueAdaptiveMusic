@@ -1,12 +1,12 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class HeightPredicate(private val direction: Direction, private val y: Int): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val playerHeight = client.player?.blockPos?.y ?: return false
+        val minecraft = Minecraft.getInstance()
+        val playerHeight = minecraft.player?.blockPosition()?.y ?: return false
 
         return if (direction == Direction.Above) playerHeight >= y else playerHeight <= y
     }

@@ -36,15 +36,19 @@ class CheckboxWidget(
 
     override fun onPress(input: InputWithModifiers) {
         super.onPress(input)
-        onChange(checked)
+        onChange(selected)
     }
 
     override fun extractContents(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         graphics.blit(
             RenderPipelines.GUI_TEXTURED,
-            if (checked) CHECKED else UNCHECKED,
+            if (selected) CHECKED else UNCHECKED,
             x,
             y,
+            0F,
+            0F,
+            CHECKBOX_SIZE,
+            CHECKBOX_SIZE,
             CHECKBOX_SIZE,
             CHECKBOX_SIZE,
             CommonColors.WHITE

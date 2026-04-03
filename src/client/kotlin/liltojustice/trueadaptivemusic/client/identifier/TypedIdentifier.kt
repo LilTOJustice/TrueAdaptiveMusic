@@ -13,7 +13,7 @@ sealed class TypedIdentifier(val id: Identifier) {
     val namespace: String
         get() = id.namespace
 
-    abstract fun toPrefixedTranslationKey(): String
+    abstract fun toPrefixedLanguageKey(): String
 
     override fun equals(other: Any?): Boolean {
         return super.equals(other) || (other as? TypedIdentifier)?.id == id
@@ -24,9 +24,9 @@ sealed class TypedIdentifier(val id: Identifier) {
     }
 
     fun prettify(): String {
-        val translationKey = toPrefixedTranslationKey()
-        val translatedString = Component.translatable(translationKey).string
-        return if (translatedString != translationKey) {
+        val languageKey = toPrefixedLanguageKey()
+        val translatedString = Component.translatable(languageKey).string
+        return if (translatedString != languageKey) {
             "${toString().split(":")[0].replaceFirstChar { it.uppercase() }} - $translatedString"
         }
         else {
@@ -47,7 +47,7 @@ sealed class TypedIdentifier(val id: Identifier) {
                         "Ensure it has a companion object implementing the " +
                         "${TypedIdentifierCompanion::class.simpleName} interface.")
             return (typeCompanion.functions.firstOrNull { f -> f.name == Companion::getRegistryIds.name }
-                ?.call(typeCompanion.objectInstance) as? List<*>)?.mapNotNull { x -> x as? Identifier }
+                ?.call(typeCompanion.objectInstance) as? List<*>)?.filterIsInstance<Identifier>()
                 ?: throw TypedIdentifierException(
                     "Failed to get registry ids from identifier type ${type}. " +
                             "Ensure it has a companion object implementing the " +

@@ -1,22 +1,8 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
-import com.google.gson.ExclusionStrategy
-import com.google.gson.FieldAttributes
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.TypeAdapter
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonWriter
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.client.Serialize
-import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
-import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import net.minecraft.text.Text
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.primaryConstructor
+import net.minecraft.network.chat.Component
 
 abstract class MusicTrigger {
     @Serialize
@@ -55,9 +41,9 @@ abstract class MusicTrigger {
         val argDescriptions: Map<String, String>
             get() = mapOf()
 
-        fun getDisplayName(triggerName: String): Text
-        fun getArgDisplayName(triggerName: String, argName: String): Text?
-        fun getArgDescription(triggerName: String, argName: String): Text?
+        fun getDisplayName(triggerName: String): Component
+        fun getArgDisplayName(triggerName: String, argName: String): Component?
+        fun getArgDescription(triggerName: String, argName: String): Component?
     }
 
     abstract class Parameters {

@@ -2,26 +2,20 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.server.world.ServerWorld
-import net.minecraft.structure.StructureStart
-import net.minecraft.util.math.BlockBox
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkSectionPos
-import net.minecraft.world.gen.StructureAccessor
-import net.minecraft.world.gen.structure.Structure
+import net.minecraft.client.Minecraft
+import net.minecraft.core.BlockPos
+import net.minecraft.server.level.ServerLevel
 import kotlin.math.max
 import kotlin.math.min
 
 class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val serverWorld = client.server?.worlds?.firstOrNull { world ->
-            world.registryKey == client.world?.registryKey } ?: return false
-        val x: Double = client.player?.x ?: return false
-        val y: Double = client.player?.y ?: return false
-        val z: Double = client.player?.z ?: return false
+        val minecraft = Minecraft.getInstance()
+        val serverWorld = minecraft.server?.worlds?.firstOrNull { world ->
+            world.registryKey == minecraft.world?.registryKey } ?: return false
+        val x: Double = minecraft.player?.x ?: return false
+        val y: Double = minecraft.player?.y ?: return false
+        val z: Double = minecraft.player?.z ?: return false
 
         return fullStructureTest(serverWorld, x, y, z)
     }
@@ -30,9 +24,9 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         return super.getTickRate() * 20
     }
 
-    private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
-        val blockPos = BlockPos.ofFloored(x, y, z)
-        val structureAccessor = world.structureAccessor
+    private fun fullStructureTest(level: ServerLevel, x: Double, y: Double, z: Double): Boolean {
+        val blockPos = BlockPos.containing(x, y, z)
+        val structureAccessor = level.structureManager
 
         return (structures.takeIf { structures.isNotEmpty() }?.map { structure -> structure.id }
             ?: StructureIdentifier.getRegistryIds())

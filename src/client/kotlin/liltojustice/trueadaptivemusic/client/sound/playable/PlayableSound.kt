@@ -2,8 +2,8 @@ package liltojustice.trueadaptivemusic.client.sound.playable
 
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.util.Identifier
-import net.minecraft.util.InvalidIdentifierException
+import net.minecraft.IdentifierException
+import net.minecraft.resources.Identifier
 
 interface PlayableSound {
     fun makeSoundInstance(
@@ -12,12 +12,7 @@ interface PlayableSound {
 
     companion object {
         fun of(path: String, soundLibrary: SoundLibrary): PlayableSound? {
-            return soundLibrary[path] ?: try {
-                PlayableSoundEvent(Identifier.of(path))
-            }
-            catch (_: InvalidIdentifierException) {
-                null
-            }
+            return soundLibrary[path] ?: Identifier.tryParse(path)?.let { PlayableSoundEvent(it) }
         }
     }
 }

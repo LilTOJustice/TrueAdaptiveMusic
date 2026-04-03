@@ -19,8 +19,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.stream.ZipInputStream
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.text.Text
-import net.minecraft.util.JsonHelper
+import net.minecraft.network.chat.Component
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.Files
@@ -240,7 +239,7 @@ class MusicPack private constructor(
         }
         catch (e: Exception) {
             TAMClient.errorToast(
-                Text.translatableWithFallback(
+                Component.translatableWithFallback(
                     "trueadaptivemusic.export_failure", "Failed to export pack! Try again."),
                 e.message
             )
@@ -292,7 +291,7 @@ class MusicPack private constructor(
 
     companion object {
         private val jsonErrorText =
-            Text.translatableWithFallback(
+            Component.translatableWithFallback(
                 "trueadaptivemusic.json_error",
                 "Could not load pack due to json error:"
             ).string
@@ -370,8 +369,7 @@ class MusicPack private constructor(
             val preValidation = MusicPackValidation()
 
             val rules = try {
-                MusicTree.fromJson(
-                    JsonHelper.deserialize(rulesFile.inputStream().reader()), playableSounds)
+                MusicTree.fromJson(JsonHelper.parse(rulesFile.inputStream().reader()), playableSounds)
             }
             catch (e: JsonParseException) {
                 preValidation.addError("$jsonErrorText\n$e")
@@ -423,8 +421,7 @@ class MusicPack private constructor(
 
                 val rules = try {
                     zipFile.getInputStream(rulesFile).use {
-                        MusicTree.fromJson(
-                            JsonHelper.deserialize(it.reader()) , playableSounds)
+                        MusicTree.fromJson(JsonHelper.parse(it.reader()), playableSounds)
                     }
                 }
                 catch (e: JsonParseException) {

@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget.utility
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.input.CharacterEvent
 import net.minecraft.client.input.KeyEvent
@@ -18,7 +19,7 @@ class TextInputWidget(
     x: Int = 0,
     y: Int = 0)
     : AbstractWidget(x, y, Int.MAX_VALUE, HEIGHT, Component.literal(prompt)) {
-    private val textRenderer = Minecraft.getInstance().gameRenderer
+    private val font = Minecraft.getInstance().font
     private val promptWidget = run {
         val widget = ClickableTextWidget(prompt)
         widget.disableBold()
@@ -26,15 +27,15 @@ class TextInputWidget(
         widget
     }
 
-    private val fieldWidget = TextFieldWidget(
-        textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Component.literal(placeholder))
+    private val fieldWidget = EditBox(
+        font, 0, 0, Int.MAX_VALUE, HEIGHT, Component.literal(placeholder))
     var text: String
-        get() { return fieldWidget.text }
-        set(value) { fieldWidget.text = value }
+        get() { return fieldWidget.value }
+        set(value) { fieldWidget.value = value }
     var updateText: String = ""
 
     init {
-        fieldWidget.setChangedListener { text -> updateText = onChange(this, text).ifEmpty { "" } }
+        fieldWidget.setResponder { text -> updateText = onChange(this, text).ifEmpty { "" } }
         text = placeholder
     }
 
@@ -42,22 +43,22 @@ class TextInputWidget(
     }
 
     override fun charTyped(event: CharacterEvent): Boolean {
-        return fieldWidget.charTyped(input)
+        return fieldWidget.charTyped(event)
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {
-        return fieldWidget.keyPressed(input)
+        return fieldWidget.keyPressed(event)
     }
 
     override fun keyReleased(event: KeyEvent): Boolean {
-        return fieldWidget.keyReleased(input)
+        return fieldWidget.keyReleased(event)
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
-        return fieldWidget.mouseClicked(click, doubled)
+        return fieldWidget.mouseClicked(event, doubled)
     }
 
-    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         if (fieldWidget.isFocused != isFocused) {
             fieldWidget.isFocused = isFocused
         }
@@ -71,12 +72,12 @@ class TextInputWidget(
         promptWidget.y = y
         fieldWidget.y = y
         promptWidget.width = min(
-            textRenderer.getWidth(promptWidget.text), width - fieldWidget.width - PADDING)
+            font.width(promptWidget.text), width - fieldWidget.width - PADDING)
         fieldWidget.x = promptWidget.x + promptWidget.width + PADDING
-        fieldWidget.width = textRenderer.getWidth(text) + 30
+        fieldWidget.width = font.width(text) + 30
 
-        promptWidget.render(graphics, mouseX, mouseY, delta)
-        fieldWidget.render(graphics, mouseX, mouseY, delta)
+        promptWidget.extractRenderState(graphics, mouseX, mouseY, a)
+        fieldWidget.extractRenderState(graphics, mouseX, mouseY, a)
     }
 
     override fun updateWidgetNarration(output: NarrationElementOutput) {

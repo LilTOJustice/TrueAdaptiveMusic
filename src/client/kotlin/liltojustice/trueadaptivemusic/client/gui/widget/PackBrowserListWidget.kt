@@ -218,10 +218,11 @@ class PackBrowserListWidget(
         )
 
         if (identifier !in loadedPackImages) {
-            minecraft.textureManager.register(
-                identifier,
-                DynamicTexture(identifier::toString, ImageProcessor.getNativeImage(imagePath))
-            )
+            ImageProcessor.getNativeImage(imagePath)?.let { image ->
+                minecraft.textureManager.register(
+                    identifier, DynamicTexture(identifier::toString, image))
+            }
+
             loadedPackImages.add(identifier)
         }
 

@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.ImageButton
+import net.minecraft.client.gui.components.SpriteIconButton
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
@@ -21,7 +22,7 @@ class ConfirmBackupScreen(
     : Screen(Component.translatableWithFallback("trueadaptivemusic.backup_exists", "Backup Exists")) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
-        val acceptButtonWidget = ImageButton.builder(
+        val acceptButtonWidget = SpriteIconButton.builder(
             Component.translatableWithFallback("trueadaptivemusic.keep", "Keep"), {
                 val backup = MusicPack.fromFile(backupPath)
                 TAMClient.musicPack = backup
@@ -31,7 +32,7 @@ class ConfirmBackupScreen(
                     Logger.logError("Failed to load existing pack.")
                 }
         }, false)
-            .texture(CHECKMARK, 9, 8)
+            .sprite(CHECKMARK, 9, 8)
             .build()
         val deleteButtonWidget = Button.Builder(
             Component.translatableWithFallback("trueadaptivemusic.delete", "Delete")) {

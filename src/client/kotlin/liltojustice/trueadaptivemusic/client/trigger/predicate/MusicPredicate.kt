@@ -6,7 +6,7 @@ import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.reflect.full.companionObjectInstance
 
 abstract class MusicPredicate: MusicTrigger() {
@@ -47,15 +47,15 @@ abstract class MusicPredicate: MusicTrigger() {
     companion object: MusicPredicateCompanion
 
     interface MusicPredicateCompanion: MusicTriggerCompanion {
-        override fun getDisplayName(triggerName: String): Text {
-            return Text.translatableWithFallback(
+        override fun getDisplayName(triggerName: String): Component {
+            return Component.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",
                 (TAMClient.predicateRegistry[triggerName]?.companionObjectInstance as? MusicPredicateCompanion)
                     ?.displayName ?: triggerName.prettify()
             )
         }
 
-        override fun getArgDisplayName(triggerName: String, argName: String): Text? {
+        override fun getArgDisplayName(triggerName: String, argName: String): Component? {
             val predicateType = TAMClient.predicateRegistry[triggerName] ?: return null
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
@@ -67,7 +67,7 @@ abstract class MusicPredicate: MusicTrigger() {
             )
         }
 
-        override fun getArgDescription(triggerName: String, argName: String): Text? {
+        override fun getArgDescription(triggerName: String, argName: String): Component? {
             val predicateClass = TAMClient.predicateRegistry[triggerName] ?: return null
 
             return translatableWithFallbackOrNull(

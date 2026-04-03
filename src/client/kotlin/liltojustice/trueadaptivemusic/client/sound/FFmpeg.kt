@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound
 
 import liltojustice.trueadaptivemusic.client.TAMClient
-import net.minecraft.util.JsonHelper
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader

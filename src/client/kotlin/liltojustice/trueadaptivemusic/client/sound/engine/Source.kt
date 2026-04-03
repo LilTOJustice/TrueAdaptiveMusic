@@ -1,9 +1,8 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
+import com.mojang.blaze3d.audio.OpenAlUtil
 import liltojustice.trueadaptivemusic.Logger
-import net.minecraft.client.sound.AlUtil
-import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.StaticSound
+import net.minecraft.client.sounds.AudioStream
 import org.lwjgl.openal.AL10
 import org.lwjgl.openal.AL11
 import java.io.IOException
@@ -52,7 +51,7 @@ class Source private constructor(private val pointer: Int) {
 
         this.playing = false
         AL10.alSourceStop(this.pointer)
-        AlUtil.checkErrors("Stop")
+        OpenAlUtil.checkALError("Stop")
         this.stream?.let {
             try {
                 it.close()

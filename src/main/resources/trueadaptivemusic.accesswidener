@@ -3,3 +3,6 @@ accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minec
 accessible field net/minecraft/client/sounds/SoundEngine loaded Z
 accessible method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V
 accessible field net/minecraft/client/gui/components/Checkbox selected Z
+accessible field net/minecraft/client/gui/components/BossHealthOverlay events Ljava/util/Map;
+accessible field net/minecraft/client/sounds/SoundEngine instanceToChannel Ljava/util/Map;
+accessible method com/mojang/blaze3d/audio/OpenAlUtil checkALError (Ljava/lang/String;)Z

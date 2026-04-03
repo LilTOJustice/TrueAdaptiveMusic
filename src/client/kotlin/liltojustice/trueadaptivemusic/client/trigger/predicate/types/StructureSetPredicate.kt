@@ -2,23 +2,23 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.StructureSetIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.server.world.ServerWorld
-import net.minecraft.structure.StructureSet
-import net.minecraft.util.math.BlockPos
+import net.minecraft.client.Minecraft
+import net.minecraft.core.BlockPos
+import net.minecraft.core.registries.Registries
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.levelgen.structure.StructureSet
 import kotlin.jvm.optionals.getOrNull
 
 class StructureSetPredicate internal constructor(
     private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
 
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val serverWorld = client.server?.worlds?.firstOrNull { world ->
-            world.registryKey == client.world?.registryKey } ?: return false
-        val x: Double = client.player?.x ?: return false
-        val y: Double = client.player?.y ?: return false
-        val z: Double = client.player?.z ?: return false
+        val minecraft = Minecraft.getInstance()
+        val serverWorld = minecraft.server?.worlds?.firstOrNull { world ->
+            world.registryKey == minecraft.world?.registryKey } ?: return false
+        val x: Double = minecraft.player?.x ?: return false
+        val y: Double = minecraft.player?.y ?: return false
+        val z: Double = minecraft.player?.z ?: return false
 
         return fullStructureTest(serverWorld, x, y, z)
     }
@@ -27,16 +27,16 @@ class StructureSetPredicate internal constructor(
         return super.getTickRate() * 20
     }
 
-    private fun fullStructureTest(world: ServerWorld, x: Double, y: Double, z: Double): Boolean {
-        val blockPos = BlockPos.ofFloored(x, y, z)
-        val structureAccessor = world.structureAccessor
+    private fun fullStructureTest(level: ServerLevel, x: Double, y: Double, z: Double): Boolean {
+        val blockPos = BlockPos.containing(x, y, z)
+        val structureAccessor = level.structureManager()
 
         return (structureSets.takeIf { structureSets.isNotEmpty() }?.map { structureSet -> structureSet.id }
             ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
-                    structureAccessor.registryManager
-                        .getOptional(RegistryKeys.STRUCTURE_SET).getOrNull()?.get(structureSetId)
+                    structureAccessor.registryAccess()
+                        .get(Registries.STRUCTURE_SET).getOrNull()?.value()?.get(structureSetId)
                         ?: return false
 
                 structureSet.structures.any { structureWeightedEntry ->

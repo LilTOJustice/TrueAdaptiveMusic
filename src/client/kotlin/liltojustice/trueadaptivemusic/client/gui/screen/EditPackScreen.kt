@@ -10,11 +10,17 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.ImageButton
+import net.minecraft.client.gui.components.SpriteIconButton
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.layouts.GridLayout
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
@@ -29,7 +35,7 @@ class EditPackScreen(
     private lateinit var nodeViewWidget: NodeViewWidget
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
-    private lateinit var saveButtonWidget: ImageButton
+    private lateinit var saveButtonWidget: SpriteIconButton
     private lateinit var closeButtonWidget: Button
     private lateinit var openAssetsFolderButtonWidget: Button
     private lateinit var optionsButtonWidget: Button
@@ -76,14 +82,14 @@ class EditPackScreen(
                 e.message
             )
             Logger.logError("Failed to load pack to edit:\n$e")
-            close()
+            onClose()
         }
 
-        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, { exportAndClose() }, false)
-            .texture(CHECKMARK, 9, 8)
+        saveButtonWidget = SpriteIconButton.builder(SAVE_BUTTON_TEXT, { exportAndClose() }, false)
+            .sprite(CHECKMARK, 9, 8)
             .build()
 
-        closeButtonWidget = Button.Builder(CLOSE_BUTTON_TEXT) { close() }.build()
+        closeButtonWidget = Button.Builder(CLOSE_BUTTON_TEXT) { onClose() }.build()
 
         openAssetsFolderButtonWidget = Button.Builder(OPEN_ASSETS_TEXT) {
             Util.getPlatform().openUri(musicPack.getEditPackAssetsPath().toUri())
@@ -156,33 +162,33 @@ class EditPackScreen(
             }
         )
 
-        addDrawableChild(saveButtonWidget)
-        addDrawableChild(closeButtonWidget)
-        addDrawableChild(openAssetsFolderButtonWidget)
-        addDrawableChild(packStructureWidget)
-        addDrawableChild(nodeViewWidget)
-        addDrawableChild(predicateViewWidget)
-        addDrawableChild(eventViewWidget)
-        addDrawableChild(optionsButtonWidget)
+        addWidget(saveButtonWidget)
+        addWidget(closeButtonWidget)
+        addWidget(openAssetsFolderButtonWidget)
+        addWidget(packStructureWidget)
+        addWidget(nodeViewWidget)
+        addWidget(predicateViewWidget)
+        addWidget(eventViewWidget)
+        addWidget(optionsButtonWidget)
 
-        saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
+        saveButtonWidget.width = font.width(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
-        closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        closeButtonWidget.width = font.width(CLOSE_BUTTON_TEXT) + 10
         closeButtonWidget.setTooltip(
-            Tooltip.of(
-                Text.translatableWithFallback(
+            Tooltip.create(
+                Component.translatableWithFallback(
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
+        openAssetsFolderButtonWidget.width = font.width(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
-        optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
+        optionsButtonWidget.width = font.width(OPTIONS_BUTTON_TEXT) + 10
         optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
     }
 
-    override fun close() {
+    override fun onClose() {
         try {
             initPack()
         }
@@ -192,21 +198,20 @@ class EditPackScreen(
             parent.reload()
         }
 
-        client?.setScreen(parent)
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, 22, Colors.WHITE)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        super.extractRenderState(graphics, mouseX, mouseY, a)
+        graphics.centeredText(font, title, width / 2, 22, CommonColors.WHITE)
     }
 
     private fun positionContainers() {
-        val gridWidget = GridWidget()
-        gridWidget.mainPositioner
-            .marginLeft(LEFT_MARGIN / 2)
-            .marginRight(RIGHT_MARGIN / 2)
-        val adder: GridWidget.Adder = gridWidget.createAdder(2)
+        val gridLayout = GridLayout()
+        gridLayout.defaultCellSetting()
+            .paddingLeft(LEFT_PADDING / 2)
+            .paddingRight(RIGHT_PADDING / 2)
+        val rowHelper: GridLayout.RowHelper = gridLayout.createRowHelper(2)
 
         packStructureWidget.height = getContainerHeight()
         nodeViewWidget.height = getContainerHeight()
@@ -214,34 +219,35 @@ class EditPackScreen(
         eventViewWidget.height = getContainerHeight()
 
         if (predicateView) {
-            adder.add(packStructureWidget)
-            adder.add(predicateViewWidget)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(predicateViewWidget)
         }
         else if (eventView) {
-            val innerGridWidget = GridWidget()
+            val innerGridLayout = GridLayout()
             nodeViewWidget.height = getContainerHeight() / 2
             eventViewWidget.height = getContainerHeight() / 2
-            innerGridWidget.add(nodeViewWidget, 0, 0)
-            innerGridWidget.add(eventViewWidget, 1, 0)
-            innerGridWidget.setRowSpacing(1)
-            adder.add(packStructureWidget)
-            adder.add(innerGridWidget)
-            innerGridWidget.refreshPositions()
+            innerGridLayout.addChild(nodeViewWidget, 0, 0)
+            innerGridLayout.addChild(eventViewWidget, 1, 0)
+            innerGridLayout.rowSpacing(1)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(innerGridLayout)
+            innerGridLayout.arrangeElements()
         }
         else {
-            adder.add(packStructureWidget)
-            adder.add(nodeViewWidget)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(nodeViewWidget)
         }
 
-        gridWidget.refreshPositions()
+        gridLayout.arrangeElements()
         SimplePositioningWidget.setPos(
-            gridWidget,
-            LEFT_MARGIN,
+            gridLayout,
+            LEFT_PADDING,
             TOP_MARGIN,
-            RIGHT_MARGIN,
+            RIGHT_PADDING,
             BOTTOM_MARGIN,
             0f,
-            0f)
+            0f
+        )
     }
 
     private fun switchToNodeView() {
@@ -265,7 +271,7 @@ class EditPackScreen(
     }
 
     private fun getContainerWidth(): Int {
-        return (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt()
+        return (width * 0.5 - LEFT_PADDING - RIGHT_PADDING).toInt()
     }
 
     private fun getContainerHeight(): Int {
@@ -273,17 +279,18 @@ class EditPackScreen(
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
+        private val CHECKMARK: Identifier = Identifier.withDefaultNamespace("icon/checkmark")
         private const val TOP_MARGIN = 32
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
-        private const val LEFT_MARGIN = TOP_MARGIN / 4
-        private const val RIGHT_MARGIN = LEFT_MARGIN
-        private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
+        private const val LEFT_PADDING = TOP_MARGIN / 4
+        private const val RIGHT_PADDING = LEFT_PADDING
+        private val OPEN_ASSETS_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.show_assets", "Show Assets")
-        private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
+        private val SAVE_BUTTON_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
-        private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
-        private val OPTIONS_BUTTON_TEXT = Text.translatableWithFallback(
+        private val CLOSE_BUTTON_TEXT = Component.translatableWithFallback(
+            "trueadaptivemusic.close", "Close")
+        private val OPTIONS_BUTTON_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.options", "Options")
     }
 }

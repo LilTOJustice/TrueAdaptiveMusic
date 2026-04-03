@@ -3,10 +3,10 @@ package liltojustice.trueadaptivemusic.client.javasucks
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
-import net.minecraft.client.MinecraftClient
-import net.minecraft.entity.LivingEntity
-import net.minecraft.text.TranslatableTextContent
-import net.minecraft.util.Identifier
+import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.contents.TranslatableContents
+import net.minecraft.resources.Identifier
+import net.minecraft.world.entity.LivingEntity
 
 object OnBossDefeatEventMixinHelper {
     @JvmStatic
@@ -17,15 +17,15 @@ object OnBossDefeatEventMixinHelper {
 
         TAMClient.invokeMusicEvent(
             OnBossDefeatEvent::class,
-            EntityTypeIdentifier(Identifier.of(entity.type.toString()))
+            EntityTypeIdentifier(Identifier.parse(entity.type.toString()))
         )
     }
 
     private fun isBoss(entity: LivingEntity): Boolean {
-        val client = MinecraftClient.getInstance()
-        return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
-            val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
-            bossName == entity.type.translationKey
+        val minecraft = Minecraft.getInstance()
+        return minecraft.gui.bossOverlay.events.values.any { bossBar ->
+            val bossName = (bossBar.name.contents as? TranslatableContents)?.key ?: return@any false
+            bossName == entity.type.descriptionId
         }
     }
 }
