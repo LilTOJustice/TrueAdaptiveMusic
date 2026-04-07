@@ -14,9 +14,8 @@ class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
         override fun getRegistryIds(): List<Identifier> {
             return Minecraft
                 .getInstance().level?.registryAccess()
-                ?.get(Registries.BIOME)
+                ?.lookup(Registries.BIOME)
                 ?.getOrNull()
-                ?.value()
                 ?.keySet()
                 ?.toList()
                 ?: emptyList()

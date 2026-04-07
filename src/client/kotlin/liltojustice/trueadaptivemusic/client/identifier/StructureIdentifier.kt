@@ -17,9 +17,8 @@ class StructureIdentifier(id: Identifier): TypedIdentifier(id) {
                     level
                         .structureManager()
                         .registryAccess()
-                        .get(Registries.STRUCTURE)
+                        .lookup(Registries.STRUCTURE)
                         .getOrNull()
-                        ?.value()
                         ?.keySet()
                         ?: emptyList()
                 }

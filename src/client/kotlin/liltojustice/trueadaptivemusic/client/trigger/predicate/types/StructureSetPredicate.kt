@@ -33,12 +33,13 @@ class StructureSetPredicate internal constructor(
         val structureManager = level.structureManager()
         val structuresNearby = structureManager.getAllStructuresAt(blockPos).keys
 
-        return (structureSets.takeIf { structureSets.isNotEmpty() }?.map { structureSet -> structureSet.id }
+        return (structureSets.takeIf { structureSets.isNotEmpty() }
+            ?.map { structureSet -> structureSet.id }
             ?: StructureSetIdentifier.getRegistryIds())
             .any { structureSetId ->
                 val structureSet: StructureSet =
                     structureManager.registryAccess()
-                        .get(Registries.STRUCTURE_SET).getOrNull()?.value()?.get(structureSetId)?.getOrNull()?.value()
+                        .lookup(Registries.STRUCTURE_SET).getOrNull()?.getValue(structureSetId)
                         ?: return false
 
                 structureSet.structures.any { structureSelectionEntry ->

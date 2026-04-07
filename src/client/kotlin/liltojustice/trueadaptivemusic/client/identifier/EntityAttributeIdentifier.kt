@@ -14,9 +14,8 @@ class EntityAttributeIdentifier(id: Identifier): TypedIdentifier(id) {
         override fun getRegistryIds(): List<Identifier> {
             return Minecraft
                 .getInstance().level?.registryAccess()
-                ?.get(Registries.ATTRIBUTE)
+                ?.lookup(Registries.ATTRIBUTE)
                 ?.getOrNull()
-                ?.value()
                 ?.keySet()
                 ?.toList()
                 ?: emptyList()

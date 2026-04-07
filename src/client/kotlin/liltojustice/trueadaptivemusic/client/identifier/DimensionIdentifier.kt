@@ -17,9 +17,8 @@ class DimensionIdentifier(id: Identifier): TypedIdentifier(id) {
                 .getInstance()
                 .level
                 ?.registryAccess()
-                ?.get(Registries.DIMENSION_TYPE)
+                ?.lookup(Registries.DIMENSION_TYPE)
                 ?.getOrNull()
-                ?.value()
                 ?.keySet()
                 ?.filter { it != BuiltinDimensionTypes.OVERWORLD_CAVES.identifier() }
                 ?.toList()

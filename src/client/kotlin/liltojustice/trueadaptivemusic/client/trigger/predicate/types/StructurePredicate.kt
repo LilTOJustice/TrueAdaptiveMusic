@@ -4,8 +4,9 @@ import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
-import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
+import kotlin.jvm.optionals.getOrNull
 
 class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
@@ -27,7 +28,15 @@ class StructurePredicate internal constructor(private val structures: List<Struc
         val structuresNearby = structureManager.getAllStructuresAt(blockPos).keys
 
         return (structures.takeIf { structures.isNotEmpty() }?.map { structure -> structure.id }
-            ?: StructureIdentifier.getRegistryIds()).map { BuiltInRegistries.STRUCTURE_TYPE[it] }
+            ?: StructureIdentifier.getRegistryIds())
+            .map { structureId ->
+                structureManager
+                    .registryAccess()
+                    .lookup(Registries.STRUCTURE)
+                    .getOrNull()
+                    ?.getValue(structureId)
+                    ?.type()
+            }
             .any { structureType -> structuresNearby.any { structure -> structure.type() == structureType } }
     }
 
