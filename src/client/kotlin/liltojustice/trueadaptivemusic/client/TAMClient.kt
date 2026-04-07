@@ -79,11 +79,11 @@ object TAMClient {
     private var musicManager: MusicManager? = null
 
     fun start() {
-        val client = Minecraft.getInstance()
+        val minecraft = Minecraft.getInstance()
         backgroundScope.launch {
             while (true) {
                 try {
-                    tick(client)
+                    tick(minecraft)
                 }
                 catch (e: Exception) {
                     Logger.logError("TAM Processor thread encountered an error: ${e.message}\n" +
@@ -240,9 +240,9 @@ object TAMClient {
         return manifest
     }
 
-    private fun tick(client: Minecraft) {
+    private fun tick(minecraft: Minecraft) {
         if (!initialized) {
-            initialize(client)
+            initialize(minecraft)
         }
 
         currentPredicateResult = musicPack?.let { pack ->
@@ -254,12 +254,12 @@ object TAMClient {
     }
 
     @Suppress("UNNECESSARY_SAFE_CALL")
-    private fun initialize(client: Minecraft) {
-        if (initialized || client.soundManager?.soundEngine?.loaded != true) {
+    private fun initialize(minecraft: Minecraft) {
+        if (initialized || minecraft.soundManager?.soundEngine?.loaded != true) {
             return
         }
 
-        musicManager = MusicManager(client)
+        musicManager = MusicManager(minecraft)
 
         options =
             try {
