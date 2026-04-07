@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.mixin.event;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDeathEvent;
-import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screens.DeathScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

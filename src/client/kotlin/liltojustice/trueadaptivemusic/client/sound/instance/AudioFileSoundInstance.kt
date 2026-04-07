@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import net.minecraft.client.sound.AudioStream
+import net.minecraft.client.sounds.AudioStream
 
 class AudioFileSoundInstance(
     playableSound: PlayableSound,

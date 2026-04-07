@@ -1,13 +1,13 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class BossHealthPredicate(private val direction: Direction, private val healthPercentage: Int): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        return client.inGameHud.bossBarHud.bossBars.any { bossBar ->
-            healthTest((healthPercentage / 100F), direction, bossBar.value.percent) }
+        return Minecraft.getInstance().gui.bossOverlay.events.any { bossBar ->
+            healthTest((healthPercentage / 100F), direction, bossBar.value.progress)
+        }
     }
 
     override fun getTickRate(): Int {

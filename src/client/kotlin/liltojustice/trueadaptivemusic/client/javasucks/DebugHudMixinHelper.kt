@@ -4,28 +4,28 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 
 object DebugHudMixinHelper {
     private const val INDENT = 10
 
     @JvmStatic
-    fun render(context: DrawContext) {
+    fun render(graphics: GuiGraphicsExtractor) {
         if (!TAMClient.options.useDebugHud) {
             return
         }
 
         val musicPack = TAMClient.musicPack ?: return
 
-        val client = MinecraftClient.getInstance()
-        if (client.inGameHud.debugHud.shouldShowDebugHud()) {
+        val minecraft = Minecraft.getInstance()
+        if (minecraft.gui.debugOverlay.showDebugScreen()) {
             return
         }
 
-        val textRenderer = client.textRenderer
+        val font = minecraft.font
         val predicateTreeLines = mutableListOf<Line>()
         val rules = musicPack.rules
         val currentNodePath = TAMClient.currentPredicateResult?.path ?: return
@@ -40,7 +40,7 @@ object DebugHudMixinHelper {
                     Line(
                         path.size - 1,
                         text,
-                        Colors.GREEN,
+                        CommonColors.GREEN,
                         currentNodeDepth == path.size
                     )
                 )
@@ -61,45 +61,48 @@ object DebugHudMixinHelper {
         }
 
         var rowOffset = 0
-        val fontHeight = textRenderer.fontHeight
+        val fontHeight = font.lineHeight
         val playingEvent = TAMClient.getPlayingEvent()
         val eventMusic = TAMClient.getCurrentEventMusic()
         playingEvent?.let {
-            context.drawText(
-                textRenderer,
-                "${Text.translatableWithFallback(
+            graphics.text(
+                font,
+                "${
+                    Component.translatableWithFallback(
                     "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
                         "(${eventMusic?.getSoundString()})",
                 1,
                 getY(rowOffset++, fontHeight),
-                Colors.WHITE,
+                CommonColors.WHITE,
                 true
             )
         }
 
         val playingMusic = TAMClient.getCurrentMusic()
         playingMusic?.let {
-            context.drawText(
-                textRenderer,
-                "${Text.translatableWithFallback(
+            graphics.text(
+                font,
+                "${
+                    Component.translatableWithFallback(
                     "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
                 1,
                 getY(rowOffset++, fontHeight),
-                Colors.WHITE,
+                CommonColors.WHITE,
                 true
             )
         }
 
         val playingAmbience = TAMClient.getCurrentAmbience()
         playingAmbience?.let {
-            context.drawText(
-                textRenderer,
-                "${Text.translatableWithFallback(
+            graphics.text(
+                font,
+                "${
+                    Component.translatableWithFallback(
                     "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
                         it.getSoundString(),
                 1,
                 getY(rowOffset++, fontHeight),
-                Colors.WHITE,
+                CommonColors.WHITE,
                 true
             )
         }
@@ -112,11 +115,11 @@ object DebugHudMixinHelper {
             val x: Int = line.indent * INDENT + 1
             val y: Int = getY(row + rowOffset, fontHeight)
 
-            context.drawText(textRenderer, line.text, x, y, line.color, true)
+            graphics.text(font, line.text, x, y, line.color, true)
 
             if (line.selected) {
-                context.drawBorder(
-                    x - 2, y - 2, textRenderer.getWidth(line.text) + 3, fontHeight + 3)
+                graphics.drawBorder(
+                    x - 2, y - 2, font.width(line.text) + 3, fontHeight + 3)
             }
         }
     }
@@ -125,6 +128,7 @@ object DebugHudMixinHelper {
         return row * (fontHeight + 2) + 1
     }
 
-    private data class Line(val indent: Int, val text: String, val color: Int = Colors.WHITE, val selected: Boolean = false)
+    private data class Line(
+        val indent: Int, val text: String, val color: Int = CommonColors.WHITE, val selected: Boolean = false)
 }
 

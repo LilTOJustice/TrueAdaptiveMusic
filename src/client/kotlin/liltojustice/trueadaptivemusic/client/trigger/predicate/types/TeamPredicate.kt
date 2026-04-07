@@ -1,15 +1,15 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class TeamPredicate(private val teamId: String): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val scoreboard = client.world?.scoreboard ?: return false
-        val playerName = client.player?.name?.string ?: return false
+        val minecraft = Minecraft.getInstance()
+        val scoreboard = minecraft.level?.scoreboard ?: return false
+        val playerName = minecraft.player?.name?.string ?: return false
 
-        return scoreboard.teams.firstOrNull { it.name == teamId }?.playerList?.contains(playerName) ?: false
+        return scoreboard.playerTeams.firstOrNull { it.name == teamId }?.players?.contains(playerName) ?: false
     }
 
     companion object: MusicPredicateCompanion {

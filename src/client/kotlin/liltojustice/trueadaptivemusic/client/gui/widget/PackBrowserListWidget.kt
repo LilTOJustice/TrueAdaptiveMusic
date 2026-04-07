@@ -16,19 +16,19 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.DownloadButtonWi
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPackDownloader
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.RenderPipelines
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen.MENU_BACKGROUND_TEXTURE
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget
-import net.minecraft.client.gui.widget.LoadingWidget
-import net.minecraft.client.gui.widget.TextWidget
-import net.minecraft.client.texture.NativeImageBackedTexture
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.LoadingDotsWidget
+import net.minecraft.client.gui.components.MultiLineTextWidget
+import net.minecraft.client.gui.components.ObjectSelectionList
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.texture.DynamicTexture
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import net.minecraft.util.Util
 import java.nio.file.Path
 import java.text.SimpleDateFormat
@@ -40,22 +40,22 @@ import kotlin.io.path.exists
 import kotlin.io.path.name
 
 class PackBrowserListWidget(
-    client: MinecraftClient,
+    client: Minecraft,
     width: Int,
     height: Int,
     top: Int,
     itemHeight: Int,
     private val onSelectPack: (selectedPack: BrowsableMusicPack) -> Unit = {}
-) : AlwaysSelectedEntryListWidget<PackBrowserListWidget.Entry>(client, width, height, top, itemHeight) {
+): ObjectSelectionList<PackBrowserListWidget.Entry>(client, width, height, top, itemHeight) {
     val refreshTime: Date?
         get() = packManifest?.timestamp
 
     private var packManifest: PackManifest? = null
     private var renderState = RenderState.Loading
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
-    private val loadingWidget = LoadingWidget(this.client.textRenderer, LOADING_TEXT)
-    private val noPacksFoundWidget = TextWidget(NO_PACKS_TEXT, client.textRenderer)
-    private val loadFailureWidget = TextWidget(LOAD_FAILURE_TEXT, client.textRenderer)
+    private val loadingWidget = LoadingDotsWidget(this.minecraft.font, LOADING_TEXT)
+    private val noPacksFoundWidget = MultiLineTextWidget(NO_PACKS_TEXT, client.font)
+    private val loadFailureWidget = MultiLineTextWidget(LOAD_FAILURE_TEXT, client.font)
     private val downloadedPacks
         get() = Constants.MUSIC_PACK_DIR
             .toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
@@ -87,10 +87,10 @@ class PackBrowserListWidget(
         return x + 3
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, deltaTicks: Float) {
-        context?.drawTexture(
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        graphics.blit(
             RenderPipelines.GUI_TEXTURED,
-            MENU_BACKGROUND_TEXTURE,
+            Screen.MENU_BACKGROUND,
             x,
             y,
             0F,
@@ -101,18 +101,18 @@ class PackBrowserListWidget(
             32
         )
 
-        super.renderWidget(context, mouseX, mouseY, deltaTicks)
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
         if (renderState == RenderState.Loading) {
             loadingWidget.setPosition(
                 x + (width - loadingWidget.width) / 2, y + (height - loadingWidget.height) / 2)
-            loadingWidget.render(context, mouseX, mouseY, deltaTicks)
+            loadingWidget.extractRenderState(graphics, mouseX, mouseY, a)
 
             return
         }
         else if (renderState == RenderState.Failure) {
             loadFailureWidget.setPosition(
                 x + (width - loadFailureWidget.width) / 2, y + (height - loadFailureWidget.height) / 2)
-            loadFailureWidget.render(context, mouseX, mouseY, deltaTicks)
+            loadFailureWidget.extractRenderState(graphics, mouseX, mouseY, a)
 
             return
         }
@@ -120,113 +120,116 @@ class PackBrowserListWidget(
         if (packManifest == null) {
             noPacksFoundWidget.setPosition(
                 x + (width - noPacksFoundWidget.width) / 2, y + (height - noPacksFoundWidget.height) / 2)
-            noPacksFoundWidget.renderWidget(context, mouseX, mouseY, deltaTicks)
+            noPacksFoundWidget.extractRenderState(graphics, mouseX, mouseY, a)
 
             return
         }
 
-        selectedOrNull?.let { renderSelectedPack(context, it.musicPack) }
+        selected?.let { renderSelectedPack(graphics, it.musicPack) }
     }
 
     private fun initEntries() {
         val entries = packManifest?.packs?.map { Entry(it) }
         entries?.forEach { addEntry(it) }
-        setSelected(entries?.firstOrNull())
+        selected = entries?.firstOrNull()
     }
 
-    private fun renderSelectedPack(context: DrawContext?, musicPack: BrowsableMusicPack) {
-        val panelX = scrollbarX + 9
+    private fun renderSelectedPack(graphics: GuiGraphicsExtractor, musicPack: BrowsableMusicPack) {
+        val panelX = scrollBarX() + 9
         val panelWidth = width - panelX
-        context?.drawBorder(panelX, y, panelWidth - 1, height)
+        graphics.drawBorder(panelX, y, panelWidth - 1, height)
 
         val restrictDescription = musicPack.getImagePath()?.let { imagePath ->
             if (!imagePath.exists()) {
                 return@let false
             }
 
-            renderPackImage(context, panelX, panelWidth, imagePath)
+            renderPackImage(graphics, panelX, panelWidth, imagePath)
         } == true
 
         if (restrictDescription) {
-            context?.drawVerticalLine(panelX + panelWidth / 3, y, y + height, Colors.WHITE)
+            graphics.verticalLine(panelX + panelWidth / 3, y, y + height, CommonColors.WHITE)
         }
 
-        context?.drawTextWithShadow(
-            client.textRenderer,
+        graphics.text(
+            minecraft.font,
             musicPack.name,
             panelX +
                     ((if (restrictDescription) panelWidth + panelWidth / 3 else panelWidth) -
-                            client.textRenderer.getWidth(musicPack.name)) / 2,
+                            minecraft.font.width(musicPack.name)) / 2,
             y + 3,
-            Colors.WHITE
+            CommonColors.WHITE
         )
 
-        val flavorText = Text.empty()
-            .append(Text.literal("Title:\n").withColor(Colors.GRAY))
+        val flavorText = Component.empty()
+            .append(Component.literal("Title:\n").withColor(CommonColors.GRAY))
             .append(musicPack.name)
 
         musicPack.author?.let {
             flavorText
-                .append(Text.literal("\n\nAuthor:\n").withColor(Colors.GRAY))
+                .append(Component.literal("\n\nAuthor:\n").withColor(CommonColors.GRAY))
                 .append(it)
         }
 
         musicPack.version?.let {
             flavorText
-                .append(Text.literal("\n\nVersion:\n").withColor(Colors.GRAY))
+                .append(Component.literal("\n\nVersion:\n").withColor(CommonColors.GRAY))
                 .append(it)
         }
 
         musicPack.description?.let {
             flavorText
-                .append(Text.literal("\n\nDescription:\n").withColor(Colors.GRAY))
+                .append(Component.literal("\n\nDescription:\n").withColor(CommonColors.GRAY))
                 .append(it)
         }
 
         flavorText
-            .append(Text.literal("\n\nSize:\n").withColor(Colors.GRAY))
-            .append(Text.literal(DataSizeHelper.getDataSizeString(musicPack.size)))
+            .append(Component.literal("\n\nSize:\n").withColor(CommonColors.GRAY))
+            .append(Component.literal(DataSizeHelper.getDataSizeString(musicPack.size)))
 
         flavorText
-            .append(Text.literal("\n\nUpdated:\n").withColor(Colors.GRAY))
+            .append(Component.literal("\n\nUpdated:\n").withColor(CommonColors.GRAY))
             .append(
-                Text.literal(SimpleDateFormat("EEE MMM dd yyyy").format(musicPack.lastUpdated)))
+                Component.literal(
+                    SimpleDateFormat("EEE MMM dd yyyy").format(musicPack.lastUpdated))
+            )
             .append(
-                Text.literal("\n" + SimpleDateFormat("hh:mm aa zzz").format(musicPack.lastUpdated)))
+                Component.literal(
+                    "\n" + SimpleDateFormat("hh:mm aa zzz").format(musicPack.lastUpdated))
+            )
 
         val flavorTextWidth = (if (restrictDescription) panelWidth / 3 else panelWidth) - 3
         val flavorTextX = panelX + 3
-        context?.drawMarqueedWrappedText(
-            client.textRenderer,
+        graphics.drawMarqueedWrappedText(
+            minecraft.font,
             flavorText,
             flavorTextX,
             flavorTextX + flavorTextWidth,
-            y + 3 + if (restrictDescription) 0 else (client.textRenderer.fontHeight + 3),
+            y + 3 + if (restrictDescription) 0 else (minecraft.font.lineHeight + 3),
             y + height - 3
         )
     }
 
-    private fun renderPackImage(context: DrawContext?, panelX: Int, panelWidth: Int, imagePath: Path): Boolean {
-        val identifier = Identifier.of(
+    private fun renderPackImage(
+        graphics: GuiGraphicsExtractor, panelX: Int, panelWidth: Int, imagePath: Path): Boolean {
+        val identifier = Identifier.fromNamespaceAndPath(
             "trueadaptivemusic",
-            "image/" +
-                    Util.replaceInvalidChars(imagePath.name, Identifier::isPathCharacterValid)
+            "image/${Util.sanitizeName(imagePath.name, Identifier::validPathChar)}"
         )
 
         if (identifier !in loadedPackImages) {
             ImageProcessor.getNativeImage(imagePath)?.let { image ->
-                client.textureManager.registerTexture(
-                    identifier,
-                    NativeImageBackedTexture(identifier::toString, image)
-                )
-            } ?: return false
+                minecraft.textureManager.register(
+                    identifier, DynamicTexture(identifier::toString, image))
+            }
+
             loadedPackImages.add(identifier)
         }
 
-        val image = (client.textureManager.getTexture(identifier) as? NativeImageBackedTexture)?.image
+        val image = (minecraft.textureManager.getTexture(identifier) as? DynamicTexture)?.pixels
             ?: return false
 
-        val imageY = y + client.textRenderer.fontHeight + 6
+        val imageY = y + minecraft.font.lineHeight + 6
         val aspectRatio = image.width.toFloat() / image.height
         val maxImageWidth = panelWidth * 2 / 3 - 6
         val maxImageHeight = y + height - imageY - 3
@@ -248,7 +251,7 @@ class PackBrowserListWidget(
             xOffset = (panelWidth * 2 / 3 - finalImageWidth) / 2
         }
 
-        context?.drawTexture(
+        graphics.blit(
             RenderPipelines.GUI_TEXTURED,
             identifier,
             panelX + 3 + panelWidth / 3 + xOffset,
@@ -265,17 +268,17 @@ class PackBrowserListWidget(
     }
 
     companion object {
-        private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
+        private val LOADING_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.downloading_packs", "Downloading Pack List")
-        private val NO_PACKS_TEXT: MutableText = Text.translatableWithFallback(
+        private val NO_PACKS_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.no_packs_found", "No Packs Found")
-        private val LOAD_FAILURE_TEXT: MutableText = Text.translatableWithFallback(
+        private val LOAD_FAILURE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.load_failed", "Failed to Load Packs")
     }
 
-    inner class Entry(val musicPack: BrowsableMusicPack): AlwaysSelectedEntryListWidget.Entry<Entry>() {
+    inner class Entry(val musicPack: BrowsableMusicPack): ObjectSelectionList.Entry<Entry>() {
         private val progress = Reference(0F)
-        private val versionText = Text.literal("Ver ${musicPack.version}").withColor(Colors.GRAY)
+        private val versionText = Component.literal("Ver ${musicPack.version}").withColor(CommonColors.GRAY)
         private val packPath = musicPack.getFilePath()
         private val downloadButton = run {
             val isDownloaded = packPath in downloadedPacks
@@ -293,53 +296,48 @@ class PackBrowserListWidget(
             }
         }
 
-        override fun render(
-            context: DrawContext,
-            mouseX: Int,
-            mouseY: Int,
-            hovered: Boolean,
-            tickDelta: Float
-        ) {
-            context.textConsumer.marqueedText(
-                Text.literal(musicPack.name),
+        override fun extractContent(
+            graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, hovered: Boolean, a: Float) {
+            graphics.textRenderer().acceptScrolling(
+                Component.literal(musicPack.name),
                 x + 3,
                 x + 3,
                 rowRight - 3,
                 y + 3,
-                y + client.textRenderer.fontHeight + 3,
+                y + minecraft.font.lineHeight + 3,
             )
             downloadButton.x = x + width - downloadButton.width - 5
             downloadButton.y = y + height - downloadButton.height - 5
-            downloadButton.render(context, mouseX, mouseY, tickDelta)
+            downloadButton.extractRenderState(graphics, mouseX, mouseY, a)
 
             if (downloadButton.downloadStatus == RenderState.Loading) {
                 val currentBytes = (progress.value * musicPack.size).toLong()
                 val currentString = DataSizeHelper.getDataSizeString(currentBytes)
                 val totalString = DataSizeHelper.getDataSizeString(musicPack.size)
                 val percentString = String.format("%.1f", currentBytes.toFloat() / musicPack.size * 100) + '%'
-                val progressText = Text.literal("$currentString/$totalString ($percentString)")
-                context.drawText(
-                    client.textRenderer,
+                val progressText = Component.literal("$currentString/$totalString ($percentString)")
+                graphics.text(
+                    minecraft.font,
                     progressText,
-                    x + width - client.textRenderer.getWidth(progressText) - 5,
-                    downloadButton.y - client.textRenderer.fontHeight,
-                    Colors.GRAY,
+                    x + width - minecraft.font.width(progressText) - 5,
+                    downloadButton.y - minecraft.font.lineHeight,
+                    CommonColors.GRAY,
                     false
                 )
             }
             else {
-                val sizeText = Text.literal(DataSizeHelper.getDataSizeString(musicPack.size))
-                context.drawText(
-                    client.textRenderer,
+                val sizeText = Component.literal(DataSizeHelper.getDataSizeString(musicPack.size))
+                graphics.text(
+                    minecraft.font,
                     sizeText,
-                    x + width - client.textRenderer.getWidth(sizeText) - 5,
-                    downloadButton.y - client.textRenderer.fontHeight,
-                    Colors.GRAY,
+                    x + width - minecraft.font.width(sizeText) - 5,
+                    downloadButton.y - minecraft.font.lineHeight,
+                    CommonColors.GRAY,
                     false
                 )
             }
 
-            context.textConsumer.marqueedText(
+            graphics.textRenderer().acceptScrolling(
                 versionText,
                 x + 3,
                 x + 3,
@@ -349,20 +347,20 @@ class PackBrowserListWidget(
             )
         }
 
-        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-            if (!isMouseOver(click.x, click.y)) {
+        override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
+            if (!isMouseOver(event.x, event.y)) {
                 return false
             }
 
-            downloadButton.mouseClicked(click, doubled)
+            downloadButton.mouseClicked(event, doubled)
             setSelected(this)
             onSelectPack(musicPack)
 
             return true
         }
 
-        override fun getNarration(): Text {
-            return Text.empty()
+        override fun getNarration(): Component {
+            return Component.empty()
         }
     }
 }

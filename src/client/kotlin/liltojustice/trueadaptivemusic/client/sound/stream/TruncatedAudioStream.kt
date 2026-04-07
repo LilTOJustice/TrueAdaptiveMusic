@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.stream
 
-import net.minecraft.client.sound.AudioStream
+import net.minecraft.client.sounds.AudioStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
@@ -17,7 +17,7 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
         return backingStream.format
     }
 
-    override fun read(size: Int): ByteBuffer? {
+    override fun read(size: Int): ByteBuffer {
         var resultArray: ByteArray?
 
         do {
@@ -25,7 +25,7 @@ class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream 
             isNew = false
         } while (!nonZeroRead && resultArray != null)
 
-        return resultArray?.let { makeByteBuffer(it) }
+        return resultArray?.let { makeByteBuffer(it) } ?: ByteBuffer.allocateDirect(0)
     }
 
     private fun getTruncatedArray(size: Int): ByteArray? {

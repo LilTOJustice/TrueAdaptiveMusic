@@ -1,12 +1,12 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class HealthPredicate(private val healthType: HealthType, private val direction: Direction, private val health: Int): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val player = client.player ?: return false
+        val minecraft = Minecraft.getInstance()
+        val player = minecraft.player ?: return false
         val typeAdjusted = if (healthType == HealthType.Percentage)
             player.maxHealth * (health / 100F)
         else

@@ -8,7 +8,7 @@ import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.collections.plus
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMembers
@@ -53,28 +53,28 @@ abstract class MusicEvent: MusicTrigger() {
                 return Parameters::class.primaryConstructor?.call(*paramArgs.toTypedArray()) ?: default()
             }
 
-            fun getParamDisplayName(paramName: String): Text? {
+            fun getParamDisplayName(paramName: String): Component? {
                 return translatableWithFallbackOrNull(
                     "trueadaptivemusic.param.event.${paramName}.display", displayNames[paramName])
             }
 
-            fun getParamDescription(paramName: String): Text? {
-                return Text.translatableWithFallback(
+            fun getParamDescription(paramName: String): Component {
+                return Component.translatableWithFallback(
                     "trueadaptivemusic.param.event.${paramName}.description", descriptions[paramName])
             }
         }
     }
 
     interface MusicEventCompanion: MusicTriggerCompanion {
-        override fun getDisplayName(triggerName: String): Text {
-            return Text.translatableWithFallback(
+        override fun getDisplayName(triggerName: String): Component {
+            return Component.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",
                 (TAMClient.eventRegistry[triggerName]?.companionObjectInstance as? MusicEventCompanion)
                     ?.displayName ?: triggerName.prettify()
             )
         }
 
-        override fun getArgDisplayName(triggerName: String, argName: String): Text? {
+        override fun getArgDisplayName(triggerName: String, argName: String): Component? {
             val eventType = TAMClient.eventRegistry[triggerName] ?: return null
             val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(eventType)
             val combined = inferredDisplayNames.associateWith { it.prettify() } +
@@ -85,7 +85,7 @@ abstract class MusicEvent: MusicTrigger() {
             )
         }
 
-        override fun getArgDescription(triggerName: String, argName: String): Text? {
+        override fun getArgDescription(triggerName: String, argName: String): Component? {
             val eventClass = TAMClient.eventRegistry[triggerName] ?: return null
 
             return translatableWithFallbackOrNull(

@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.sound.stream
 
 import liltojustice.trueadaptivemusic.client.TAMClient
-import net.minecraft.client.sound.AudioStream
+import net.minecraft.client.sounds.AudioStream
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -60,7 +60,7 @@ class FFmpegAudioStream(inputStream: InputStream, private val format: AudioForma
         return format
     }
 
-    override fun read(size: Int): ByteBuffer? {
+    override fun read(size: Int): ByteBuffer {
         val bytes = ffmpeg.inputStream.readNBytes(size)
         val buffer = ByteBuffer.allocateDirect(bytes.size)
         buffer.order(ByteOrder.LITTLE_ENDIAN)

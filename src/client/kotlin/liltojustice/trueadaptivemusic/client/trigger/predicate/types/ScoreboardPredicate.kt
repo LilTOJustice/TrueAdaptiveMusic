@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class ScoreboardPredicate(
     private val objectiveId: String,
@@ -9,15 +9,15 @@ class ScoreboardPredicate(
     private val comparison: Comparison
 ): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val scoreboard = client.world?.scoreboard ?: return false
-        val playerName = client.player?.name?.string ?: return false
+        val minecraft = Minecraft.getInstance()
+        val scoreboard = minecraft.level?.scoreboard ?: return false
+        val player = minecraft.player ?: return false
         val matchingObjective = scoreboard.objectives.firstOrNull { objective ->
             objective.name == objectiveId
         } ?: return false
 
-        val matchingEntries = scoreboard.getScoreboardEntries(matchingObjective).filter { entry ->
-            entry.owner == playerName || scoreboard.teams.any { team -> team.playerList.any { it == playerName } }
+        val matchingEntries = scoreboard.listPlayerScores(matchingObjective).filter { entry ->
+            entry.owner == player.name.string || player.team in scoreboard.playerTeams
         }
 
         return matchingEntries.any { matchingEntry ->

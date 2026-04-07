@@ -1,10 +1,10 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.text.Text
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
 
 class MultiSelectDropdownWidget<TKey>(
     private val options: List<TKey>,
@@ -16,7 +16,7 @@ class MultiSelectDropdownWidget<TKey>(
     private val notSelectedPlaceholder: String? = null,
     alreadySelected: List<TKey> = listOf(),
     private val onHoverOption: (option: String?) -> Unit = {},
-    private val tooltipText: Text? = null,
+    private val tooltipText: Component? = null,
     x: Int = 0,
     y: Int = 0
 )
@@ -39,17 +39,17 @@ class MultiSelectDropdownWidget<TKey>(
         onChange(selected)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+        val result = super.mouseClicked(event, doubleClick)
 
         if (!result) {
-            forEachChild { it.mouseClicked(click, doubled) }
+            visitWidgets { it.mouseClicked(event, doubleClick) }
         }
 
         return result
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         addWidgetFromRender(
             {
                 DropdownWidget(
@@ -91,8 +91,8 @@ class MultiSelectDropdownWidget<TKey>(
                         onMouseOn = { option -> onHoverOption(option.text) },
                         onMouseOff = { option -> onHoverOption(null) })
                     widget.setTooltip(
-                        Tooltip.of(
-                            Text.translatableWithFallback(
+                        Tooltip.create(
+                            Component.translatableWithFallback(
                                 "trueadaptivemusic.click_to_remove", "Click to remove")
                         )
                     )
@@ -102,10 +102,10 @@ class MultiSelectDropdownWidget<TKey>(
             )
         }
 
-        super.renderWidget(context, mouseX, mouseY, delta)
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
         fitToChildrenHeight()
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 }

@@ -4,48 +4,48 @@ import liltojustice.trueadaptivemusic.client.gui.widget.PackOptionsViewWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.screen.ScreenTexts
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 
 @Environment(EnvType.CLIENT)
 class PackOptionsScreen(private val parent: Screen, private val musicPack: MusicPack): Screen(
-    Text.translatableWithFallback("trueadaptivemusic.pack_options_title", "Edit Pack Options")) {
+    Component.translatableWithFallback("trueadaptivemusic.pack_options_title", "Edit Pack Options")) {
     private lateinit var packOptionsViewWidget: PackOptionsViewWidget
-    private lateinit var doneButton: ButtonWidget
+    private lateinit var doneButton: Button
 
     override fun init() {
         packOptionsViewWidget = PackOptionsViewWidget(
             musicPack.options,
             width - BUFFER,
-            height - BUFFER - TITLE_Y - textRenderer.fontHeight - 20,
+            height - BUFFER - TITLE_Y - font.lineHeight - 20,
             BUFFER / 2,
-            BUFFER / 2 + TITLE_Y + textRenderer.fontHeight)
+            BUFFER / 2 + TITLE_Y + font.lineHeight
+        )
 
-        doneButton = ButtonWidget.Builder(ScreenTexts.DONE) { close() }
-            .width(textRenderer.getWidth(ScreenTexts.DONE) + 10)
+        doneButton = Button.Builder(CommonComponents.GUI_DONE) { onClose() }
+            .width(font.width(CommonComponents.GUI_DONE) + 10)
             .build()
 
         doneButton.x = width - doneButton.width
         doneButton.y = packOptionsViewWidget.y + packOptionsViewWidget.height + 2
 
-        addDrawableChild(packOptionsViewWidget)
-        addDrawableChild(doneButton)
+        addRenderableWidget(packOptionsViewWidget)
+        addRenderableWidget(doneButton)
     }
 
-    override fun close() {
+    override fun onClose() {
         musicPack.options = packOptionsViewWidget.getCurrentOptions()
         musicPack.initOptions()
-        client?.setScreen(parent)
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, TITLE_Y, Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        graphics.centeredText(font, title, width / 2, TITLE_Y, CommonColors.WHITE)
+        super.extractRenderState(graphics, mouseX, mouseY, a)
     }
 
     companion object {

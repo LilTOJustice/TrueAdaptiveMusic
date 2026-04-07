@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic
 
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -20,7 +20,7 @@ class Constants {
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json")
         val MANIFEST_PATH_TEMP = Path(
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json.tmp")
-        val DISCORD_JOIN_TEXT: MutableText = Text.translatableWithFallback(
+        val DISCORD_JOIN_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.join_discord", "Join the Discord!")
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"

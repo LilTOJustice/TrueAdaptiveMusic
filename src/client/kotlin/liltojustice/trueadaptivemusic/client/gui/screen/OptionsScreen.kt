@@ -4,48 +4,48 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.OptionsViewWidget
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.screen.ScreenTexts
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 
 @Environment(EnvType.CLIENT)
 class OptionsScreen(private val parent: Screen): Screen(
-    Text.translatableWithFallback("trueadaptivemusic.options_title", "TrueAdaptiveMusic Options")) {
+    Component.translatableWithFallback("trueadaptivemusic.options_title", "TrueAdaptiveMusic Options")) {
     private lateinit var optionsViewWidget: OptionsViewWidget
-    private lateinit var doneButton: ButtonWidget
+    private lateinit var doneButton: Button
 
     override fun init() {
         optionsViewWidget = OptionsViewWidget(
             TAMClient.options,
             width - BUFFER,
-            height - BUFFER - TITLE_Y - textRenderer.fontHeight - 20,
+            height - BUFFER - TITLE_Y - font.lineHeight - 20,
             BUFFER / 2,
-            BUFFER / 2 + TITLE_Y + textRenderer.fontHeight)
+            BUFFER / 2 + TITLE_Y + font.lineHeight
+        )
 
-        doneButton = ButtonWidget.Builder(ScreenTexts.DONE) { close() }
-            .width(textRenderer.getWidth(ScreenTexts.DONE) + 10)
+        doneButton = Button.Builder(CommonComponents.GUI_DONE) { onClose() }
+            .width(font.width(CommonComponents.GUI_DONE) + 10)
             .build()
 
         doneButton.x = width - doneButton.width
         doneButton.y = height - doneButton.height - 2
 
-        addDrawableChild(optionsViewWidget)
-        addDrawableChild(doneButton)
+        addRenderableWidget(optionsViewWidget)
+        addRenderableWidget(doneButton)
     }
 
-    override fun close() {
+    override fun onClose() {
         TAMClient.options = optionsViewWidget.getCurrentOptions()
         TAMClient.resetSound()
-        client?.setScreen(parent)
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, TITLE_Y, Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        graphics.centeredText(font, title, width / 2, TITLE_Y, CommonColors.WHITE)
+        super.extractRenderState(graphics, mouseX, mouseY, a)
     }
 
     companion object {

@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -61,12 +61,12 @@ data class TrueAdaptiveMusicOptions(
             return TrueAdaptiveMusicOptions::class.primaryConstructor?.parameters?.drop(1) ?: emptyList()
         }
 
-        fun getArgDisplayName(argName: String): Text? {
+        fun getArgDisplayName(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.options.${argName}.display", displayNames[argName])
         }
 
-        fun getArgDescription(argName: String): Text? {
+        fun getArgDescription(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.options.${argName}.description", descriptions[argName])
         }

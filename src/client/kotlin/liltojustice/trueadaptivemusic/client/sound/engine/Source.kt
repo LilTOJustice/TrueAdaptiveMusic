@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
+import com.mojang.blaze3d.audio.OpenAlUtil
+import com.mojang.blaze3d.audio.SoundBuffer
 import liltojustice.trueadaptivemusic.Logger
-import net.minecraft.client.sound.AlUtil
-import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.StaticSound
+import net.minecraft.client.sounds.AudioStream
 import org.lwjgl.openal.AL10
 import org.lwjgl.openal.AL11
 import java.io.IOException
@@ -52,7 +52,7 @@ class Source private constructor(private val pointer: Int) {
 
         this.playing = false
         AL10.alSourceStop(this.pointer)
-        AlUtil.checkErrors("Stop")
+        OpenAlUtil.checkALError("Stop")
         this.stream?.let {
             try {
                 it.close()
@@ -65,38 +65,38 @@ class Source private constructor(private val pointer: Int) {
         }
 
         AL10.alDeleteSources(intArrayOf(this.pointer))
-        AlUtil.checkErrors("Cleanup")
+        OpenAlUtil.checkALError("Cleanup")
     }
 
     fun play() {
         AL10.alSourcePlay(this.pointer)
-        AlUtil.checkErrors("Play")
+        OpenAlUtil.checkALError("Play")
     }
 
     fun pause() {
         if (this.sourceState == AL_PLAYING) {
             AL10.alSourcePause(this.pointer)
-            AlUtil.checkErrors("Pause")
+            OpenAlUtil.checkALError("Pause")
         }
     }
 
     fun resume() {
         if (this.sourceState == AL_PAUSED) {
             AL10.alSourcePlay(this.pointer)
-            AlUtil.checkErrors("Resume")
+            OpenAlUtil.checkALError("Resume")
         }
     }
 
     fun stop() {
         if (this.playing) {
             AL10.alSourceStop(this.pointer)
-            AlUtil.checkErrors("Stop")
+            OpenAlUtil.checkALError("Stop")
         }
     }
 
     fun setVolume(volume: Float) {
         AL10.alSourcef(this.pointer, AL_GAIN, volume)
-        AlUtil.checkErrors("Set Volume")
+        OpenAlUtil.checkALError("Set Volume")
     }
 
     fun setStream(stream: AudioStream) {
@@ -114,7 +114,7 @@ class Source private constructor(private val pointer: Int) {
         this.loopStartPointSeconds = loopStartPoint.toFloat() / 1000F
         this.looping = looping
         AL10.alSourcei(this.pointer, AL_LOOPING, if (looping) 1 else 0)
-        AlUtil.checkErrors("Set Looping")
+        OpenAlUtil.checkALError("Set Looping")
     }
 
     fun tick() {
@@ -136,12 +136,15 @@ class Source private constructor(private val pointer: Int) {
     private fun read(): Boolean {
         this.stream?.let { stream ->
             try {
-                val byteBuffer = stream.read(this.bufferSize) ?: return false
+                val byteBuffer = stream.read(this.bufferSize)
+                if (byteBuffer.remaining() == 0) {
+                    return false
+                }
 
                 totalBytes += byteBuffer.remaining().toULong()
 
-                StaticSound(byteBuffer, stream.format)
-                    .takeStreamBufferPointer()
+                SoundBuffer(byteBuffer, stream.format)
+                    .releaseAlBuffer()
                     .ifPresent { pointer: Int ->
                         AL10.alSourceQueueBuffers(
                             this.pointer,
@@ -162,7 +165,7 @@ class Source private constructor(private val pointer: Int) {
         val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
         if (newTimestamp < lastTimestamp) {
             AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
-            AlUtil.checkErrors("Seek")
+            OpenAlUtil.checkALError("Seek")
         }
 
         lastTimestamp = newTimestamp
@@ -178,9 +181,9 @@ class Source private constructor(private val pointer: Int) {
         if (finished > 0) {
             val buffers = IntArray(finished)
             AL10.alSourceUnqueueBuffers(this.pointer, buffers)
-            AlUtil.checkErrors("Unqueue buffers")
+            OpenAlUtil.checkALError("Unqueue buffers")
             AL10.alDeleteBuffers(buffers)
-            AlUtil.checkErrors("Remove processed buffers")
+            OpenAlUtil.checkALError("Remove processed buffers")
         }
 
         return finished
@@ -204,7 +207,7 @@ class Source private constructor(private val pointer: Int) {
         fun create(): Source? {
             val i = IntArray(1)
             AL10.alGenSources(i)
-            return if (AlUtil.checkErrors("Allocate new source")) null else Source(i[0])
+            return if (OpenAlUtil.checkALError("Allocate new source")) null else Source(i[0])
         }
 
         private fun getBufferSize(format: AudioFormat): Int {

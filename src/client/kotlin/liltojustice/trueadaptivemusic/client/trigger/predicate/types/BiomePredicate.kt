@@ -2,15 +2,15 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.BiomeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val player = client.player ?: return false
-        val playerBiome = client.world?.getBiome(player.blockPos) ?: return false
+        val minecraft = Minecraft.getInstance()
+        val player = minecraft.player ?: return false
+        val playerBiome = minecraft.level?.getBiome(player.blockPosition()) ?: return false
 
-        return biomes.isEmpty() || biomes.any { biome -> playerBiome.matchesId(biome.id) }
+        return biomes.isEmpty() || biomes.any { biome -> playerBiome.`is`(biome.id) }
     }
 
     companion object: MusicPredicateCompanion {

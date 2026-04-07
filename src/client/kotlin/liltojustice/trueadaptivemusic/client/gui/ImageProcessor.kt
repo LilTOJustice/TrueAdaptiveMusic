@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui
 
+import com.mojang.blaze3d.platform.NativeImage
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
-import net.minecraft.client.texture.NativeImage
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.extension
@@ -33,8 +33,8 @@ object ImageProcessor {
             "-i", filePath.invariantSeparatorsPathString,
             "-c:v", "png",
             "-f", "image2pipe",
-            "-")
-            .start()
+            "-"
+        ).start()
 
         return ffmpeg.inputStream
     }

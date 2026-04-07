@@ -6,50 +6,50 @@ import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
-import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.Sound
-import net.minecraft.client.sound.SoundInstance
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.client.sound.WeightedSoundSet
-import net.minecraft.sound.SoundCategory
-import net.minecraft.util.Identifier
+import net.minecraft.client.resources.sounds.Sound
+import net.minecraft.client.resources.sounds.SoundInstance
+import net.minecraft.client.sounds.AudioStream
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.client.sounds.WeighedSoundEvents
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundSource
 import java.io.InputStream
 
 abstract class TAMSoundInstance(
     val playableSound: PlayableSound,
     val isAmbient: Boolean,
-    val isLooping: Boolean,
+    val isLoop: Boolean,
     val loopStartPoint: UInt
 ): SoundInstance {
     var desiredVolume = 1F
     abstract fun getAudioStream(): AudioStream?
     abstract fun getSoundString(): String
 
-    override fun getId(): Identifier? {
-        return null
+    override fun getIdentifier(): Identifier {
+        return Identifier.fromNamespaceAndPath("", "")
     }
 
-    override fun getSoundSet(soundManager: SoundManager?): WeightedSoundSet? {
+    override fun resolve(soundManager: SoundManager): WeighedSoundEvents? {
         return null
     }
 
     override fun getSound(): Sound? {
         return Sound(
-            Identifier.of("trueadaptivemusic", "file"),
+            Identifier.fromNamespaceAndPath("trueadaptivemusic", "file"),
             { 1F },
             { 1F },
             0,
-            Sound.RegistrationType.FILE,
+            Sound.Type.FILE,
             true,
             false,
             0)
     }
 
-    override fun getCategory(): SoundCategory? {
-        return null
+    override fun getSource(): SoundSource {
+        return SoundSource.MUSIC
     }
 
-    override fun isRepeatable(): Boolean {
+    override fun isLooping(): Boolean {
         return false
     }
 
@@ -57,7 +57,7 @@ abstract class TAMSoundInstance(
         return false
     }
 
-    override fun getRepeatDelay(): Int {
+    override fun getDelay(): Int {
         return 0
     }
 
@@ -81,8 +81,8 @@ abstract class TAMSoundInstance(
         return 0.0
     }
 
-    override fun getAttenuationType(): SoundInstance.AttenuationType? {
-        return null
+    override fun getAttenuation(): SoundInstance.Attenuation {
+        return SoundInstance.Attenuation.NONE
     }
 
     companion object {

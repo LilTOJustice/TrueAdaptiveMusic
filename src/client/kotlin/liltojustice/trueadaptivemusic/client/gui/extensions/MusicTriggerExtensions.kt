@@ -5,27 +5,34 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 
 fun MusicTrigger.getTriggerTooltipString(): String {
     return getTriggerTooltipText().string
 }
 
-fun MusicTrigger.getTriggerTooltipText(): MutableText {
+fun MusicTrigger.getTriggerTooltipText(): MutableComponent {
     if (this is ErrorPredicate) {
-        return Text.literal(Text.translatableWithFallback(
+        return Component.literal(Component.translatableWithFallback(
             "trueadaptivemusic.trigger_error_predicate_tooltip",
             "Failed to load this predicate, so it will always be false.").string +
-                    "\n\n${Text.translatableWithFallback("trueadaptivemusic.reason", "Reason").string}" +
+                "\n\n${
+                    Component.translatableWithFallback("trueadaptivemusic.reason", "Reason").string}" +
                 ": $reason\n\nJson: $shortenedJson")
     }
 
     if (this is ErrorEvent) {
-        return Text.literal(Text.translatableWithFallback(
-            "trueadaptivemusic.trigger_error_predicate_tooltip",
-            "Failed to load this event, so it will never trigger.").string + "\n\n${Text.translatableWithFallback(
-                "trueadaptivemusic.reason", "Reason")}: $reason\n\nJson: $shortenedJson")
+        return Component.literal(
+            Component.translatableWithFallback(
+                "trueadaptivemusic.trigger_error_predicate_tooltip",
+                "Failed to load this event, so it will never trigger."
+            ).string +
+                    "\n\n${
+                        Component.translatableWithFallback(
+                            "trueadaptivemusic.reason", "Reason")
+                    }: $reason\n\nJson: $shortenedJson"
+        )
     }
 
     val result = StringBuilder()
@@ -41,9 +48,9 @@ fun MusicTrigger.getTriggerTooltipText(): MutableText {
 
     if (args.isEmpty()) {
         result.append(
-            Text.translatableWithFallback(
+            Component.translatableWithFallback(
                 "trueadaptivemusic.trigger_no_parameters", "No Arguments").string)
     }
 
-    return Text.literal(result.trim().toString())
+    return Component.literal(result.trim().toString())
 }

@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
-import net.minecraft.registry.tag.FluidTags
+import net.minecraft.client.Minecraft
+import net.minecraft.tags.FluidTags
 
 class InWaterPredicate: MusicPredicate() {
     override fun getTickRate(): Int {
@@ -10,7 +10,6 @@ class InWaterPredicate: MusicPredicate() {
     }
 
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        return client.player?.isSubmergedIn(FluidTags.WATER) ?: false
+        return Minecraft.getInstance().player?.isEyeInFluid(FluidTags.WATER) ?: false
     }
 }

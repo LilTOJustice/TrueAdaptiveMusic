@@ -2,20 +2,20 @@ package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.javasucks.MusicTrackerMixinHelper;
-import net.minecraft.client.sound.*;
-import net.minecraft.sound.MusicSound;
+import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.sounds.Music;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MusicTracker.class)
+@Mixin(MusicManager.class)
 public class MusicTrackerMixin {
-    @Inject(method = "play", at = @At("HEAD"), cancellable = true)
-    public void play(MusicSound sound, CallbackInfo ci) {
-        TAMClient.INSTANCE.setDesiredVanillaSoundEvent(sound.sound().value());
-        if (MusicTrackerMixinHelper.shouldIgnore(sound)) {
+    @Inject(method = "startPlaying", at = @At("HEAD"), cancellable = true)
+    public void play(Music music, CallbackInfo ci) {
+        TAMClient.INSTANCE.setDesiredVanillaSoundEvent(music.sound().value());
+        if (MusicTrackerMixinHelper.shouldIgnore(music)) {
             ci.cancel();
         }
     }

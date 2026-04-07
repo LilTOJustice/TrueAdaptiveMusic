@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
@@ -42,12 +42,12 @@ data class MusicPackOptions(val description: String = "", val persistentNodeMusi
             return MusicPackOptions::class.primaryConstructor?.parameters ?: emptyList()
         }
 
-        fun getArgDisplayName(argName: String): Text? {
+        fun getArgDisplayName(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.pack_options.${argName}.display", displayNames[argName])
         }
 
-        fun getArgDescription(argName: String): Text? {
+        fun getArgDescription(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.pack_options.${argName}.description", descriptions[argName])
         }

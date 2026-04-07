@@ -21,8 +21,8 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.util.Identifier
-import net.minecraft.util.JsonHelper
+import net.minecraft.resources.Identifier
+import net.minecraft.util.GsonHelper
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
@@ -66,7 +66,7 @@ object MusicTriggerSerializer {
 
     private fun deserializePredicate(json: JsonObject, soundLibrary: SoundLibrary): MusicPredicate {
         return try {
-            val typeName = JsonHelper.getString(json, "type")
+            val typeName = GsonHelper.getAsString(json, "type")
             val type = TAMClient.predicateRegistry[typeName]
                 ?: return ErrorPredicate(json, "Unknown predicate type '$typeName'")
 
@@ -84,7 +84,7 @@ object MusicTriggerSerializer {
 
     private fun deserializeEvent(json: JsonObject, soundLibrary: SoundLibrary): MusicEvent {
         return try {
-            val typeName = JsonHelper.getString(json, "type")
+            val typeName = GsonHelper.getAsString(json, "type")
             val type = TAMClient.eventRegistry[typeName]
                 ?: return ErrorEvent(json, "Unknown event type '$typeName'")
 
@@ -146,7 +146,7 @@ object MusicTriggerSerializer {
             writer.endObject()
         }
 
-        override fun read(reader: JsonReader): Identifier? {
+        override fun read(reader: JsonReader): Identifier {
             reader.beginObject()
             reader.nextName()
             val namespace = reader.nextString()
@@ -160,7 +160,7 @@ object MusicTriggerSerializer {
 
             reader.endObject()
 
-            return Identifier.of(namespace, path)
+            return Identifier.fromNamespaceAndPath(namespace, path)
         }
     }
 }

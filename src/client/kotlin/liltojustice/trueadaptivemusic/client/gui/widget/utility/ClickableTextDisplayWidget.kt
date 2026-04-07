@@ -1,55 +1,54 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.util.Colors
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
+import net.minecraft.util.CommonColors
 
 open class ClickableTextDisplayWidget(
     text: String,
     x: Int = 0,
     y: Int = 0,
     private val onClick: (ClickableTextDisplayWidget) -> Unit = {})
-    : ClickableWidget(x, y, 0, 0, Text.literal(text)) {
-    private val textRenderer = MinecraftClient.getInstance().textRenderer
-    var color: Int = Colors.WHITE
+    : AbstractWidget(x, y, 0, 0, Component.literal(text)) {
+    private val font = Minecraft.getInstance().font
+    var color: Int = CommonColors.WHITE
     val text: String
         get() = message.string
-    val coloredText: Text?
-        get() = message.getWithStyle(message.style.withColor(TextColor.fromRgb(color))).firstOrNull()
+    val coloredText: Component?
+        get() = message.toFlatList(message.style.withColor(TextColor.fromRgb(color))).firstOrNull()
 
     init {
-        width = textRenderer.getWidth(message)
-        height = textRenderer.fontHeight
+        width = font.width(message)
+        height = font.lineHeight
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         if (!visible) {
             return
         }
 
-        context?.drawBorder(x + TEXT_OFFSET, y, width - TEXT_OFFSET / 2, height, padding = BORDER_BUFFER)
+        graphics.drawBorder(x + TEXT_OFFSET, y, width - TEXT_OFFSET / 2, height, padding = BORDER_BUFFER)
 
         x += TEXT_OFFSET
-        context?.let {
-            coloredText?.let {
-                drawTextWithMargin(
-                    context.getHoverListener(this, DrawContext.HoverType.NONE),
-                    coloredText,
-                    0
-                )
-            }
+        coloredText?.let {
+            extractScrollingStringOverContents(
+                graphics.textRendererForWidget(
+                    this, GuiGraphicsExtractor.HoveredTextEffects.NONE),
+                it,
+                0
+            )
         }
         x -= TEXT_OFFSET
     }
 
-    override fun onClick(click: Click, doubled: Boolean) {
-        super.onClick(click, doubled)
+    override fun onClick(event: MouseButtonEvent, doubled: Boolean) {
+        super.onClick(event, doubled)
 
         if (visible && active)
         {
@@ -57,12 +56,12 @@ open class ClickableTextDisplayWidget(
         }
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
     fun setText(text: String) {
-        message = Text.literal(text)
-        this.width = textRenderer.getWidth(message)
+        message = Component.literal(text)
+        this.width = font.width(message)
     }
 
     companion object {

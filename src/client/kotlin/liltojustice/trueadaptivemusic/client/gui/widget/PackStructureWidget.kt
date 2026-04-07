@@ -8,15 +8,15 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.input.KeyInput
-import net.minecraft.text.MutableText
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.util.CommonColors
 import kotlin.math.max
 
 class PackStructureWidget(
@@ -94,7 +94,7 @@ class PackStructureWidget(
                         row,
                         xOffset
                     )
-                    widget.setTooltip(Tooltip.of(if (isCollapsed) EXPAND_TEXT else COLLAPSE_TEXT))
+                    widget.setTooltip(Tooltip.create(if (isCollapsed) EXPAND_TEXT else COLLAPSE_TEXT))
                 }
 
                 addWidget(NodeWidget(node, TargetNode(node, false)), row, xOffset + 7)
@@ -116,71 +116,71 @@ class PackStructureWidget(
         )
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
-    override fun keyPressed(input: KeyInput): Boolean {
-        if (input.key == SHIFT_KEY) {
+    override fun keyPressed(event: KeyEvent): Boolean {
+        if (event.key == SHIFT_KEY) {
             shiftHeld = true
         }
 
-        if (input.key == CTRL_KEY) {
+        if (event.key == CTRL_KEY) {
             ctrlHeld = true
         }
 
-        if (input.key == SPACE_KEY) {
+        if (event.key == SPACE_KEY) {
             spaceHeld = true
         }
 
-        return super.keyPressed(input)
+        return super.keyPressed(event)
     }
 
-    override fun keyReleased(input: KeyInput): Boolean {
-        if (input.key == SHIFT_KEY) {
+    override fun keyReleased(event: KeyEvent): Boolean {
+        if (event.key == SHIFT_KEY) {
             shiftHeld = false
         }
 
-        if (input.key == CTRL_KEY) {
+        if (event.key == CTRL_KEY) {
             ctrlHeld = false
         }
 
-        if (input.key == SPACE_KEY) {
+        if (event.key == SPACE_KEY) {
             spaceHeld = false
         }
 
-        return super.keyReleased(input)
+        return super.keyReleased(event)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+        val result = super.mouseClicked(event, doubleClick)
         mouseButtonHeld = false
-        forEachChild { child ->
+        visitWidgets { child ->
             if (focusedWidget == child &&
                 child is NodeWidget &&
                 child.targetNode.node.parent != null &&
-                child.isMouseOver(click.x, click.y)) {
+                child.isMouseOver(event.x, event.y)) {
                 mouseButtonHeld = true
 
-                return@forEachChild
+                return@visitWidgets
             }
         }
 
         return result
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        val result = super.mouseReleased(click)
+    override fun mouseReleased(event: MouseButtonEvent): Boolean {
+        val result = super.mouseReleased(event)
 
         if (!isMovingNode()) {
             return result
         }
 
-        forEachChild { child ->
+        visitWidgets { child ->
             if (child !is AbstractNodeWidget
-                || !child.isMouseOver(click.x, click.y)
+                || !child.isMouseOver(event.x, event.y)
                 || (targetedNode === child.targetNode.node && !shiftHeld)
                 || targetedNode?.let { child.isValidDestination(it) || shiftHeld } != true) {
-                return@forEachChild
+                return@visitWidgets
             }
 
             val targetNode = child.targetNode.node
@@ -191,7 +191,7 @@ class PackStructureWidget(
                 else {
                     it
                 }
-            } ?: return@forEachChild
+            } ?: return@visitWidgets
 
             if (child.targetNode.isParent || spaceHeld) {
                 targetNode.adoptChild(toAdopt)
@@ -209,45 +209,45 @@ class PackStructureWidget(
         return result
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.renderWidget(context, mouseX, mouseY, delta)
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
 
         if (!isMovingNode()) {
             return
         }
 
-        forEachChild { child ->
+        visitWidgets { child ->
             if (child !is AbstractNodeWidget
                 || !child.isMouseOver(mouseX.toDouble(), mouseY.toDouble())
                 || (child.targetNode.node === targetedNode && !shiftHeld)) {
-                return@forEachChild
+                return@visitWidgets
             }
 
             val valid = targetedNode?.let { child.isValidDestination(it) || shiftHeld } == true
-            val rowHeight = getRowHeight(textRenderer.fontHeight)
+            val rowHeight = getRowHeight(font.lineHeight)
 
             if (spaceHeld && !child.targetNode.isParent) {
-                context?.drawText(
-                    textRenderer,
+                graphics.text(
+                    font,
                     ARROW_TEXT,
-                    child.x + INDENT - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.x + INDENT - font.width(ARROW_TEXT) - 2,
                     child.y + (rowHeight / 2).toInt(),
-                    if (valid) Colors.WHITE else Colors.RED,
+                    if (valid) CommonColors.WHITE else CommonColors.RED,
                     false
                 )
             }
             else {
-                context?.drawText(
-                    textRenderer,
+                graphics.text(
+                    font,
                     ARROW_TEXT,
-                    child.x - textRenderer.getWidth(ARROW_TEXT) - 2,
+                    child.x - font.width(ARROW_TEXT) - 2,
                     child.y - (rowHeight / 2).toInt(),
-                    if (valid) Colors.WHITE else Colors.RED,
+                    if (valid) CommonColors.WHITE else CommonColors.RED,
                     false
                 )
             }
 
-            return@forEachChild
+            return@visitWidgets
         }
     }
 
@@ -265,33 +265,33 @@ class PackStructureWidget(
         const val SHIFT_KEY = 340
         const val CTRL_KEY = 341
         const val SPACE_KEY = 32
-        val TITLE_TEXT: MutableText = Text.translatableWithFallback(
+        val TITLE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.pack_structure", "Pack Structure")
-        val MOVE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+        val MOVE_NODE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.move_node",
             "Click and drag to move\n+ shift (copy)\n+ ctrl (copy recursively)\n+ space (target children" +
                     " of node)"
         )
-        val ARROW_TEXT: MutableText = Text.literal("→")
-        val LINE_SPACE: MutableText = Text.literal("\n\n")
-        val CREATE_CHILD_NODE_TEXT: MutableText = Text.translatableWithFallback(
+        val ARROW_TEXT: MutableComponent = Component.literal("→")
+        val LINE_SPACE: MutableComponent = Component.literal("\n\n")
+        val CREATE_CHILD_NODE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.create_child_node", "Create Child Node"
         )
-        val CREATE_CHILD_NODE_ROOT_TEXT: MutableText = Text.translatableWithFallback(
+        val CREATE_CHILD_NODE_ROOT_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.create_child_node_root", "Create Child Node of Root"
         )
-        val CREATE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+        val CREATE_NODE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.create_node", "Create New Node")
-        val CREATE_PREDICATE_TEXT: MutableText = Text.translatableWithFallback(
+        val CREATE_PREDICATE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.create_predicate", "Create a Predicate")
-        val COMBINE_PREDICATES_TEXT: MutableText = Text.translatableWithFallback(
+        val COMBINE_PREDICATES_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.combine_predicates", "Combine Predicates")
-        val EMPTY_TEXT: MutableText = Text.translatableWithFallback("trueadaptivemusic.empty", "Empty")
-        val CONFIGURE_NODE_TEXT: MutableText = Text.translatableWithFallback(
+        val EMPTY_TEXT: MutableComponent = Component.translatableWithFallback("trueadaptivemusic.empty", "Empty")
+        val CONFIGURE_NODE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.configure_node", "Configure this node")
-        val EXPAND_TEXT: MutableText = Text.translatableWithFallback(
+        val EXPAND_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.expand", "Click to Expand Children\n\nHold shift to expand recursively")
-        val COLLAPSE_TEXT: MutableText = Text.translatableWithFallback(
+        val COLLAPSE_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.collapse", "Click to Collapse Children")
     }
 
@@ -322,11 +322,11 @@ class PackStructureWidget(
 
                 val tooltipText = predicate.getTriggerTooltipText()
 
-                widget.setTooltip(Tooltip.of(tooltipText))
+                widget.setTooltip(Tooltip.create(tooltipText))
                 widget.color = if (predicate is ErrorPredicate)
-                    Colors.RED
+                    CommonColors.RED
                 else
-                    Colors.WHITE
+                    CommonColors.WHITE
 
                 widget
             }
@@ -354,7 +354,7 @@ class PackStructureWidget(
                 }
 
                 widget.setTooltip(
-                    Tooltip.of(
+                    Tooltip.create(
                         if (node.predicates.isEmpty())
                             CREATE_PREDICATE_TEXT
                         else
@@ -377,54 +377,55 @@ class PackStructureWidget(
                 }
             )
             val tooltipText = if (targetedNode !== node)
-                CONFIGURE_NODE_TEXT.copyContentOnly().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+                CONFIGURE_NODE_TEXT.copy().append(LINE_SPACE).append(MOVE_NODE_TEXT)
             else
                 MOVE_NODE_TEXT
-            widget.setTooltip(Tooltip.of(tooltipText))
+            widget.setTooltip(Tooltip.create(tooltipText))
 
             widget
         }
 
-        override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-            val result = super.mouseClicked(click, doubled)
-            val predicateClicked = predicateWidgets.any { it.mouseClicked(click, doubled) }
-            val combineClicked = combinePredicateWidget?.mouseClicked(click, doubled) ?: false
-            configureNodeWidget.mouseClicked(click, doubled)
+        override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
+            val result = super.mouseClicked(event, doubled)
+            val predicateClicked = predicateWidgets.any { it.mouseClicked(event, doubled) }
+            val combineClicked = combinePredicateWidget?.mouseClicked(event, doubled) ?: false
+            configureNodeWidget.mouseClicked(event, doubled)
 
             if (!predicateClicked && !combineClicked && result) {
-                configureNodeWidget.onClick(click, doubled)
+                configureNodeWidget.onClick(event, doubled)
             }
 
             return result
         }
 
-        override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-            super.renderWidget(context, mouseX, mouseY, delta)
+        override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+            super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
             var nextX = 0
 
             nextX = renderWidget(configureNodeWidget, nextX) {
-                configureNodeWidget.render(context, mouseX, mouseY, delta)
+                configureNodeWidget.extractRenderState(graphics, mouseX, mouseY, a)
             }
             predicateWidgets.forEachIndexed { index, widget ->
-                nextX = renderWidget(widget, nextX) { widget.render(context, mouseX, mouseY, delta) }
+                nextX = renderWidget(widget, nextX) { widget.extractRenderState(graphics, mouseX, mouseY, a) }
 
                 if (index < orWidgets.size) {
                     val orWidget = orWidgets[index]
-                    nextX = renderWidget(orWidget, nextX) { orWidget.render(context, mouseX, mouseY, delta) }
+                    nextX = renderWidget(
+                        orWidget, nextX) { orWidget.extractRenderState(graphics, mouseX, mouseY, a) }
                 }
             }
 
             combinePredicateWidget?.let {
                 renderWidget(it, nextX) {
-                    it.render(context, mouseX, mouseY, delta)
+                    it.extractRenderState(graphics, mouseX, mouseY, a)
                 }
             }
         }
 
-        override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+        override fun updateWidgetNarration(output: NarrationElementOutput) {
         }
 
-        private fun renderWidget(widget: ClickableWidget, nextX: Int, render: () -> Unit): Int {
+        private fun renderWidget(widget: AbstractWidget, nextX: Int, render: () -> Unit): Int {
             widget.x = x + nextX
             widget.y = y
             width = max(width, nextX + widget.width)
@@ -443,7 +444,7 @@ class PackStructureWidget(
             onClick = { onSelectCreateNewNode(targetNode.node) }
         ) {
         init {
-            setTooltip(Tooltip.of(CREATE_NODE_TEXT))
+            setTooltip(Tooltip.create(CREATE_NODE_TEXT))
         }
     }
 

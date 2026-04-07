@@ -4,8 +4,8 @@ import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.narration.NarrationElementOutput
 import kotlin.reflect.full.primaryConstructor
 
 class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, height: Int, x: Int = 0, y: Int = 0)
@@ -14,11 +14,11 @@ class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, he
         .getRequiredArgs().map { InputWidgetMaker.WidgetArg.of(it) }
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.renderWidget(context, mouseX, mouseY, delta)
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
         if (!visible) {
             return
         }

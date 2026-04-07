@@ -1,50 +1,54 @@
 package liltojustice.trueadaptivemusic.client;
 
+import com.mojang.datafixers.util.Unit;
 import com.mojang.serialization.Codec;
 import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.option.SimpleOption;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
-public record TrueAdaptiveMusicOptionCallback<T>(MinecraftClient client)
-        implements SimpleOption.Callbacks<T> {
+public record TrueAdaptiveMusicOptionCallback(Minecraft minecraft) implements OptionInstance.ValueSet<Unit> {
     @Override
-    public Function<SimpleOption<T>, ClickableWidget> getWidgetCreator(
-            SimpleOption.TooltipFactory<T> tooltipFactory,
-            GameOptions gameOptions,
+    public @NonNull Function<OptionInstance<Unit>, AbstractWidget> createButton(
+            OptionInstance.@NonNull TooltipSupplier<Unit> tooltipFactory,
+            @NonNull Options options,
             int x,
             int y,
             int width,
-            Consumer<T> changeCallback) {
-        return option -> {
-            assert client.currentScreen != null;
-            return new ButtonWidget.Builder(
-                    Text.translatableWithFallback(
+            @NonNull Consumer<Unit> changeCallback
+    ) {
+        return _ -> {
+            assert minecraft.screen != null;
+            return new Button.Builder(
+                    Component.translatableWithFallback(
                             "trueadaptivemusic.trueadaptivemusic",
                             "True Adaptive Music"
                     ),
-                    widget -> client.setScreen(new MainScreen(client.currentScreen))
-            ).dimensions(x, y, width, 20).build();
+                    _ -> minecraft.setScreen(new MainScreen(minecraft.screen))
+            ).bounds(x, y, width, 20).build();
         };
     }
 
     @Override
-    public Optional<T> validate(T value) {
+    public @NonNull Optional<Unit> validateValue(@NonNull Unit value) {
         return Optional.of(value);
     }
 
     @Override
-    public Codec<T> codec() {
-        return null;
+    @NotNull
+    public Codec<com.mojang.datafixers.util.Unit> codec() {
+        return Codec.EMPTY.codec();
     }
 }

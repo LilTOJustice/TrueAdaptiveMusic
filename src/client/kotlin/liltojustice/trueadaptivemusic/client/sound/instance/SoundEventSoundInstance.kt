@@ -1,16 +1,16 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.PositionedSoundInstance
-import net.minecraft.client.sound.Sound
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.sound.SoundCategory
-import net.minecraft.sound.SoundEvent
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.random.Random
+import net.minecraft.client.Minecraft
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.resources.sounds.Sound
+import net.minecraft.client.sounds.AudioStream
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundSource
+import net.minecraft.util.RandomSource
 
 class SoundEventSoundInstance(
     playableSound: PlayableSound,
@@ -18,33 +18,34 @@ class SoundEventSoundInstance(
     isAmbient: Boolean,
     isLooping: Boolean
 ): TAMSoundInstance(playableSound, isAmbient, isLooping, 0U) {
-    private val soundManager: SoundManager = MinecraftClient.getInstance().soundManager
-    private val instance = PositionedSoundInstance(
-        SoundEvent.of(identifier),
-        SoundCategory.MUSIC,
+    private val soundManager: SoundManager = Minecraft.getInstance().soundManager
+    private val instance = SimpleSoundInstance(
+        SoundEvent.createVariableRangeEvent(identifier),
+        SoundSource.MUSIC,
         1F,
         1F,
         random,
         0.0,
         0.0,
-        0.0)
+        0.0
+    )
     private var sound: Sound? = null
 
     init {
-        instance.getSoundSet(soundManager)?.getSound(random)
-        sound = instance.sound?.takeIf { it != SoundManager.MISSING_SOUND }
+        instance.resolve(soundManager)?.getSound(random)
+        sound = instance.sound?.takeIf { it != SoundManager.EMPTY_SOUND }
     }
 
     override fun getAudioStream(): AudioStream? {
         val sound = sound ?: return null
-        val inputStreamGetter = { soundManager.soundSystem.soundLoader.resourceFactory.open(sound.location) }
+        val inputStreamGetter = { soundManager.soundEngine.soundBuffers.resourceManager.open(sound.location) }
 
         return getAudioStream(sound.location.toString(), inputStreamGetter, isAmbient)
     }
 
     override fun getSoundString(): String {
-        return sound?.identifier?.let { id ->
-            Text.translatable(id.toShortTranslationKey().replace("/", ".")).string
+        return sound?.location?.let { id ->
+            Component.translatable(id.toShortLanguageKey().replace("/", ".")).string
         } ?: "Missing Sound"
     }
 
@@ -53,6 +54,6 @@ class SoundEventSoundInstance(
     }
 
     companion object {
-        val random: Random = Random.create()
+        val random: RandomSource = RandomSource.create()
     }
 }

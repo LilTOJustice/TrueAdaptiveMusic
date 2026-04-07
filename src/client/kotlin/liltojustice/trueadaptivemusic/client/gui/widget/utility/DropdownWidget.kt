@@ -1,11 +1,11 @@
 package liltojustice.trueadaptivemusic.client.gui.widget.utility
 
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.text.Text
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.narration.NarrationElementOutput
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
 import kotlin.math.max
 
 class DropdownWidget<TKey>(
@@ -18,11 +18,10 @@ class DropdownWidget<TKey>(
     notSelectedPlaceholder: String? = null,
     startingOption: TKey? = null,
     private val onHoverOption: (option: String?) -> Unit = {},
-    tooltipText: Text? = null,
+    tooltipText: Component? = null,
     x: Int = 0,
     y: Int = 0
-)
-    : ContainerWidget(
+): ContainerWidget(
     width,
     0,
     "Dropdown: $title",
@@ -34,23 +33,23 @@ class DropdownWidget<TKey>(
     x,
     y,
     true) {
-    private val titleText = Text.literal(title)
+    private val titleText = Component.literal(title)
     private var dropdownResultsWidget: DropdownResultsWidget<TKey>
     private val realizedWidth = width.takeUnless { width == 0 }
         ?: (
                 max(
-                    textRenderer.getWidth(title),
+                    font.width(title),
                     (options + (getOptions?.invoke() ?: listOf()))
                         .map { getDisplay?.invoke(it) ?: it.toString() }
-                        .maxOfOrNull { option -> textRenderer.getWidth(option) } ?: 0
+                        .maxOfOrNull { option -> font.width(option) } ?: 0
                 ) + TEXT_WIDTH_BUFFER)
-    private val textInputWidget = TextFieldWidget(
-        textRenderer,
+    private val textInputWidget = EditBox(
+        font,
         0,
         0,
         realizedWidth,
-        textRenderer.fontHeight + TEXT_HEIGHT_BUFFER,
-        Text.literal("Dropdown Search")
+        font.lineHeight + TEXT_HEIGHT_BUFFER,
+        Component.literal("Dropdown Search")
     )
     private val selectedOptionWidget = run {
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
@@ -64,7 +63,7 @@ class DropdownWidget<TKey>(
 
     init {
         titleTextWidget.disableBold()
-        tooltipText?.let { setTooltip(Tooltip.of(it)) }
+        tooltipText?.let { setTooltip(Tooltip.create(it)) }
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
             options,
@@ -79,9 +78,7 @@ class DropdownWidget<TKey>(
             onHoverOption,
             x,
             y)
-        textInputWidget.setChangedListener { newText ->
-            dropdownResultsWidget.setSearchText(newText)
-        }
+        textInputWidget.setResponder { newText -> dropdownResultsWidget.setSearchText(newText) }
         addWidget(titleTextWidget, 0)
         addWidget(selectedOptionWidget, 1)
         addWidget(textInputWidget, 1)
@@ -89,8 +86,8 @@ class DropdownWidget<TKey>(
         close()
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val result = super.mouseClicked(click, doubled)
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+        val result = super.mouseClicked(event, doubleClick)
         if (focusedWidget == selectedOptionWidget) {
             open()
         }
@@ -102,16 +99,16 @@ class DropdownWidget<TKey>(
         return result
     }
 
-    override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.renderWidget(context, mouseX, mouseY, delta)
+    override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
         fitToChildrenHeight()
     }
 
-    override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+    override fun updateWidgetNarration(output: NarrationElementOutput) {
     }
 
     private fun open() {
-        textInputWidget.text = ""
+        textInputWidget.value = ""
         focusedWidget = textInputWidget
         onHoverOption(null)
         textInputWidget.visible = true
@@ -168,7 +165,7 @@ class DropdownWidget<TKey>(
             }
         }
 
-        override fun renderWidget(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
+        override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
             if (!visible) {
                 return
             }
@@ -186,7 +183,7 @@ class DropdownWidget<TKey>(
                                     onSelectOption(option.first)
                                 },
                                 onMouseOn = { option -> onHoverOption(option.text) },
-                                onMouseOff = { option -> onHoverOption(null) })
+                                onMouseOff = { _ -> onHoverOption(null) })
                         },
                         option.first.hashCode().toString(),
                         index
@@ -194,7 +191,7 @@ class DropdownWidget<TKey>(
                 }
 
             fitToUsedRows(MAX_DISPLAYED_OPTIONS)
-            super.renderWidget(context, mouseX, mouseY, delta)
+            super.extractWidgetRenderState(graphics, mouseX, mouseY, a)
         }
 
         fun setSearchText(searchText: String) {
@@ -202,7 +199,7 @@ class DropdownWidget<TKey>(
             clearWidgetsFromRender()
         }
 
-        override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
+        override fun updateWidgetNarration(output: NarrationElementOutput) {
         }
 
         companion object {

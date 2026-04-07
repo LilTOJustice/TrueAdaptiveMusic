@@ -3,12 +3,12 @@ package liltojustice.trueadaptivemusic.client.sound.engine
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.option.GameOptions
-import net.minecraft.sound.SoundCategory
+import net.minecraft.client.Options
+import net.minecraft.sounds.SoundSource
 import kotlin.collections.get
 
 @Environment(EnvType.CLIENT)
-class SoundSystem(private val options: GameOptions) {
+class SoundSystem(private val options: Options) {
     private val soundEngine = SoundEngine()
     val channels = mutableMapOf<TAMSoundInstance, Channel>()
 
@@ -82,13 +82,13 @@ class SoundSystem(private val options: GameOptions) {
     }
 
     private fun getProperSourceVolume(soundInstance: TAMSoundInstance): Float {
-        return soundInstance.desiredVolume * options.getSoundVolume(SoundCategory.MASTER) *
-                options.getSoundVolume(
+        return soundInstance.desiredVolume * options.getSoundSourceVolume(SoundSource.MASTER) *
+                options.getSoundSourceVolume(
                     if (soundInstance.isAmbient) {
-                        SoundCategory.AMBIENT
+                        SoundSource.AMBIENT
                     }
                     else {
-                        SoundCategory.MUSIC
+                        SoundSource.MUSIC
                     }
                 )
     }

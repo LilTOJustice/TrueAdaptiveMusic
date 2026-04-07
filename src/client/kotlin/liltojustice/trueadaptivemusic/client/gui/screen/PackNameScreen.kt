@@ -4,87 +4,92 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.TextFieldWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.SpriteIconButton
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 @Environment(EnvType.CLIENT)
 class PackNameScreen(private val parent: Screen): Screen(
-    Text.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack")) {
+    Component.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack")) {
     private var packName = ""
     private var errorText = ""
-    private lateinit var packNameWidget: TextFieldWidget
-    private lateinit var acceptButtonWidget: TextIconButtonWidget
+    private lateinit var packNameWidget: EditBox
+    private lateinit var acceptButtonWidget: SpriteIconButton
 
     override fun init() {
-        packNameWidget = TextFieldWidget(
-            textRenderer,
+        packNameWidget = EditBox(
+            font,
             width / 2 - width / 6,
             height / 2,
             width / 3,
-            (client?.textRenderer?.fontHeight ?: 0) + 5,
-            Text.translatableWithFallback("trueadaptivemusic.pack_name", "Pack Name"))
+            minecraft.font.lineHeight + 5,
+            Component.translatableWithFallback("trueadaptivemusic.pack_name", "Pack Name")
+        )
 
-        packNameWidget.setChangedListener { packName ->
+        packNameWidget.setResponder { packName ->
             errorText = ""
             this.packName = packName
             if (Path(Constants.MUSIC_PACK_DIR.pathString, "$packName.zip").exists()) {
-                errorText = Text.translatableWithFallback(
+                errorText = Component.translatableWithFallback(
                     "trueadaptivemusic.name_already_exists",
                     "%s.zip already exists",
                     packName).string
             }
         }
-        acceptButtonWidget = TextIconButtonWidget.Builder(
-            Text.translatableWithFallback("trueadaptivemusic.accept", "Accept"),
-            {
-            if (!validPackName(packName) || errorText.isNotEmpty()) {
-                return@Builder
-            }
 
-            client?.setScreen(EditPackScreen(parent, MusicPack.makeEmpty(packName)))
-        }, false)
-            .texture(CHECKMARK, 9, 8)
-            .build()
+        acceptButtonWidget = SpriteIconButton.builder(
+            CommonComponents.GUI_PROCEED, {
+                if (!validPackName(packName) || errorText.isNotEmpty()) {
+                    return@builder
+                }
+
+                minecraft.setScreen(EditPackScreen(parent, MusicPack.makeEmpty(packName)))
+            },
+            false
+        ).sprite(CHECKMARK, 9, 8).build()
+
         acceptButtonWidget.width = 60
         acceptButtonWidget.x = width / 2 - width / 6
-        acceptButtonWidget.y = height / 2 + (client?.textRenderer?.fontHeight ?: 0) + 10
+        acceptButtonWidget.y = height / 2 + font.lineHeight + 10
 
-        addDrawableChild(packNameWidget)
-        addDrawableChild(acceptButtonWidget)
+        addRenderableWidget(packNameWidget)
+        addRenderableWidget(acceptButtonWidget)
     }
 
-    override fun close() {
-        client?.setScreen(parent)
+    override fun onClose() {
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        context?.drawText(
-            client?.textRenderer,
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        graphics.text(
+            font,
             errorText,
             width / 2 - width / 6,
-            height / 2 + (client?.textRenderer?.fontHeight ?: 0) + 35,
-            Colors.RED,
-            false)
-        context?.drawCenteredTextWithShadow(
-            client?.textRenderer,
-            Text.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack"),
+            height / 2 + font.lineHeight + 35,
+            CommonColors.RED,
+            false
+        )
+        graphics.centeredText(
+            font,
+            Component.translatableWithFallback("trueadaptivemusic.name_pack", "Name Your New Pack"),
             width / 2,
             10,
-            Colors.WHITE)
+            CommonColors.WHITE
+        )
         acceptButtonWidget.active = errorText.isEmpty() && validPackName(packName)
-        super.render(context, mouseX, mouseY, delta)
+        super.extractRenderState(graphics, mouseX, mouseY, a)
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
+        private val CHECKMARK: Identifier = Identifier.withDefaultNamespace("icon/checkmark")
 
         fun validPackName(packName: String): Boolean {
             if (packName.isEmpty()) {

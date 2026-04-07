@@ -10,32 +10,35 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.tooltip.Tooltip
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.GridWidget
-import net.minecraft.client.gui.widget.SimplePositioningWidget
-import net.minecraft.client.gui.widget.TextIconButtonWidget
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.SpriteIconButton
+import net.minecraft.client.gui.components.Tooltip
+import net.minecraft.client.gui.layouts.FrameLayout
+import net.minecraft.client.gui.layouts.GridLayout
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import net.minecraft.util.Util
 
 @Environment(EnvType.CLIENT)
-class EditPackScreen(private val parent: Screen, private val musicPack: MusicPack)
-    : Screen(
-    Text.translatableWithFallback(
-        "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")) {
+class EditPackScreen(
+    private val parent: Screen,
+    private val musicPack: MusicPack
+): Screen(
+    Component.translatableWithFallback(
+        "trueadaptivemusic.create_edit_pack", "Create/Edit a music pack")
+) {
     private lateinit var packStructureWidget: PackStructureWidget
     private lateinit var nodeViewWidget: NodeViewWidget
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
-    private lateinit var saveButtonWidget: TextIconButtonWidget
-    private lateinit var closeButtonWidget: ButtonWidget
-    private lateinit var openAssetsFolderButtonWidget: ButtonWidget
-    private lateinit var optionsButtonWidget: ButtonWidget
+    private lateinit var saveButtonWidget: SpriteIconButton
+    private lateinit var closeButtonWidget: Button
+    private lateinit var openAssetsFolderButtonWidget: Button
+    private lateinit var optionsButtonWidget: Button
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -49,17 +52,17 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     private fun exportAndClose() {
-        client.setScreen(ExportPackScreen(musicPack, parent))
+        minecraft.setScreen(ExportPackScreen(musicPack, parent))
     }
 
-    override fun mouseClicked(click: Click?, doubled: Boolean): Boolean {
-        val optional = this.hoveredElement(click!!.x(), click.y())
+    override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
+        val optional = this.getChildAt(event.x, event.y)
         if (optional.isEmpty) {
             return false
         } else {
             val element = optional.get()
-            if (element.mouseClicked(click, doubled) && element.isClickable) {
-                if (click.button() == 0) {
+            if (element.mouseClicked(event, doubled)) {
+                if (event.button() == 0) {
                     this.isDragging = true
                 }
             }
@@ -74,34 +77,27 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
         catch (e: Exception) {
             TAMClient.errorToast(
-                Text.translatableWithFallback(
+                Component.translatableWithFallback(
                     "trueadaptivemusic.edit_load_error", "Failed to load pack to edit!"),
                 e.message
             )
             Logger.logError("Failed to load pack to edit:\n$e")
-            close()
+            onClose()
         }
 
-        saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
-            exportAndClose()
-        }, false)
-            .texture(CHECKMARK, 9, 8)
+        saveButtonWidget = SpriteIconButton.builder(SAVE_BUTTON_TEXT, { exportAndClose() }, false)
+            .sprite(CHECKMARK, 9, 8)
             .build()
 
-        closeButtonWidget = ButtonWidget.Builder(CLOSE_BUTTON_TEXT) {
-            close()
-        }
-            .build()
+        closeButtonWidget = Button.Builder(CLOSE_BUTTON_TEXT) { onClose() }.build()
 
-        openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
-            Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
-        }
-            .build()
+        openAssetsFolderButtonWidget = Button.Builder(OPEN_ASSETS_TEXT) {
+            Util.getPlatform().openUri(musicPack.getEditPackAssetsPath().toUri())
+        }.build()
 
-        optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
-            client.setScreen(PackOptionsScreen(this, musicPack))
-        }
-            .build()
+        optionsButtonWidget = Button.Builder(OPTIONS_BUTTON_TEXT) {
+            minecraft.setScreen(PackOptionsScreen(this, musicPack))
+        }.build()
 
         val containerWidth = getContainerWidth()
         val containerHeight = getContainerHeight()
@@ -166,33 +162,33 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             }
         )
 
-        addDrawableChild(saveButtonWidget)
-        addDrawableChild(closeButtonWidget)
-        addDrawableChild(openAssetsFolderButtonWidget)
-        addDrawableChild(packStructureWidget)
-        addDrawableChild(nodeViewWidget)
-        addDrawableChild(predicateViewWidget)
-        addDrawableChild(eventViewWidget)
-        addDrawableChild(optionsButtonWidget)
+        addRenderableWidget(saveButtonWidget)
+        addRenderableWidget(closeButtonWidget)
+        addRenderableWidget(openAssetsFolderButtonWidget)
+        addRenderableWidget(packStructureWidget)
+        addRenderableWidget(nodeViewWidget)
+        addRenderableWidget(predicateViewWidget)
+        addRenderableWidget(eventViewWidget)
+        addRenderableWidget(optionsButtonWidget)
 
-        saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
+        saveButtonWidget.width = font.width(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
-        closeButtonWidget.width = textRenderer.getWidth(CLOSE_BUTTON_TEXT) + 10
+        closeButtonWidget.width = font.width(CLOSE_BUTTON_TEXT) + 10
         closeButtonWidget.setTooltip(
-            Tooltip.of(
-                Text.translatableWithFallback(
+            Tooltip.create(
+                Component.translatableWithFallback(
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
+        openAssetsFolderButtonWidget.width = font.width(OPEN_ASSETS_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
-        optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
+        optionsButtonWidget.width = font.width(OPTIONS_BUTTON_TEXT) + 10
         optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
     }
 
-    override fun close() {
+    override fun onClose() {
         try {
             initPack()
         }
@@ -202,21 +198,20 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             parent.reload()
         }
 
-        client?.setScreen(parent)
+        minecraft.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        super.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(
-            this.textRenderer, this.title, this.width / 2, 22, Colors.WHITE)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+        super.extractRenderState(graphics, mouseX, mouseY, a)
+        graphics.centeredText(font, title, width / 2, 22, CommonColors.WHITE)
     }
 
     private fun positionContainers() {
-        val gridWidget = GridWidget()
-        gridWidget.mainPositioner
-            .marginLeft(LEFT_MARGIN / 2)
-            .marginRight(RIGHT_MARGIN / 2)
-        val adder: GridWidget.Adder = gridWidget.createAdder(2)
+        val gridLayout = GridLayout()
+        gridLayout.defaultCellSetting()
+            .paddingLeft(LEFT_PADDING / 2)
+            .paddingRight(RIGHT_PADDING / 2)
+        val rowHelper: GridLayout.RowHelper = gridLayout.createRowHelper(2)
 
         packStructureWidget.height = getContainerHeight()
         nodeViewWidget.height = getContainerHeight()
@@ -224,34 +219,35 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         eventViewWidget.height = getContainerHeight()
 
         if (predicateView) {
-            adder.add(packStructureWidget)
-            adder.add(predicateViewWidget)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(predicateViewWidget)
         }
         else if (eventView) {
-            val innerGridWidget = GridWidget()
+            val innerGridLayout = GridLayout()
             nodeViewWidget.height = getContainerHeight() / 2
             eventViewWidget.height = getContainerHeight() / 2
-            innerGridWidget.add(nodeViewWidget, 0, 0)
-            innerGridWidget.add(eventViewWidget, 1, 0)
-            innerGridWidget.setRowSpacing(1)
-            adder.add(packStructureWidget)
-            adder.add(innerGridWidget)
-            innerGridWidget.refreshPositions()
+            innerGridLayout.addChild(nodeViewWidget, 0, 0)
+            innerGridLayout.addChild(eventViewWidget, 1, 0)
+            innerGridLayout.rowSpacing(1)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(innerGridLayout)
+            innerGridLayout.arrangeElements()
         }
         else {
-            adder.add(packStructureWidget)
-            adder.add(nodeViewWidget)
+            rowHelper.addChild(packStructureWidget)
+            rowHelper.addChild(nodeViewWidget)
         }
 
-        gridWidget.refreshPositions()
-        SimplePositioningWidget.setPos(
-            gridWidget,
-            LEFT_MARGIN,
+        gridLayout.arrangeElements()
+        FrameLayout.alignInRectangle(
+            gridLayout,
+            LEFT_PADDING,
             TOP_MARGIN,
-            RIGHT_MARGIN,
+            RIGHT_PADDING,
             BOTTOM_MARGIN,
             0f,
-            0f)
+            0f
+        )
     }
 
     private fun switchToNodeView() {
@@ -275,7 +271,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     private fun getContainerWidth(): Int {
-        return (width * 0.5 - LEFT_MARGIN - RIGHT_MARGIN).toInt()
+        return (width * 0.5 - LEFT_PADDING - RIGHT_PADDING).toInt()
     }
 
     private fun getContainerHeight(): Int {
@@ -283,17 +279,18 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     }
 
     companion object {
-        private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
+        private val CHECKMARK: Identifier = Identifier.withDefaultNamespace("icon/checkmark")
         private const val TOP_MARGIN = 32
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
-        private const val LEFT_MARGIN = TOP_MARGIN / 4
-        private const val RIGHT_MARGIN = LEFT_MARGIN
-        private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
+        private const val LEFT_PADDING = TOP_MARGIN / 4
+        private const val RIGHT_PADDING = LEFT_PADDING
+        private val OPEN_ASSETS_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.show_assets", "Show Assets")
-        private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
+        private val SAVE_BUTTON_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
-        private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
-        private val OPTIONS_BUTTON_TEXT = Text.translatableWithFallback(
+        private val CLOSE_BUTTON_TEXT = Component.translatableWithFallback(
+            "trueadaptivemusic.close", "Close")
+        private val OPTIONS_BUTTON_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.options", "Options")
     }
 }

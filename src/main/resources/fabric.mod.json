@@ -33,8 +33,8 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabric-api": "*",
+    "minecraft": ">=${minecraft_version}"
   },
   "accessWidener" : "trueadaptivemusic.accesswidener"
 }

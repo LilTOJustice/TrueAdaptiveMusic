@@ -1,17 +1,17 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 class WeatherPredicate(private val weather: Weather): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val world = client.world ?: return false
+        val minecraft = Minecraft.getInstance()
+        val level = minecraft.level ?: return false
 
         return when(weather) {
-            Weather.Clear -> !world.isRaining
-            Weather.Rain -> world.isRaining
-            Weather.Thunder -> world.isThundering
+            Weather.Clear -> !level.isRaining
+            Weather.Rain -> level.isRaining
+            Weather.Thunder -> level.isThundering
         }
     }
 
