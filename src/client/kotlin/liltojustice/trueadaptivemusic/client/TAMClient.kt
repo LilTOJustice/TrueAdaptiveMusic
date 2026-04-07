@@ -253,8 +253,9 @@ object TAMClient {
         }
     }
 
+    @Suppress("UNNECESSARY_SAFE_CALL")
     private fun initialize(client: Minecraft) {
-        if (initialized || !client.soundManager.soundEngine.loaded) {
+        if (initialized || client.soundManager?.soundEngine?.loaded != true) {
             return
         }
 
