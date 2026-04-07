@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
-import net.minecraft.client.gui.components.ImageButton
 import net.minecraft.client.gui.components.SpriteIconButton
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -47,8 +46,8 @@ class ConfirmBackupScreen(
         acceptButtonWidget.y = height / 2 + font.lineHeight * 2 + 10
         deleteButtonWidget.y = acceptButtonWidget.y
 
-        addWidget(acceptButtonWidget)
-        addWidget(deleteButtonWidget)
+        addRenderableWidget(acceptButtonWidget)
+        addRenderableWidget(deleteButtonWidget)
     }
 
     override fun onClose() {

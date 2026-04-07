@@ -117,15 +117,15 @@ class MainScreen(private val parent: Screen): Screen(
 
 
         addWidget(packListWidget)
-        addWidget(createNewPackButton)
-        addWidget(openMusicPacksButton)
-        addWidget(doneButton)
-        addWidget(editButton)
-        addWidget(refreshButton)
-        addWidget(wikiButton)
-        addWidget(optionsButton)
-        addWidget(packBrowserButton)
-        addWidget(discordButton)
+        addRenderableWidget(createNewPackButton)
+        addRenderableWidget(openMusicPacksButton)
+        addRenderableWidget(doneButton)
+        addRenderableWidget(editButton)
+        addRenderableWidget(refreshButton)
+        addRenderableWidget(wikiButton)
+        addRenderableWidget(optionsButton)
+        addRenderableWidget(packBrowserButton)
+        addRenderableWidget(discordButton)
     }
 
     override fun onClose() {

@@ -40,15 +40,11 @@ class CheckboxWidget(
     }
 
     override fun extractContents(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
-        graphics.blit(
+        graphics.blitSprite(
             RenderPipelines.GUI_TEXTURED,
             if (selected) CHECKED else UNCHECKED,
             x,
             y,
-            0F,
-            0F,
-            CHECKBOX_SIZE,
-            CHECKBOX_SIZE,
             CHECKBOX_SIZE,
             CHECKBOX_SIZE,
             CommonColors.WHITE

@@ -72,11 +72,11 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         discordButton.x = width - discordButton.width - 1
 
         addWidget(packListWidget)
-        addWidget(openMusicPacksButton)
-        addWidget(doneButton)
-        addWidget(refreshButton)
-        addWidget(lastRefreshedWidget)
-        addWidget(discordButton)
+        addRenderableWidget(openMusicPacksButton)
+        addRenderableWidget(doneButton)
+        addRenderableWidget(refreshButton)
+        addRenderableWidget(lastRefreshedWidget)
+        addRenderableWidget(discordButton)
     }
 
     override fun onClose() {

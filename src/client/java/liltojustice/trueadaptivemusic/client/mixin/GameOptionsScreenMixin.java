@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundOptionsScreen.class)
 public class GameOptionsScreenMixin {
-    @Inject(method = "<init>", at = @At("TAIL"))
-    protected void init(CallbackInfo ci) {
+    @Inject(method = "addOptions", at = @At("TAIL"))
+    protected void addOptions(CallbackInfo ci) {
         SoundOptionsScreen soundOptionsScreen = (SoundOptionsScreen) (Object)this;
 
         var trueAdaptiveMusicButton = new OptionInstance<>(
@@ -26,7 +26,7 @@ public class GameOptionsScreenMixin {
         );
 
         if (soundOptionsScreen.list != null) {
-            soundOptionsScreen.list.addSmall(trueAdaptiveMusicButton);
+            soundOptionsScreen.list.addBig(trueAdaptiveMusicButton);
         }
     }
 }

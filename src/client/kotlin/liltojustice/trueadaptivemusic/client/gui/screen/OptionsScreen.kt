@@ -33,8 +33,8 @@ class OptionsScreen(private val parent: Screen): Screen(
         doneButton.x = width - doneButton.width
         doneButton.y = height - doneButton.height - 2
 
-        addWidget(optionsViewWidget)
-        addWidget(doneButton)
+        addRenderableWidget(optionsViewWidget)
+        addRenderableWidget(doneButton)
     }
 
     override fun onClose() {

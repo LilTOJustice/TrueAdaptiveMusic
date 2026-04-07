@@ -33,8 +33,8 @@ class PackOptionsScreen(private val parent: Screen, private val musicPack: Music
         doneButton.x = width - doneButton.width
         doneButton.y = packOptionsViewWidget.y + packOptionsViewWidget.height + 2
 
-        addWidget(packOptionsViewWidget)
-        addWidget(doneButton)
+        addRenderableWidget(packOptionsViewWidget)
+        addRenderableWidget(doneButton)
     }
 
     override fun onClose() {

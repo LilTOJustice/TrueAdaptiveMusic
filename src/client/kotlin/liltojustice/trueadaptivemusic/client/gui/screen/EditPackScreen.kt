@@ -162,14 +162,14 @@ class EditPackScreen(
             }
         )
 
-        addWidget(saveButtonWidget)
-        addWidget(closeButtonWidget)
-        addWidget(openAssetsFolderButtonWidget)
-        addWidget(packStructureWidget)
-        addWidget(nodeViewWidget)
-        addWidget(predicateViewWidget)
-        addWidget(eventViewWidget)
-        addWidget(optionsButtonWidget)
+        addRenderableWidget(saveButtonWidget)
+        addRenderableWidget(closeButtonWidget)
+        addRenderableWidget(openAssetsFolderButtonWidget)
+        addRenderableWidget(packStructureWidget)
+        addRenderableWidget(nodeViewWidget)
+        addRenderableWidget(predicateViewWidget)
+        addRenderableWidget(eventViewWidget)
+        addRenderableWidget(optionsButtonWidget)
 
         saveButtonWidget.width = font.width(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5

@@ -6,7 +6,6 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.EditBox
-import net.minecraft.client.gui.components.ImageButton
 import net.minecraft.client.gui.components.SpriteIconButton
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.CommonComponents
@@ -47,7 +46,7 @@ class PackNameScreen(private val parent: Screen): Screen(
         }
 
         acceptButtonWidget = SpriteIconButton.builder(
-            CommonComponents.GUI_ACKNOWLEDGE, {
+            CommonComponents.GUI_PROCEED, {
                 if (!validPackName(packName) || errorText.isNotEmpty()) {
                     return@builder
                 }
@@ -61,8 +60,8 @@ class PackNameScreen(private val parent: Screen): Screen(
         acceptButtonWidget.x = width / 2 - width / 6
         acceptButtonWidget.y = height / 2 + font.lineHeight + 10
 
-        addWidget(packNameWidget)
-        addWidget(acceptButtonWidget)
+        addRenderableWidget(packNameWidget)
+        addRenderableWidget(acceptButtonWidget)
     }
 
     override fun onClose() {
