@@ -401,15 +401,19 @@ class MusicManager(private val minecraft: Minecraft) {
         }
 
         private fun jukeboxPlaying(minecraft: Minecraft): Boolean {
-            val instances = minecraft.soundManager.soundEngine.instanceToChannel.keys.toMutableSet()
-            return instances.any { instance ->
-                ((instance.source == SoundSource.RECORDS)
-                        && (instance is SimpleSoundInstance)
-                        && (minecraft.player?.let {
-                    Vec3(instance.x, instance.y, instance.z)
-                        .distanceToSqr(it.position()) <
-                            (instance.sound?.attenuationDistance ?: 0) * (instance.sound?.attenuationDistance ?: 0) * 4
-                } ?: false))
+            return try {
+                minecraft.soundManager.soundEngine.instanceToChannel.keys.any { instance ->
+                    ((instance.source == SoundSource.RECORDS)
+                            && (instance is SimpleSoundInstance)
+                            && (minecraft.player?.let {
+                        Vec3(instance.x, instance.y, instance.z)
+                            .distanceToSqr(it.position()) <
+                                (instance.sound?.attenuationDistance ?: 0) * (instance.sound?.attenuationDistance ?: 0) * 4
+                    } ?: false))
+                }
+            }
+            catch (_: ConcurrentModificationException) {
+                false
             }
         }
 

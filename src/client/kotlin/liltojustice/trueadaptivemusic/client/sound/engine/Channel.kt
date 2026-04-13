@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.sound.engine
 
-import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import java.util.function.Consumer
 
@@ -57,7 +56,6 @@ class Channel private constructor(
             }
             catch (e: Exception) {
                 if (e !is InterruptedException) {
-                    Logger.logError("TAM Sound Engine thread encountered an exception: $e")
                     stop()
                 }
             }
