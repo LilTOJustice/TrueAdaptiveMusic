@@ -30,7 +30,15 @@ object CurlHelper {
 
             progressReaderThread.start()
 
-            process.waitFor()
+            try {
+                process.waitFor()
+            }
+            catch (e: Exception) {
+                process.destroyForcibly()
+
+                Logger.logError("Curl error:\n${e.stackTraceToString()}")
+            }
+
             process.errorStream.close()
             progressReaderThread.join()
         }
