@@ -206,7 +206,7 @@ class MusicManager(private val minecraft: Minecraft) {
 
         updatePredicateId(identifier)
 
-        if (shouldKeepPlaying(musicToPlay, enterDelay, persistNodeMusic)) {
+        if (shouldKeepPlaying(musicToPlay, persistNodeMusic)) {
             return
         }
 
@@ -261,11 +261,9 @@ class MusicManager(private val minecraft: Minecraft) {
                 && musicVolumeOption.get() > 0
     }
 
-    private fun shouldKeepPlaying(
-        musicToPlay: List<PlayableSound>, enterDelay: UInt, persistNodeMusic: Boolean): Boolean {
+    private fun shouldKeepPlaying(musicToPlay: List<PlayableSound>, persistNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
-        return mainTrackPlaying &&
-                ((musicToPlay.contains(currentMusic?.playableSound) && enterDelay == 0U) || persistNodeMusic)
+        return mainTrackPlaying && (musicToPlay.contains(currentMusic?.playableSound) || persistNodeMusic)
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
