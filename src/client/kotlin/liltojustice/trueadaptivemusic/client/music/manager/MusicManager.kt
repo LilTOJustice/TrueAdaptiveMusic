@@ -265,7 +265,7 @@ class MusicManager(private val minecraft: Minecraft) {
         musicToPlay: List<PlayableSound>, enterDelay: UInt, persistNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
         return mainTrackPlaying &&
-                ((musicToPlay.contains(currentMusic?.playableSound) && enterDelay != 0U) || persistNodeMusic)
+                ((musicToPlay.contains(currentMusic?.playableSound) && enterDelay == 0U) || persistNodeMusic)
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
