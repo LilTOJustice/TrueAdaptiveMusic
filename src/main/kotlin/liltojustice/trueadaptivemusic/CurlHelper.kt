@@ -12,7 +12,7 @@ object CurlHelper {
                 .getRuntime()
                 .exec(
                     arrayOf(
-                        "curl", "-L", "-o", outputPath.invariantSeparatorsPathString, "\"${url}\"", "--progress-bar")
+                        "curl", "-L", "-o", outputPath.invariantSeparatorsPathString, url, "--progress-bar")
                 )
 
             val progressReaderThread = Thread {
