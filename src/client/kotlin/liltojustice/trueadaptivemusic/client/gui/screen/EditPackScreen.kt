@@ -79,7 +79,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                 e.message
             )
             Logger.logError("Failed to load pack to edit:\n${e.stackTraceToString()}")
-            onClose()
+            close()
         }
 
         saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
