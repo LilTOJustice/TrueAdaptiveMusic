@@ -47,6 +47,7 @@ jobs:
         with:
           submodules: true
           lfs: true
+          fetch-depth: 1
 
       - name: Setup Java
         uses: actions/setup-java@v2
