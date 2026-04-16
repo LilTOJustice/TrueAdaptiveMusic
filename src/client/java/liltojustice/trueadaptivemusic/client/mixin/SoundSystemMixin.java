@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundEngine.class)
 public class SoundSystemMixin {
-    @Inject(method = "stopAll", at = @At("HEAD"))
-    public void stopAll(CallbackInfo ci) {
+    @Inject(method = "destroy", at = @At("HEAD"))
+    public void destroy(CallbackInfo ci) {
         TAMClient.INSTANCE.resetSound();
     }
 }
