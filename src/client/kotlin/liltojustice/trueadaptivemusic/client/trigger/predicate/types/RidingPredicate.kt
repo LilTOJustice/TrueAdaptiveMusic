@@ -6,7 +6,7 @@ import net.minecraft.client.MinecraftClient
 
 class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
-        val vehicle = Minecraft.getInstance().player?.vehicle ?: return false
+        val vehicle = MinecraftClient.getInstance().player?.vehicle ?: return false
 
         return entities.isEmpty() || entities.any { entity -> entity.matches(vehicle) }
     }
