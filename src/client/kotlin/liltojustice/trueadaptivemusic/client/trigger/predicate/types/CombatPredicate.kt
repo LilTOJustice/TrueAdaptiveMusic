@@ -21,11 +21,10 @@ import kotlin.math.cbrt
 import kotlin.math.tan
 
 class CombatPredicate(
-    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>) : MusicPredicate() {
+    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
     private val aggroTimer: Timer = Timer()
     private var aggroTimerTask: TimerTask? = null
     private var isAggro: Boolean = false
-    private val entityTranslationKeys = mobEntities.map { mobEntity -> mobEntity.toTranslationKey("entity") }
 
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
@@ -93,13 +92,13 @@ class CombatPredicate(
     }
 
     private fun filterEntity(entity: Entity): Boolean {
-        return entityTranslationKeys
+        return mobEntities
             .takeIf { it.isNotEmpty() }
             ?.let {
                 if (blacklist)
-                    it.none { mobEntity -> mobEntity == entity.type.translationKey }
+                    it.none { mobEntity -> mobEntity.matches(entity) }
                 else
-                    it.any { mobEntity -> mobEntity == entity.type.translationKey }
+                    it.any { mobEntity -> mobEntity.matches(entity) }
             }
             ?: true
     }
