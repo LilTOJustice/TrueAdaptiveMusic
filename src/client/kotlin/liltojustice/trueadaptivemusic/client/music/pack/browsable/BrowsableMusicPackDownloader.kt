@@ -1,5 +1,7 @@
 package liltojustice.trueadaptivemusic.client.music.pack.browsable
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Reference
@@ -29,7 +31,7 @@ object BrowsableMusicPackDownloader {
     private suspend fun downloadPack(url: String, outputPath: Path, progressOutput: Reference<Float>) {
         CurlHelper.curl(url, outputPath, progressOutput)
         try {
-            ZipFile(outputPath.toFile()).close()
+            withContext(Dispatchers.IO) { ZipFile(outputPath.toFile()).use { it.close() } }
         }
         catch (e: ZipException) {
             outputPath.deleteIfExists()
