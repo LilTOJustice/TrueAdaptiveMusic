@@ -6,10 +6,9 @@ import net.minecraft.client.MinecraftClient
 
 class RidingPredicate(private val entities: List<EntityTypeIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val vehicleKey = client.player?.vehicle?.type?.translationKey ?: return false
+        val vehicle = Minecraft.getInstance().player?.vehicle ?: return false
 
-        return entities.isEmpty() || entities.any { entity -> entity.toTranslationKey("entity") == vehicleKey }
+        return entities.isEmpty() || entities.any { entity -> entity.matches(vehicle) }
     }
 
     companion object: MusicPredicateCompanion {
