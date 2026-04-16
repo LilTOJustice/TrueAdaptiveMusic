@@ -253,19 +253,19 @@ class PackBrowserListWidget(
         val aspectRatio = image.width.toFloat() / image.height
         val maxImageWidth = panelWidth * 2 / 3 - 6
         val maxImageHeight = y + height - imageY - 3
-        var finalImageWidth = image.width
-        var finalImageHeight = image.height
-        val widthDiff = (image.width - maxImageWidth)
-        val heightDiff = (image.height - maxImageHeight)
+        val widthDiff = (image.width - maxImageWidth).toFloat() / maxImageWidth
+        val heightDiff = (image.height - maxImageHeight).toFloat() / maxImageHeight
         var xOffset = 0
         var yOffset = 0
 
-        if (widthDiff > heightDiff && widthDiff > 0) {
+        var finalImageWidth: Int
+        var finalImageHeight: Int
+        if (widthDiff > heightDiff) {
             finalImageWidth = maxImageWidth
             finalImageHeight = (finalImageWidth / aspectRatio).toInt()
             yOffset = (height - finalImageHeight) / 2
         }
-        else if (heightDiff > 0) {
+        else {
             finalImageHeight = maxImageHeight
             finalImageWidth = (finalImageHeight * aspectRatio).toInt()
             xOffset = (panelWidth * 2 / 3 - finalImageWidth) / 2

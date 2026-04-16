@@ -58,8 +58,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                     "trueadaptivemusic.edit_load_error", "Failed to load pack to edit!"),
                 e.message
             )
-            Logger.logError("Failed to load pack to edit:\n$e")
-            close()
+            Logger.logError("Failed to load pack to edit:\n${e.stackTraceToString()}")
+            onClose()
         }
 
         saveButtonWidget = TextIconButtonWidget.Builder(SAVE_BUTTON_TEXT, {
