@@ -8,7 +8,7 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
 import kotlin.jvm.optionals.getOrNull
 
-class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
+class StructurePredicate(private val structures: List<StructureIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
         val minecraft = Minecraft.getInstance()
         val player = minecraft.player ?: return false

@@ -81,7 +81,7 @@ class EditPackScreen(
                     "trueadaptivemusic.edit_load_error", "Failed to load pack to edit!"),
                 e.message
             )
-            Logger.logError("Failed to load pack to edit:\n$e")
+            Logger.logError("Failed to load pack to edit:\n${e.stackTraceToString()}")
             onClose()
         }
 

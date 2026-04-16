@@ -10,9 +10,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet
 import kotlin.collections.any
 import kotlin.jvm.optionals.getOrNull
 
-class StructureSetPredicate internal constructor(
-    private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
-
+class StructureSetPredicate(private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
         val minecraft = Minecraft.getInstance()
         val dimensionKey = minecraft.level?.dimension() ?: return false
