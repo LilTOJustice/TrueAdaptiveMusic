@@ -10,16 +10,15 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 
 object PlayableSoundSerializer {
     class PlayableSoundTypeAdapter(private val soundLibrary: SoundLibrary?): TypeAdapter<PlayableSound>() {
-        override fun write(output: JsonWriter, sound: PlayableSound) {
-            output.value(sound.getSoundName())
+        override fun write(output: JsonWriter, sound: PlayableSound?) {
+            sound?.getSoundName()?.let { output.value(it) }
         }
 
         override fun read(input: JsonReader): PlayableSound? {
             val path = input.nextString()
             val library = soundLibrary
-                ?: throw MusicTriggerException(
-                    "No sound library given for deserializing sound files from trigger.")
-            return PlayableSound.Companion.of(path, library)
+                ?: throw MusicTriggerException("No sound library given for deserializing sound files from trigger.")
+            return PlayableSound.of(path, library)
                 ?: run {
                     Logger.logWarning("Could not find sound for \"$path\", skipping...")
                     null

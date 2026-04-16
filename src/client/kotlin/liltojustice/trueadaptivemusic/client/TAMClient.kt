@@ -87,8 +87,7 @@ object TAMClient {
                 }
                 catch (e: Exception) {
                     Logger.logError("TAM Processor thread encountered an error: ${e.message}\n" +
-                            e.stackTraceToString()
-                    )
+                            e.stackTraceToString())
                 }
 
                 delay(TICK_MS)
