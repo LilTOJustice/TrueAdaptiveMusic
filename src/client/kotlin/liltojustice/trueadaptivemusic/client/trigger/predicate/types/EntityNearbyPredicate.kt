@@ -11,7 +11,7 @@ class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, pr
         val world = client.world ?: return false
         val validEntities =
             (if (entities.isNotEmpty()) {
-                level.entitiesForRendering().filter { entity -> entities.any { entityId -> entityId.matches(entity) } }
+                world.entities.filter { entity -> entities.any { entityId -> entityId.matches(entity) } }
             }
             else {
                 world.entities
