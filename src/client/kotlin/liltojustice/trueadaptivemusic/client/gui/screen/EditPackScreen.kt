@@ -78,7 +78,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                 e.message
             )
             Logger.logError("Failed to load pack to edit:\n${e.stackTraceToString()}")
-            onClose()
+            close()
         }
 
         val saveButtonWidgetWidth = textRenderer.getWidth(SAVE_BUTTON_TEXT) + 20
