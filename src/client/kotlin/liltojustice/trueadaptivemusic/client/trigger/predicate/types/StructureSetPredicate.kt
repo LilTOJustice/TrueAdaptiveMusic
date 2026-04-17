@@ -9,9 +9,7 @@ import net.minecraft.structure.StructureSet
 import net.minecraft.util.math.BlockPos
 import kotlin.jvm.optionals.getOrNull
 
-class StructureSetPredicate internal constructor(
-    private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
-
+class StructureSetPredicate(private val structureSets: List<StructureSetIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
         val serverWorld = client.server?.worlds?.firstOrNull { world ->
