@@ -8,7 +8,7 @@ class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     override fun test(): Boolean {
         val level = Minecraft.getInstance().level ?: return false
         val currentPhase = level.environmentAttributes.getDimensionValue(EnvironmentAttributes.MOON_PHASE)
-        val time = level.gameTime % 24000
+        val time = level.overworldClockTime % 24000
 
         return time in 13000..23999 && when(moonPhase) {
             MoonPhase.Full -> currentPhase == net.minecraft.world.level.MoonPhase.FULL_MOON

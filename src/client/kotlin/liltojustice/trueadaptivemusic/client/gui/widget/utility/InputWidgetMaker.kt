@@ -10,8 +10,7 @@ import kotlin.reflect.KType
 class InputWidgetMaker {
     private val widgetRegistry = ArrayDeque<WidgetRegistryEntry>()
 
-    fun register(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker)
-    {
+    fun register(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
         widgetRegistry.addFirst(WidgetRegistryEntry(predicate, widgetMaker))
     }
 
