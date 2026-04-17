@@ -5,9 +5,8 @@ import net.minecraft.client.MinecraftClient
 
 class DayTimePredicate: MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val world = client.world ?: return false
-        val time = world.timeOfDay % 24000
+        val level = MinecraftClient.getInstance().world ?: return false
+        val time = level.timeOfDay % 24000
 
         return time in 0..12999
     }
