@@ -6,10 +6,10 @@ import net.minecraft.world.attribute.EnvironmentAttributes
 
 class MoonPhasePredicate(private val moonPhase: MoonPhase): MusicPredicate() {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val world = client.world ?: return false
-        val currentPhase = world.environmentAttributes.getAttributeValue(EnvironmentAttributes.MOON_PHASE_VISUAL)
-        val time = world.timeOfDay % 24000
+        val level = MinecraftClient.getInstance().world ?: return false
+        val currentPhase = level.environmentAttributes.getAttributeValue(
+            EnvironmentAttributes.MOON_PHASE_VISUAL)
+        val time = level.timeOfDay % 24000
 
         return time in 13000..23999 && when(moonPhase) {
             MoonPhase.Full -> currentPhase == net.minecraft.world.MoonPhase.FULL_MOON

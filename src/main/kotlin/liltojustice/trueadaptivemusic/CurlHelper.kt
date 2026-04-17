@@ -12,7 +12,7 @@ object CurlHelper {
                 .getRuntime()
                 .exec(
                     arrayOf(
-                        "curl", "-L", "-o", outputPath.invariantSeparatorsPathString, "\"${url}\"", "--progress-bar")
+                        "curl", "-L", "-o", outputPath.invariantSeparatorsPathString, url, "--progress-bar")
                 )
 
             val progressReaderThread = Thread {
@@ -30,7 +30,15 @@ object CurlHelper {
 
             progressReaderThread.start()
 
-            process.waitFor()
+            try {
+                process.waitFor()
+            }
+            catch (e: Exception) {
+                process.destroyForcibly()
+
+                Logger.logError("Curl error:\n${e.stackTraceToString()}")
+            }
+
             process.errorStream.close()
             progressReaderThread.join()
         }
