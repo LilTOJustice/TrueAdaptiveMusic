@@ -14,7 +14,7 @@ import net.minecraft.world.gen.structure.Structure
 import kotlin.math.max
 import kotlin.math.min
 
-class StructurePredicate internal constructor(private val structures: List<StructureIdentifier>): MusicPredicate() {
+class StructurePredicate(private val structures: List<StructureIdentifier>): MusicPredicate() {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
         val serverWorld = client.server?.worlds?.firstOrNull { world ->
