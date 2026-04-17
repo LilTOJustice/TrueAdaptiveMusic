@@ -5,15 +5,13 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.client.MinecraftClient
 
 class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, private val blockRadius: UInt): MusicPredicate() {
-    private val entityTranslationKeys = entities.map { entity -> entity.toTranslationKey("entity") }
-
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
         val playerEntity = client.player ?: return false
         val world = client.world ?: return false
         val validEntities =
-            (if (entityTranslationKeys.isNotEmpty()) {
-                world.entities.filter { entityTranslationKeys.any { key -> it.type.translationKey == key } }
+            (if (entities.isNotEmpty()) {
+                world.entities.filter { entity -> entities.any { entityId -> entityId.matches(entity) } }
             }
             else {
                 world.entities
