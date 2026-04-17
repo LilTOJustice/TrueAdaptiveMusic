@@ -206,7 +206,7 @@ class MusicManager(private val client: MinecraftClient) {
 
         updatePredicateId(identifier)
 
-        if (shouldKeepPlaying(musicToPlay, enterDelay, persistNodeMusic)) {
+        if (shouldKeepPlaying(musicToPlay, persistNodeMusic)) {
             return
         }
 
@@ -261,11 +261,9 @@ class MusicManager(private val client: MinecraftClient) {
                 && musicVolumeOption.value > 0
     }
 
-    private fun shouldKeepPlaying(
-        musicToPlay: List<PlayableSound>, enterDelay: UInt, persistNodeMusic: Boolean): Boolean {
+    private fun shouldKeepPlaying(musicToPlay: List<PlayableSound>, persistNodeMusic: Boolean): Boolean {
         val mainTrackPlaying = musicPlayer.isTrackPlaying(mainTrack)
-        return mainTrackPlaying &&
-                ((musicToPlay.contains(currentMusic?.playableSound) && enterDelay != 0U) || persistNodeMusic)
+        return mainTrackPlaying && (musicToPlay.contains(currentMusic?.playableSound) || persistNodeMusic)
     }
 
     private fun getRandomDelay(trackDelay: UInt, trackDelayNoise: UInt): UInt {
@@ -400,16 +398,20 @@ class MusicManager(private val client: MinecraftClient) {
                     musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
         }
 
-        private fun jukeboxPlaying(client: MinecraftClient): Boolean {
-            val instances = client.soundManager.soundSystem.sources.keys.toMutableSet()
-            return instances.any { instance ->
-                ((instance.category == SoundCategory.RECORDS)
-                        && (instance is PositionedSoundInstance)
-                        && (client.player?.let {
-                    Vec3d(instance.x, instance.y, instance.z)
-                        .squaredDistanceTo(it.entityPos) <
-                            (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
-                } ?: false))
+        private fun jukeboxPlaying(minecraft: MinecraftClient): Boolean {
+            return try {
+                minecraft.soundManager.soundSystem.sources.keys.any { instance ->
+                    ((instance.category == SoundCategory.RECORDS)
+                            && (instance is PositionedSoundInstance)
+                            && (minecraft.player?.let {
+                        Vec3d(instance.x, instance.y, instance.z)
+                            .squaredDistanceTo(it.entityPos) <
+                                (instance.sound?.attenuation ?: 0) * (instance.sound?.attenuation ?: 0) * 4
+                    } ?: false))
+                }
+            }
+            catch (_: ConcurrentModificationException) {
+                false
             }
         }
 
