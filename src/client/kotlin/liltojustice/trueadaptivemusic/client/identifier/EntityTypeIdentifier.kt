@@ -10,7 +10,7 @@ class EntityTypeIdentifier(id: Identifier): TypedIdentifier(id) {
     }
 
     fun matches(entity: Entity): Boolean {
-        return Registries.ENTITY_TYPE.tags.toList().firstOrNull { it.tag.id == id }?.tag?.let {
+        return Registries.ENTITY_TYPE.streamTags().toList().firstOrNull { it.id == id }?.let {
             entity.type.isIn(it)
         } ?: (Registries.ENTITY_TYPE[id] == entity.type)
     }
