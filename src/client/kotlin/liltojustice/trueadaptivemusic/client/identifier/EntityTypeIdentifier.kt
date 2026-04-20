@@ -10,11 +10,9 @@ class EntityTypeIdentifier(id: Identifier): TypedIdentifier(id) {
     }
 
     fun matches(entity: Entity): Boolean {
-        val entityType = entity.type
-        return entityType == id ||
-                Registries.ENTITY_TYPE.streamTags().toList().firstOrNull { it.id == id }?.let {
-                    entityType.isIn(it)
-                } ?: false
+        return Registries.ENTITY_TYPE.streamTags().toList().firstOrNull { it.id == id }?.let {
+            entity.type.isIn(it)
+        } ?: (Registries.ENTITY_TYPE[id] == entity.type)
     }
 
     companion object: TypedIdentifierCompanion() {
