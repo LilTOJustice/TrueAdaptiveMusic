@@ -11,11 +11,9 @@ class EntityTypeIdentifier(id: Identifier): TypedIdentifier(id) {
     }
 
     fun matches(entity: Entity): Boolean {
-        return BuiltInRegistries.ENTITY_TYPE[id].getOrNull()?.let {
-            entity.`is`(it)
-        } ?: BuiltInRegistries.ENTITY_TYPE.tags.toList().firstOrNull { it.key().location == id }?.key()?.let {
-            entity.`is`(it)
-        } ?: false
+        return Registries.ENTITY_TYPE.tags.toList().firstOrNull { it.tag.id == id }?.tag?.let {
+            entity.type.isIn(it)
+        } ?: (Registries.ENTITY_TYPE[id] == entity.type)
     }
 
     companion object: TypedIdentifierCompanion() {
