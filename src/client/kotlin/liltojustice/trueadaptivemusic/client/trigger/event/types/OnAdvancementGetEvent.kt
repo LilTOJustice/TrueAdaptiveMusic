@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnAdvancementGetEvent: MusicEvent() {
-}
+
+class OnAdvancementGetEvent: BasicEventType("on_advancement_get")

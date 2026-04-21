@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
@@ -15,9 +16,14 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.trigger.predicate.arguments.EmptyPredicateArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.state.EmptyPredicateState
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import kotlin.collections.emptyMap
 import kotlin.collections.plus
+import kotlin.collections.toList
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.primaryConstructor
 
@@ -106,8 +112,8 @@ class MusicTree {
     class Node private constructor(
         var music: List<PlayableSound>,
         var ambience: List<PlayableSound>,
-        var predicates: MutableList<MusicPredicate>,
-        var events: List<MusicEvent>,
+        var predicates: MutableList<MusicPredicate<*, *, *>>,
+        var events: List<MusicEvent<*, *, *, *>>,
         var parameters: Parameters,
         val children: MutableList<Node> = mutableListOf()
     ) {
@@ -132,7 +138,7 @@ class MusicTree {
         fun getSatisfiedNode(
             minecraft: Minecraft,
             path: List<String> = emptyList(),
-            eventCollection: Map<String, MusicEvent> = emptyMap(),
+            eventCollection: Map<String, MusicEvent<*, *, *, *>> = emptyMap(),
             musicCollection: Set<PlayableSound> = emptySet(),
             ambienceCollection: Set<PlayableSound> = emptySet(),
             parallelRoot: Node? = null
@@ -223,7 +229,7 @@ class MusicTree {
 
         fun newChild(
             parameters: List<Any>,
-            events: List<MusicEvent>,
+            events: List<MusicEvent<*, *, *, *>>,
             music: List<PlayableSound>,
             ambience: List<PlayableSound>
         ): Node {
@@ -234,8 +240,10 @@ class MusicTree {
             return child
         }
 
-        fun newPredicate(predicateType: String, predicateArgs: List<Any>): Node {
-            val predicate = TAMClient.predicateFactory.fromArgs(predicateType, predicateArgs)
+        fun newPredicate(predicateTypeName: String, vararg predicateArgs: Any?): Node {
+            val predicateType = TAMAPI.getPredicateType(predicateTypeName)
+            val predicate = TAMClient.musicPredicateFactory.fromArgs(
+                predicateType, TAMAPI.makePredicateArguments(predicateType, predicateArgs))
             predicates.add(predicate)
 
             return this
@@ -245,8 +253,8 @@ class MusicTree {
             return Node(
                 music,
                 ambience,
-                predicates.map { TAMClient.predicateFactory.makeCopy(it) }.toMutableList(),
-                events.map { TAMClient.eventFactory.makeCopy(it) },
+                predicates.map { TAMClient.musicPredicateFactory.fromArgs(it.type, it.arguments) }.toMutableList(),
+                events.map { TAMClient.musicEventFactory.makeCopy(it) },
                 parameters.copy(),
                 if (withChildren)
                     children.map { it.copy(true) }.toMutableList()
@@ -312,7 +320,7 @@ class MusicTree {
                 return Node(
                     listOf(),
                     listOf(),
-                    mutableListOf(RootPredicate()),
+                    mutableListOf(MusicPredicate(RootPredicate(), EmptyPredicateArguments(), EmptyPredicateState())),
                     listOf(),
                     Parameters.default()
                 )
@@ -322,7 +330,7 @@ class MusicTree {
         class Result(
             val node: Node,
             val path: List<String>,
-            val events: Map<String, MusicEvent>,
+            val events: Map<String, MusicEvent<*, *, *, *>>,
             val music: List<PlayableSound>,
             val ambience: List<PlayableSound>,
             val parallelRoot: Node?
@@ -411,7 +419,7 @@ class MusicTree {
         val parameters: Node.Parameters,
         val accumulatedMusic: List<PlayableSound>,
         val accumulatedAmbience: List<PlayableSound>,
-        val accumulatedEvents: List<MusicEvent>,
+        val accumulatedEvents: List<MusicEvent<*, *, *, *>>,
         val parallelMusicContext: ParallelMusicContext?
     )
 

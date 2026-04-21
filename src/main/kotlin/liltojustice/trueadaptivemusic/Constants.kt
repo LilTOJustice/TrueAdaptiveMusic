@@ -7,6 +7,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 
 class Constants {
     companion object {
+        val ROOT_PREDICATE_NAME = "root"
         val MUSIC_PACK_DIR = Path("trueadaptivemusicpacks")
         val OPTIONS_DIR = Path("config", "trueadaptivemusic")
         val FFMPEG_DIR = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffmpeg_binaries")
@@ -33,7 +34,6 @@ class Constants {
         const val ICON_FILENAME = "icon.png"
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
-        const val FFMPEG_DOWNLOAD_LINK = "https://www.gyan.dev/ffmpeg/builds/"
         const val DRIVE_SOURCE_DOWNLOAD_PREFIX = "https://drive.usercontent.google.com/download?id="
         const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
         const val MANIFEST_FILE_URL =

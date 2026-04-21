@@ -1,10 +1,10 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.Minecraft
 
-class PillagerRaidPredicate: MusicPredicate() {
-    override fun test(): Boolean {
+class PillagerRaidPredicate: BasicPredicateType("pillager_raid") {
+    override fun validate(): Boolean {
         val client = Minecraft.getInstance()
         val clientLevel = client.level ?: return false
         val serverWorld = client.singleplayerServer?.allLevels?.firstOrNull { level ->

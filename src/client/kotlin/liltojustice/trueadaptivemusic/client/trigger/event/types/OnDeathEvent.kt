@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnDeathEvent: MusicEvent() {
-}
+class OnDeathEvent: BasicEventType("on_death_event")

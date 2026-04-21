@@ -1,24 +1,14 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
 import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.Serialize
+import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.TriggerState
+import liltojustice.trueadaptivemusicapi.trigger.TriggerType
 import net.minecraft.network.chat.Component
+import kotlin.reflect.full.memberProperties
 
-abstract class MusicTrigger {
-    @Serialize
-    private val type = getTypeName()
-
-    abstract fun getTypeName(): String
-
-    fun getTriggerArgs(): List<TriggerArg> {
-        return ReflectionHelper.getConstructorParameterValues(this)
-            .map { arg -> TriggerArg(arg.name, arg.value) }
-    }
-
-    fun getTriggerId(): String {
-        val args = getTriggerArgs()
-        return getTypeName()  + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
-    }
+abstract class MusicTrigger<TType: TriggerType<TArg, TState>, TArg: TriggerArguments, TState: TriggerState>(
+    val type: TType, val arguments: TArg, val state: TState) {
 
     companion object {
         fun getTruncatedTriggerId(triggerId: String): String {
@@ -29,18 +19,13 @@ abstract class MusicTrigger {
 
             return text
         }
+
+        inline fun <reified TArg: TriggerArguments> getTriggerArgs(arguments: TArg): List<TriggerArg> {
+            return TArg::class.memberProperties.map { TriggerArg(it.name, it.get(arguments)) }
+        }
     }
 
     interface MusicTriggerCompanion {
-        val displayName: String?
-            get() = null
-
-        val argDisplayNames: Map<String, String>
-            get() = mapOf()
-
-        val argDescriptions: Map<String, String>
-            get() = mapOf()
-
         fun getDisplayName(triggerName: String): Component
         fun getArgDisplayName(triggerName: String, argName: String): Component?
         fun getArgDescription(triggerName: String, argName: String): Component?

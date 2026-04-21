@@ -257,7 +257,7 @@ class EditPackScreen(
         positionContainers()
     }
 
-    private fun switchToEventView(event: MusicEvent?) {
+    private fun switchToEventView(event: MusicEvent<*, *, *, *>?) {
         eventViewWidget.visible = true
         eventViewWidget.setEvent(event)
         positionContainers()

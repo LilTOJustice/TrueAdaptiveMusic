@@ -2,4 +2,4 @@ package liltojustice.trueadaptivemusic.client.trigger.event.types
 
 import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnNightStartEvent: BasicEventType("on_night_start")
+class OnEnterNodeEvent: BasicEventType("on_enter_node")

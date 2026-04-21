@@ -1,41 +1,38 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
-import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.Serialize
-import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
+import liltojustice.trueadaptivemusic.client.music.MusicTriggerParameters
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
+import liltojustice.trueadaptivemusicapi.trigger.event.state.EventState
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
 import net.minecraft.network.chat.Component
 import kotlin.collections.plus
-import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.primaryConstructor
 
-abstract class MusicEvent: MusicTrigger() {
-    @Serialize
-    var music: List<PlayableSound> = listOf()
-
-    @Serialize
-    var parameters = Parameters.default()
-
-    open fun validate(vararg eventArgs: Any?): Boolean {
-        return true
+class MusicEvent<
+        TTrigger: EventType<TArg, TState, TInput>,
+        TArg: EventArguments,
+        TState: EventState,
+        TInput: EventInput>(
+    type: TTrigger,
+    arguments: TArg,
+    state: TState,
+    var music: List<PlayableSound> = emptyList(),
+    var parameters: Parameters = Parameters.default()
+): MusicTrigger<TTrigger, TArg, TState>(type, arguments, state) {
+    fun validateEvent(input: TInput): Boolean {
+        return type.validate(arguments, state, input)
     }
 
-    final override fun getTypeName(): String {
-        return if (this is ErrorEvent)
-            ErrorEvent.NAME
-        else
-            TAMClient.eventRegistry[this::class]
-    }
+    companion object: MusicEventCompanion
 
-    companion object: MusicEventCompanion {
-    }
-
-    data class Parameters(var isPersistent: Boolean = false): MusicTrigger.Parameters() {
+    data class Parameters(var isPersistent: Boolean = false): MusicTriggerParameters() {
         companion object: ParametersCompanion<Parameters> {
             override val displayNames: Map<String, String>
                 get() = super.displayNames +
@@ -69,28 +66,26 @@ abstract class MusicEvent: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Component {
             return Component.translatableWithFallback(
                 "trueadaptivemusic.event.name.${triggerName}",
-                (TAMClient.eventRegistry[triggerName]?.companionObjectInstance as? MusicEventCompanion)
-                    ?.displayName ?: triggerName.prettify()
+                TAMAPI.getEventType(triggerName)?.displayName ?: triggerName.prettify()
             )
         }
 
         override fun getArgDisplayName(triggerName: String, argName: String): Component? {
-            val eventType = TAMClient.eventRegistry[triggerName] ?: return null
-            val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(eventType)
-            val combined = inferredDisplayNames.associateWith { it.prettify() } +
-                    TriggerReflectionHelper.getMusicTriggerArgDisplayNames(eventType)
+            val eventType = TAMAPI.getEventType(triggerName) ?: return null
+
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.event.arg.${triggerName}.${argName}.display",
-                combined[argName]
+                eventType.argDisplayNames[argName]
             )
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Component? {
-            val eventClass = TAMClient.eventRegistry[triggerName] ?: return null
+            val eventType = TAMAPI.getEventType(triggerName) ?: return null
 
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.event.arg.${triggerName}.${argName}.description",
-                TriggerReflectionHelper.getMusicTriggerArgDescriptions(eventClass)[argName])
+                eventType.argDescriptions[argName]
+            )
         }
     }
 }

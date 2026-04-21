@@ -10,8 +10,6 @@ import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
-import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
-import liltojustice.trueadaptivemusic.client.gui.widget.utility.WidgetMaker
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -19,14 +17,16 @@ import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusic
 import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventRegistry
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateRegistry
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
+import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.toasts.SystemToast
@@ -42,17 +42,14 @@ import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
-import kotlin.reflect.KType
 import kotlin.time.Duration.Companion.milliseconds
 
 object TAMClient {
     const val TPS = 20
     val TICK_MS = (1.0 / TPS * 1000).milliseconds
     val minecraftClient: Minecraft = Minecraft.getInstance()
-    val predicateRegistry = MusicPredicateRegistry()
-    val eventRegistry = MusicEventRegistry()
-    val predicateFactory = MusicPredicateFactory(predicateRegistry)
-    val eventFactory = MusicEventFactory(eventRegistry)
+    val musicPredicateFactory = MusicPredicateFactory()
+    val musicEventFactory = MusicEventFactory()
     var currentPredicateResult: MusicTree.Result? = null
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
@@ -74,7 +71,6 @@ object TAMClient {
         }
 
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
-    private val inputWidgetMaker = InputWidgetMaker()
     private var initialized = false
     private var musicManager: MusicManager? = null
 
@@ -115,57 +111,27 @@ object TAMClient {
         return musicManager?.currentEventMusic
     }
 
-    fun getPlayingEvent(): MusicEvent? {
+    fun getPlayingEvent(): MusicEvent<*, *, *, *>? {
         return musicManager?.playingEvent
-    }
-
-    fun registerPredicate(name: String, triggerType: KClass<out MusicPredicate>) {
-        predicateRegistry[name] = triggerType
-    }
-
-    fun registerEvent(name: String, triggerType: KClass<out MusicEvent>) {
-        eventRegistry[name] = triggerType
-    }
-
-    @Suppress("unused")
-    fun registerPredicate(name: String, triggerType: Class<out MusicPredicate>) {
-        registerPredicate(name, triggerType.kotlin)
-    }
-
-    @Suppress("unused")
-    fun registerEvent(name: String, triggerType: Class<out MusicEvent>) {
-        registerEvent(name, triggerType.kotlin)
-    }
-
-    fun registerInputWidget(predicate: (parameterType: KType) -> Boolean, widgetMaker: WidgetMaker) {
-        inputWidgetMaker.register(predicate, widgetMaker)
-    }
-
-    fun registerInputWidget(parameterType: KType, widgetMaker: WidgetMaker) {
-        registerInputWidget({ type -> type == parameterType}, widgetMaker)
     }
 
     fun makeInputWidget(
         screen: Screen,
         outArgs: MutableList<Any?>,
-        arg: InputWidgetMaker.WidgetArg,
+        arg: WidgetArg,
         displayName: Component?,
         tooltipText: Component?,
         onChange: () -> Unit = {}
     ): AbstractWidget {
-        return inputWidgetMaker.makeWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
+        return TAMAPI.makeInputWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
     fun refreshSoundVolume() {
         musicManager?.refreshSoundVolume()
     }
 
-    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg eventArgs: Any?) {
-        musicManager?.invokeMusicEvent(eventType, *eventArgs)
-    }
-
-    fun <T: MusicEvent> invokeMusicEvent(eventType: Class<T>, vararg eventArgs: Any?) {
-        invokeMusicEvent(eventType.kotlin, *eventArgs)
+    fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
+        musicManager?.invokeMusicEvent(eventType, input)
     }
 
     fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {

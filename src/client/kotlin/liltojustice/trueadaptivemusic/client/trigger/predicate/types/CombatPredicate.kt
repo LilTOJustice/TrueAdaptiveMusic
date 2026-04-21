@@ -1,7 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
+import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
@@ -20,13 +22,23 @@ import kotlin.math.atan
 import kotlin.math.cbrt
 import kotlin.math.tan
 
-class CombatPredicate(
-    private val blacklist: Boolean, private val mobEntities: List<EntityTypeIdentifier>): MusicPredicate() {
-    private val aggroTimer: Timer = Timer()
-    private var aggroTimerTask: TimerTask? = null
-    private var isAggro: Boolean = false
+class CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.State>(
+    "combat") {
+    override val tickRate: Int
+        get() = super.tickRate * 10
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::blacklist.name to "Whether the list of mob entities attacking should not (if " +
+                    "checked) or should (if not checked) make the music play.",
+            Arguments::mobEntities.name to "Select mob entities for this predicate. If none, any entity " +
+                    "will trigger the music."
+        )
 
-    override fun test(): Boolean {
+    override fun createPredicateState(arguments: Arguments): State {
+        return State(arguments)
+    }
+
+    override fun validatePredicate(arguments: Arguments, state: State): Boolean {
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val level = minecraft.level ?: return false
@@ -37,92 +49,90 @@ class CombatPredicate(
 
         val entityGroups = mutableListOf<List<LivingEntity>>()
 
-        entityGroups.add(level.entitiesForRendering().filterIsInstance<Monster>().filter { filterEntity(it) })
-        entityGroups.add(level.entitiesForRendering().filterIsInstance<Phantom>().filter { filterEntity(it) })
+        entityGroups.add(level.entitiesForRendering().filterIsInstance<Monster>().filter { state.filterEntity(it) })
+        entityGroups.add(level.entitiesForRendering().filterIsInstance<Phantom>().filter { state.filterEntity(it) })
         entityGroups.add(
-            level.entitiesForRendering().filterIsInstance<Player>().filter { it != playerEntity && filterEntity(it) })
+            level.entitiesForRendering().filterIsInstance<Player>()
+                .filter { it != playerEntity && state.filterEntity(it) }
+        )
 
         for (validEntities in entityGroups) {
             for (livingEntity: LivingEntity in validEntities) {
-                if (processEntity(
+                if (state.processEntity(
                         livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
                     return true
                 }
             }
         }
 
-        return isAggro
+        return state.isAggro
     }
 
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 10
-    }
+    data class Arguments(val blacklist: Boolean, val mobEntities: List<EntityTypeIdentifier>): TriggerArguments()
 
-    private fun processEntity(
-        entity: LivingEntity,
-        playerEntity: Player,
-        verticalAngle: Float,
-        horizontalAngle: Float,
-        verticalFov: Double,
-        horizontalFov: Double
-    ): Boolean {
-        val relativeEntityPos = entity.position().subtract(playerEntity.position())
-        val relativeEntityPosN = relativeEntityPos.normalize()
+    class State(private val arguments: Arguments): TriggerState() {
+        val aggroTimer: Timer = Timer()
+        var aggroTimerTask: TimerTask? = null
+        var isAggro: Boolean = false
 
-        val entityVerticalAngle = acos(relativeEntityPosN.y)
-        val entityHorizontalAngle = acos(relativeEntityPosN.x)
+        fun processEntity(
+            entity: LivingEntity,
+            playerEntity: Player,
+            verticalAngle: Float,
+            horizontalAngle: Float,
+            verticalFov: Double,
+            horizontalFov: Double
+        ): Boolean {
+            val relativeEntityPos = entity.position().subtract(playerEntity.position())
+            val relativeEntityPosN = relativeEntityPos.normalize()
 
-        if (!isAggro && (abs(entityVerticalAngle - verticalAngle) > verticalFov / 2
-                    || abs(entityHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
+            val entityVerticalAngle = acos(relativeEntityPosN.y)
+            val entityHorizontalAngle = acos(relativeEntityPosN.x)
+
+            if (!isAggro && (abs(entityVerticalAngle - verticalAngle) > verticalFov / 2
+                        || abs(entityHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
+                return false
+            }
+
+            if (isValidAttacker(entity, playerEntity, relativeEntityPos)) {
+                isAggro = true
+                aggroTimerTask?.cancel()
+                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
+                    isAggro = false
+                    aggroTimerTask = null
+                }
+
+                return true
+            }
+
             return false
         }
 
-        if (isValidAttacker(entity, playerEntity, relativeEntityPos)) {
-            isAggro = true
-            aggroTimerTask?.cancel()
-            aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
-                isAggro = false
-                aggroTimerTask = null
-            }
-
-            return true
+        fun filterEntity(entity: Entity): Boolean {
+            return arguments.mobEntities
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    if (arguments.blacklist)
+                        it.none { mobEntity -> mobEntity.matches(entity) }
+                    else
+                        it.any { mobEntity -> mobEntity.matches(entity) }
+                }
+                ?: true
         }
-
-        return false
     }
 
-    private fun filterEntity(entity: Entity): Boolean {
-        return mobEntities
-            .takeIf { it.isNotEmpty() }
-            ?.let {
-                if (blacklist)
-                    it.none { mobEntity -> mobEntity.matches(entity) }
-                else
-                    it.any { mobEntity -> mobEntity.matches(entity) }
-            }
-            ?: true
-    }
-
-    companion object: MusicPredicateCompanion {
+    companion object {
         private val baseAxialDistance = Vec3(20.0, 20.0, 20.0)
         private const val AGGRO_TIMER_SECONDS = 4L
-        private const val DEG_PER_RAD = 180.0 / PI
-
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                CombatPredicate::blacklist.name to "Whether the list of mob entities attacking should not (if " +
-                        "checked) or should (if not checked) make the music play.",
-                CombatPredicate::mobEntities.name to "Select mob entities for this predicate. If none, any entity " +
-                        "will trigger the music."
-            )
+        const val DEG_PER_RAD = 180.0 / PI
 
         private fun isValidAttacker(entity: LivingEntity, playerEntity: Player, displacement: Vec3): Boolean {
             val closeEnough = closeEnough(
-                    displacement,
-                    Vec3(entity.boundingBox.xsize,
-                        entity.boundingBox.ysize,
-                        entity.boundingBox.zsize
-                    )
+                displacement,
+                Vec3(entity.boundingBox.xsize,
+                    entity.boundingBox.ysize,
+                    entity.boundingBox.zsize
+                )
             )
 
             return closeEnough && (

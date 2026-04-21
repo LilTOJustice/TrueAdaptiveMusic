@@ -1,29 +1,32 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
+import liltojustice.trueadaptivemusicapi.trigger.event.type.StaticEventType
 import net.minecraft.resources.Identifier
 
-class OnBossDefeatEvent(private val bosses: List<EntityTypeIdentifier>): MusicEvent() {
-    override fun validate(vararg eventArgs: Any?): Boolean {
-        val bossId = (eventArgs[0] as? EntityTypeIdentifier)
-            ?.path
-            ?.split(".")
-            ?.drop(1)
-            ?.joinToString(":")
-            ?.let { Identifier.tryParse(it) }
+class OnBossDefeatEvent: StaticEventType<OnBossDefeatEvent.Arguments, OnBossDefeatEvent.Input>(
+    "on_boss_defeat") {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::bosses.name to "Which entities the music should play for when their boss bar hits zero.")
+
+    data class Arguments(val bosses: List<EntityTypeIdentifier>): TriggerArguments()
+
+    data class Input(val boss: EntityTypeIdentifier): EventInput()
+
+    override fun validateEvent(arguments: Arguments, input: Input): Boolean {
+        val bossId = input.boss
+            .path
+            .split(".")
+            .drop(1)
+            .joinToString(":")
+            .let { Identifier.tryParse(it) }
             ?: return false
 
-        return bosses.isEmpty()
-                || bosses.any {
+        return arguments.bosses.isEmpty()
+                || arguments.bosses.any {
                     bossId.namespace == it.namespace && bossId.path.split(".").lastOrNull() == it.path }
-    }
-
-    companion object: MusicEventCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                OnBossDefeatEvent::bosses.name to "Which entities the music should play for when their boss bar " +
-                        "hits zero."
-            )
     }
 }

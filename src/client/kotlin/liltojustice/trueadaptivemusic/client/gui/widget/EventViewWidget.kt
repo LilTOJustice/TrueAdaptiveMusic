@@ -2,10 +2,14 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
+import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.narration.NarrationElementOutput
@@ -21,7 +25,7 @@ class EventViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onSaveEvent: (newEvent: MusicEvent?, exit: Boolean) -> Unit,
+    private val onSaveEvent: (newEvent: MusicEvent<*, *, *, *>?, exit: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -35,14 +39,14 @@ class EventViewWidget(
     true,
     x,
     y) {
-    private val eventTypeNameOptions = TAMClient.eventRegistry.getAllNames()
+    private val eventTypeNameOptions = TAMAPI.getEventTypeNames()
     private var selectedEventTypeName: String = eventTypeNameOptions.firstOrNull() ?: ""
-    private var requiredEventArgs = listOf<InputWidgetMaker.WidgetArg>()
+    private var requiredEventArgs = listOf<WidgetArg>()
     private var eventArgs = mutableListOf<Any?>()
     private val requiredEventParams = MusicEvent.Parameters::class.primaryConstructor?.parameters
-        ?.map { InputWidgetMaker.WidgetArg.of(it) } ?: listOf()
+        ?.map { WidgetArg.of(it) } ?: listOf()
     private var eventParams: MutableList<Any?> = requiredEventParams.map { null }.toMutableList()
-    private var selectedEvent: MusicEvent? = null
+    private var selectedEvent: MusicEvent<*, *, *, *>? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
 
@@ -52,15 +56,16 @@ class EventViewWidget(
         }
     }
 
-    fun setEvent(event: MusicEvent?) {
+    fun setEvent(event: MusicEvent<*, *, *, *>?) {
         selectedEvent = event
         eventParams = selectedEvent?.parameters?.getTriggerParams()?.map { param -> param.value }?.toMutableList()
             ?: requiredEventParams.map { null }.toMutableList()
         if (event != null) {
-            if (event !is ErrorEvent) {
-                setSelectedEventTypeName(event.getTypeName())
-                eventArgs = (event.getTriggerArgs().map { arg -> arg.value }).toMutableList()
+            if (event.type !is ErrorEvent) {
+                setSelectedEventTypeName(event.type.typeName)
+                eventArgs = (MusicTrigger.getTriggerArgs(event.arguments).map { arg -> arg.value }).toMutableList()
             }
+
             selectedMusicPaths = event.music.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
@@ -86,7 +91,7 @@ class EventViewWidget(
             return
         }
 
-        if (selectedEvent is ErrorEvent) {
+        if (selectedEvent?.type is ErrorEvent) {
             val result = addWidgetFromRender(
                 {
                     ClickableTextWidget(
@@ -256,8 +261,7 @@ class EventViewWidget(
         }
 
         selectedEventTypeName = typeName
-        requiredEventArgs = TAMClient.eventFactory
-            .getRequiredArgs(typeName).map { InputWidgetMaker.WidgetArg.of(it) }
+        requiredEventArgs = TAMAPI.getEventTypeArguments(typeName)?.map { WidgetArg.of(it) } ?: emptyList()
         eventArgs = requiredEventArgs.map { null }.toMutableList()
         clearWidgetsFromRender()
     }
@@ -280,12 +284,14 @@ class EventViewWidget(
         }
 
         soundLibrary = musicPack.getEditPackSoundLibrary()
-        val newEvent = TAMClient.eventFactory
+        val eventType = TAMAPI.getEventType(selectedEventTypeName)
+        val newEvent = TAMClient.musicEventFactory
             .fromArgs(
-                selectedEventTypeName,
+                eventType,
+                TAMAPI.makeEventArguments(eventType, eventArgs.filterNotNull()),
                 selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) },
-                eventArgs.filterNotNull(),
-                eventParams.filterNotNull())
+                MusicEvent.Parameters.fromArgs(eventParams.filterNotNull())
+            )
         selectedEvent = newEvent
         onSaveEvent(newEvent, false)
     }

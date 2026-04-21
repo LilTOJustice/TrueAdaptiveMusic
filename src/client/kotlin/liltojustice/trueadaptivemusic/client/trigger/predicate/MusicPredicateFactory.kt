@@ -1,15 +1,14 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
-import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerFactory
+import liltojustice.trueadaptivemusicapi.trigger.predicate.arguments.PredicateArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.state.PredicateState
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
 
-class MusicPredicateFactory(musicPredicateRegistry: MusicPredicateRegistry)
-    : MusicTriggerFactory<MusicPredicate>(musicPredicateRegistry) {
-    fun makeCopy(musicPredicate: MusicPredicate): MusicPredicate {
-        return fromArgs(
-            musicPredicate.getTypeName(),
-            ReflectionHelper.getConstructorParameterValues(musicPredicate)
-                .mapNotNull { it.value }
-        )
+class MusicPredicateFactory {
+    fun fromArgs(predicateType: PredicateType<*, *>, arguments: PredicateArguments): MusicPredicate<*, *, *> {
+        val predicateType = predicateType as PredicateType<PredicateArguments, PredicateState>
+        return MusicPredicate(predicateType, arguments, predicateType.create(arguments))
     }
+
+    fun makeCopy()
 }

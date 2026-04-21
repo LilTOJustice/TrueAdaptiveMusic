@@ -1,5 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnRecipeUnlockEvent: MusicEvent()
+class OnRecipeUnlockEvent: BasicEventType("on_recipe_unlock")
