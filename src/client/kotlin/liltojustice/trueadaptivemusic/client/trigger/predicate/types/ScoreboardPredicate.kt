@@ -1,10 +1,13 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>("scoreboard") {
+object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
+    "scoreboard", typeOf<Arguments>()
+) {
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
             Arguments::objectiveId.name to "Id of the scoreboard objective to track.",
@@ -14,7 +17,7 @@ class ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>("s
 
     data class Arguments(val objectiveId: String, val value: Int, val comparison: Comparison): TriggerArguments()
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val scoreboard = minecraft.level?.scoreboard ?: return false
         val player = minecraft.player ?: return false

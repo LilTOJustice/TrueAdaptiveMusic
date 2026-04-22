@@ -1,10 +1,13 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class HealthPredicate: StaticPredicateType<HealthPredicate.Arguments>("health") {
+object HealthPredicate: StaticPredicateType<HealthPredicate.Arguments>(
+    "health", typeOf<Arguments>()
+) {
     data class Arguments(val healthType: HealthType, val direction: Direction, val health: Int)
         : TriggerArguments()
     override val argDescriptions: Map<String, String>
@@ -14,7 +17,7 @@ class HealthPredicate: StaticPredicateType<HealthPredicate.Arguments>("health") 
             Arguments::health.name to "Threshold at which the predicate should switch."
         )
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val player = minecraft.player ?: return false
         val typeAdjusted = if (arguments.healthType == HealthType.Percentage)

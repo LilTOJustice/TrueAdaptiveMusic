@@ -1,11 +1,14 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Arguments>("entity_nearby") {
+object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Arguments>(
+    "entity_nearby", typeOf<Arguments>()
+) {
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
             Arguments::entities.name to "List of entities the music should play for. If none, any entity will " +
@@ -17,7 +20,7 @@ class EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Arguments
 
     data class Arguments(val entities: List<EntityTypeIdentifier>, val blockRadius: UInt): TriggerArguments()
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val level = minecraft.level ?: return false

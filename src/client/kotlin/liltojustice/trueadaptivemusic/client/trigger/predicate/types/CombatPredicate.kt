@@ -21,9 +21,11 @@ import kotlin.math.acos
 import kotlin.math.atan
 import kotlin.math.cbrt
 import kotlin.math.tan
+import kotlin.reflect.typeOf
 
-class CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.State>(
-    "combat") {
+object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.State>(
+    "combat", typeOf<Arguments>()
+) {
     override val tickRate: Int
         get() = super.tickRate * 10
     override val argDescriptions: Map<String, String>
@@ -34,11 +36,11 @@ class CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.
                     "will trigger the music."
         )
 
-    override fun createPredicateState(arguments: Arguments): State {
+    override fun createState(arguments: Arguments): State {
         return State(arguments)
     }
 
-    override fun validatePredicate(arguments: Arguments, state: State): Boolean {
+    override fun test(arguments: Arguments, state: State): Boolean {
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val level = minecraft.level ?: return false
@@ -121,45 +123,43 @@ class CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.
         }
     }
 
-    companion object {
-        private val baseAxialDistance = Vec3(20.0, 20.0, 20.0)
-        private const val AGGRO_TIMER_SECONDS = 4L
-        const val DEG_PER_RAD = 180.0 / PI
+    private val baseAxialDistance = Vec3(20.0, 20.0, 20.0)
+    private const val AGGRO_TIMER_SECONDS = 4L
+    private const val DEG_PER_RAD = 180.0 / PI
 
-        private fun isValidAttacker(entity: LivingEntity, playerEntity: Player, displacement: Vec3): Boolean {
-            val closeEnough = closeEnough(
-                displacement,
-                Vec3(entity.boundingBox.xsize,
-                    entity.boundingBox.ysize,
-                    entity.boundingBox.zsize
+    private fun isValidAttacker(entity: LivingEntity, playerEntity: Player, displacement: Vec3): Boolean {
+        val closeEnough = closeEnough(
+            displacement,
+            Vec3(entity.boundingBox.xsize,
+                entity.boundingBox.ysize,
+                entity.boundingBox.zsize
+            )
+        )
+
+        return closeEnough && (
+                (entity as? Mob)?.isAggressive == true ||
+                        (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
+                        entity is Phantom||
+                        (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true
                 )
+    }
+
+    private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
+        return player.team != null && otherPlayer.team != null && !player.isAlliedTo(otherPlayer)
+    }
+
+    private fun closeEnough(displacement: Vec3, attackerSize: Vec3): Boolean
+    {
+        val axialDistance = Vec3(
+            abs(displacement.x), abs(displacement.y), abs(displacement.z))
+        val scaledAttackerMinDistance = baseAxialDistance
+            .multiply(
+                Vec3(
+                    cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z))
             )
 
-            return closeEnough && (
-                    (entity as? Mob)?.isAggressive == true ||
-                            (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
-                            entity is Phantom||
-                            (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true
-                    )
-        }
-
-        private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
-            return player.team != null && otherPlayer.team != null && !player.isAlliedTo(otherPlayer)
-        }
-
-        private fun closeEnough(displacement: Vec3, attackerSize: Vec3): Boolean
-        {
-            val axialDistance = Vec3(
-                abs(displacement.x), abs(displacement.y), abs(displacement.z))
-            val scaledAttackerMinDistance = baseAxialDistance
-                .multiply(
-                    Vec3(
-                        cbrt(attackerSize.x), cbrt(attackerSize.y), cbrt(attackerSize.z))
-                )
-
-            return axialDistance.x < scaledAttackerMinDistance.x
-                    && axialDistance.y < scaledAttackerMinDistance.y
-                    && axialDistance.z < scaledAttackerMinDistance.z
-        }
+        return axialDistance.x < scaledAttackerMinDistance.x
+                && axialDistance.y < scaledAttackerMinDistance.y
+                && axialDistance.z < scaledAttackerMinDistance.z
     }
 }

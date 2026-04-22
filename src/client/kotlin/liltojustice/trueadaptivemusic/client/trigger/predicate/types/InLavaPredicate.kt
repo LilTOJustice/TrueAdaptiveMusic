@@ -4,11 +4,11 @@ import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateTy
 import net.minecraft.client.Minecraft
 import net.minecraft.tags.FluidTags
 
-class InLavaPredicate: BasicPredicateType("in_lava") {
+object InLavaPredicate: BasicPredicateType("in_lava") {
     override val tickRate: Int
         get() = 2
 
-    override fun validate(): Boolean {
+    override fun test(): Boolean {
         return Minecraft.getInstance().player?.isEyeInFluid(FluidTags.LAVA) ?: false
     }
 }

@@ -1,14 +1,10 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
-import liltojustice.trueadaptivemusicapi.trigger.predicate.arguments.PredicateArguments
-import liltojustice.trueadaptivemusicapi.trigger.predicate.state.PredicateState
-import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateTypeBase
 
 class MusicPredicateFactory {
-    fun fromArgs(predicateType: PredicateType<*, *>, arguments: PredicateArguments): MusicPredicate<*, *, *> {
-        val predicateType = predicateType as PredicateType<PredicateArguments, PredicateState>
-        return MusicPredicate(predicateType, arguments, predicateType.create(arguments))
+    fun fromArgs(predicateType: PredicateTypeBase, arguments: TriggerArguments): MusicPredicate<*> {
+        return MusicPredicate(predicateType, arguments, predicateType.createStateBase(arguments))
     }
-
-    fun makeCopy()
 }

@@ -7,7 +7,9 @@ import kotlin.io.path.invariantSeparatorsPathString
 
 class Constants {
     companion object {
-        val ROOT_PREDICATE_NAME = "root"
+        const val ROOT_PREDICATE_NAME = "root"
+        const val ERROR_PREDICATE_NAME = "error_predicate"
+        const val ERROR_EVENT_NAME = "error_event"
         val MUSIC_PACK_DIR = Path("trueadaptivemusicpacks")
         val OPTIONS_DIR = Path("config", "trueadaptivemusic")
         val FFMPEG_DIR = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffmpeg_binaries")

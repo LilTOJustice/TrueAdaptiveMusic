@@ -11,14 +11,15 @@ import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
+import liltojustice.trueadaptivemusic.client.trigger.MusicParameters
+import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import liltojustice.trueadaptivemusicapi.trigger.predicate.arguments.EmptyPredicateArguments
-import liltojustice.trueadaptivemusicapi.trigger.predicate.state.EmptyPredicateState
+import liltojustice.trueadaptivemusicapi.trigger.arguments.EmptyTriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.state.EmptyTriggerState
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import kotlin.collections.emptyMap
@@ -112,8 +113,8 @@ class MusicTree {
     class Node private constructor(
         var music: List<PlayableSound>,
         var ambience: List<PlayableSound>,
-        var predicates: MutableList<MusicPredicate<*, *, *>>,
-        var events: List<MusicEvent<*, *, *, *>>,
+        var predicates: MutableList<MusicPredicate<*>>,
+        var events: List<MusicEvent<*>>,
         var parameters: Parameters,
         val children: MutableList<Node> = mutableListOf()
     ) {
@@ -138,7 +139,7 @@ class MusicTree {
         fun getSatisfiedNode(
             minecraft: Minecraft,
             path: List<String> = emptyList(),
-            eventCollection: Map<String, MusicEvent<*, *, *, *>> = emptyMap(),
+            eventCollection: Map<String, MusicEvent<*>> = emptyMap(),
             musicCollection: Set<PlayableSound> = emptySet(),
             ambienceCollection: Set<PlayableSound> = emptySet(),
             parallelRoot: Node? = null
@@ -146,7 +147,7 @@ class MusicTree {
             val parallelRoot = this.takeIf { parallelRoot == null } ?: parallelRoot
             predicates.forEach { predicate ->
                 try {
-                    if (!predicate.testPredicate()) {
+                    if (!predicate.test()) {
                         return@forEach
                     }
                 }
@@ -229,7 +230,7 @@ class MusicTree {
 
         fun newChild(
             parameters: List<Any>,
-            events: List<MusicEvent<*, *, *, *>>,
+            events: List<MusicEvent<*>>,
             music: List<PlayableSound>,
             ambience: List<PlayableSound>
         ): Node {
@@ -240,8 +241,9 @@ class MusicTree {
             return child
         }
 
-        fun newPredicate(predicateTypeName: String, vararg predicateArgs: Any?): Node {
+        fun newPredicate(predicateTypeName: String, predicateArgs: List<Any?>): Node {
             val predicateType = TAMAPI.getPredicateType(predicateTypeName)
+                ?: throw MusicTriggerException("Unknown predicate type '$predicateTypeName'")
             val predicate = TAMClient.musicPredicateFactory.fromArgs(
                 predicateType, TAMAPI.makePredicateArguments(predicateType, predicateArgs))
             predicates.add(predicate)
@@ -320,7 +322,8 @@ class MusicTree {
                 return Node(
                     listOf(),
                     listOf(),
-                    mutableListOf(MusicPredicate(RootPredicate(), EmptyPredicateArguments(), EmptyPredicateState())),
+                    mutableListOf(MusicPredicate(
+                        RootPredicate, EmptyTriggerArguments(), EmptyTriggerState())),
                     listOf(),
                     Parameters.default()
                 )
@@ -330,7 +333,7 @@ class MusicTree {
         class Result(
             val node: Node,
             val path: List<String>,
-            val events: Map<String, MusicEvent<*, *, *, *>>,
+            val events: Map<String, MusicEvent<*>>,
             val music: List<PlayableSound>,
             val ambience: List<PlayableSound>,
             val parallelRoot: Node?
@@ -347,7 +350,7 @@ class MusicTree {
             var parallelMusic: Boolean = false,
             var loopMusic: Boolean = false,
             var loopStartPoints: Map<String, UInt> = mapOf(),
-        ): MusicTrigger.Parameters() {
+        ): MusicParameters() {
             companion object: ParametersCompanion<Parameters> {
                 override val displayNames: Map<String, String>
                     get() = super.displayNames +
@@ -419,7 +422,7 @@ class MusicTree {
         val parameters: Node.Parameters,
         val accumulatedMusic: List<PlayableSound>,
         val accumulatedAmbience: List<PlayableSound>,
-        val accumulatedEvents: List<MusicEvent<*, *, *, *>>,
+        val accumulatedEvents: List<MusicEvent<*>>,
         val parallelMusicContext: ParallelMusicContext?
     )
 

@@ -3,36 +3,32 @@ package liltojustice.trueadaptivemusic.client.trigger.event
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.music.MusicTriggerParameters
+import liltojustice.trueadaptivemusic.client.trigger.MusicParameters
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.state.EventState
-import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
+import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.network.chat.Component
 import kotlin.collections.plus
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.primaryConstructor
 
-class MusicEvent<
-        TTrigger: EventType<TArg, TState, TInput>,
-        TArg: EventArguments,
-        TState: EventState,
-        TInput: EventInput>(
-    type: TTrigger,
-    arguments: TArg,
-    state: TState,
+class MusicEvent<TEvent: EventTypeBase>(
+    type: TEvent,
+    arguments: TriggerArguments,
+    state: TriggerState,
     var music: List<PlayableSound> = emptyList(),
     var parameters: Parameters = Parameters.default()
-): MusicTrigger<TTrigger, TArg, TState>(type, arguments, state) {
-    fun validateEvent(input: TInput): Boolean {
-        return type.validate(arguments, state, input)
+): MusicTrigger<TEvent>(type, arguments, state) {
+    fun validate(input: EventInput): Boolean {
+        return type.validateBase(arguments, state, input)
     }
 
     companion object: MusicEventCompanion
 
-    data class Parameters(var isPersistent: Boolean = false): MusicTriggerParameters() {
+    data class Parameters(var isPersistent: Boolean = false): MusicParameters() {
         companion object: ParametersCompanion<Parameters> {
             override val displayNames: Map<String, String>
                 get() = super.displayNames +

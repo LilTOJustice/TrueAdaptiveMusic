@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.StructureSetIdentifier
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
@@ -10,8 +10,11 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.levelgen.structure.StructureSet
 import kotlin.collections.any
 import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.typeOf
 
-class StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Arguments>("structure_set") {
+object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Arguments>(
+    "structure_set", typeOf<Arguments>()
+) {
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
             Arguments::structureSets.name to "Which structure sets the player must be in for the music should play. " +
@@ -22,7 +25,7 @@ class StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Arguments
 
     data class Arguments(val structureSets: List<StructureSetIdentifier>): TriggerArguments()
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val dimensionKey = minecraft.level?.dimension() ?: return false
         val serverLevel = minecraft.singleplayerServer?.getLevel(dimensionKey) ?: return false

@@ -4,8 +4,8 @@ import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateTy
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.DeathScreen
 
-class DeathScreenPredicate: BasicPredicateType("death_screen") {
-    override fun validate(): Boolean {
+object DeathScreenPredicate: BasicPredicateType("death_screen") {
+    override fun test(): Boolean {
         return Minecraft.getInstance().screen is DeathScreen
     }
 }

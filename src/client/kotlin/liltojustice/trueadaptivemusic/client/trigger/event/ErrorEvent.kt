@@ -1,19 +1,22 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.event.type.ClosedEventType
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
+import kotlin.reflect.typeOf
 
-class ErrorEvent: ClosedEventType<ErrorEvent.Arguments, ErrorEvent.State>(
-    "error_event") {
+object ErrorEvent: ClosedEventType<ErrorEvent.Arguments, ErrorEvent.State>(
+    Constants.ERROR_EVENT_NAME, typeOf<Arguments>()
+) {
     data class Arguments(val actualJson: JsonObject, val reason: String): TriggerArguments()
 
-    override fun validateEvent(arguments: Arguments, state: State): Boolean {
+    override fun validate(arguments: Arguments, state: State): Boolean {
         return false
     }
 
-    override fun createEventState(arguments: Arguments): State {
+    override fun createState(arguments: Arguments): State {
         return State(arguments)
     }
 

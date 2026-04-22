@@ -22,7 +22,7 @@ public class OnWakeUpEventMixin {
     @Inject(at = @At("HEAD"), method = "onClose")
     public void closeChatIfEmpty(CallbackInfo ci) {
         if (!stopSleepingPressed) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnWakeUpEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnWakeUpEvent.INSTANCE);
         }
 
         stopSleepingPressed = false;

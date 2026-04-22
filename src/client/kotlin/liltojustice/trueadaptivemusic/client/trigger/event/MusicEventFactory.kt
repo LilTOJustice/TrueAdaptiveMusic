@@ -1,25 +1,20 @@
 package liltojustice.trueadaptivemusic.client.trigger.event
 
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
-import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.state.EventState
-import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
 
 class MusicEventFactory {
     fun fromArgs(
-        eventType: EventType<*, *, *>,
-        arguments: EventArguments,
+        eventType: EventTypeBase,
+        arguments: TriggerArguments,
         music: List<PlayableSound>,
         parameters: MusicEvent.Parameters
-    ): MusicEvent<EventType<EventArguments, EventState, EventInput>, EventArguments, EventState, EventInput> {
-        val eventType = eventType as EventType<EventArguments, EventState, EventInput>
-        return MusicEvent(eventType, arguments, eventType.create(arguments), music, parameters)
+    ): MusicEvent<*> {
+        return MusicEvent(eventType, arguments, eventType.createStateBase(arguments), music, parameters)
     }
 
-    fun makeCopy(event: MusicEvent<*, *, *, *>)
-    : MusicEvent<EventType<EventArguments, EventState, EventInput>, EventArguments, EventState, EventInput> {
-        val eventType = event.type as EventType<EventArguments, EventState, EventInput>
-        return MusicEvent(eventType, event.arguments, event.state, event.music, event.parameters)
+    fun makeCopy(existing: MusicEvent<*>): MusicEvent<*> {
+        return MusicEvent(existing.type, existing.arguments, existing.state, existing.music, existing.parameters)
     }
 }

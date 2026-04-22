@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnDeathEventMixin {
     @Inject(at = @At("HEAD"), method = "init()V")
     public void init(CallbackInfo ci) {
-        TAMClient.INSTANCE.invokeMusicEvent(OnDeathEvent.class);
+        TAMClient.INSTANCE.invokeMusicEvent(OnDeathEvent.INSTANCE);
     }
 }

@@ -31,7 +31,7 @@ class NodeViewWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onChangesSaved: (newTarget: MusicTree.Node?) -> Unit,
-    private val onEventClick: (event: MusicEvent<*, *, *, *>?) -> Unit,
+    private val onEventClick: (event: MusicEvent<*>?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
     y: Int = 0
@@ -47,13 +47,13 @@ class NodeViewWidget(
     x,
     y
 ) {
-    private val defaultNodeParams = MusicTree.Node.Parameters.default().getTriggerParams().map { it.value }
+    private val defaultNodeParams = MusicTree.Node.Parameters.default().getMusicParams().map { it.value }
     private val requiredNodeParams = MusicTree.Node.Parameters::class.primaryConstructor?.parameters
         ?.map { WidgetArg.of(it) } ?: listOf()
     private var newNodeParent: MusicTree.Node? = null
     private var nodeParams: MutableList<Any?> = defaultNodeParams.toMutableList()
-    private var events = mutableListOf<MusicEvent<*, *, *, *>>()
-    private var selectedEvent: MusicEvent<*, *, *, *>? = null
+    private var events = mutableListOf<MusicEvent<*>>()
+    private var selectedEvent: MusicEvent<*>? = null
     private var selectedNode: MusicTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
@@ -485,7 +485,7 @@ class NodeViewWidget(
         selectedEvent = null
         selectedMusicPaths = node.music.map { sound -> sound.getSoundName() }.toMutableList()
         selectedAmbiencePaths = node.ambience.map { sound -> sound.getSoundName() }.toMutableList()
-        nodeParams = node.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
+        nodeParams = node.parameters.getMusicParams().map { param -> param.value }.toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }
@@ -502,7 +502,7 @@ class NodeViewWidget(
         resetScrolling()
     }
 
-    fun onEventModeSave(newEvent: MusicEvent<*, *, *, *>?, exit: Boolean) {
+    fun onEventModeSave(newEvent: MusicEvent<*>?, exit: Boolean) {
         newEvent?.let {
             events.remove(selectedEvent)
             events.add(it)

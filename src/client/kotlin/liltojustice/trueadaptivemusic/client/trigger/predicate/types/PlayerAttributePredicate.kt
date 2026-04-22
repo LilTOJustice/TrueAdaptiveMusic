@@ -1,14 +1,16 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityAttributeIdentifier
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.Registries
 import kotlin.jvm.optionals.getOrNull
+import kotlin.reflect.typeOf
 
-class PlayerAttributePredicate: StaticPredicateType<PlayerAttributePredicate.Arguments>(
-    "player_attribute") {
+object PlayerAttributePredicate: StaticPredicateType<PlayerAttributePredicate.Arguments>(
+    "player_attribute", typeOf<Arguments>()
+) {
     data class Arguments(val attribute: EntityAttributeIdentifier, val value: Double, val comparison: Comparison)
         : TriggerArguments()
     override val argDescriptions: Map<String, String>
@@ -18,7 +20,7 @@ class PlayerAttributePredicate: StaticPredicateType<PlayerAttributePredicate.Arg
             Arguments::comparison.name to "Comparison to use between the player attribute value and the given value."
         )
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val player = Minecraft.getInstance().player ?: return false
         val registry = player.level().registryAccess().get(Registries.ATTRIBUTE).getOrNull()?.value() ?: return false
         val entityAttributeEntry = registry.get(arguments.attribute.id).getOrNull() ?: return false

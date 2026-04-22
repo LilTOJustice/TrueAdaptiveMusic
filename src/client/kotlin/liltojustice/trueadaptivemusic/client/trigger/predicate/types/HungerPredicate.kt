@@ -1,11 +1,14 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
 import net.minecraft.world.level.GameType
+import kotlin.reflect.typeOf
 
-class HungerPredicate: StaticPredicateType<HungerPredicate.Arguments>("hunger") {
+object HungerPredicate: StaticPredicateType<HungerPredicate.Arguments>(
+    "hunger", typeOf<Arguments>()
+) {
     override val tickRate: Int
         get() = super.tickRate * 4
     override val argDescriptions: Map<String, String>
@@ -17,7 +20,7 @@ class HungerPredicate: StaticPredicateType<HungerPredicate.Arguments>("hunger") 
 
     data class Arguments(val direction: Direction, val hungerPercentage: Int): TriggerArguments()
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         if (minecraft.player?.gameMode() in listOf(GameType.CREATIVE, GameType.SPECTATOR)) {
             return false

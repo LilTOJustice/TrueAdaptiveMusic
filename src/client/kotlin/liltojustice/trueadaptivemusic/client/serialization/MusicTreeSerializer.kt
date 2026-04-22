@@ -41,10 +41,12 @@ object MusicTreeSerializer {
         return GsonBuilder()
             .registerTypeHierarchyAdapter(
                 MusicPredicate::class.java,
-                MusicTriggerSerializer.MusicPredicateTypeAdapter(soundLibrary)
+                MusicTriggerSerializer.MusicPredicateTypeAdapter()
             )
             .registerTypeHierarchyAdapter(
-                MusicEvent::class.java, MusicTriggerSerializer.MusicEventTypeAdapter(soundLibrary))
+                MusicEvent::class.java,
+                MusicTriggerSerializer.MusicEventTypeAdapter(soundLibrary)
+            )
             .registerTypeHierarchyAdapter(
                 PlayableSound::class.java,
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
@@ -70,7 +72,7 @@ object MusicTreeSerializer {
     @Suppress("USELESS_ELVIS")
     private object MusicTreeNodeParametersDeserializer: JsonDeserializer<MusicTree.Node.Parameters> {
         override fun deserialize(
-            json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTree.Node.Parameters? {
+            json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTree.Node.Parameters {
             val result = MusicTree.Node.Parameters.jsonDecode(json.asJsonObject)
             result.loopStartPoints = result.loopStartPoints ?: mapOf()
 

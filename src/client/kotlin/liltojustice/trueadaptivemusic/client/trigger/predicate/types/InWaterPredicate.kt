@@ -4,11 +4,11 @@ import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateTy
 import net.minecraft.client.Minecraft
 import net.minecraft.tags.FluidTags
 
-class InWaterPredicate: BasicPredicateType("in_water") {
+object InWaterPredicate: BasicPredicateType("in_water") {
     override val tickRate: Int
         get() = 2
 
-    override fun validate(): Boolean {
+    override fun test(): Boolean {
         return Minecraft.getInstance().player?.isEyeInFluid(FluidTags.WATER) ?: false
     }
 }

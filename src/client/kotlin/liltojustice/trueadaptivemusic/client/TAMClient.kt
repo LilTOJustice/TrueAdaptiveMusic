@@ -23,7 +23,7 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
@@ -41,7 +41,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
-import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 
 object TAMClient {
@@ -111,7 +110,7 @@ object TAMClient {
         return musicManager?.currentEventMusic
     }
 
-    fun getPlayingEvent(): MusicEvent<*, *, *, *>? {
+    fun getPlayingEvent(): MusicEvent<*>? {
         return musicManager?.playingEvent
     }
 
@@ -128,6 +127,10 @@ object TAMClient {
 
     fun refreshSoundVolume() {
         musicManager?.refreshSoundVolume()
+    }
+
+    fun invokeMusicEvent(eventType: EventType<*, *, EmptyEventInput>) {
+        musicManager?.invokeMusicEvent(eventType, EmptyEventInput())
     }
 
     fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {

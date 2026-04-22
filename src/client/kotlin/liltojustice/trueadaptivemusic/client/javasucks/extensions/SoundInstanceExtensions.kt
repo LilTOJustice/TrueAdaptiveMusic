@@ -15,7 +15,7 @@ private fun uiToastCheck(sound: SoundInstance): Boolean {
     val events = TAMClient.currentPredicateResult?.accumulatedEvents ?: return false
 
     return sound.identifier.toString() == CHALLENGE_COMPLETE &&
-            events.stream().anyMatch { event: MusicEvent<*, *, *, *>? -> event?.type is OnAdvancementGetEvent }
+            events.stream().anyMatch { event: MusicEvent<*>? -> event?.type is OnAdvancementGetEvent }
 }
 
 private val CHALLENGE_COMPLETE = SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.location.toString()

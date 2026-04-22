@@ -24,7 +24,7 @@ class PackStructureWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
-    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate<*, *, *>) -> Unit,
+    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate<*>) -> Unit,
     private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
     private val onSelectCreateNewPredicate: (node: MusicTree.Node) -> Unit,
     private val onUnselectNode: () -> Unit,
@@ -32,21 +32,30 @@ class PackStructureWidget(
     x: Int = 0,
     y: Int = 0
 ): ContainerWidget(
-    width, height, TITLE_TEXT.string, true, false, true, true, true, x, y)
-{
+    width,
+    height,
+    TITLE_TEXT.string,
+    true,
+    false,
+    true,
+    true,
+    true,
+    x,
+    y
+) {
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
     private var spaceHeld = false
     private var targetedNode: MusicTree.Node? = null
-    private var targetedPredicate: MusicPredicate<*, *, *>? = null
+    private var targetedPredicate: MusicPredicate<*>? = null
     private var collapsed = mutableMapOf<MusicTree.Node, Boolean>()
 
     init {
         initPredicateWidgets()
     }
 
-    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate<*, *, *>?) {
+    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate<*>?) {
         targetedNode = node
         targetedPredicate = predicate
     }

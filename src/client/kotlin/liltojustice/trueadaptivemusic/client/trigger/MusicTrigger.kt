@@ -1,20 +1,20 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
-import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
-import liltojustice.trueadaptivemusicapi.trigger.TriggerState
-import liltojustice.trueadaptivemusicapi.trigger.TriggerType
+import liltojustice.trueadaptivemusicapi.trigger.TriggerTypeBase
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.network.chat.Component
 import kotlin.reflect.full.memberProperties
 
-abstract class MusicTrigger<TType: TriggerType<TArg, TState>, TArg: TriggerArguments, TState: TriggerState>(
-    val type: TType, val arguments: TArg, val state: TState) {
+abstract class MusicTrigger<TTrigger: TriggerTypeBase>(
+    val type: TTrigger, val arguments: TriggerArguments, val state: TriggerState) {
 
     companion object {
         fun getTruncatedTriggerId(triggerId: String): String {
             val arrays = Regex("\\[[^]]*]").findAll(triggerId).map { result -> result.value }
             val text = arrays.fold(triggerId) { partial: String, array ->
-                partial.replace(array, Regex(",.*").replace(array, ", ...]"))
+                partial.replace(
+                    array, Regex(",.*").replace(array, ", ...]"))
             }
 
             return text
@@ -29,28 +29,5 @@ abstract class MusicTrigger<TType: TriggerType<TArg, TState>, TArg: TriggerArgum
         fun getDisplayName(triggerName: String): Component
         fun getArgDisplayName(triggerName: String, argName: String): Component?
         fun getArgDescription(triggerName: String, argName: String): Component?
-    }
-
-    abstract class Parameters {
-        fun getTriggerParams(): List<TriggerParam> {
-            return ReflectionHelper.getConstructorParameterValues(this)
-                .map { arg -> TriggerParam(arg.name, arg.value) }
-        }
-
-        companion object: ParametersCompanion<Parameters> {
-            override fun default(): Parameters {
-                throw MusicTriggerException("default() called on abstract Parameters class.")
-            }
-        }
-
-        interface ParametersCompanion<TSelf: Parameters> {
-            val displayNames: Map<String, String>
-                get() = mapOf()
-
-            val descriptions: Map<String, String>
-                get() = mapOf()
-
-            fun default(): TSelf
-        }
     }
 }

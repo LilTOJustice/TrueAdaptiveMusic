@@ -1,10 +1,13 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class HeightPredicate: StaticPredicateType<HeightPredicate.Arguments>("height") {
+object HeightPredicate: StaticPredicateType<HeightPredicate.Arguments>(
+    "height", typeOf<Arguments>()
+) {
     data class Arguments(val direction: Direction, val y: Int): TriggerArguments()
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
@@ -13,7 +16,7 @@ class HeightPredicate: StaticPredicateType<HeightPredicate.Arguments>("height") 
             Arguments::y.name to "Threshold at which the predicate should switch."
         )
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val playerHeight = minecraft.player?.blockPosition()?.y ?: return false
 

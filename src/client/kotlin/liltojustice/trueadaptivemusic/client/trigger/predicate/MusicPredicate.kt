@@ -4,23 +4,22 @@ import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import liltojustice.trueadaptivemusicapi.trigger.predicate.arguments.PredicateArguments
-import liltojustice.trueadaptivemusicapi.trigger.predicate.state.PredicateState
-import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateTypeBase
+import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.network.chat.Component
 
-class MusicPredicate<TTrigger: PredicateType<TArg, TState>, TArg: PredicateArguments, TState: PredicateState>(
-    type: TTrigger, arguments: TArg, state: TState)
-    : MusicTrigger<PredicateType<TArg, TState>, TArg, TState>(type, arguments, state) {
+class MusicPredicate<TTrigger: PredicateTypeBase>(type: TTrigger, arguments: TriggerArguments, state: TriggerState)
+    : MusicTrigger<TTrigger>(type, arguments, state) {
     private var lastResult = false
     private var ticksSinceResult = 0
 
-    fun testPredicate(): Boolean {
+    fun test(): Boolean {
         val tickRate = getFixedTickRate()
         if (ticksSinceResult == 0 || ticksSinceResult >= tickRate) {
             ticksSinceResult = 1
 
-            lastResult = type.validate(arguments, state)
+            lastResult = type.testBase(arguments, state)
         }
 
         ticksSinceResult++

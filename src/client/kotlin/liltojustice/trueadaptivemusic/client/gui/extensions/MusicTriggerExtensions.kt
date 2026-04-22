@@ -3,23 +3,19 @@ package liltojustice.trueadaptivemusic.client.gui.extensions
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
-import liltojustice.trueadaptivemusicapi.trigger.event.state.EventState
-import liltojustice.trueadaptivemusicapi.trigger.predicate.state.PredicateState
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import kotlin.reflect.full.memberProperties
 
-fun MusicTrigger<*, *, *>.getTriggerTooltipString(): String {
-    return getTriggerTooltipText().string
-}
-
-fun MusicTrigger<*, *, *>.getTriggerId(): String {
+fun MusicTrigger<*>.getTriggerId(): String {
     val args = arguments::class.memberProperties
     return type.typeName + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
 }
 
-fun MusicTrigger<*, *, *>.getTriggerTooltipText(): MutableComponent {
+fun MusicTrigger<*>.getTriggerTooltipText(): MutableComponent {
     if (arguments is ErrorPredicate.Arguments && state is ErrorPredicate.State) {
         return Component.literal(Component.translatableWithFallback(
             "trueadaptivemusic.trigger_error_predicate_tooltip",
@@ -44,10 +40,10 @@ fun MusicTrigger<*, *, *>.getTriggerTooltipText(): MutableComponent {
 
     val result = StringBuilder()
     val args = MusicTrigger.getTriggerArgs(arguments)
-    if (state is PredicateState) {
+    if (this is MusicPredicate<*>) {
         result.appendLine("Predicate Arguments:")
     }
-    else if (state is EventState) {
+    else if (this is MusicEvent<*>) {
         result.appendLine("Event Arguments:")
     }
 

@@ -14,7 +14,7 @@ public class OnNightStartMixin {
     public void tick(CallbackInfo ci) {
         Minecraft thisObject = (Minecraft)(Object)this;
         if (thisObject.level != null && thisObject.level.getGameTime() % 24000L == 13000L) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnNightStartEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnNightStartEvent.INSTANCE);
         }
     }
 }

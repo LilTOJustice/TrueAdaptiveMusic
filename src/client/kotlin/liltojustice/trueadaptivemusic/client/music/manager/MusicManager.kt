@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
-import liltojustice.trueadaptivemusicapi.trigger.event.arguments.EventArguments
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
@@ -18,10 +17,9 @@ import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.phys.Vec3
 import kotlin.math.max
-import kotlin.reflect.KClass
 
 class MusicManager(private val minecraft: Minecraft) {
-    var playingEvent: MusicEvent<*, *, *, *>? = null
+    var playingEvent: MusicEvent<*>? = null
     val currentMusic: TAMSoundInstance?
         get() = musicPlayer.getPlayingInstance(mainTrack)
     val currentAmbience: TAMSoundInstance?
@@ -37,7 +35,7 @@ class MusicManager(private val minecraft: Minecraft) {
         minecraft.options.getSoundSourceOptionInstance(SoundSource.MUSIC)
     private var masterVolumeOption: OptionInstance<Double> =
         minecraft.options.getSoundSourceOptionInstance(SoundSource.MASTER)
-    private var eventPool: List<MusicEvent<*, *, *, *>> = emptyList()
+    private var eventPool: List<MusicEvent<*>> = emptyList()
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private val parallelTracks = mutableMapOf<PlayableSound, String>()
@@ -55,8 +53,8 @@ class MusicManager(private val minecraft: Minecraft) {
     }
 
     fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
-        eventPool.filterIsInstance<MusicEvent<EventType<*, *, TInput>, *, *, TInput>>().firstOrNull { event ->
-            eventType == event.type && runCatching { event.validateEvent(input) }.getOrNull() == true }
+        eventPool.firstOrNull { event ->
+            eventType == event.type && runCatching { event.validate(input) }.getOrNull() == true }
             ?.let { event ->
                 event.music.randomOrNull()?.let {
                     musicPlayer.startNew(EVENT_TRACK, it)
@@ -186,7 +184,7 @@ class MusicManager(private val minecraft: Minecraft) {
         }
 
         if (isEnter && treeResult.accumulatedEvents.any { event -> event.type is OnEnterNodeEvent }) {
-            invokeMusicEvent(OnEnterNodeEvent(), EmptyEventInput())
+            invokeMusicEvent(OnEnterNodeEvent, EmptyEventInput())
         }
 
         if (shouldStop) {

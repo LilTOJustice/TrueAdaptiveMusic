@@ -1,11 +1,14 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.trigger.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
 import net.minecraft.world.attribute.EnvironmentAttributes
+import kotlin.reflect.typeOf
 
-class MoonPhasePredicate: StaticPredicateType<MoonPhasePredicate.Arguments>("moon_phase") {
+object MoonPhasePredicate: StaticPredicateType<MoonPhasePredicate.Arguments>(
+    "moon_phase", typeOf<Arguments>()
+) {
     override val tickRate: Int
         get() = super.tickRate * 10
 
@@ -15,7 +18,7 @@ class MoonPhasePredicate: StaticPredicateType<MoonPhasePredicate.Arguments>("moo
 
     data class Arguments(val moonPhase: MoonPhase): TriggerArguments()
 
-    override fun validate(arguments: Arguments): Boolean {
+    override fun test(arguments: Arguments): Boolean {
         val level = Minecraft.getInstance().level ?: return false
         val currentPhase = level.environmentAttributes.getDimensionValue(EnvironmentAttributes.MOON_PHASE)
         val time = level.overworldClockTime % 24000
