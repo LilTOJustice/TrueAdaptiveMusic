@@ -1,24 +1,17 @@
 package liltojustice.trueadaptivemusic.client
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.CurlHelper
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.music.pack.browsable.BrowsableMusicPack
-import liltojustice.trueadaptivemusic.client.music.pack.browsable.PackManifest
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import liltojustice.trueadaptivemusic.client.serialization.EnumTypeAdapter
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
@@ -34,12 +27,9 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
 import java.io.IOException
-import java.util.Calendar
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.moveTo
 import kotlin.io.path.pathString
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -72,6 +62,7 @@ object TAMClient {
     private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
     private var initialized = false
     private var musicManager: MusicManager? = null
+    private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
 
     fun start() {
         val minecraft = Minecraft.getInstance()
@@ -162,50 +153,13 @@ object TAMClient {
             .invariantSeparatorsPathString
     }
 
-    suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
-        val gson = GsonBuilder()
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .registerTypeAdapter(
-                BrowsableMusicPack.SourceType::class.java,
-                EnumTypeAdapter(BrowsableMusicPack.SourceType::class)
-            ).create()
-        if (!ignoreCache && Constants.MANIFEST_PATH.exists()) {
-            return gson
-                .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
-        }
+    @Suppress("UNUSED")
+    fun addPackBrowserSupport(screenProducer: (parent: Screen) -> Screen) {
+        packBrowserScreenProducer = screenProducer
+    }
 
-        coroutineScope { CurlHelper.curl(Constants.MANIFEST_FILE_URL, Constants.MANIFEST_PATH_TEMP) }
-
-        if (!Constants.MANIFEST_PATH_TEMP.exists()) {
-            Logger.logError("Failed to fetch pack manifest.")
-
-            return null
-        }
-
-        val manifest = try {
-            gson
-                .fromJson(Constants.MANIFEST_PATH_TEMP.toFile().readText(), PackManifest::class.java)
-                .copy(timestamp = Calendar.getInstance().time)
-        }
-        catch (_: JsonSyntaxException) {
-            Logger.logError("Failed to parse manifest json.")
-
-            return null
-        }
-
-        Constants.MANIFEST_PATH_TEMP.moveTo(Constants.MANIFEST_PATH, true)
-        Constants.MANIFEST_PATH.toFile().writeText(gson.toJson(manifest))
-
-        manifest.packs.forEach { pack ->
-            pack.getImagePath()?.let { imagePath ->
-                pack.image?.source?.let { source ->
-                    CurlHelper.curl(source, imagePath)
-                }
-            }
-        }
-
-        return manifest
+    fun createPackBrowserScreen(parent: Screen): Screen? {
+        return packBrowserScreenProducer?.invoke(parent)
     }
 
     private fun tick(minecraft: Minecraft) {
