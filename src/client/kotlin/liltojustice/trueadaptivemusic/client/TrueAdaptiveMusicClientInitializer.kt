@@ -34,8 +34,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InLavaPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InWaterPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InFluidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
@@ -90,8 +89,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(PausedPredicate)
         TAMAPI.registerPredicateType(CreditsScreenPredicate)
         TAMAPI.registerPredicateType(InBedPredicate)
-        TAMAPI.registerPredicateType(InWaterPredicate)
-        TAMAPI.registerPredicateType(InLavaPredicate)
+        TAMAPI.registerPredicateType(InFluidPredicate)
         TAMAPI.registerPredicateType(BossHealthPredicate)
         TAMAPI.registerPredicateType(HungerPredicate)
         TAMAPI.registerPredicateType(EntityNearbyPredicate)
