@@ -14,6 +14,10 @@ object InFluidPredicate: StaticPredicateType<InFluidPredicate.Arguments>(
 ) {
     override val tickRate: Int
         get() = 4
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::fluids.name to "Select all fluids the music should play for. If none, any fluid will trigger."
+        )
 
     override fun test(arguments: Arguments): Boolean {
         val player = Minecraft.getInstance().player ?: return false
