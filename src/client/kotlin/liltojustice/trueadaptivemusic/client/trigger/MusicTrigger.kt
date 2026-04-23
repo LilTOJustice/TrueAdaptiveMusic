@@ -1,10 +1,10 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
+import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusicapi.trigger.TriggerTypeBase
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.network.chat.Component
-import kotlin.reflect.full.memberProperties
 
 abstract class MusicTrigger<TTrigger: TriggerTypeBase>(
     val type: TTrigger, val arguments: TriggerArguments, val state: TriggerState) {
@@ -20,8 +20,10 @@ abstract class MusicTrigger<TTrigger: TriggerTypeBase>(
             return text
         }
 
-        inline fun <reified TArg: TriggerArguments> getTriggerArgs(arguments: TArg): List<TriggerArg> {
-            return TArg::class.memberProperties.map { TriggerArg(it.name, it.get(arguments)) }
+        fun getTriggerArgs(arguments: TriggerArguments): List<TriggerArg> {
+            return ReflectionHelper.getConstructorParameterValues(arguments).map {
+                TriggerArg(it.name, it.value)
+            }
         }
     }
 
