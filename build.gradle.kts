@@ -60,7 +60,7 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api(files("TrueAdaptiveMusicAPI-1.1.jar"))
+    api("curse.maven:true-adaptive-music-api-1514598:7970705")
 }
 
 tasks.processResources {
