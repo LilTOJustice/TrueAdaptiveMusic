@@ -8,10 +8,9 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
-import kotlin.reflect.full.memberProperties
 
 fun MusicTrigger<*>.getTriggerId(): String {
-    val args = arguments::class.memberProperties
+    val args = MusicTrigger.getTriggerArgs(arguments)
     return type.typeName + if (args.isEmpty()) "" else "{${args.joinToString(",")}}"
 }
 
