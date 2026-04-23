@@ -119,14 +119,13 @@ class MainScreen(private val parent: Screen): Screen(
         addRenderableWidget(optionsButton)
         addRenderableWidget(discordButton)
 
-        TAMClient.createPackBrowserScreen(this)?.let {
-            val packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
-            { _: Button? -> minecraft.setScreen(it) }.build()
-            packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
-            packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
-            packBrowserButton.x = (this.width - packBrowserButton.width) / 2
-            addRenderableWidget(packBrowserButton)
-        }
+        val packBrowserTarget = TAMClient.createPackBrowserScreen(this)
+        val packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
+        { _: Button? -> minecraft.setScreen(packBrowserTarget) }.build()
+        packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
+        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
+        addRenderableWidget(packBrowserButton)
     }
 
     override fun onClose() {

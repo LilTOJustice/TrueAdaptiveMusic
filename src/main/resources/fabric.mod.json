@@ -30,7 +30,7 @@
       "environment": "client"
     }
   ],
-  "recommends": {
+  "suggests": {
     "trueadaptivemusicpackbrowser": "*"
   },
   "depends": {

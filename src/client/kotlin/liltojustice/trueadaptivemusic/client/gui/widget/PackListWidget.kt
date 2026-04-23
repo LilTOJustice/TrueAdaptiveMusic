@@ -93,9 +93,8 @@ class PackListWidget(
                     }
                 }
 
-            TAMClient.createPackBrowserScreen(screen)?.let {
-                addEntry(PackBrowserEntry { minecraft.setScreen(it) })
-            }
+            val packBrowserScreen = TAMClient.createPackBrowserScreen(screen)
+            addEntry(PackBrowserEntry { minecraft.setScreen(packBrowserScreen) })
             renderState = RenderState.Success
         }
     }
@@ -103,7 +102,7 @@ class PackListWidget(
     companion object {
         private val VANILLA_TEXT = Component.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla")
         private val DISABLE_TAM_TEXT = Component.translatableWithFallback(
-        "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
+            "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
         private val ISSUES_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.issues_found", "Issues Found")
         private val PACK_BROWSER_TEXT = Component.translatableWithFallback(
