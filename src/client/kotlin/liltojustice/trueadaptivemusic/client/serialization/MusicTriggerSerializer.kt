@@ -11,8 +11,6 @@ import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusicException
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
@@ -93,8 +91,7 @@ object MusicTriggerSerializer {
         }
         catch (e: MusicTriggerException) {
             TAMClient.musicPredicateFactory.fromArgs(
-                TAMAPI.getPredicateType(Constants.ERROR_PREDICATE_NAME)
-                    ?: throw TrueAdaptiveMusicException("Error predicate not registered"),
+                ErrorPredicate,
                 ErrorPredicate.Arguments(json, e.message ?: "Unknown")
             )
         }
@@ -112,15 +109,14 @@ object MusicTriggerSerializer {
         return try {
             val typeName = GsonHelper.getAsString(json, "type")
             val type = TAMAPI.getEventType(typeName)
-                ?: throw MusicTriggerException("Unknown predicate type '$typeName'")
+                ?: throw MusicTriggerException("Unknown event type '$typeName'")
             val arguments = type.createArguments(json.getAsJsonObject("arguments") ?: JsonObject())
 
             TAMClient.musicEventFactory.fromArgs(type, arguments, music, parameters)
         }
         catch (e: MusicTriggerException) {
             TAMClient.musicEventFactory.fromArgs(
-                TAMAPI.getEventType(Constants.ERROR_EVENT_NAME)
-                    ?: throw TrueAdaptiveMusicException("Error predicate not registered"),
+                ErrorEvent,
                 ErrorEvent.Arguments(json, e.message ?: "Unknown"),
                 music,
                 parameters
