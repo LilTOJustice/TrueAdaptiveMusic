@@ -20,7 +20,6 @@ import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.trigger.arguments.EmptyTriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.state.EmptyTriggerState
-import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import kotlin.collections.emptyMap
 import kotlin.collections.plus
@@ -42,8 +41,8 @@ class MusicTree {
         return MusicTreeSerializer.serialize(this)
     }
 
-    fun getMusicToPlay(minecraft: Minecraft): Result {
-        val result = root.getSatisfiedNode(minecraft)
+    fun getMusicToPlay(): Result {
+        val result = root.getSatisfiedNode()
         val parallel = result.node.parameters.parallelMusic
         val parallelMusic = result.music
             .takeIf { parallel }
@@ -137,7 +136,6 @@ class MusicTree {
         }
 
         fun getSatisfiedNode(
-            minecraft: Minecraft,
             path: List<String> = emptyList(),
             eventCollection: Map<String, MusicEvent<*>> = emptyMap(),
             musicCollection: Set<PlayableSound> = emptySet(),
@@ -195,7 +193,6 @@ class MusicTree {
 
                 for (child in children) {
                     val result = child.getSatisfiedNode(
-                        minecraft,
                         newPath,
                         newEvents,
                         newMusic,

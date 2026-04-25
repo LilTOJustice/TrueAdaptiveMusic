@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
@@ -37,7 +38,7 @@ import kotlin.time.Duration.Companion.milliseconds
 object TAMClient {
     const val TPS = 20
     val TICK_MS = (1.0 / TPS * 1000).milliseconds
-    val minecraftClient: Minecraft = Minecraft.getInstance()
+    val minecraft: Minecraft = Minecraft.getInstance()
     val musicPredicateFactory = MusicPredicateFactory()
     val musicEventFactory = MusicEventFactory()
     var currentPredicateResult: MusicTree.Result? = null
@@ -49,8 +50,7 @@ object TAMClient {
     var musicPack: MusicPack? = null
         set(value) {
             field = value
-            minecraftClient.soundManager.soundEngine.reload()
-            musicManager?.stop()
+            resetSound()
 
             val packName = value?.packName ?: ""
             try {
@@ -60,30 +60,56 @@ object TAMClient {
             }
         }
 
-    private val backgroundScope = CoroutineScope(EmptyCoroutineContext)
-    private var initialized = false
+    private lateinit var backgroundScope: CoroutineScope
     private var musicManager: MusicManager? = null
     private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
+    private var started = false
 
-    fun start() {
-        val minecraft = Minecraft.getInstance()
-        backgroundScope.launch {
-            while (true) {
-                try {
-                    tick(minecraft)
-                }
-                catch (e: Exception) {
-                    Logger.logError("TAM Processor thread encountered an error: ${e.message}\n" +
-                            e.stackTraceToString())
-                }
-
-                delay(TICK_MS)
-            }
+    @Suppress("UNNECESSARY_SAFE_CALL")
+    fun initialize() {
+        if (musicManager != null) {
+            return
         }
+
+        musicManager = MusicManager(minecraft)
+
+        options =
+            try {
+                TrueAdaptiveMusicOptions.jsonDecode(Constants.OPTIONS_PATH.toFile().readText())
+            }
+            catch (_: Exception) {
+                Logger.logError("Failed to load TrueAdaptiveMusic settings. Resetting...")
+                TrueAdaptiveMusicOptions()
+            }
+
+        try {
+            musicPack =
+                if (options.selectedPack.isBlank())
+                    null
+                else
+                    MusicPack.fromFile(
+                        Path(Constants.MUSIC_PACK_DIR.pathString, options.selectedPack))
+        }
+        catch (e: MusicLoadException) {
+            Logger.logError("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e")
+        }
+
+        start()
+    }
+
+    fun stop() {
+        if (!started) {
+            return
+        }
+
+        musicManager?.stop()
+        backgroundScope.cancel()
+        started = false
     }
 
     fun resetSound() {
-        musicManager?.stop()
+        stop()
+        start()
     }
 
     fun playSoundNow(sound: PlayableSound?) {
@@ -134,9 +160,9 @@ object TAMClient {
     }
 
     fun errorToast(errorMessage: Component, exceptionMessage: String? = null) {
-        minecraftClient.toastManager.addToast(
+        minecraft.toastManager.addToast(
             SystemToast.multiline(
-                minecraftClient,
+                minecraft,
                 SystemToast.SystemToastId.FILE_DROP_FAILURE,
                 errorMessage,
                 Component.literal(exceptionMessage ?: "")
@@ -163,48 +189,35 @@ object TAMClient {
         return packBrowserScreenProducer?.invoke(parent) ?: MissingPackBrowserScreen(parent)
     }
 
-    private fun tick(minecraft: Minecraft) {
-        if (!initialized) {
-            initialize(minecraft)
+    private fun start() {
+        if (started) {
+            return
         }
 
+        minecraft.musicManager.stopPlaying()
+        backgroundScope = CoroutineScope(EmptyCoroutineContext)
+        backgroundScope.launch {
+            while (true) {
+                try {
+                    tick()
+                }
+                catch (e: Exception) {
+                    Logger.logError("TAM Processor thread encountered an error:\n${e.stackTraceToString()}")
+                }
+
+                delay(TICK_MS)
+            }
+        }
+
+        started = true
+    }
+
+    private fun tick() {
         currentPredicateResult = musicPack?.let { pack ->
-            val result = pack.rules.getMusicToPlay(minecraftClient)
+            val result = pack.rules.getMusicToPlay()
             musicManager?.tick(result, pack.options)
 
             result
         }
-    }
-
-    @Suppress("UNNECESSARY_SAFE_CALL")
-    private fun initialize(minecraft: Minecraft) {
-        if (initialized || minecraft.soundManager?.soundEngine?.loaded != true) {
-            return
-        }
-
-        musicManager = MusicManager(minecraft)
-
-        options =
-            try {
-                TrueAdaptiveMusicOptions.jsonDecode(Constants.OPTIONS_PATH.toFile().readText())
-            }
-            catch (_: Exception) {
-                Logger.logError("Failed to load TrueAdaptiveMusic settings. Resetting...")
-                TrueAdaptiveMusicOptions()
-            }
-
-        try {
-            musicPack =
-                if (options.selectedPack.isBlank())
-                    null
-                else
-                    MusicPack.fromFile(
-                        Path(Constants.MUSIC_PACK_DIR.pathString, options.selectedPack))
-        }
-        catch (e: MusicLoadException) {
-            Logger.logError("Selected pack \"${options.selectedPack}\" failed to load. Error:\n$e")
-        }
-
-        initialized = true
     }
 }

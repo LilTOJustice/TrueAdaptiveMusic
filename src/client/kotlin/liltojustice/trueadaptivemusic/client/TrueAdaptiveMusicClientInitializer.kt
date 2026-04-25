@@ -382,8 +382,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
             result
         }
-
-        TAMClient.start()
     }
 
     companion object {
