@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
+import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -32,7 +33,7 @@ typealias NodeVisitor = (node: MusicTree.Node, path: List<String>) -> Unit
 class MusicTree {
     @Serialize
     @Suppress("unused")
-    private val version = SERIALIZATION_VERSION
+    private val version = LegacyMusicTreeJsonConverter.CURRENT_VERSION
 
     @Serialize
     private val root = Node.makeRoot()
@@ -93,7 +94,6 @@ class MusicTree {
     }
 
     companion object {
-        const val SERIALIZATION_VERSION = 2
         const val PATH_SEPARATOR = "/"
 
         fun makeEmpty(): MusicTree {

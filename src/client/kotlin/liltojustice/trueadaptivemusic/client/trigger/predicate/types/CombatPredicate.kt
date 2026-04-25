@@ -30,9 +30,9 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         get() = super.tickRate * 10
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
-            Arguments::blacklist.name to "Whether the list of mob entities attacking should not (if " +
+            Arguments::isBlacklist.name to "Whether the list of mob entities attacking should not (if " +
                     "checked) or should (if not checked) make the music play.",
-            Arguments::mobEntities.name to "Select mob entities for this predicate. If none, any entity " +
+            Arguments::entities.name to "Select mob entities for this predicate. If none, any entity " +
                     "will trigger the music."
         )
 
@@ -70,7 +70,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         return state.isAggro
     }
 
-    data class Arguments(val blacklist: Boolean, val mobEntities: List<EntityTypeIdentifier>): TriggerArguments()
+    data class Arguments(val isBlacklist: Boolean, val entities: List<EntityTypeIdentifier>): TriggerArguments()
 
     class State(private val arguments: Arguments): TriggerState() {
         val aggroTimer: Timer = Timer()
@@ -111,10 +111,10 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         }
 
         fun filterEntity(entity: Entity): Boolean {
-            return arguments.mobEntities
+            return arguments.entities
                 .takeIf { it.isNotEmpty() }
                 ?.let {
-                    if (arguments.blacklist)
+                    if (arguments.isBlacklist)
                         it.none { mobEntity -> mobEntity.matches(entity) }
                     else
                         it.any { mobEntity -> mobEntity.matches(entity) }

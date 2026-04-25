@@ -1,13 +1,13 @@
-package liltojustice.trueadaptivemusic.client.serialization.legacy.original
+package liltojustice.trueadaptivemusic.client.serialization.legacy.v1
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
-import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.event.MusicEvent
-import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.trigger.predicate.MusicPredicate
 
-object OriginalMusicTreeJsonConverter {
+object V1MusicTreeJsonConverter {
     private const val TARGET_VERSION = 2
 
     fun convert(json: JsonObject): JsonObject {

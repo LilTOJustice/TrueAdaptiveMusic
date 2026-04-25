@@ -22,15 +22,11 @@ object MusicTreeSerializer {
     }
 
     fun deserialize(json: JsonObject, soundLibrary: SoundLibrary): MusicTree {
-        var toDeserialize = json
         val serializationVersion = if (!json.has("version"))
-            null
+            1
         else
             json.getAsJsonPrimitive("version").asInt
-        if (serializationVersion != MusicTree.SERIALIZATION_VERSION) {
-            toDeserialize = LegacyMusicTreeJsonConverter.convert(toDeserialize, serializationVersion)
-        }
-
+        val toDeserialize = LegacyMusicTreeJsonConverter.convert(json, serializationVersion)
         val tree = getGson(soundLibrary).fromJson(toDeserialize, MusicTree::class.java)
         tree.initializeParents()
 

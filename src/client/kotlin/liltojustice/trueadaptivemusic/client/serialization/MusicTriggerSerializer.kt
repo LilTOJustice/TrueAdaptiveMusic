@@ -87,7 +87,7 @@ object MusicTriggerSerializer {
             val typeName = GsonHelper.getAsString(json, "type")
             val type = TAMAPI.getPredicateType(typeName)
                 ?: throw MusicTriggerException("Unknown predicate type '$typeName'")
-            val arguments = type.createArguments(json.getAsJsonObject("arguments"))
+            val arguments = type.createArguments(json.getAsJsonObject("arguments") ?: JsonObject())
 
             TAMClient.musicPredicateFactory.fromArgs(type, arguments)
         }
@@ -106,13 +106,14 @@ object MusicTriggerSerializer {
         }
 
         val parameters = getGson(null)
-            .fromJson(json.getAsJsonObject("parameters"), MusicEvent.Parameters::class.java)
+            .fromJson(json.getAsJsonObject("parameters") ?: JsonObject(),
+                MusicEvent.Parameters::class.java)
 
         return try {
             val typeName = GsonHelper.getAsString(json, "type")
             val type = TAMAPI.getEventType(typeName)
                 ?: throw MusicTriggerException("Unknown predicate type '$typeName'")
-            val arguments = type.createArguments(json.getAsJsonObject("arguments"))
+            val arguments = type.createArguments(json.getAsJsonObject("arguments") ?: JsonObject())
 
             TAMClient.musicEventFactory.fromArgs(type, arguments, music, parameters)
         }
@@ -146,8 +147,7 @@ object MusicTriggerSerializer {
                 return false
             }
 
-            val kotlinAnnotations = f.declaringClass.kotlin.declaredMemberProperties
-                .firstOrNull() { it.name == f.name }
+            val kotlinAnnotations = f.declaringClass.kotlin.declaredMemberProperties.firstOrNull { it.name == f.name }
                 ?.annotations
             return f.annotations?.any { it is Serialize } != true &&
                     kotlinAnnotations?.any { it is Serialize } != true &&

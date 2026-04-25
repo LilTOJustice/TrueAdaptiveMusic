@@ -1,12 +1,12 @@
-package liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.trigger.predicate.types
+package liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.trigger.predicate.types
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.serialization.legacy.Convertible
-import liltojustice.trueadaptivemusic.client.serialization.legacy.original.model.identifier.Identifier
+import liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.identifier.Identifier
 
-object RidingPredicate: Convertible {
+object EntityNearbyPredicate: Convertible {
     override fun convert(json: JsonElement): JsonObject {
         val result = JsonObject()
         val entities = JsonArray()
