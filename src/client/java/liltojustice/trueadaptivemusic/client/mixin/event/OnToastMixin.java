@@ -15,13 +15,13 @@ public class OnToastMixin {
     @Inject(at = @At("HEAD"), method = "addToast")
     public void add(Toast toast, CallbackInfo ci) {
         if (toast instanceof AdvancementToast) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnAdvancementGetEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnAdvancementGetEvent.INSTANCE);
         }
         else if (toast instanceof RecipeToast) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnRecipeUnlockEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnRecipeUnlockEvent.INSTANCE);
         }
         else if (toast instanceof TutorialToast) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnTutorialPopupEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnTutorialPopupEvent.INSTANCE);
         }
     }
 }

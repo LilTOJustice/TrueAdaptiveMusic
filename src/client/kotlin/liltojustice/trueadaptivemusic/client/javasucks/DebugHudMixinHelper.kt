@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.javasucks
 
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import net.minecraft.client.Minecraft

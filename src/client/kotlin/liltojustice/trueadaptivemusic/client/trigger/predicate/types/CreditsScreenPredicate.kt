@@ -1,10 +1,10 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.WinScreen
 
-class CreditsScreenPredicate: MusicPredicate() {
+object CreditsScreenPredicate: BasicPredicateType("credits_screen") {
     override fun test(): Boolean {
         return Minecraft.getInstance().screen is WinScreen
     }
