@@ -14,10 +14,11 @@ import liltojustice.trueadaptivemusic.client.sound.file.ZipSoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
-import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
-import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.stream.ZipInputStream
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Component
 import net.minecraft.util.GsonHelper
@@ -272,14 +273,14 @@ class MusicPack private constructor(
 
         rules.traverse { node, _ ->
             node.predicates.forEach { predicate ->
-                (predicate as? ErrorPredicate)?.let {
-                    validation.addWarning(it.reason)
+                if (predicate.arguments is ErrorPredicate.Arguments) {
+                    validation.addWarning(predicate.arguments.reason)
                 }
             }
 
             node.events.forEach { event ->
-                (event as? ErrorEvent)?.let {
-                    validation.addWarning(it.reason)
+                if (event.arguments is ErrorEvent.Arguments) {
+                    validation.addWarning(event.arguments.reason)
                 }
             }
         }

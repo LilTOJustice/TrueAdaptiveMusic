@@ -1,32 +1,37 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class BossHealthPredicate(private val direction: Direction, private val healthPercentage: Int): MusicPredicate() {
-    override fun test(): Boolean {
+object BossHealthPredicate: StaticPredicateType<BossHealthPredicate.Arguments>(
+    "boss_health", typeOf<Arguments>()
+) {
+    override val tickRate
+        get() = super.tickRate * 4
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::direction.name to "Whether the music should play above or below the given health percentage.",
+            Arguments::healthPercentage.name to "The threshold at which the predicate switches."
+        )
+
+    override fun test(arguments: Arguments): Boolean {
         return Minecraft.getInstance().gui.bossOverlay.events.any { bossBar ->
-            healthTest((healthPercentage / 100F), direction, bossBar.value.progress)
+            healthTest(
+                arguments.healthPercentage / 100F,
+                arguments.direction,
+                bossBar.value.progress
+            )
         }
     }
 
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 4
-    }
+    data class Arguments(val direction: Direction, val healthPercentage: Int): TriggerArguments()
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                BossHealthPredicate::direction.name to "Whether the music should play above or below the given " +
-                        "health percentage.",
-                BossHealthPredicate::healthPercentage.name to "The threshold at which the predicate switches."
-            )
-
-        private fun healthTest(thresholdPercentage: Float, direction: Direction, currentPercentage: Float): Boolean {
-            return when (direction) {
-                Direction.Greater -> currentPercentage > thresholdPercentage
-                Direction.Lesser -> currentPercentage < thresholdPercentage
-            }
+    private fun healthTest(thresholdPercentage: Float, direction: Direction, currentPercentage: Float): Boolean {
+        return when (direction) {
+            Direction.Greater -> currentPercentage > thresholdPercentage
+            Direction.Lesser -> currentPercentage < thresholdPercentage
         }
     }
 

@@ -1,33 +1,25 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate
 
-import liltojustice.trueadaptivemusic.ReflectionHelper
-import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
-import liltojustice.trueadaptivemusic.client.trigger.TriggerReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateTypeBase
+import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.network.chat.Component
-import kotlin.reflect.full.companionObjectInstance
 
-abstract class MusicPredicate: MusicTrigger() {
+class MusicPredicate<TTrigger: PredicateTypeBase>(type: TTrigger, arguments: TriggerArguments, state: TriggerState)
+    : MusicTrigger<TTrigger>(type, arguments, state) {
     private var lastResult = false
     private var ticksSinceResult = 0
 
-    protected abstract fun test(): Boolean
-
-    final override fun getTypeName(): String {
-        return if (this is ErrorPredicate)
-            ErrorPredicate.NAME
-        else
-            TAMClient.predicateRegistry[this::class]
-    }
-
-    fun testPredicate(): Boolean {
+    fun test(): Boolean {
         val tickRate = getFixedTickRate()
         if (ticksSinceResult == 0 || ticksSinceResult >= tickRate) {
             ticksSinceResult = 1
 
-            lastResult = test()
+            lastResult = type.testBase(arguments, state)
         }
 
         ticksSinceResult++
@@ -35,13 +27,8 @@ abstract class MusicPredicate: MusicTrigger() {
         return lastResult
     }
 
-    open fun getTickRate(): Int {
-        return 1
-    }
-
     private fun getFixedTickRate(): Int {
-        val desiredTickRate = getTickRate()
-        return if (desiredTickRate < 1) 1 else desiredTickRate
+        return if (type.tickRate < 1) 1 else type.tickRate
     }
 
     companion object: MusicPredicateCompanion
@@ -50,29 +37,25 @@ abstract class MusicPredicate: MusicTrigger() {
         override fun getDisplayName(triggerName: String): Component {
             return Component.translatableWithFallback(
                 "trueadaptivemusic.predicate.name.${triggerName}",
-                (TAMClient.predicateRegistry[triggerName]?.companionObjectInstance as? MusicPredicateCompanion)
-                    ?.displayName ?: triggerName.prettify()
+                TAMAPI.getPredicateType(triggerName)?.displayName ?: triggerName.prettify()
             )
         }
 
         override fun getArgDisplayName(triggerName: String, argName: String): Component? {
-            val predicateType = TAMClient.predicateRegistry[triggerName] ?: return null
-            val inferredDisplayNames = ReflectionHelper.getConstructorParameterNames(predicateType)
-            val combined = inferredDisplayNames.associateWith { it.prettify() } +
-                TriggerReflectionHelper.getMusicTriggerArgDisplayNames(predicateType)
+            val predicateType = TAMAPI.getPredicateType(triggerName) ?: return null
 
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.display",
-                combined[argName]
+                predicateType.argDisplayNames[argName]
             )
         }
 
         override fun getArgDescription(triggerName: String, argName: String): Component? {
-            val predicateClass = TAMClient.predicateRegistry[triggerName] ?: return null
+            val predicateType = TAMAPI.getPredicateType(triggerName) ?: return null
 
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.predicate.arg.${triggerName}.${argName}.description",
-                TriggerReflectionHelper.getMusicTriggerArgDescriptions(predicateClass)[argName]
+                predicateType.argDescriptions[argName]
             )
         }
     }

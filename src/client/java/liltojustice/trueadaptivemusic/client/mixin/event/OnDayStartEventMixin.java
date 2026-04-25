@@ -14,7 +14,7 @@ public class OnDayStartEventMixin {
     public void tick(CallbackInfo ci) {
         Minecraft thisObject = (Minecraft)(Object)this;
         if (thisObject.level != null && thisObject.level.getGameTime() % 24000L == 0L) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.INSTANCE);
         }
     }
 }

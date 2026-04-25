@@ -1,20 +1,24 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
+import kotlin.reflect.typeOf
 
-class TeamPredicate(private val teamId: String): MusicPredicate() {
-    override fun test(): Boolean {
+object TeamPredicate: StaticPredicateType<TeamPredicate.Arguments>(
+    "team", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(Arguments::teamId.name to "Id of the team to check if the player is on.")
+
+    data class Arguments(val teamId: String): TriggerArguments()
+
+    override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val scoreboard = minecraft.level?.scoreboard ?: return false
         val playerName = minecraft.player?.name?.string ?: return false
 
-        return scoreboard.playerTeams.firstOrNull { it.name == teamId }?.players?.contains(playerName) ?: false
-    }
-
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                TeamPredicate::teamId.name to "Id of the team to check if the player is on.")
+        return scoreboard.playerTeams.firstOrNull { it.name == arguments.teamId }?.players?.contains(playerName)
+            ?: false
     }
 }
