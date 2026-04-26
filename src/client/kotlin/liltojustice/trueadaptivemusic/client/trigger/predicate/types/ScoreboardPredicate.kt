@@ -1,27 +1,37 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class ScoreboardPredicate(
-    private val objectiveId: String,
-    private val value: Int,
-    private val comparison: Comparison
-): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val scoreboard = client.world?.scoreboard ?: return false
-        val playerName = client.player?.name?.string ?: return false
+object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
+    "scoreboard", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::objectiveId.name to "Id of the scoreboard objective to track.",
+            Arguments::value.name to "Value to compare to the objective value.",
+            Arguments::comparison.name to "How to compare the objective value to the given value."
+        )
+
+    data class Arguments(val objectiveId: String, val value: Int, val comparison: Comparison): TriggerArguments()
+
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val scoreboard = minecraft.world?.scoreboard ?: return false
+        val player = minecraft.player?.nameForScoreboard ?: return false
         val matchingObjective = scoreboard.objectives.firstOrNull { objective ->
-            objective.name == objectiveId
+            objective.name == arguments.objectiveId
         } ?: return false
 
         val matchingEntries = scoreboard.getScoreboardEntries(matchingObjective).filter { entry ->
-            entry.owner == playerName || scoreboard.teams.any { team -> team.playerList.any { it == playerName } }
+            entry.owner == player || scoreboard.teams.any { team -> team.playerList.any { it == player } }
         }
 
+        val value = arguments.value
         return matchingEntries.any { matchingEntry ->
-            when (comparison) {
+            when (arguments.comparison) {
                 Comparison.Equal -> matchingEntry.value == value
                 Comparison.NotEqual -> matchingEntry.value == value
                 Comparison.Greater -> matchingEntry.value > value
@@ -30,15 +40,6 @@ class ScoreboardPredicate(
                 Comparison.LesserOrEqual -> matchingEntry.value <= value
             }
         }
-    }
-
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                ScoreboardPredicate::objectiveId.name to "Id of the scoreboard objective to track.",
-                ScoreboardPredicate::value.name to "Value to compare to the objective value.",
-                ScoreboardPredicate::comparison.name to "How to compare the objective value to the given value."
-            )
     }
 
     enum class Comparison {
