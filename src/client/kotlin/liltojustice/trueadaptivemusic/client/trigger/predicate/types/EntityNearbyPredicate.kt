@@ -1,36 +1,39 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class EntityNearbyPredicate(private val entities: List<EntityTypeIdentifier>, private val blockRadius: UInt): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val playerEntity = client.player ?: return false
-        val world = client.world ?: return false
+object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Arguments>(
+    "entity_nearby", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::entities.name to "List of entities the music should play for. If none, any entity will " +
+                    "trigger the music.",
+            Arguments::blockRadius.name to "Minimum radius for the entity to trigger the predicate."
+        )
+    override val tickRate: Int
+        get() = super.tickRate * 5
+
+    data class Arguments(val entities: List<EntityTypeIdentifier>, val blockRadius: UInt): TriggerArguments()
+
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val playerEntity = minecraft.player ?: return false
+        val level = minecraft.world ?: return false
         val validEntities =
-            (if (entities.isNotEmpty()) {
-                world.entities.filter { entity -> entities.any { entityId -> entityId.matches(entity) } }
+            (if (arguments.entities.isNotEmpty()) {
+                level.entities.filter { entity -> arguments.entities.any { entityId -> entityId.matches(entity) } }
             }
             else {
-                world.entities
+                level.entities
             })
                 .filter { it != playerEntity }
 
-        return validEntities.any { playerEntity.pos.distanceTo(it.pos).toUInt() <= blockRadius }
-    }
-
-    override fun getTickRate(): Int {
-        return super.getTickRate() * 5
-    }
-
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                EntityNearbyPredicate::entities.name to "List of entities the music should play for. If none, any " +
-                        "entity will trigger the music.",
-                EntityNearbyPredicate::blockRadius.name to "Minimum radius for the entity to trigger the predicate."
-            )
+        return validEntities
+            .any { playerEntity.pos.distanceTo(it.pos).toUInt() <= arguments.blockRadius }
     }
 }
