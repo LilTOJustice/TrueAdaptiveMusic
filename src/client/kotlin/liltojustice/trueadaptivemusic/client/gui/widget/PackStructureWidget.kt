@@ -4,9 +4,9 @@ import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipTex
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -22,7 +22,7 @@ class PackStructureWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
-    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate) -> Unit,
+    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate<*>) -> Unit,
     private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
     private val onSelectCreateNewPredicate: (node: MusicTree.Node) -> Unit,
     private val onUnselectNode: () -> Unit,
@@ -30,21 +30,30 @@ class PackStructureWidget(
     x: Int = 0,
     y: Int = 0
 ): ContainerWidget(
-    width, height, TITLE_TEXT.string, true, false, true, true, true, x, y)
-{
+    width,
+    height,
+    TITLE_TEXT.string,
+    true,
+    false,
+    true,
+    true,
+    true,
+    x,
+    y
+) {
     private var mouseButtonHeld = false
     private var shiftHeld = false
     private var ctrlHeld = false
     private var spaceHeld = false
     private var targetedNode: MusicTree.Node? = null
-    private var targetedPredicate: MusicPredicate? = null
+    private var targetedPredicate: MusicPredicate<*>? = null
     private var collapsed = mutableMapOf<MusicTree.Node, Boolean>()
 
     init {
         initPredicateWidgets()
     }
 
-    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate?) {
+    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate<*>?) {
         targetedNode = node
         targetedPredicate = predicate
     }
@@ -305,8 +314,8 @@ class PackStructureWidget(
         val predicateWidgets = run {
             node.predicates.map { predicate ->
                 val widget = ClickableTextWidget(
-                    MusicPredicate.getDisplayName(predicate.getTypeName()).string,
-                    onClick = if (predicate is RootPredicate) ({
+                    MusicPredicate.getDisplayName(predicate.type.typeName).string,
+                    onClick = if (predicate.type is RootPredicate) ({
                         targetedPredicate = null
                         targetedNode = node
                         onSelectEditExistingNode(node)
@@ -321,7 +330,7 @@ class PackStructureWidget(
                 val tooltipText = predicate.getTriggerTooltipText()
 
                 widget.setTooltip(Tooltip.of(tooltipText))
-                widget.color = if (predicate is ErrorPredicate)
+                widget.color = if (predicate.type is ErrorPredicate)
                     Colors.RED
                 else
                     Colors.WHITE
@@ -334,7 +343,7 @@ class PackStructureWidget(
             repeat(max(0, predicateWidgets.size - 1)) { add(ClickableTextWidget("||")) }
         }
 
-        val combinePredicateWidget = if (!node.predicates.isEmpty() && node.predicates.any { it is RootPredicate })
+        val combinePredicateWidget = if (!node.predicates.isEmpty() && node.predicates.any { it.type is RootPredicate })
             null
         else
             run {
