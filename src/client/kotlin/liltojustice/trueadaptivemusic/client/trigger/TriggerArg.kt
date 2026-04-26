@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger
 
-typealias TriggerParam = TriggerArg
+typealias MusicParam = TriggerArg
 
 data class TriggerArg(val name: String, val value: Any?) {
     override fun toString(): String {

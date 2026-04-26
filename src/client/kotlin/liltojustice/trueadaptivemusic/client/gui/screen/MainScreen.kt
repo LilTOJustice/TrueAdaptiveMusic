@@ -27,7 +27,6 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var refreshButton: ButtonWidget
     private lateinit var wikiButton: ButtonWidget
     private lateinit var optionsButton: ButtonWidget
-    private lateinit var packBrowserButton: ButtonWidget
     private lateinit var discordButton: ButtonWidget
 
     override fun init() {
@@ -89,12 +88,6 @@ class MainScreen(private val parent: Screen): Screen(
         optionsButton.width = textRenderer.getWidth(OPTIONS_TEXT) + 10
         optionsButton.x = width - optionsButton.width - 1
 
-        packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
-        { _: ButtonWidget? -> client?.setScreen(PackBrowserScreen(this)) }.build()
-        packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
-        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
-        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
-
         discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
         { _: ButtonWidget? -> client?.setScreen(
             ConfirmLinkScreen(
@@ -122,8 +115,15 @@ class MainScreen(private val parent: Screen): Screen(
         addDrawableChild(refreshButton)
         addDrawableChild(wikiButton)
         addDrawableChild(optionsButton)
-        addDrawableChild(packBrowserButton)
         addDrawableChild(discordButton)
+
+        val packBrowserTarget = TAMClient.createPackBrowserScreen(this)
+        val packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
+        { _: ButtonWidget? -> client?.setScreen(packBrowserTarget) }.build()
+        packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
+        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
+        addDrawableChild(packBrowserButton)
     }
 
     override fun close() {

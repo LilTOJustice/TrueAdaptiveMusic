@@ -1,17 +1,17 @@
-True Adaptive Music v2.1.2
+True Adaptive Music v2.2 - Infrastructure Update
 
-### New Features:
-#### Entity Tag Support
-- Entity tags will now be selectable for predicate types that involve entities (e.g. entity nearby, combat, etc.). This allows better support for mods as well as a more streamlined way to select a set of entities. For example, if you want specific combat music for all undead mobs, you can just select "Minecraft - Undead" instead of having to select all mobs with that tag manually.
+### Important Note
+As of True Adaptive Music 2.2, the mod will now be split into 3 separate mods. True Adaptive Music is the base mod and depends on an api mod called True Adaptive Music API. The pack browser feature is now split into the True Adaptive Music Pack Browser mod for curseforge compliance reasons, and the mod will only be available for download on modrinth.
+
+As a result of these changes, this should be the first update that is available on Curseforge since 2.0 (pending approval)
+
+### Fluid Predicate
+- The InWater/InLava predicate types have now been replaced with an "In Fluid" predicate type which can accept registered fluid (including modded ones)
+  - Packs using the old predicate types will still work on this version
 
 ### Other Improvements/Fixes:
-#### 26.1-specific
-- Fixed music stopping and then breaking when loading into a world
-- Fixed day/night predicates not working properly
-#### All versions
-- Fixed the pack browser not working on linux systems (special thanks to Flare @devflareon for helping with this!)
-- Fixed the pack browser images not centering on smaller gui scales
-- Blocked concurrency-based errors from spamming the console (this will be naturally fixed when minecraft introduces logic multithreading in an upcoming update)
+- Fixed some error spam from the sound engine
 
+Next up is [2.3](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/15)
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
