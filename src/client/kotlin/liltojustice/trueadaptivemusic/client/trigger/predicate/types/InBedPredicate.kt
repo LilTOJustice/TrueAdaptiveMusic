@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.Minecraft
 
-class InBedPredicate: MusicPredicate() {
+object InBedPredicate: BasicPredicateType("in_bed") {
     override fun test(): Boolean {
         return Minecraft.getInstance().player?.isSleeping ?: false
     }

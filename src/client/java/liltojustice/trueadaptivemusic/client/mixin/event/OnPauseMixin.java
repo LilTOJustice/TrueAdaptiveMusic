@@ -13,7 +13,7 @@ public class OnPauseMixin {
     @Inject(method = "pauseGame", at = @At("HEAD"))
     public void openGameMenu(boolean suppressPauseMenuIfWeReallyArePausing, CallbackInfo ci) {
         if (Minecraft.getInstance().screen == null) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnPauseEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnPauseEvent.INSTANCE);
         }
     }
 }

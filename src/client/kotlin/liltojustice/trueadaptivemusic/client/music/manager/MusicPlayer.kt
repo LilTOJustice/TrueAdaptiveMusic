@@ -17,6 +17,7 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     private val soundSystem = SoundSystem(minecraft.options)
     private val volumeManager = VolumeManager(soundSystem)
     private val tracks = mutableMapOf<String, Track>()
+    private val lock = Any()
 
     fun refreshSoundVolume() {
         soundSystem.refreshSoundVolume()
@@ -136,34 +137,38 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     }
 
     private fun stop(track: Track) {
-        if (isTrackPlaying(track)) {
-            track.currentSoundInstance?.let {
-                volumeManager.startFade(
-                    it, track.crossFadeTicks, 0F, true)
-            }
+        synchronized(lock) {
+            if (isTrackPlaying(track)) {
+                track.currentSoundInstance?.let {
+                    volumeManager.startFade(
+                        it, track.crossFadeTicks, 0F, true)
+                }
 
-            track.resetSounds()
+                track.resetSounds()
+            }
         }
     }
 
     private fun startNewInstance(
         track: Track, newMusic: PlayableSound, fadeIn: Boolean, isLooping: Boolean, loopStartPoint: UInt) {
-        val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint)
-        soundSystem.stop(track.currentSoundInstance)
-        track.updateSound(newMusic, newInstance)
-        playInstance(newInstance)
+        synchronized(lock) {
+            val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint)
+            soundSystem.stop(track.currentSoundInstance)
+            track.updateSound(newMusic, newInstance)
+            playInstance(newInstance)
 
 
-        if (fadeIn) {
-            volumeManager.setInstanceVolume(newInstance, 0F, false)
-            volumeManager.startFade(
-                newInstance, track.crossFadeTicks, track.clampedVolume)
+            if (fadeIn) {
+                volumeManager.setInstanceVolume(newInstance, 0F, false)
+                volumeManager.startFade(
+                    newInstance, track.crossFadeTicks, track.clampedVolume)
+            }
+            else {
+                volumeManager.setInstanceVolume(newInstance, track.clampedVolume)
+            }
+
+            track.desiredVolume = 1F
         }
-        else {
-            volumeManager.setInstanceVolume(newInstance, track.clampedVolume)
-        }
-
-        track.desiredVolume = 1F
     }
 
     private fun getTrack(trackName: String): Track? {
@@ -184,11 +189,13 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     }
 
     private fun playInstance(soundInstance: TAMSoundInstance) {
-        try {
-            soundSystem.play(soundInstance)
-        }
-        catch (e: MusicLoadException) {
-            Logger.logError("Error: Failed to play sound instance - ${e.message}")
+        synchronized(lock) {
+            try {
+                soundSystem.play(soundInstance)
+            }
+            catch (e: MusicLoadException) {
+                Logger.logError("Error: Failed to play sound instance - ${e.message}")
+            }
         }
     }
 
@@ -198,13 +205,15 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         outFadeTicks: Int,
         inFadeTicks: Int,
         inVolume: Float) {
-        if (inSoundInstance.desiredVolume == 0F || inSoundInstance.desiredVolume == 1F) {
-            volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
-        }
+        synchronized(lock) {
+            if (inSoundInstance.desiredVolume == 0F || inSoundInstance.desiredVolume == 1F) {
+                volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
+            }
 
-        soundSystem.resumeInstance(inSoundInstance)
-        volumeManager.startFade(inSoundInstance, inFadeTicks, inVolume, false)
-        volumeManager.startFade(outSoundInstance, outFadeTicks, 0F, false)
+            soundSystem.resumeInstance(inSoundInstance)
+            volumeManager.startFade(inSoundInstance, inFadeTicks, inVolume, false)
+            volumeManager.startFade(outSoundInstance, outFadeTicks, 0F, false)
+        }
     }
 
     private fun clampTrackVolume(track: Track, clamp: Float) {

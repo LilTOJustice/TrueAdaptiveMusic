@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.Minecraft
 
-class TitleScreenPredicate: MusicPredicate() {
+object TitleScreenPredicate: BasicPredicateType("title_screen") {
     override fun test(): Boolean {
         return Minecraft.getInstance().level == null
     }

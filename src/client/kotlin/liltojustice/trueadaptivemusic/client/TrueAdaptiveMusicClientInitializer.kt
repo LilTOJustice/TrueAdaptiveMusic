@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
-import liltojustice.trueadaptivemusic.client.gui.widget.utility.EmptyClickableWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
@@ -11,7 +10,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGe
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDeathEvent
-import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnJoinWorldEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnNightStartEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnPauseEvent
@@ -35,8 +34,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InLavaPredicate
-import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InWaterPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InFluidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
@@ -52,6 +50,8 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TeamPredica
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
@@ -64,53 +64,52 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
-        TAMClient.registerPredicate("biome", BiomePredicate::class)
-        TAMClient.registerPredicate("boss", BossPredicate::class)
-        TAMClient.registerPredicate("combat", CombatPredicate::class)
-        TAMClient.registerPredicate("day", DayTimePredicate::class)
-        TAMClient.registerPredicate("dimension", DimensionPredicate::class)
-        TAMClient.registerPredicate("first_day", FirstDayPredicate::class)
-        TAMClient.registerPredicate("game_mode", GameModePredicate::class)
-        TAMClient.registerPredicate("health", HealthPredicate::class)
-        TAMClient.registerPredicate("height", HeightPredicate::class)
-        TAMClient.registerPredicate("moon_phase", MoonPhasePredicate::class)
-        TAMClient.registerPredicate("night", NightTimePredicate::class)
-        TAMClient.registerPredicate("pillager_raid", PillagerRaidPredicate::class)
-        TAMClient.registerPredicate("riding", RidingPredicate::class)
-        TAMClient.registerPredicate("root", RootPredicate::class)
-        TAMClient.registerPredicate("status_effect", StatusEffectPredicate::class)
-        TAMClient.registerPredicate("structure", StructurePredicate::class)
-        TAMClient.registerPredicate("structure_set", StructureSetPredicate::class)
-        TAMClient.registerPredicate("title_screen", TitleScreenPredicate::class)
-        TAMClient.registerPredicate("weather", WeatherPredicate::class)
-        TAMClient.registerPredicate("death_screen", DeathScreenPredicate::class)
-        TAMClient.registerPredicate("fishing", FishingPredicate::class)
-        TAMClient.registerPredicate("flying", FlyingPredicate::class)
-        TAMClient.registerPredicate("paused", PausedPredicate::class)
-        TAMClient.registerPredicate("credits_screen", CreditsScreenPredicate::class)
-        TAMClient.registerPredicate("in_bed", InBedPredicate::class)
-        TAMClient.registerPredicate("in_water", InWaterPredicate::class)
-        TAMClient.registerPredicate("in_lava", InLavaPredicate::class)
-        TAMClient.registerPredicate("boss_health", BossHealthPredicate::class)
-        TAMClient.registerPredicate("hunger", HungerPredicate::class)
-        TAMClient.registerPredicate("entity_nearby", EntityNearbyPredicate::class)
-        TAMClient.registerPredicate("scoreboard", ScoreboardPredicate::class)
-        TAMClient.registerPredicate("team", TeamPredicate::class)
-        TAMClient.registerPredicate("player_attribute", PlayerAttributePredicate::class)
+        TAMAPI.registerPredicateType(BiomePredicate)
+        TAMAPI.registerPredicateType(BossPredicate)
+        TAMAPI.registerPredicateType(CombatPredicate)
+        TAMAPI.registerPredicateType(DayTimePredicate)
+        TAMAPI.registerPredicateType(DimensionPredicate)
+        TAMAPI.registerPredicateType(FirstDayPredicate)
+        TAMAPI.registerPredicateType(GameModePredicate)
+        TAMAPI.registerPredicateType(HealthPredicate)
+        TAMAPI.registerPredicateType(HeightPredicate)
+        TAMAPI.registerPredicateType(MoonPhasePredicate)
+        TAMAPI.registerPredicateType(NightTimePredicate)
+        TAMAPI.registerPredicateType(PillagerRaidPredicate)
+        TAMAPI.registerPredicateType(RidingPredicate)
+        TAMAPI.registerPredicateType(RootPredicate)
+        TAMAPI.registerPredicateType(StatusEffectPredicate)
+        TAMAPI.registerPredicateType(StructurePredicate)
+        TAMAPI.registerPredicateType(StructureSetPredicate)
+        TAMAPI.registerPredicateType(TitleScreenPredicate)
+        TAMAPI.registerPredicateType(WeatherPredicate)
+        TAMAPI.registerPredicateType(DeathScreenPredicate)
+        TAMAPI.registerPredicateType(FishingPredicate)
+        TAMAPI.registerPredicateType(FlyingPredicate)
+        TAMAPI.registerPredicateType(PausedPredicate)
+        TAMAPI.registerPredicateType(CreditsScreenPredicate)
+        TAMAPI.registerPredicateType(InBedPredicate)
+        TAMAPI.registerPredicateType(InFluidPredicate)
+        TAMAPI.registerPredicateType(BossHealthPredicate)
+        TAMAPI.registerPredicateType(HungerPredicate)
+        TAMAPI.registerPredicateType(EntityNearbyPredicate)
+        TAMAPI.registerPredicateType(ScoreboardPredicate)
+        TAMAPI.registerPredicateType(TeamPredicate)
+        TAMAPI.registerPredicateType(PlayerAttributePredicate)
 
-        TAMClient.registerEvent("on_advancement_get", OnAdvancementGetEvent::class)
-        TAMClient.registerEvent("on_boss_defeat", OnBossDefeatEvent::class)
-        TAMClient.registerEvent("on_day_start", OnDayStartEvent::class)
-        TAMClient.registerEvent("on_death", OnDeathEvent::class)
-        TAMClient.registerEvent("on_enter_predicate", OnEnterPredicateEvent::class)
-        TAMClient.registerEvent("on_join_world", OnJoinWorldEvent::class)
-        TAMClient.registerEvent("on_night_start", OnNightStartEvent::class)
-        TAMClient.registerEvent("on_recipe_unlock", OnRecipeUnlockEvent::class)
-        TAMClient.registerEvent("on_tutorial_popup", OnTutorialPopupEvent::class)
-        TAMClient.registerEvent("on_wake_up", OnWakeUpEvent::class)
-        TAMClient.registerEvent("on_pause", OnPauseEvent::class)
+        TAMAPI.registerEventType(OnAdvancementGetEvent)
+        TAMAPI.registerEventType(OnBossDefeatEvent)
+        TAMAPI.registerEventType(OnDayStartEvent)
+        TAMAPI.registerEventType(OnDeathEvent)
+        TAMAPI.registerEventType(OnEnterNodeEvent)
+        TAMAPI.registerEventType(OnJoinWorldEvent)
+        TAMAPI.registerEventType(OnNightStartEvent)
+        TAMAPI.registerEventType(OnRecipeUnlockEvent)
+        TAMAPI.registerEventType(OnTutorialPopupEvent)
+        TAMAPI.registerEventType(OnWakeUpEvent)
+        TAMAPI.registerEventType(OnPauseEvent)
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<String>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
@@ -127,7 +126,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             result
         }
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<Int>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
@@ -161,7 +160,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             result
         }
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<UInt>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
@@ -191,7 +190,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             result
         }
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<Double>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
@@ -254,7 +253,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             result
         }
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<Boolean>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = CheckboxWidget(
@@ -269,7 +268,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             result
         }
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<Enum<*>>()) },
             { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
@@ -294,7 +293,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
         )
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             { type -> isEnumList(type) },
             { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
@@ -319,7 +318,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
         )
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<TypedIdentifier>()) },
             { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val prettify = TAMClient.options.prettifyIdentifiers
@@ -341,7 +340,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
         )
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             { type -> isTypedIdentifierList(type) },
             { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
@@ -370,7 +369,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             }
         )
 
-        TAMClient.registerInputWidget(
+        TAMAPI.registerInputWidget(
             typeOf<TrueAdaptiveMusicOptions.LUFBoost>()
         ) { prompt, _, outArgs, arg, tooltipText, _ ->
             val result = SliderWidget(
@@ -383,8 +382,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
             result
         }
-
-        TAMClient.start()
     }
 
     companion object {

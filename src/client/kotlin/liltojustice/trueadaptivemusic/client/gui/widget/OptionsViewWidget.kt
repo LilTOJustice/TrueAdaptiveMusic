@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptions
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
-import liltojustice.trueadaptivemusic.client.gui.widget.utility.InputWidgetMaker
+import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import kotlin.reflect.full.primaryConstructor
@@ -11,7 +11,7 @@ import kotlin.reflect.full.primaryConstructor
 class OptionsViewWidget(initialOptions: TrueAdaptiveMusicOptions, width: Int, height: Int, x: Int = 0, y: Int = 0)
     : ContainerWidget(width, height, "", false, false, x = x, y = y) {
     private val requiredOptionsArgs = TrueAdaptiveMusicOptions
-        .getRequiredArgs().map { InputWidgetMaker.WidgetArg.of(it) }
+        .getRequiredArgs().map { WidgetArg.of(it) }
     private var optionsArgs: MutableList<Any?> = initialOptions.getArgs().toMutableList()
 
     override fun updateWidgetNarration(output: NarrationElementOutput) {

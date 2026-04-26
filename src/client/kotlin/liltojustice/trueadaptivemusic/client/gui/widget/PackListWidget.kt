@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
-import liltojustice.trueadaptivemusic.client.gui.screen.PackBrowserScreen
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextDisplayWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
@@ -93,8 +92,9 @@ class PackListWidget(
                         setSelected(newEntry)
                     }
                 }
-            addEntry(
-                PackBrowserEntry { minecraft.setScreen(PackBrowserScreen(screen)) })
+
+            val packBrowserScreen = TAMClient.createPackBrowserScreen(screen)
+            addEntry(PackBrowserEntry { minecraft.setScreen(packBrowserScreen) })
             renderState = RenderState.Success
         }
     }
@@ -102,7 +102,7 @@ class PackListWidget(
     companion object {
         private val VANILLA_TEXT = Component.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla")
         private val DISABLE_TAM_TEXT = Component.translatableWithFallback(
-        "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
+            "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
         private val ISSUES_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.issues_found", "Issues Found")
         private val PACK_BROWSER_TEXT = Component.translatableWithFallback(
