@@ -1,23 +1,26 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class HeightPredicate(private val direction: Direction, private val y: Int): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val playerHeight = client.player?.blockPos?.y ?: return false
+object HeightPredicate: StaticPredicateType<HeightPredicate.Arguments>(
+    "height", typeOf<Arguments>()
+) {
+    data class Arguments(val direction: Direction, val y: Int): TriggerArguments()
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::direction.name to "Whether the music should play when the player is above or below " +
+                    "the y value.",
+            Arguments::y.name to "Threshold at which the predicate should switch."
+        )
 
-        return if (direction == Direction.Above) playerHeight >= y else playerHeight <= y
-    }
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val playerHeight = minecraft.player?.blockPos?.y ?: return false
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                HeightPredicate::direction.name to "Whether the music should play when the player is above or below " +
-                        "the y value.",
-                HeightPredicate::y.name to "Threshold at which the predicate should switch."
-            )
+        return if (arguments.direction == Direction.Above) playerHeight >= arguments.y else playerHeight <= arguments.y
     }
 
     @Suppress("unused")

@@ -1,20 +1,23 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class TeamPredicate(private val teamId: String): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val scoreboard = client.world?.scoreboard ?: return false
-        val playerName = client.player?.name?.string ?: return false
+object TeamPredicate: StaticPredicateType<TeamPredicate.Arguments>(
+    "team", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(Arguments::teamId.name to "Id of the team to check if the player is on.")
 
-        return scoreboard.teams.firstOrNull { it.name == teamId }?.playerList?.contains(playerName) ?: false
-    }
+    data class Arguments(val teamId: String): TriggerArguments()
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                TeamPredicate::teamId.name to "Id of the team to check if the player is on.")
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val scoreboard = minecraft.world?.scoreboard ?: return false
+        val playerName = minecraft.player?.nameForScoreboard ?: return false
+
+        return scoreboard.teams.firstOrNull { it.name == arguments.teamId }?.playerList?.contains(playerName) ?: false
     }
 }

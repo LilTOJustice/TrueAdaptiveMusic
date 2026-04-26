@@ -1,9 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("fabric-loom") version "1.7.1"
+    kotlin("jvm") version "2.3.20"
+    id("fabric-loom") version "1.15-SNAPSHOT"
     id("maven-publish")
 }
 
@@ -42,6 +43,9 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
+    maven {
+        url = URI("https://cursemaven.com")
+    }
 
     maven("https://maven.terraformersmc.com/releases/")
 }
@@ -54,9 +58,10 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
+    modApi("curse.maven:true-adaptive-music-api-1514598:7985977")
 }
 
 tasks.processResources {

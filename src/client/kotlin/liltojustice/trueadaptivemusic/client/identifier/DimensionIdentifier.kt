@@ -6,7 +6,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.dimension.DimensionTypes
 
 class DimensionIdentifier(id: Identifier): TypedIdentifier(id) {
-    override fun toPrefixedTranslationKey(): String {
+    override fun toPrefixedLanguageKey(): String {
         return id.toTranslationKey("dimension")
     }
 
