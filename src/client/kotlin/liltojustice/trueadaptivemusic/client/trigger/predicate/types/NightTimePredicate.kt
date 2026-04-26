@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.MinecraftClient
 
-class NightTimePredicate: MusicPredicate() {
+object NightTimePredicate: BasicPredicateType("night") {
     override fun test(): Boolean {
         val level = MinecraftClient.getInstance().world ?: return false
         val time = level.timeOfDay % 24000

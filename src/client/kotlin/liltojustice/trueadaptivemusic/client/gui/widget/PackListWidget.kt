@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
-import liltojustice.trueadaptivemusic.client.gui.screen.PackBrowserScreen
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextDisplayWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
@@ -50,7 +49,11 @@ class PackListWidget(
     }
 
     override fun getRowRight(): Int {
-        return right - 16
+        return scrollbarPositionX - 3
+    }
+
+    override fun getScrollbarPositionX(): Int {
+        return right - 8
     }
 
     override fun drawSelectionHighlight(
@@ -116,8 +119,9 @@ class PackListWidget(
                         setSelected(newEntry)
                     }
                 }
-            addEntry(
-                PackBrowserEntry { client.setScreen(PackBrowserScreen(screen)) })
+
+            val packBrowserScreen = TAMClient.createPackBrowserScreen(screen)
+            addEntry(PackBrowserEntry { client.setScreen(packBrowserScreen) })
             renderState = RenderState.Success
         }
     }
@@ -125,7 +129,7 @@ class PackListWidget(
     companion object {
         private val VANILLA_TEXT = Text.translatableWithFallback("trueadaptivemusic.vanilla", "Vanilla")
         private val DISABLE_TAM_TEXT = Text.translatableWithFallback(
-        "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
+            "trueadaptivemusic.disable_tam", "Disable True Adaptive Music")
         private val ISSUES_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.issues_found", "Issues Found")
         private val PACK_BROWSER_TEXT = Text.translatableWithFallback(

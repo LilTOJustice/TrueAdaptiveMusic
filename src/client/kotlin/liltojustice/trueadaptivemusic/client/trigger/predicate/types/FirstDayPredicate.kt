@@ -1,12 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.MinecraftClient
 
-class FirstDayPredicate: MusicPredicate() {
+object FirstDayPredicate: BasicPredicateType("first_day") {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val time = client.world?.time ?: return false
+        val time = MinecraftClient.getInstance().world?.time ?: return false
 
         return time <= 24000L
     }

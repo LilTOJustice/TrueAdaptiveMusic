@@ -5,7 +5,7 @@ import net.minecraft.registry.RegistryKeys
 import net.minecraft.util.Identifier
 
 class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
-    override fun toPrefixedTranslationKey(): String {
+    override fun toPrefixedLanguageKey(): String {
         return id.toTranslationKey("biome")
     }
 

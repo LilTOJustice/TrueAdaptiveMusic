@@ -1,12 +1,18 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
-import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
+import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
+import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
+import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
@@ -19,14 +25,14 @@ class PredicateViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: (targetNode: MusicTree.Node?, targetPredicate: MusicPredicate?, exit: Boolean) -> Unit,
+    private val onChangesSaved:
+        (targetNode: MusicTree.Node?, targetPredicate: MusicPredicate<*>?, exit: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
     width,
     height,
-    Text.translatableWithFallback(
-        "trueadaptivemusic.predicate_view", "Predicate View").string,
+    Text.translatableWithFallback("trueadaptivemusic.predicate_view", "Predicate View").string,
     true,
     false,
     true,
@@ -34,12 +40,12 @@ class PredicateViewWidget(
     true,
     x,
     y) {
-    private val predicateTypeNameOptions = TAMClient.predicateRegistry.getAllNames()
-        .filter { typeName -> typeName != TAMClient.predicateRegistry[RootPredicate::class] }
+    private val predicateTypeNameOptions = TAMAPI.getPredicateTypeNames().filter {
+        typeName -> typeName != Constants.ROOT_PREDICATE_NAME }
     private var selectedPredicateTypeName: String = predicateTypeNameOptions.firstOrNull() ?: ""
-    private var requiredPredicateArgs = listOf<InputWidgetMaker.WidgetArg>()
+    private var requiredPredicateArgs = listOf<WidgetArg>()
     private var predicateArgs = mutableListOf<Any?>()
-    private var selectedPredicate: MusicPredicate? = null
+    private var selectedPredicate: MusicPredicate<*>? = null
     private var selectedNode: MusicTree.Node? = null
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
 
@@ -60,7 +66,7 @@ class PredicateViewWidget(
             return
         }
 
-        if (selectedPredicate is ErrorPredicate) {
+        if (selectedPredicate?.type is ErrorPredicate) {
             renderErrorMode()
             return
         }
@@ -116,7 +122,7 @@ class PredicateViewWidget(
             "deleteSpacer"
         )
 
-        if (selectedPredicate !is RootPredicate) {
+        if (selectedPredicate?.type !is RootPredicate) {
             val result = addWidgetFromRender(
                 {
                     var clicked = false
@@ -163,9 +169,9 @@ class PredicateViewWidget(
         )
     }
 
-    fun setEditExistingPredicate(node: MusicTree.Node, predicate: MusicPredicate) {
+    fun setEditExistingPredicate(node: MusicTree.Node, predicate: MusicPredicate<*>) {
         clearWidgetsFromRender()
-        setSelectedPredicateTypeName(predicate.getTypeName())
+        setSelectedPredicateTypeName(predicate.type.typeName)
         selectedPredicate = predicate
         selectedNode = node
         resetScrolling()
@@ -183,11 +189,10 @@ class PredicateViewWidget(
 
     private fun setSelectedPredicateTypeName(typeName: String) {
         selectedPredicateTypeName = typeName
-        requiredPredicateArgs = TAMClient.predicateFactory
-            .getRequiredArgs(typeName).map { InputWidgetMaker.WidgetArg.of(it) }
+        requiredPredicateArgs = TAMAPI.getPredicateTypeArguments(typeName).map { WidgetArg.of(it) }
         predicateArgs = selectedPredicate?.let {
-            if (it.getTypeName() == selectedPredicateTypeName)
-                it.getTriggerArgs().map { arg -> arg.value }.toMutableList()
+            if (it.type.typeName == selectedPredicateTypeName)
+                MusicTrigger.getTriggerArgs(it.arguments).map { arg -> arg.value }.toMutableList()
             else
                 null
         } ?: requiredPredicateArgs.map { null }.toMutableList()
@@ -242,8 +247,14 @@ class PredicateViewWidget(
         }
 
         soundLibrary = musicPack.getEditPackSoundLibrary()
+        val predicateType = TAMAPI.getPredicateType(selectedPredicateTypeName)
+            ?: throw MusicTriggerException("Unknown predicate type '$selectedPredicateTypeName'")
         val replacement =
-            TAMClient.predicateFactory.fromArgs(selectedPredicateTypeName, predicateArgs.filterNotNull())
+            TAMClient.musicPredicateFactory.fromArgs(
+                predicateType,
+                TAMAPI.makePredicateArguments(
+                    predicateType, predicateArgs.filterNotNull())
+            )
         selectedNode?.let { node ->
             node.predicates = node.predicates.map { predicate ->
                 if (predicate == selectedPredicate) {
@@ -260,7 +271,6 @@ class PredicateViewWidget(
     }
 
     private fun makeNewPredicate(): MusicTree.Node? {
-        return selectedNode?.newPredicate(
-            selectedPredicateTypeName, predicateArgs.filterNotNull())
+        return selectedNode?.newPredicate(selectedPredicateTypeName, predicateArgs)
     }
 }

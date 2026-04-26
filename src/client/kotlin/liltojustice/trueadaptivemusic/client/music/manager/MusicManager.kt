@@ -6,7 +6,10 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
-import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterPredicateEvent
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
+import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
@@ -14,10 +17,9 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.math.Vec3d
 import kotlin.math.max
-import kotlin.reflect.KClass
 
-class MusicManager(private val client: MinecraftClient) {
-    var playingEvent: MusicEvent? = null
+class MusicManager(private val minecraft: MinecraftClient) {
+    var playingEvent: MusicEvent<*>? = null
     val currentMusic: TAMSoundInstance?
         get() = musicPlayer.getPlayingInstance(mainTrack)
     val currentAmbience: TAMSoundInstance?
@@ -25,15 +27,15 @@ class MusicManager(private val client: MinecraftClient) {
     val currentEventMusic: TAMSoundInstance?
         get() = musicPlayer.getPlayingInstance(EVENT_TRACK)
 
-    private val musicPlayer = MusicPlayer(client)
+    private val musicPlayer = MusicPlayer(minecraft)
     private var currentNodeId: String = ""
     private var oldNodeId: String = ""
     private var lastIgnorePersistence = false
     private var musicVolumeOption: SimpleOption<Double> =
-        client.options.getSoundVolumeOption(SoundCategory.MUSIC)
+        minecraft.options.getSoundVolumeOption(SoundCategory.MUSIC)
     private var masterVolumeOption: SimpleOption<Double> =
-        client.options.getSoundVolumeOption(SoundCategory.MASTER)
-    private var eventPool: List<MusicEvent> = emptyList()
+        minecraft.options.getSoundVolumeOption(SoundCategory.MASTER)
+    private var eventPool: List<MusicEvent<*>> = emptyList()
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private val parallelTracks = mutableMapOf<PlayableSound, String>()
@@ -50,13 +52,14 @@ class MusicManager(private val client: MinecraftClient) {
         musicPlayer.createTrack(ON_DEMAND_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
     }
 
-    fun <T: MusicEvent> invokeMusicEvent(eventType: KClass<T>, vararg args: Any?) {
+    fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
         eventPool.firstOrNull { event ->
-            eventType == event::class && runCatching { event.validate(*args) }.getOrNull() == true }
+            eventType == event.type && runCatching { event.validate(input) }.getOrNull() == true }
             ?.let { event ->
                 event.music.randomOrNull()?.let {
                     musicPlayer.startNew(EVENT_TRACK, it)
                 }
+
                 playingEvent = event
             }
     }
@@ -115,8 +118,8 @@ class MusicManager(private val client: MinecraftClient) {
 
         eventPool = treeResult.accumulatedEvents
 
-        val isPaused = isPaused(client)
-        val shouldStop = shouldStopMain(client, musicPlayer, musicToPlay)
+        val isPaused = isPaused(minecraft)
+        val shouldStop = shouldStopMain(minecraft, musicPlayer, musicToPlay)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
@@ -160,12 +163,12 @@ class MusicManager(private val client: MinecraftClient) {
 
         val isAmbiencePlaying = musicPlayer.isTrackPlaying(ambienceTrack)
         val isAmbienceAlmostDone = musicPlayer.isTrackAlmostDone(ambienceTrack)
-        if ((ambienceToPlay.isEmpty() || client.player == null) && isAmbiencePlaying) {
+        if ((ambienceToPlay.isEmpty() || minecraft.player == null) && isAmbiencePlaying) {
             musicPlayer.stop(ambienceTrack)
         }
 
         if (!ambienceToPlay.isEmpty() &&
-            client.player != null &&
+            minecraft.player != null &&
             (!isAmbiencePlaying || !ambienceToPlay.contains(currentAmbience?.playableSound) || isAmbienceAlmostDone)) {
             val newAmbience = getPseudoRandomAmbience(ambienceToPlay)
             playNextAmbience(newAmbience)
@@ -180,8 +183,8 @@ class MusicManager(private val client: MinecraftClient) {
             musicPlayer.stop(EVENT_TRACK)
         }
 
-        if (isEnter && treeResult.accumulatedEvents.any { event -> event is OnEnterPredicateEvent }) {
-            invokeMusicEvent(OnEnterPredicateEvent::class)
+        if (isEnter && treeResult.accumulatedEvents.any { event -> event.type is OnEnterNodeEvent }) {
+            invokeMusicEvent(OnEnterNodeEvent, EmptyEventInput())
         }
 
         if (shouldStop) {

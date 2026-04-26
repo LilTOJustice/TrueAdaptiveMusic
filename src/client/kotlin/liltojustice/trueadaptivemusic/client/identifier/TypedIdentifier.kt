@@ -13,7 +13,7 @@ sealed class TypedIdentifier(val id: Identifier) {
     val namespace: String
         get() = id.namespace
 
-    abstract fun toPrefixedTranslationKey(): String
+    abstract fun toPrefixedLanguageKey(): String
 
     override fun equals(other: Any?): Boolean {
         return super.equals(other) || (other as? TypedIdentifier)?.id == id
@@ -24,7 +24,7 @@ sealed class TypedIdentifier(val id: Identifier) {
     }
 
     fun prettify(): String {
-        val translationKey = toPrefixedTranslationKey()
+        val translationKey = toPrefixedLanguageKey()
         val translatedString = Text.translatable(translationKey).string
         return if (translatedString != translationKey) {
             "${toString().split(":")[0].replaceFirstChar { it.uppercase() }} - $translatedString"

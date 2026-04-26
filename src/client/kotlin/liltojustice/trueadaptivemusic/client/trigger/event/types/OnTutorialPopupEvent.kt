@@ -1,5 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnTutorialPopupEvent: MusicEvent()
+object OnTutorialPopupEvent: BasicEventType("on_tutorial")
