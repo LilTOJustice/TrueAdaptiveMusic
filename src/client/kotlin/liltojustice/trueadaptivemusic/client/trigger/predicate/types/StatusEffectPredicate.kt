@@ -1,24 +1,26 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.StatusEffectIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class StatusEffectPredicate(private val statusEffects: List<StatusEffectIdentifier>): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val playerStatusEffects = client.player?.statusEffects ?: return false
+object StatusEffectPredicate: StaticPredicateType<StatusEffectPredicate.Arguments>(
+    "status_effect", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::statusEffects.name to "Which status effects the player needs to have for the music to play.")
 
-        return statusEffects.any { statusEffect ->
+    data class Arguments(val statusEffects: List<StatusEffectIdentifier>): TriggerArguments()
+
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val playerStatusEffects = minecraft.player?.statusEffects ?: return false
+
+        return arguments.statusEffects.any { statusEffect ->
             playerStatusEffects.any { playerStatusEffect ->
                 statusEffect.toTranslationKey("effect") == playerStatusEffect.effectType.translationKey } }
-    }
-
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                StatusEffectPredicate::statusEffects.name to "Which status effects the player needs to have for the " +
-                        "music to play."
-            )
     }
 }

@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic
 
-import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -28,14 +27,6 @@ class ReflectionHelper {
             }
 
             return result
-        }
-
-        fun getConstructorParameterNames(clazz: KClass<*>): List<String> {
-            val constructor = clazz.primaryConstructor
-                ?: throw ReflectionHelperException("No constructor found for ${clazz.simpleName}." +
-                        " It must have a constructor.")
-            val declaredFields = clazz.java.declaredFields.map { it.name }
-            return constructor.parameters.mapNotNull { it.name }.filter { declaredFields.contains(it) }
         }
     }
 
