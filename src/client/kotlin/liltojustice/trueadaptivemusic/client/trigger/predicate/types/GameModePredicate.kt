@@ -1,20 +1,25 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
 import net.minecraft.world.GameMode
+import kotlin.reflect.typeOf
 
-class GameModePredicate(private val gameMode: GameMode): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val currentGameMode = client.networkHandler?.getPlayerListEntry(client.player?.uuid ?: return false)?.gameMode
+object GameModePredicate: StaticPredicateType<GameModePredicate.Arguments>(
+    "game_mode", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::gameMode.name to "Which game mode to be in for the music to play.")
 
-        return currentGameMode == gameMode
-    }
+    data class Arguments(val gameMode: GameMode): TriggerArguments()
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                GameModePredicate::gameMode.name to "Which game mode to be in for the music to play.")
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val currentGameMode = minecraft.networkHandler
+            ?.getPlayerListEntry(minecraft.player?.uuid ?: return false)?.gameMode
+
+        return currentGameMode == arguments.gameMode
     }
 }
