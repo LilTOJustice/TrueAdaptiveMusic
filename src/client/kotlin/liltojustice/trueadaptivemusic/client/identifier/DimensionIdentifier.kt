@@ -7,7 +7,7 @@ import net.minecraft.world.dimension.DimensionTypes
 import kotlin.jvm.optionals.getOrNull
 
 class DimensionIdentifier(id: Identifier): TypedIdentifier(id) {
-    override fun toPrefixedTranslationKey(): String {
+    override fun toPrefixedLanguageKey(): String {
         return id.toTranslationKey("dimension")
     }
 
