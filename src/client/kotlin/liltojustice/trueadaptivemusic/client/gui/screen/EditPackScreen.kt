@@ -261,7 +261,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         positionContainers()
     }
 
-    private fun switchToEventView(event: MusicEvent?) {
+    private fun switchToEventView(event: MusicEvent<*>?) {
         eventViewWidget.visible = true
         eventViewWidget.setEvent(event)
         positionContainers()

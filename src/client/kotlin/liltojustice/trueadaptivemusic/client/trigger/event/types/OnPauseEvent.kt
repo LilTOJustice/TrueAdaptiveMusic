@@ -1,5 +1,5 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
+import liltojustice.trueadaptivemusicapi.trigger.event.type.BasicEventType
 
-class OnPauseEvent: MusicEvent()
+object OnPauseEvent: BasicEventType("on_pause")

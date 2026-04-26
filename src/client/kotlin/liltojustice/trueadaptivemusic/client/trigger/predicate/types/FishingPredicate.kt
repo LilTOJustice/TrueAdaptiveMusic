@@ -1,11 +1,10 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.MinecraftClient
 
-class FishingPredicate: MusicPredicate() {
+object FishingPredicate: BasicPredicateType("fishing") {
     override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        return client.player?.fishHook != null
+        return MinecraftClient.getInstance().player?.fishHook != null
     }
 }

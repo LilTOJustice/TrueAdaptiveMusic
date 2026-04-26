@@ -1,23 +1,26 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.DimensionIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class DimensionPredicate(private val dimensions: List<DimensionIdentifier>): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val playerDimension = client.player?.entityWorld?.dimensionEntry ?: return false
-
-        return dimensions.isEmpty() ||
-                dimensions.any { dimension -> playerDimension.matchesId(dimension.id) }
-    }
-
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
+object DimensionPredicate: StaticPredicateType<DimensionPredicate.Arguments>(
+    "dimension", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
-            DimensionPredicate::dimensions.name to "Select all dimensions the music should play for. If none, any " +
+            Arguments::dimensions.name to "Select all dimensions the music should play for. If none, any " +
                     "dimension will trigger the music."
         )
+
+    override fun test(arguments: Arguments): Boolean {
+        val playerDimension = MinecraftClient.getInstance().world?.dimensionEntry ?: return false
+
+        return arguments.dimensions.isEmpty() ||
+                arguments.dimensions.any { dimension -> playerDimension.matchesId(dimension.id) }
     }
+
+    data class Arguments(val dimensions: List<DimensionIdentifier>): TriggerArguments()
 }

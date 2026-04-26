@@ -1,24 +1,28 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.TranslatableTextContent
+import kotlin.reflect.typeOf
 
-class BossPredicate(private val bosses: List<EntityTypeIdentifier>): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        return client.inGameHud.bossBarHud.bossBars.values.any { bossBar ->
-            val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
-            bosses.isEmpty() || bosses.any { boss -> bossName == boss.toTranslationKey("entity") }
+object BossPredicate: StaticPredicateType<BossPredicate.Arguments>(
+    "boss", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::bosses.name to "List of entities that the music should play for. If none, any entity will " +
+                    "trigger the music."
+        )
+
+    override fun test(arguments: Arguments): Boolean {
+        return MinecraftClient.getInstance().inGameHud.bossBarHud.bossBars.values.any { bossBar ->
+            val bossName = (bossBar.name as? TranslatableTextContent)?.key ?: return@any false
+            arguments.bosses.isEmpty() ||
+                    arguments.bosses.any { boss -> bossName == boss.toTranslationKey("entity") }
         }
     }
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                BossPredicate::bosses.name to "List of entities that the music should play for. If none, any entity " +
-                        "will trigger the music."
-            )
-    }
+    data class Arguments(val bosses: List<EntityTypeIdentifier>): TriggerArguments()
 }
