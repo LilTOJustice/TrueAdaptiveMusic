@@ -15,7 +15,7 @@ public class OnPauseMixin {
             at = @At("HEAD"))
     public void openGameMenu(boolean pauseOnly, CallbackInfo ci) {
         if (MinecraftClient.getInstance().currentScreen == null) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnPauseEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnPauseEvent.INSTANCE);
         }
     }
 }

@@ -16,8 +16,9 @@ object OnBossDefeatEventMixinHelper {
         }
 
         TAMClient.invokeMusicEvent(
-            OnBossDefeatEvent::class,
-            EntityTypeIdentifier(Identifier.of(entity.type.toString()))
+            OnBossDefeatEvent,
+            OnBossDefeatEvent.Input(
+                EntityTypeIdentifier(Identifier.of(entity.type.toString())))
         )
     }
 
