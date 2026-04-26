@@ -6,7 +6,7 @@ import net.minecraft.util.Identifier
 import kotlin.jvm.optionals.getOrNull
 
 class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
-    override fun toPrefixedTranslationKey(): String {
+    override fun toPrefixedLanguageKey(): String {
         return id.toTranslationKey("biome")
     }
 
