@@ -14,7 +14,7 @@ public class OnDayStartEventMixin {
     public void tick(CallbackInfo ci) {
         MinecraftClient thisObject = (MinecraftClient)(Object)this;
         if (thisObject.world != null && thisObject.world.getTimeOfDay() % 24000L == 0L) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.class);
+            TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.INSTANCE);
         }
     }
 }
