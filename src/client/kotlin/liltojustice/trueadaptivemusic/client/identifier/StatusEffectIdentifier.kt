@@ -4,7 +4,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.util.Identifier
 
 class StatusEffectIdentifier(id: Identifier): TypedIdentifier(id) {
-    override fun toPrefixedTranslationKey(): String {
+    override fun toPrefixedLanguageKey(): String {
         return id.toTranslationKey("effect")
     }
 

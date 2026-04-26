@@ -1,15 +1,18 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerTooltipText
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
+import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
+import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.Click
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -18,6 +21,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import java.util.Timer
+import kotlin.collections.toMutableList
 import kotlin.concurrent.schedule
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
@@ -27,7 +31,7 @@ class NodeViewWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onChangesSaved: (newTarget: MusicTree.Node?) -> Unit,
-    private val onEventClick: (event: MusicEvent?) -> Unit,
+    private val onEventClick: (event: MusicEvent<*>?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
     y: Int = 0
@@ -42,14 +46,15 @@ class NodeViewWidget(
     false,
     true,
     x,
-    y) {
-    private val defaultNodeParams = MusicTree.Node.Parameters.default().getTriggerParams().map { it.value }
+    y
+) {
+    private val defaultNodeParams = MusicTree.Node.Parameters.default().getMusicParams().map { it.value }
     private val requiredNodeParams = MusicTree.Node.Parameters::class.primaryConstructor?.parameters
-        ?.map { InputWidgetMaker.WidgetArg.of(it) } ?: listOf()
+        ?.map { WidgetArg.of(it) } ?: listOf()
     private var newNodeParent: MusicTree.Node? = null
     private var nodeParams: MutableList<Any?> = defaultNodeParams.toMutableList()
-    private var events = mutableListOf<MusicEvent>()
-    private var selectedEvent: MusicEvent? = null
+    private var events = mutableListOf<MusicEvent<*>>()
+    private var selectedEvent: MusicEvent<*>? = null
     private var selectedNode: MusicTree.Node? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
@@ -295,7 +300,7 @@ class NodeViewWidget(
                         TAMClient.makeInputWidget(
                             screen!!,
                             outArg,
-                            InputWidgetMaker.WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
+                            WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
                             Text.literal("Parallel loop start point"),
                             null
                         ) {
@@ -343,7 +348,7 @@ class NodeViewWidget(
                         TAMClient.makeInputWidget(
                             screen!!,
                             outArg,
-                            InputWidgetMaker.WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
+                            WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
                             Text.literal(soundName),
                             null
                         ) {
@@ -379,7 +384,7 @@ class NodeViewWidget(
         events.forEach { event ->
             addWidgetFromRender(
                 { val eventWidget = ClickableTextWidget(
-                    MusicEvent.getDisplayName(event.getTypeName()).string,
+                    MusicEvent.getDisplayName(event.type.typeName).string,
                     onClick = {
                         if (selectedEvent === event) {
                             return@ClickableTextWidget
@@ -390,7 +395,7 @@ class NodeViewWidget(
                         scrollToBottom() },
                     isSelected = { selectedEvent == event })
                     eventWidget.setTooltip(Tooltip.of(event.getTriggerTooltipText()))
-                    if (event is ErrorEvent) {
+                    if (event.type is ErrorEvent) {
                         eventWidget.color = Colors.RED
                     }
 
@@ -481,7 +486,7 @@ class NodeViewWidget(
         selectedEvent = null
         selectedMusicPaths = node.music.map { sound -> sound.getSoundName() }.toMutableList()
         selectedAmbiencePaths = node.ambience.map { sound -> sound.getSoundName() }.toMutableList()
-        nodeParams = node.parameters.getTriggerParams().map { param -> param.value }.toMutableList()
+        nodeParams = node.parameters.getMusicParams().map { param -> param.value }.toMutableList()
         events = node.events.toMutableList()
         resetScrolling()
     }
@@ -498,7 +503,7 @@ class NodeViewWidget(
         resetScrolling()
     }
 
-    fun onEventModeSave(newEvent: MusicEvent?, exit: Boolean) {
+    fun onEventModeSave(newEvent: MusicEvent<*>?, exit: Boolean) {
         newEvent?.let {
             events.remove(selectedEvent)
             events.add(it)
