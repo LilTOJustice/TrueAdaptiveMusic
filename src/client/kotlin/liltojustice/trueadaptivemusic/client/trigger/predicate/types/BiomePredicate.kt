@@ -1,23 +1,27 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.identifier.BiomeIdentifier
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
+import kotlin.reflect.typeOf
 
-class BiomePredicate(private val biomes: List<BiomeIdentifier>): MusicPredicate() {
-    override fun test(): Boolean {
-        val client = MinecraftClient.getInstance()
-        val player = client.player ?: return false
-        val playerBiome = client.world?.getBiome(player.blockPos) ?: return false
+object BiomePredicate: StaticPredicateType<BiomePredicate.Arguments>(
+    "biome", typeOf<Arguments>()
+) {
+    override val argDescriptions: Map<String, String>
+        get() = super.argDescriptions + mapOf(
+            Arguments::biomes.name to "Select all biomes the music should play for. If none, any biome will trigger " +
+                    "the music."
+        )
 
-        return biomes.isEmpty() || biomes.any { biome -> playerBiome.matchesId(biome.id) }
+    override fun test(arguments: Arguments): Boolean {
+        val minecraft = MinecraftClient.getInstance()
+        val player = minecraft.player ?: return false
+        val playerBiome = minecraft.world?.getBiome(player.blockPos) ?: return false
+
+        return arguments.biomes.isEmpty() || arguments.biomes.any { biome -> playerBiome.matchesId(biome.id) }
     }
 
-    companion object: MusicPredicateCompanion {
-        override val argDescriptions: Map<String, String>
-            get() = super.argDescriptions + mapOf(
-                BiomePredicate::biomes.name to "Select all biomes the music should play for. If none, any biome will " +
-                        "trigger the music."
-            )
-    }
+    data class Arguments(val biomes: List<BiomeIdentifier>): TriggerArguments()
 }
