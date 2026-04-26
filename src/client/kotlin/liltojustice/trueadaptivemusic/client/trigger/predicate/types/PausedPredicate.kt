@@ -1,9 +1,9 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusicapi.trigger.predicate.type.BasicPredicateType
 import net.minecraft.client.MinecraftClient
 
-class PausedPredicate: MusicPredicate() {
+object PausedPredicate: BasicPredicateType("paused") {
     override fun test(): Boolean {
         val client = MinecraftClient.getInstance()
         return client.world != null && client.currentScreen?.shouldPause() ?: false
