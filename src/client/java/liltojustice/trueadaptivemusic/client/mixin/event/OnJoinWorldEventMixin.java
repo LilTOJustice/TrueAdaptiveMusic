@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnJoinWorldEventMixin {
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     public void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
-        TAMClient.INSTANCE.invokeMusicEvent(OnJoinWorldEvent.class);
+        TAMClient.INSTANCE.invokeMusicEvent(OnJoinWorldEvent.INSTANCE);
     }
 }
