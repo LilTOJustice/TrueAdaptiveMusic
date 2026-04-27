@@ -17,13 +17,10 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
-import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
-import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.toasts.SystemToast
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -130,17 +127,6 @@ object TAMClient {
 
     fun getPlayingEvent(): MusicEvent<*>? {
         return musicManager?.playingEvent
-    }
-
-    fun makeInputWidget(
-        screen: Screen,
-        outArgs: MutableList<Any?>,
-        arg: WidgetArg,
-        displayName: Component?,
-        tooltipText: Component?,
-        onChange: () -> Unit = {}
-    ): AbstractWidget {
-        return TAMAPI.makeInputWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
     }
 
     fun refreshSoundVolume() {
