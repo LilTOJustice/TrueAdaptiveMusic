@@ -33,6 +33,6 @@ class Constants {
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
-        const val MODRINTH_PACK_BROWSER_URL = "https://modrinth.com/project/true-adaptive-music-pack-browser"
+        const val MODRINTH_PACK_BROWSER_URL = "https://modrinth.com/project/trueadaptivemusicpackbrowser"
     }
 }
