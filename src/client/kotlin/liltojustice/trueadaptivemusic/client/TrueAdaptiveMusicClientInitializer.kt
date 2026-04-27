@@ -170,10 +170,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         return@TextInputWidget "0"
                     }
 
-                    val value = text.toUIntOrNull()
-                    if (value == null) {
-                        return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
-                    }
+                    val value = text.toUIntOrNull() ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
 
                     if (text != value.toString()) {
                         return@TextInputWidget value.toString()
@@ -402,8 +399,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         private fun prettifyEnum(enum: Enum<*>): String {
-            val enumString = enum.toString()
-            return when(enumString) {
+            return when(val enumString = enum.toString()) {
                 "Equal" -> "="
                 "NotEqual" -> "!="
                 "Greater" -> ">"

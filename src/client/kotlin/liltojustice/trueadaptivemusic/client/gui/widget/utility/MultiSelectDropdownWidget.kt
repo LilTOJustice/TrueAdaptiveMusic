@@ -78,7 +78,7 @@ class MultiSelectDropdownWidget<TKey>(
             "dropdown"
         )
 
-        selected.map { it to (getDisplay?.invoke(it) ?: it.toString()) }.sortedBy { it.second }.map { option ->
+        selected.map { it to (getDisplay?.invoke(it) ?: it.toString()) }.sortedBy { it.second }.forEach { option ->
             addWidgetFromRender(
                 {
                     val widget = ClickableTextWidget(
@@ -89,7 +89,7 @@ class MultiSelectDropdownWidget<TKey>(
                             onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
-                        onMouseOff = { option -> onHoverOption(null) })
+                        onMouseOff = { _ -> onHoverOption(null) })
                     widget.setTooltip(
                         Tooltip.create(
                             Component.translatableWithFallback(

@@ -87,7 +87,7 @@ class Channel private constructor(
         fun new(soundEngine: SoundEngine, soundInstance: TAMSoundInstance, startingVolume: Float): Channel? {
             val source = soundEngine.createSource() ?: return null
 
-            return Channel(soundEngine, source, soundInstance, startingVolume,)
+            return Channel(soundEngine, source, soundInstance, startingVolume)
         }
     }
 }

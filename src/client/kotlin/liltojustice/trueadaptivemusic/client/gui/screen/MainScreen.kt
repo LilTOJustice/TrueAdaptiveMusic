@@ -144,7 +144,7 @@ class MainScreen(private val parent: Screen): Screen(
 
     companion object {
         fun getOngoingEdit(packName: Path): Path? {
-            return Constants.MUSIC_PACK_DIR.listDirectoryEntries().firstOrNull() { file ->
+            return Constants.MUSIC_PACK_DIR.listDirectoryEntries().firstOrNull { file ->
                 packName.nameWithoutExtension == file.nameWithoutExtension && file.extension == "new" }
         }
 
