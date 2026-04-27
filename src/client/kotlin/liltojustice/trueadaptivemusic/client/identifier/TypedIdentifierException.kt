@@ -1,4 +1,3 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
-class TypedIdentifierException(message: String): Exception(message) {
-}
+class TypedIdentifierException(message: String): Exception(message)

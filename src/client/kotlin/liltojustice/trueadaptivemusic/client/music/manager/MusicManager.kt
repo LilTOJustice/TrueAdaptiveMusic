@@ -242,7 +242,7 @@ class MusicManager(private val minecraft: Minecraft) {
             }
         }
 
-        parallelTracks.forEach { music, trackName ->
+        parallelTracks.forEach { (music, trackName) ->
             if (music != currentMusic) {
                 musicPlayer.clampTrackVolume(trackName, 0F)
             }

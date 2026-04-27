@@ -5,7 +5,8 @@ import liltojustice.trueadaptivemusic.client.sound.instance.SoundEventSoundInsta
 import net.minecraft.resources.Identifier
 
 class PlayableSoundEvent(private val identifier: Identifier): PlayableSound {
-    override fun makeSoundInstance(isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
+    override fun makeSoundInstance(
+        isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
         return SoundEventSoundInstance(this, identifier, isAmbient, isLooping)
     }
 

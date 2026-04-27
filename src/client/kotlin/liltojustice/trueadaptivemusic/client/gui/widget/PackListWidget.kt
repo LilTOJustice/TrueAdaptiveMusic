@@ -84,12 +84,12 @@ class PackListWidget(
             val packs = MusicPack.loadAllPacks()
             val vanillaEntry = VanillaEntry()
             addEntry(vanillaEntry)
-            setSelected(vanillaEntry)
+            selected = vanillaEntry
                 packs.forEach { musicPack ->
                     val newEntry = Entry(musicPack)
                     addEntry(newEntry)
                     if (musicPack.packName == TAMClient.musicPack?.packName) {
-                        setSelected(newEntry)
+                        selected = newEntry
                     }
                 }
 
@@ -217,7 +217,7 @@ class PackListWidget(
                 return false
             }
 
-            setSelected(this)
+            selected = this
             onSelectPack(musicPack)
 
             return true

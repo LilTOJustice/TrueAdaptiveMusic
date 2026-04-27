@@ -2,7 +2,6 @@ package liltojustice.trueadaptivemusic.client.sound.playable
 
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
-import net.minecraft.IdentifierException
 import net.minecraft.resources.Identifier
 
 interface PlayableSound {
