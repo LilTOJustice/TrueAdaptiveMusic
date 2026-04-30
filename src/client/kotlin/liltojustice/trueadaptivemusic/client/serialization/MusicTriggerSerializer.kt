@@ -175,7 +175,7 @@ object MusicTriggerSerializer {
             if (!reader.hasNext()) {
                 reader.endObject()
 
-                return Identifier.fromNamespaceAndPath("null", "null")
+                return Identifier.of("null", "null")
             }
 
             reader.nextName()
