@@ -85,7 +85,8 @@ object MusicTriggerSerializer {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMAPI.getPredicateType(typeName)
                 ?: throw MusicTriggerException("Unknown predicate type '$typeName'")
-            val arguments = type.createArguments(json.getAsJsonObject("arguments") ?: JsonObject())
+            val arguments = type.createArguments(
+                getGson(), json.getAsJsonObject("arguments") ?: JsonObject())
 
             TAMClient.musicPredicateFactory.fromArgs(type, arguments)
         }
@@ -110,7 +111,8 @@ object MusicTriggerSerializer {
             val typeName = JsonHelper.getString(json, "type")
             val type = TAMAPI.getEventType(typeName)
                 ?: throw MusicTriggerException("Unknown event type '$typeName'")
-            val arguments = type.createArguments(json.getAsJsonObject("arguments") ?: JsonObject())
+            val arguments = type.createArguments(
+                getGson(soundLibrary), json.getAsJsonObject("arguments") ?: JsonObject())
 
             TAMClient.musicEventFactory.fromArgs(type, arguments, music, parameters)
         }
@@ -169,6 +171,13 @@ object MusicTriggerSerializer {
 
         override fun read(reader: JsonReader): Identifier? {
             reader.beginObject()
+
+            if (!reader.hasNext()) {
+                reader.endObject()
+
+                return Identifier.fromNamespaceAndPath("null", "null")
+            }
+
             reader.nextName()
             val namespace = reader.nextString()
             reader.nextName()
