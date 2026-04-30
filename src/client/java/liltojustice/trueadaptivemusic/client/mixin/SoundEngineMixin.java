@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundEngine.class)
 public class SoundEngineMixin {
-    @Inject(method = "init", at = @At("HEAD"))
+    @Inject(method = "init", at = @At("TAIL"))
     public void init(String deviceSpecifier, boolean directionalAudio, CallbackInfo ci) {
         TAMClient.INSTANCE.initialize();
     }
