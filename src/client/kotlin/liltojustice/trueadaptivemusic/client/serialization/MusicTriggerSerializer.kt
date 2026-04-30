@@ -171,6 +171,13 @@ object MusicTriggerSerializer {
 
         override fun read(reader: JsonReader): Identifier {
             reader.beginObject()
+
+            if (!reader.hasNext()) {
+                reader.endObject()
+
+                return Identifier.fromNamespaceAndPath("null", "null")
+            }
+
             reader.nextName()
             val namespace = reader.nextString()
             reader.nextName()
