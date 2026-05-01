@@ -41,27 +41,26 @@ jobs:
     steps:
       - name: Check Environment Variables
         run: env
-
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: true
           lfs: true
           fetch-depth: 1
-
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
-
+          server-username: ${{ secrets.CENTRAL_USERNAME }}
+          server-password: ${{ secrets.CENTRAL_PASSWORD }}
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
-
       - name: Build
         run: ./gradlew clean build
-
       - name: Publish (CurseForge/Modrinth/GitHub)
         env:
           MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
@@ -71,9 +70,6 @@ jobs:
           files: |
             build/libs/!(*-@(dev|sources|javadoc)).jar
 
-          curseforge-id: true-adaptive-music
-          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
-          
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
           
@@ -84,3 +80,5 @@ jobs:
           
           game-versions: "${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
+      - name: Publish to Maven Central
+        run: mvn --batch-mode deploy
