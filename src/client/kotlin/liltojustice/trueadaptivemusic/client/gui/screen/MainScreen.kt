@@ -28,6 +28,7 @@ class MainScreen(private val parent: Screen): Screen(
     private lateinit var wikiButton: Button
     private lateinit var optionsButton: Button
     private lateinit var discordButton: Button
+    private lateinit var packBrowserButton: Button
 
     override fun init() {
         createNewPackButton = Button.Builder(CREATE_PACK_TEXT)
@@ -108,6 +109,12 @@ class MainScreen(private val parent: Screen): Screen(
         discordButton.y = wikiButton.y
         discordButton.x = wikiButton.x - discordButton.width - 5
 
+        packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
+        { _: Button? -> minecraft.setScreen(PackBrowserScreen(this)) }.build()
+        packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
+        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
+        addRenderableWidget(packBrowserButton)
 
         addWidget(packListWidget)
         addRenderableWidget(createNewPackButton)
@@ -118,14 +125,6 @@ class MainScreen(private val parent: Screen): Screen(
         addRenderableWidget(wikiButton)
         addRenderableWidget(optionsButton)
         addRenderableWidget(discordButton)
-
-        val packBrowserTarget = TAMClient.createPackBrowserScreen(this)
-        val packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
-        { _: Button? -> minecraft.setScreen(packBrowserTarget) }.build()
-        packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
-        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
-        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
-        addRenderableWidget(packBrowserButton)
     }
 
     override fun onClose() {
