@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.screen.PackBrowserScreen
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextDisplayWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackValidation
@@ -94,8 +95,7 @@ class PackListWidget(
                     }
                 }
 
-            val packBrowserScreen = TAMClient.createPackBrowserScreen(screen)
-            addEntry(PackBrowserEntry { client.setScreen(packBrowserScreen) })
+            addEntry(PackBrowserEntry { client.setScreen(PackBrowserScreen(screen)) })
             renderState = RenderState.Success
         }
     }
