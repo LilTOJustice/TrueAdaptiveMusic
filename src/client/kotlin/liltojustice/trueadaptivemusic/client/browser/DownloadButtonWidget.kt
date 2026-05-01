@@ -1,10 +1,11 @@
-package liltojustice.trueadaptivemusic.client.gui.widget.utility
+package liltojustice.trueadaptivemusic.client.browser
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWidget
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.LoadingDisplay
 import net.minecraft.client.gui.tooltip.Tooltip
