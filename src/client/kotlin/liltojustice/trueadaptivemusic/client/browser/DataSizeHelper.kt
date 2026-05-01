@@ -1,4 +1,4 @@
-package liltojustice.trueadaptivemusic
+package liltojustice.trueadaptivemusic.client.browser
 
 object DataSizeHelper {
     fun getDataSizeString(sizeInBytes: Long): String {
