@@ -64,7 +64,7 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build
         run: ./gradlew clean build
-      - name: Publish (CurseForge/Modrinth/GitHub)
+      - name: Publish (Modrinth/Maven)
         env:
           MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
@@ -84,4 +84,7 @@ jobs:
           game-versions: "${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
       - name: Publish to Maven Central
-        run: mvn --batch-mode deploy
+        run: ./gradlew publish
+        env:
+          CENTRAL_USERNAME: ${{env.CENTRAL_USERNAME}}
+          CENTRAL_PASSWORD: ${{env.CENTRAL_PASSWORD}}
