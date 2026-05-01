@@ -11,9 +11,5 @@ class Constants {
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json")
         val MANIFEST_PATH_TEMP = Path(
             PACK_BROWSER_CACHE_DIR.invariantSeparatorsPathString, "manifest.json.tmp")
-        const val DRIVE_SOURCE_DOWNLOAD_PREFIX = "https://drive.usercontent.google.com/download?id="
-        const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
-        const val MANIFEST_FILE_URL =
-            "https://gist.githubusercontent.com/LilTOJustice/d591ee8817ee4051acdc76ed5ff092b1/raw/manifest.json"
     }
 }

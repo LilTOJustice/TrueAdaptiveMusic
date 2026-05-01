@@ -17,6 +17,11 @@ import kotlin.io.path.exists
 import kotlin.io.path.moveTo
 
 object BrowsableMusicPackDownloader {
+    private const val DRIVE_SOURCE_DOWNLOAD_PREFIX = "https://drive.usercontent.google.com/download?id="
+    private const val DRIVE_SOURCE_DOWNLOAD_SUFFIX = "&export=download&confirm=y"
+    private const val MANIFEST_FILE_URL =
+        "https://gist.githubusercontent.com/LilTOJustice/d591ee8817ee4051acdc76ed5ff092b1/raw/manifest.json"
+
     suspend fun fetchPacksFromRepository(ignoreCache: Boolean = false): PackManifest? {
         val gson = GsonBuilder()
             .setPrettyPrinting()
@@ -30,7 +35,7 @@ object BrowsableMusicPackDownloader {
                 .fromJson(Constants.MANIFEST_PATH.toFile().readText(), PackManifest::class.java)
         }
 
-        coroutineScope { CurlHelper.curl(Constants.MANIFEST_FILE_URL, Constants.MANIFEST_PATH_TEMP) }
+        coroutineScope { CurlHelper.curl(MANIFEST_FILE_URL, Constants.MANIFEST_PATH_TEMP) }
 
         if (!Constants.MANIFEST_PATH_TEMP.exists()) {
             Logger.logError("Failed to fetch pack manifest.")
@@ -74,8 +79,7 @@ object BrowsableMusicPackDownloader {
     }
 
     private suspend fun downloadFromGoogleDrive(musicPack: BrowsableMusicPack, progressOutput: Reference<Float>) {
-        val targetUrl =
-            Constants.DRIVE_SOURCE_DOWNLOAD_PREFIX + musicPack.source + Constants.DRIVE_SOURCE_DOWNLOAD_SUFFIX
+        val targetUrl = DRIVE_SOURCE_DOWNLOAD_PREFIX + musicPack.source + DRIVE_SOURCE_DOWNLOAD_SUFFIX
         downloadPack(targetUrl, musicPack.getFilePath(), progressOutput)
     }
 
