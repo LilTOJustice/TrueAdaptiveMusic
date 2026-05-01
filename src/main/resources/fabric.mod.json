@@ -30,9 +30,6 @@
       "environment": "client"
     }
   ],
-  "suggests": {
-    "trueadaptivemusicpackbrowser": "*"
-  },
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
