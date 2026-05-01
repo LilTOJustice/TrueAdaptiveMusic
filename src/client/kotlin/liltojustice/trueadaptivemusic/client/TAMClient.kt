@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
-import liltojustice.trueadaptivemusic.client.gui.screen.MissingPackBrowserScreen
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -183,10 +182,6 @@ object TAMClient {
     @Suppress("UNUSED")
     fun addPackBrowserSupport(screenProducer: (parent: Screen) -> Screen) {
         packBrowserScreenProducer = screenProducer
-    }
-
-    fun createPackBrowserScreen(parent: Screen): Screen {
-        return packBrowserScreenProducer?.invoke(parent) ?: MissingPackBrowserScreen(parent)
     }
 
     private fun start() {

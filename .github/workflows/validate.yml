@@ -1,4 +1,4 @@
-name: validate
+name: Validate PR targets
 
 on:
   pull_request:
