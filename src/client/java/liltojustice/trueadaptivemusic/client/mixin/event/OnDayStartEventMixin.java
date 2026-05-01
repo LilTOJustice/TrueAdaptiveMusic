@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent;
+import liltojustice.trueadaptivemusicapi.TAMAPI;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +14,7 @@ public class OnDayStartEventMixin {
     public void tick(CallbackInfo ci) {
         Minecraft thisObject = (Minecraft)(Object)this;
         if (thisObject.level != null && thisObject.level.getGameTime() % 24000L == 0L) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnDayStartEvent.INSTANCE);
+            TAMAPI.INSTANCE.invokeEvent(OnDayStartEvent.INSTANCE);
         }
     }
 }

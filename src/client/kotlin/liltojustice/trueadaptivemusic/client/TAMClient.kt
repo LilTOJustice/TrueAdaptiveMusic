@@ -16,9 +16,7 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
-import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
+import liltojustice.trueadaptivemusicapi.TAMAPI
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
 import net.minecraft.client.gui.screens.Screen
@@ -60,6 +58,12 @@ object TAMClient {
     private var musicManager: MusicManager? = null
     private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
     private var started = false
+
+    init {
+        TAMAPI.registerEventListener { eventType, input ->
+            musicManager?.invokeMusicEvent(eventType, input)
+        }
+    }
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     fun initialize() {
@@ -130,14 +134,6 @@ object TAMClient {
 
     fun refreshSoundVolume() {
         musicManager?.refreshSoundVolume()
-    }
-
-    fun invokeMusicEvent(eventType: EventType<*, *, EmptyEventInput>) {
-        musicManager?.invokeMusicEvent(eventType, EmptyEventInput())
-    }
-
-    fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
-        musicManager?.invokeMusicEvent(eventType, input)
     }
 
     fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
