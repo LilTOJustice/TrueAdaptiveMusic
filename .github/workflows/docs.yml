@@ -1,10 +1,13 @@
-name: docs
+name: Publish docs
+
 on:
   push:
     branches:
       - master
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
