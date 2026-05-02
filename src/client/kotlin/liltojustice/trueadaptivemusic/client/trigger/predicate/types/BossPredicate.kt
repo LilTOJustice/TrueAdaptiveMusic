@@ -17,8 +17,8 @@ object BossPredicate: StaticPredicateType<BossPredicate.Arguments>(
         )
 
     override fun test(arguments: Arguments): Boolean {
-        return Minecraft.getInstance().gui.bossOverlay.events.values.any { bossBar ->
-            val bossName = (bossBar.name.contents as? TranslatableContents)?.key ?: return@any false
+        return MinecraftClient.getInstance().inGameHud.bossBarHud.bossBars.values.any { bossBar ->
+            val bossName = (bossBar.name.content as? TranslatableTextContent)?.key ?: return@any false
             arguments.bosses.isEmpty() ||
                     arguments.bosses.any { boss -> bossName == boss.toLanguageKey("entity") }
         }
