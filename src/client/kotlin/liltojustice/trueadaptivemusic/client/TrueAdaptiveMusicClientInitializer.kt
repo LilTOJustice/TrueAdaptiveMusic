@@ -23,6 +23,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthP
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CustomPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DayTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DeathScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DimensionPredicate
@@ -60,7 +61,11 @@ import net.minecraft.network.chat.Component
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.collections.map
+import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -118,6 +123,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(TeamPredicate)
         TAMAPI.registerPredicateType(PlayerAttributePredicate)
         TAMAPI.registerPredicateType(SpawnPointNearbyPredicate)
+        TAMAPI.registerPredicateType(CustomPredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
@@ -402,6 +408,24 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
 
             result
+        }
+
+        TAMAPI.registerInputWidget(
+            typeOf<CustomPredicate.PredicateFile>()
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            val options = TAMClient.musicPack?.packPath?.invariantSeparatorsPathString?.let {
+                Path(it, Constants.PREDICATES_DIRNAME)
+            }?.listDirectoryEntries()?.map { it.name } ?: emptyList()
+            DropdownWidget(
+                options,
+                { id ->
+                    outArgs[arg.index] = CustomPredicate.PredicateFile(id)
+                    onChange()
+                },
+                title = prompt,
+                startingOption = (outArgs[arg.index] as? CustomPredicate.PredicateFile)?.fileName,
+                tooltipText = tooltipText
+            )
         }
 
         TAMNetworkingClient.init()

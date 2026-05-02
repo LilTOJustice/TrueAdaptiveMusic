@@ -38,6 +38,7 @@ class Constants {
         const val META_FILENAME = "meta.json"
         const val ICON_FILENAME = "icon.png"
         const val ASSETS_DIRNAME = "assets"
+        const val PREDICATES_DIRNAME = "predicates"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
     }

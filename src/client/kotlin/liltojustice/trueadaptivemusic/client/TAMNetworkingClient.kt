@@ -2,6 +2,8 @@ package liltojustice.trueadaptivemusic.client
 
 import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
 import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.resources.Identifier
@@ -11,6 +13,7 @@ object TAMNetworkingClient {
     var structureId: Identifier = NULL_IDENTIFIER
     var structureSetId: Identifier = NULL_IDENTIFIER
     var spawnPoint: LevelData.RespawnData? = null
+    val customPredicateResults = mutableMapOf<String, Boolean>()
 
     fun init() {
         ClientPlayNetworking.registerGlobalReceiver(CurrentStructurePayload.TYPE) { payload, _ ->
@@ -20,5 +23,14 @@ object TAMNetworkingClient {
         ClientPlayNetworking.registerGlobalReceiver(SpawnPointPayload.TYPE) { payload, _ ->
             spawnPoint = payload.spawnPoint
         }
+        ClientPlayNetworking.registerGlobalReceiver(CustomPredicateResponsePayload.TYPE) { payload, _ ->
+            customPredicateResults[payload.predicateId] = payload.predicateResponse
+        }
+    }
+
+    fun queryCustomPredicate(predicateId: String, predicateString: String): Boolean {
+        ClientPlayNetworking.send(CustomPredicateQueryPayload(predicateId, predicateString))
+
+        return customPredicateResults[predicateId] ?: false
     }
 }
