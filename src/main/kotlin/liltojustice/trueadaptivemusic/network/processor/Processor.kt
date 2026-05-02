@@ -7,16 +7,15 @@ import net.minecraft.server.level.ServerPlayer
 abstract class Processor {
     protected val tickRate = 20
     private var tick = tickRate
-    private var last: CustomPacketPayload? = null
 
     fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
         if (tick++ >= tickRate) {
             tick = 0
 
-            last = makePacket(server, player)
+            return makePacket(server, player)
         }
 
-        return last
+        return null
     }
 
     protected abstract fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload?
