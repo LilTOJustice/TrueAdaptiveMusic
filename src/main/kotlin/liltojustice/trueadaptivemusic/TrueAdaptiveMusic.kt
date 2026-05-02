@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic
 
 import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
-import liltojustice.trueadaptivemusic.network.model.CurrentStructureSetPayload
-import liltojustice.trueadaptivemusic.network.model.ServerStateProcessor
+import liltojustice.trueadaptivemusic.network.ServerStateProcessor
+import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
@@ -14,9 +14,8 @@ class TrueAdaptiveMusic: ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(
             CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC)
         PayloadTypeRegistry.clientboundPlay().register(
-            CurrentStructureSetPayload.TYPE, CurrentStructureSetPayload.CODEC)
-
-        ServerTickEvents.END_SERVER_TICK.register { server -> ServerStateProcessor.processServer(server) }
+            SpawnPointPayload.TYPE, SpawnPointPayload.CODEC)
+        ServerStateProcessor().let { ServerTickEvents.END_SERVER_TICK.register { server -> it.processServer(server) } }
     }
 
     companion object {

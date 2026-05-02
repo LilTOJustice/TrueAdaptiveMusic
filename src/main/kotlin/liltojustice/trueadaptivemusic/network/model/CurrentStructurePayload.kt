@@ -4,7 +4,7 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.Identifier
 
-data class CurrentStructurePayload(val structureIdentifier: Identifier): CustomPacketPayload {
+data class CurrentStructurePayload(val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): CustomPacketPayload {
     override fun type(): CustomPacketPayload.Type<out CurrentStructurePayload> {
         return TYPE
     }
@@ -15,6 +15,8 @@ data class CurrentStructurePayload(val structureIdentifier: Identifier): CustomP
         val CODEC = StreamCodec.composite(
             Identifier.STREAM_CODEC,
             CurrentStructurePayload::structureIdentifier,
+            Identifier.STREAM_CODEC,
+            CurrentStructurePayload::structureSetIdentifier,
             ::CurrentStructurePayload
         )
     }
