@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -53,6 +52,7 @@ object TAMClient {
                 Logger.logError("Failed to save selected pack \"$packName\"")
             }
         }
+    val isWindows = "windows" in System.getProperty("os.name").lowercase()
 
     private lateinit var backgroundScope: CoroutineScope
     private var musicManager: MusicManager? = null
@@ -152,12 +152,12 @@ object TAMClient {
     }
 
     fun getFFProbeCommand(): String {
-        return (if (TrueAdaptiveMusic.isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
+        return (if (isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
             .invariantSeparatorsPathString
     }
 
     fun getFFmpegCommand(): String {
-        return (if (TrueAdaptiveMusic.isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
+        return (if (isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
             .invariantSeparatorsPathString
     }
 

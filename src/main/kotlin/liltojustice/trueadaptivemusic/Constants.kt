@@ -2,6 +2,10 @@ package liltojustice.trueadaptivemusic
 
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.resources.Identifier
+import java.nio.file.attribute.FileAttribute
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -21,6 +25,9 @@ class Constants {
         val PACK_BROWSER_CACHE_DIR = Path(".trueadaptivemusiccache")
         val DISCORD_JOIN_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.join_discord", "Join the Discord!")
+        val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
+            PosixFilePermissions.fromString("rwxrwxrwx"))
+        val NULL_IDENTIFIER = Identifier.fromNamespaceAndPath("trueadaptivemusic", "null")
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
         const val FFPROBE_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffprobe.exe"
@@ -33,6 +40,5 @@ class Constants {
         const val ASSETS_DIRNAME = "assets"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
-        const val MODRINTH_PACK_BROWSER_URL = "https://modrinth.com/project/trueadaptivemusicpackbrowser"
     }
 }
