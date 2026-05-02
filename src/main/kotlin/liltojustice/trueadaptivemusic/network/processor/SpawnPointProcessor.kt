@@ -6,9 +6,9 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.storage.LevelData
 
-class SpawnPointProcessor: Processor {
+class SpawnPointProcessor: Processor() {
     val spawnCache = mutableMapOf<ServerPlayer, LevelData.RespawnData>()
-    override fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
+    override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
         val respawnData = player.respawnConfig?.respawnData() ?: return null
         val cached = spawnCache[player]
         if (cached?.globalPos != respawnData.globalPos) {

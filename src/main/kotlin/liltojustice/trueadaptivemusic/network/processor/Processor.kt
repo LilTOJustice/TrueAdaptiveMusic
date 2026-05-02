@@ -4,6 +4,20 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 
-interface Processor {
-    fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload?
+abstract class Processor {
+    protected val tickRate = 20
+    private var tick = tickRate
+    private var last: CustomPacketPayload? = null
+
+    fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
+        if (tick++ >= tickRate) {
+            tick = 0
+
+            last = makePacket(server, player)
+        }
+
+        return last
+    }
+
+    protected abstract fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload?
 }

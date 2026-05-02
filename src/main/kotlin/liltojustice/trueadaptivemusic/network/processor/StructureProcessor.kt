@@ -8,9 +8,9 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.levelgen.structure.Structure
 
-class StructureProcessor: Processor {
+class StructureProcessor: Processor() {
     private val structureCache = mutableMapOf<Structure, Pair<Int, Int>>()
-    override fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload {
+    override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload {
         val level = player.level()
         val structureManager = level.structureManager()
         val registryAccess = structureManager.registryAccess()
