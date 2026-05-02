@@ -16,7 +16,7 @@ object TeamPredicate: StaticPredicateType<TeamPredicate.Arguments>(
     override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val scoreboard = minecraft.level?.scoreboard ?: return false
-        val playerName = minecraft.player?.name?.string ?: return false
+        val playerName = minecraft.player?.scoreboardName ?: return false
 
         return scoreboard.playerTeams.firstOrNull { it.name == arguments.teamId }?.players?.contains(playerName)
             ?: false
