@@ -32,10 +32,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var nodeViewWidget: NodeViewWidget
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
-    private lateinit var saveButtonWidget: TextIconButtonWidget
-    private lateinit var closeButtonWidget: ButtonWidget
-    private lateinit var openAssetsFolderButtonWidget: ButtonWidget
-    private lateinit var optionsButtonWidget: ButtonWidget
+    private lateinit var saveButtonWidget: SpriteIconButton
+    private lateinit var closeButtonWidget: Button
+    private lateinit var openPackDirectory: Button
+    private lateinit var optionsButtonWidget: Button
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -93,7 +93,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        openAssetsFolderButtonWidget = Button.Builder(OPEN_PACK_TEXT) {
+        openPackDirectory = Button.Builder(OPEN_PACK_TEXT) {
             Util.getPlatform().openUri(musicPack.packPath.toUri())
         }.build()
 
@@ -165,14 +165,14 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             }
         )
 
-        addDrawableChild(saveButtonWidget)
-        addDrawableChild(closeButtonWidget)
-        addDrawableChild(openAssetsFolderButtonWidget)
-        addDrawableChild(packStructureWidget)
-        addDrawableChild(nodeViewWidget)
-        addDrawableChild(predicateViewWidget)
-        addDrawableChild(eventViewWidget)
-        addDrawableChild(optionsButtonWidget)
+        addRenderableWidget(saveButtonWidget)
+        addRenderableWidget(closeButtonWidget)
+        addRenderableWidget(openPackDirectory)
+        addRenderableWidget(packStructureWidget)
+        addRenderableWidget(nodeViewWidget)
+        addRenderableWidget(predicateViewWidget)
+        addRenderableWidget(eventViewWidget)
+        addRenderableWidget(optionsButtonWidget)
 
         saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
@@ -183,10 +183,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openAssetsFolderButtonWidget.width = font.width(OPEN_PACK_TEXT) + 10
-        openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
-        optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
-        optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
+        openPackDirectory.width = font.width(OPEN_PACK_TEXT) + 10
+        openPackDirectory.x = width - openPackDirectory.width
+        optionsButtonWidget.width = font.width(OPTIONS_BUTTON_TEXT) + 10
+        optionsButtonWidget.x = openPackDirectory.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
     }
