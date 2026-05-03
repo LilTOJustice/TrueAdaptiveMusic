@@ -1,12 +1,12 @@
 package liltojustice.trueadaptivemusic.client.javasucks
 
-import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
-import net.minecraft.client.MinecraftClient
-import net.minecraft.entity.LivingEntity
-import net.minecraft.text.TranslatableTextContent
-import net.minecraft.util.Identifier
+import liltojustice.trueadaptivemusicapi.TAMAPI
+import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.contents.TranslatableContents
+import net.minecraft.resources.Identifier
+import net.minecraft.world.entity.LivingEntity
 
 object OnBossDefeatEventMixinHelper {
     @JvmStatic
@@ -15,7 +15,7 @@ object OnBossDefeatEventMixinHelper {
             return
         }
 
-        TAMClient.invokeMusicEvent(
+        TAMAPI.invokeEvent(
             OnBossDefeatEvent,
             OnBossDefeatEvent.Input(
                 EntityTypeIdentifier(Identifier(entity.type.toString())))

@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic.client.gui.widget
 
-import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
+import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
@@ -31,13 +31,13 @@ class PackOptionsViewWidget(initialOptions: MusicPackOptions, width: Int, height
         requiredOptionsArgs.forEach { required ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(
+                    TAMAPI.makeInputWidget(
                         screen!!,
                         optionsArgs,
                         required,
                         required.name?.let { MusicPackOptions.getArgDisplayName(it) },
                         required.name?.let { MusicPackOptions.getArgDescription(it) }
-                    )
+                    ) {}
                 },
                 "${required.name}: ${required.type}")
         }

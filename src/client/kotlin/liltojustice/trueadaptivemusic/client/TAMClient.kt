@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
-import liltojustice.trueadaptivemusic.TrueAdaptiveMusic
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -17,16 +16,11 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
-import liltojustice.trueadaptivemusicapi.widget.WidgetArg
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.ClickableWidget
-import net.minecraft.client.toast.SystemToast
-import net.minecraft.sound.SoundEvent
-import net.minecraft.text.Text
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.components.toasts.SystemToast
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.sounds.SoundEvent
 import java.io.IOException
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
@@ -58,11 +52,18 @@ object TAMClient {
                 Logger.logError("Failed to save selected pack \"$packName\"")
             }
         }
+    val isWindows = "windows" in System.getProperty("os.name").lowercase()
 
     private lateinit var backgroundScope: CoroutineScope
     private var musicManager: MusicManager? = null
     private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
     private var started = false
+
+    init {
+        TAMAPI.registerEventListener { eventType, input ->
+            musicManager?.invokeMusicEvent(eventType, input)
+        }
+    }
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     fun initialize() {
@@ -131,27 +132,8 @@ object TAMClient {
         return musicManager?.playingEvent
     }
 
-    fun makeInputWidget(
-        screen: Screen,
-        outArgs: MutableList<Any?>,
-        arg: WidgetArg,
-        displayName: Text?,
-        tooltipText: Text?,
-        onChange: () -> Unit = {}
-    ): ClickableWidget {
-        return TAMAPI.makeInputWidget(screen, outArgs, arg, displayName, tooltipText, onChange)
-    }
-
     fun refreshSoundVolume() {
         musicManager?.refreshSoundVolume()
-    }
-
-    fun invokeMusicEvent(eventType: EventType<*, *, EmptyEventInput>) {
-        musicManager?.invokeMusicEvent(eventType, EmptyEventInput())
-    }
-
-    fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
-        musicManager?.invokeMusicEvent(eventType, input)
     }
 
     fun setDesiredVanillaSoundEvent(soundEvent: SoundEvent) {
@@ -170,12 +152,12 @@ object TAMClient {
     }
 
     fun getFFProbeCommand(): String {
-        return (if (TrueAdaptiveMusic.isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
+        return (if (isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
             .invariantSeparatorsPathString
     }
 
     fun getFFmpegCommand(): String {
-        return (if (TrueAdaptiveMusic.isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
+        return (if (isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
             .invariantSeparatorsPathString
     }
 
