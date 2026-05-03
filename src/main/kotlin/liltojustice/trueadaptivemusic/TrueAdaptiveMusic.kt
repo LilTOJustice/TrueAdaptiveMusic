@@ -11,12 +11,12 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.loot.condition.LootCondition
+import net.minecraft.loot.context.LootContext
+import net.minecraft.loot.context.LootContextParameters
+import net.minecraft.loot.context.LootContextTypes
+import net.minecraft.loot.context.LootWorldContext
 import net.minecraft.util.StrictJsonParser
-import net.minecraft.world.level.storage.loot.LootContext
-import net.minecraft.world.level.storage.loot.LootParams
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Optional
@@ -24,33 +24,32 @@ import kotlin.jvm.optionals.getOrNull
 
 class TrueAdaptiveMusic: ModInitializer {
     override fun onInitialize() {
-        PayloadTypeRegistry.clientboundPlay().register(
-            CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC)
-        PayloadTypeRegistry.clientboundPlay().register(
-            SpawnPointPayload.TYPE, SpawnPointPayload.CODEC)
-        PayloadTypeRegistry.serverboundPlay().register(
-            CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC)
-        PayloadTypeRegistry.clientboundPlay().register(
-            CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC)
-        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.TYPE) { payload, context ->
+        PayloadTypeRegistry.playS2C().register(
+            CurrentStructurePayload.ID, CurrentStructurePayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(
+            SpawnPointPayload.ID, SpawnPointPayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(
+            CustomPredicateQueryPayload.ID, CustomPredicateQueryPayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(
+            CustomPredicateResponsePayload.ID, CustomPredicateResponsePayload.CODEC)
+        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.ID) { payload, context ->
             val player = context.player()
             val json = StrictJsonParser.parse(payload.predicateText)
-            val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
+            val condition = LootCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
                 .result()
                 .getOrNull()
-                ?.value() ?: return@registerGlobalReceiver
+                ?: return@registerGlobalReceiver
             ServerPlayNetworking.send(
                 player,
                 CustomPredicateResponsePayload(
                     payload.predicateId,
                     condition.test(
                         LootContext.Builder(
-                            LootParams.Builder(player.level())
-                                .withParameter(LootContextParams.ORIGIN, player.position())
-                                .withOptionalParameter(
-                                    LootContextParams.THIS_ENTITY, player.livingEntity)
-                                .create(LootContextParamSets.COMMAND)
-                        ).create(Optional.empty())
+                            LootWorldContext.Builder(player.entityWorld)
+                                .addOptional(LootContextParameters.ORIGIN, player.entityPos)
+                                .addOptional(LootContextParameters.THIS_ENTITY, player.entity)
+                                .build(LootContextTypes.COMMAND)
+                        ).build(Optional.empty())
                     )
                 )
             )

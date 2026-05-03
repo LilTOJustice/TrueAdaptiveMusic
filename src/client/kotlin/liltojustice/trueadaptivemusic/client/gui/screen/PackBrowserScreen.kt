@@ -8,15 +8,14 @@ import liltojustice.trueadaptivemusic.client.gui.widget.PackBrowserListWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.makeDoneButton
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.gui.GuiGraphicsExtractor
-import net.minecraft.client.gui.components.Button
-import net.minecraft.client.gui.components.Tooltip
-import net.minecraft.client.gui.components.MultiLineTextWidget
-import net.minecraft.client.gui.screens.ConfirmLinkScreen
-import net.minecraft.client.gui.screens.Screen
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import net.minecraft.util.CommonColors
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.ConfirmLinkScreen
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Colors
 import net.minecraft.util.Util
 import java.util.Date
 
@@ -24,10 +23,10 @@ import java.util.Date
 class PackBrowserScreen(private val parent: Screen): Screen(
     Text.translatableWithFallback("trueadaptivemusic.music_pack_browser", "Music Pack Browser")) {
     private lateinit var packListWidget: PackBrowserListWidget
-    private lateinit var openMusicPacksButton: Button
-    private lateinit var doneButton: Button
-    private lateinit var refreshButton: Button
-    private lateinit var discordButton: Button
+    private lateinit var openMusicPacksButton: ButtonWidget
+    private lateinit var doneButton: ButtonWidget
+    private lateinit var refreshButton: ButtonWidget
+    private lateinit var discordButton: ButtonWidget
     private var selectedPack: BrowsableMusicPack? = null
     private var refreshTime: Date? = null
 
@@ -50,8 +49,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         refreshButton.y = 1
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
-        discordButton = Button.builder(Constants.DISCORD_JOIN_TEXT)
-        { _: Button? -> minecraft.setScreen(
+        discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
+        { _: ButtonWidget? -> client.setScreen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
@@ -68,31 +67,31 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         discordButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 2
         discordButton.x = width - discordButton.width - 1
 
-        addWidget(packListWidget)
-        addRenderableWidget(openMusicPacksButton)
-        addRenderableWidget(doneButton)
-        addRenderableWidget(refreshButton)
-        addRenderableWidget(discordButton)
+        addSelectableChild(packListWidget)
+        addDrawableChild(openMusicPacksButton)
+        addDrawableChild(doneButton)
+        addDrawableChild(refreshButton)
+        addDrawableChild(discordButton)
     }
 
     override fun close() {
         client?.setScreen(parent)
     }
 
-    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+    override fun render(graphics: DrawContext, mouseX: Int, mouseY: Int, a: Float) {
         if (this.packListWidget.refreshTime != refreshTime) {
             refreshTime = this.packListWidget.refreshTime
             refreshTime.let {
                 refreshButton.setTooltip(
-                    Tooltip.create(
-                        Component.literal("${LAST_REFRESHED_TEXT.string}: $it").withColor(CommonColors.GRAY))
+                    Tooltip.of(
+                        Text.literal("${LAST_REFRESHED_TEXT.string}: $it").withColor(Colors.GRAY))
                 )
             }
         }
 
-        super.render(context, mouseX, mouseY, delta)
-        this.packListWidget.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(
+        super.render(graphics, mouseX, mouseY, a)
+        this.packListWidget.render(graphics, mouseX, mouseY, a)
+        graphics.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, 28, Colors.WHITE)
     }
 
@@ -103,8 +102,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     companion object {
         private val OPEN_MUSIC_PACKS_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.open_pack_folder", "Open Pack Folder")
-        private val REFRESH_TEXT = Component.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
-        val LAST_REFRESHED_TEXT: MutableComponent = Component.translatableWithFallback(
+        private val REFRESH_TEXT = Text.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
+        val LAST_REFRESHED_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.last_refreshed", "Last Refreshed")
     }
 }

@@ -12,7 +12,7 @@ class ServerStateProcessor {
     )
 
     fun processServer(server: MinecraftServer) {
-        server.playerList.players.forEach { player ->
+        server.playerManager.playerList.forEach { player ->
             processors.forEach { processor ->
                 processor.process(server, player)?.let { payload -> ServerPlayNetworking.send(player, payload) }
             }
