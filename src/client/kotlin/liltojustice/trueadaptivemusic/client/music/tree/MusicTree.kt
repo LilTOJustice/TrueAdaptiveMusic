@@ -145,8 +145,16 @@ class MusicTree {
             val parallelRoot = this.takeIf { parallelRoot == null } ?: parallelRoot
             predicates.forEach { predicate ->
                 try {
+                    val last = predicate.lastResult
                     if (!predicate.test()) {
+                        if (last) {
+                            parent?.predicates?.forEach { it.resetCache() }
+                        }
+
                         return@forEach
+                    }
+                    else if (!last) {
+                        children.forEach { child -> child.predicates.forEach { it.resetCache() } }
                     }
                 }
                 catch (e: NoClassDefFoundError) {
