@@ -11,13 +11,14 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.ConfirmLinkScreen
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.gui.widget.TextWidget
 import net.minecraft.text.MutableText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Util
+import java.util.Date
 
 @Environment(EnvType.CLIENT)
 class PackBrowserScreen(private val parent: Screen): Screen(
@@ -27,8 +28,8 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     private lateinit var doneButton: ButtonWidget
     private lateinit var refreshButton: ButtonWidget
     private lateinit var discordButton: ButtonWidget
-    private lateinit var lastRefreshedWidget: TextWidget
     private var selectedPack: BrowsableMusicPack? = null
+    private var refreshTime: Date? = null
 
     override fun init() {
         openMusicPacksButton = ButtonWidget.Builder(OPEN_MUSIC_PACKS_TEXT) {
@@ -54,9 +55,6 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         refreshButton.y = 1
         refreshButton.width = textRenderer.getWidth(REFRESH_TEXT) + 10
 
-        lastRefreshedWidget = TextWidget(Text.empty(), textRenderer)
-        lastRefreshedWidget.y = refreshButton.y + refreshButton.height + 3
-
         discordButton = ButtonWidget.builder(Constants.DISCORD_JOIN_TEXT)
         { _: ButtonWidget? -> client?.setScreen(
             ConfirmLinkScreen(
@@ -79,7 +77,6 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         addDrawableChild(openMusicPacksButton)
         addDrawableChild(doneButton)
         addDrawableChild(refreshButton)
-        addDrawableChild(lastRefreshedWidget)
         addDrawableChild(discordButton)
     }
 
@@ -87,22 +84,26 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         client?.setScreen(parent)
     }
 
-    override fun render(context: DrawContext?, mouseX: Int, mouseY: Int, delta: Float) {
-        this.renderBackground(context)
-        lastRefreshedWidget.message = this.packListWidget.refreshTime?.let {
-            lastRefreshedWidget.active = true
-            Text.literal("${LAST_REFRESHED_TEXT.string}: $it")
-                .getWithStyle(Style.EMPTY.withColor(Colors.GRAY)).first()
-        } ?: run {
-            lastRefreshedWidget.active = false
-            REFRESHING_TEXT
+    override fun render(graphics: DrawContext, mouseX: Int, mouseY: Int, a: Float) {
+        this.renderBackground(graphics)
+        if (this.packListWidget.refreshTime != refreshTime) {
+            refreshTime = this.packListWidget.refreshTime
+            refreshTime.let {
+                refreshButton.setTooltip(
+                    Tooltip.of(
+                        Text.literal("${LAST_REFRESHED_TEXT.string}: $it")
+                            .getWithStyle(Style.EMPTY.withColor(Colors.GRAY))
+                            .first()
+                    )
+                )
+            }
         }
-        lastRefreshedWidget.x = 2 + textRenderer.getWidth(lastRefreshedWidget.message) / 2
 
-        this.packListWidget.render(context, mouseX, mouseY, delta)
-        context?.drawCenteredTextWithShadow(
+        super.render(graphics, mouseX, mouseY, a)
+        this.packListWidget.render(graphics, mouseX, mouseY, a)
+        graphics.drawCenteredTextWithShadow(
             this.textRenderer, this.title, this.width / 2, 28, Colors.WHITE)
-        super.render(context, mouseX, mouseY, delta)
+        super.render(graphics, mouseX, mouseY, a)
     }
 
     fun reload() {
@@ -113,8 +114,6 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         private val OPEN_MUSIC_PACKS_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.open_pack_folder", "Open Pack Folder")
         private val REFRESH_TEXT = Text.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
-        private val REFRESHING_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.refreshing", "Refreshing")
         val LAST_REFRESHED_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.last_refreshed", "Last Refreshed")
     }

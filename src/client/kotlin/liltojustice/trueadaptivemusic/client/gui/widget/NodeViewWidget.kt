@@ -11,6 +11,7 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
 import net.minecraft.client.gui.DrawContext
@@ -274,7 +275,7 @@ class NodeViewWidget(
         requiredNodeParams.dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(
+                    TAMAPI.makeInputWidget(
                         screen!!,
                         nodeParams,
                         param,
@@ -298,7 +299,7 @@ class NodeViewWidget(
                 addWidgetFromRender(
                     {
                         val outArg = mutableListOf(node.parameters.loopStartPoints.values.firstOrNull() as Any?)
-                        TAMClient.makeInputWidget(
+                        TAMAPI.makeInputWidget(
                             screen!!,
                             outArg,
                             WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),
@@ -346,7 +347,7 @@ class NodeViewWidget(
                 addWidgetFromRender(
                     {
                         val outArg = mutableListOf(node.parameters.loopStartPoints[soundName] as Any?)
-                        TAMClient.makeInputWidget(
+                        TAMAPI.makeInputWidget(
                             screen!!,
                             outArg,
                             WidgetArg(typeOf<UInt>(), "loopStartPoints", 0),

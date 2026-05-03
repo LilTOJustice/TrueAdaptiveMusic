@@ -26,13 +26,14 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
         } ?: return false
         val matchingEntry = scoreboard.getPlayerScore(playerName, matchingObjective)
 
+        val value = arguments.value
         return when (arguments.comparison) {
-            Comparison.Equal -> matchingEntry.score == arguments.value
-            Comparison.NotEqual -> matchingEntry.score == arguments.value
-            Comparison.Greater -> matchingEntry.score > arguments.value
-            Comparison.GreaterOrEqual -> matchingEntry.score >= arguments.value
-            Comparison.Lesser -> matchingEntry.score < arguments.value
-            Comparison.LesserOrEqual -> matchingEntry.score <= arguments.value
+            Comparison.Equal -> matchingEntry.score == value
+            Comparison.NotEqual -> matchingEntry.score == value
+            Comparison.Greater -> matchingEntry.score > value
+            Comparison.GreaterOrEqual -> matchingEntry.score >= value
+            Comparison.Lesser -> matchingEntry.score < value
+            Comparison.LesserOrEqual -> matchingEntry.score <= value
         }
     }
 

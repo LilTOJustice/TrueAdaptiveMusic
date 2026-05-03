@@ -1,51 +1,48 @@
 package liltojustice.trueadaptivemusic
 
+import com.google.gson.JsonParser
+import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
+import liltojustice.trueadaptivemusic.network.ServerStateProcessor
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.loot.LootDataType
+import net.minecraft.loot.context.LootContext
+import net.minecraft.loot.context.LootContextParameterSet
+import net.minecraft.loot.context.LootContextParameters
+import net.minecraft.loot.context.LootContextTypes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.FileAttribute
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
-import kotlin.io.path.*
+import kotlin.jvm.optionals.getOrNull
 
 class TrueAdaptiveMusic: ModInitializer {
-    @OptIn(ExperimentalPathApi::class)
     override fun onInitialize() {
-        Files.createDirectories(Constants.MUSIC_PACK_DIR)
-        Files.createDirectories(Constants.FFMPEG_DIR)
-        Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
-
-        if (isWindows) {
-            cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
-            cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
+        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.TYPE) { packet, player, _ ->
+            val json = JsonParser.parseString(packet.predicateText)
+            val condition = LootDataType.PREDICATES.parse(NULL_IDENTIFIER, json)
+                .getOrNull()
+                ?: return@registerGlobalReceiver
+            ServerPlayNetworking.send(
+                player,
+                CustomPredicateResponsePayload(
+                    packet.predicateId,
+                    condition.test(
+                        LootContext.Builder(
+                            LootContextParameterSet.Builder(player.serverWorld)
+                                .addOptional(LootContextParameters.ORIGIN, player.pos)
+                                .addOptional(LootContextParameters.THIS_ENTITY, player)
+                                .build(LootContextTypes.COMMAND)
+                        ).build(null)
+                    )
+                )
+            )
         }
-        else {
-            cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
-            cloneResourceFile(Constants.FFPROBE_PATH, Constants.FFPROBE_RESOURCE)
-        }
+        ServerStateProcessor().let { ServerTickEvents.END_SERVER_TICK.register { server -> it.processServer(server) } }
     }
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(TrueAdaptiveMusic::class.java)
-        val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
-            PosixFilePermissions.fromString("rwxrwxrwx"))
-        val isWindows = "windows" in System.getProperty("os.name").lowercase()
-
-        fun cloneResourceFile(destinationPath: Path, resource: String) {
-            destinationPath.takeIf { !it.exists() }?.let { filePath ->
-                if (isWindows) {
-                    Files.createFile(filePath)
-                }
-                else {
-                    Files.createFile(filePath, POSIX_PERMISSIONS)
-                }
-
-                this::class.java.classLoader.getResourceAsStream(resource).use {
-                    it?.copyTo(filePath.outputStream())
-                }
-            }
-        }
     }
 }
