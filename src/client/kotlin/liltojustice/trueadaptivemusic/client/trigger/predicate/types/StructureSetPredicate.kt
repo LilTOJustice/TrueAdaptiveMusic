@@ -4,7 +4,7 @@ import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
 import liltojustice.trueadaptivemusic.client.identifier.StructureSetIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
-import net.minecraft.client.Minecraft
+import net.minecraft.client.MinecraftClient
 import kotlin.collections.any
 import kotlin.reflect.typeOf
 
@@ -22,7 +22,7 @@ object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Argument
     data class Arguments(val structureSets: List<StructureSetIdentifier>): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        return Minecraft.getInstance().player != null &&
+        return MinecraftClient.getInstance().player != null &&
                 (arguments.structureSets.isEmpty() ||
                         arguments.structureSets.any { it.id == TAMNetworkingClient.structureSetId })
     }
