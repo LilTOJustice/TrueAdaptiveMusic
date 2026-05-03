@@ -1,14 +1,14 @@
 package liltojustice.trueadaptivemusic.network.processor
 
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
+import net.minecraft.network.packet.CustomPayload
 import net.minecraft.server.MinecraftServer
-import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.network.ServerPlayerEntity
 
 abstract class Processor {
     protected val tickRate = 20
     private var tick = tickRate
 
-    fun process(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
+    fun process(server: MinecraftServer, player: ServerPlayerEntity): CustomPayload? {
         if (tick++ >= tickRate) {
             tick = 0
 
@@ -18,5 +18,5 @@ abstract class Processor {
         return null
     }
 
-    protected abstract fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload?
+    protected abstract fun makePacket(server: MinecraftServer, player: ServerPlayerEntity): CustomPayload?
 }
