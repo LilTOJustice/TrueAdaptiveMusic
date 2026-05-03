@@ -10,12 +10,12 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEven
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
-import net.minecraft.client.Minecraft
-import net.minecraft.client.OptionInstance
-import net.minecraft.client.resources.sounds.SimpleSoundInstance
-import net.minecraft.sounds.SoundEvent
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.phys.Vec3
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.option.SimpleOption
+import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
+import net.minecraft.util.math.Vec3d
 import kotlin.math.max
 
 class MusicManager(private val minecraft: MinecraftClient) {

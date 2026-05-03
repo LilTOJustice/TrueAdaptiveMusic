@@ -1,20 +1,22 @@
 package liltojustice.trueadaptivemusic.network.processor
 
+import liltojustice.trueadaptivemusic.network.model.SpawnPoint
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
+import net.fabricmc.fabric.api.networking.v1.FabricPacket
 import net.minecraft.server.MinecraftServer
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.level.storage.LevelData
+import net.minecraft.server.network.ServerPlayerEntity
 
 class SpawnPointProcessor: Processor() {
-    val spawnCache = mutableMapOf<ServerPlayer, LevelData.RespawnData>()
-    override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload? {
-        val respawnData = player.respawnConfig?.respawnData() ?: return null
+    val spawnCache = mutableMapOf<ServerPlayerEntity, SpawnPoint>()
+    override fun makePacket(server: MinecraftServer, player: ServerPlayerEntity): FabricPacket? {
+        val spawnPosition = player.spawnPointPosition ?: return null
+        val spawnDimension = player.spawnPointDimension ?: return null
+        val spawnPoint = SpawnPoint(spawnPosition, spawnDimension)
         val cached = spawnCache[player]
-        if (cached?.globalPos != respawnData.globalPos) {
-            spawnCache[player] = respawnData
+        if (cached?.blockPos != spawnPosition || cached.dimension != spawnDimension) {
+            spawnCache[player] = spawnPoint
 
-            return SpawnPointPayload(respawnData)
+            return SpawnPointPayload(spawnPoint)
         }
 
         return null

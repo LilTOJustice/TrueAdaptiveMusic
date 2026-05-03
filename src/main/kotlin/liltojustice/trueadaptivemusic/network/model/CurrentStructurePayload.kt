@@ -1,23 +1,26 @@
 package liltojustice.trueadaptivemusic.network.model
 
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.resources.Identifier
+import net.fabricmc.fabric.api.networking.v1.FabricPacket
+import net.fabricmc.fabric.api.networking.v1.PacketType
+import net.minecraft.network.PacketByteBuf
+import net.minecraft.util.Identifier
 
-data class CurrentStructurePayload(val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): CustomPacketPayload {
-    override fun type(): CustomPacketPayload.Type<out CurrentStructurePayload> {
+data class CurrentStructurePayload(
+    val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): FabricPacket {
+    constructor(buf: PacketByteBuf): this(
+        buf.readIdentifier(), buf.readIdentifier())
+
+    override fun write(buf: PacketByteBuf) {
+        buf.writeIdentifier(structureIdentifier)
+        buf.writeIdentifier(structureSetIdentifier)
+    }
+
+    override fun getType(): PacketType<*> {
         return TYPE
     }
 
     companion object {
-        val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "structure_payload")
-        val TYPE = CustomPacketPayload.Type<CurrentStructurePayload>(ID)
-        val CODEC = StreamCodec.composite(
-            Identifier.STREAM_CODEC,
-            CurrentStructurePayload::structureIdentifier,
-            Identifier.STREAM_CODEC,
-            CurrentStructurePayload::structureSetIdentifier,
-            ::CurrentStructurePayload
-        )
+        val ID = Identifier.of("trueadaptivemusic", "structure_payload")!!
+        val TYPE: PacketType<CurrentStructurePayload> = PacketType.create(ID, ::CurrentStructurePayload)
     }
 }

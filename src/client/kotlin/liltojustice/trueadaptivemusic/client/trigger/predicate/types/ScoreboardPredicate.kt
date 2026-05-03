@@ -26,20 +26,14 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
         } ?: return false
         val matchingEntry = scoreboard.getPlayerScore(playerName, matchingObjective)
 
-        val matchingEntries = scoreboard.listPlayerScores(matchingObjective).filter { entry ->
-            entry.owner == player.scoreboardName || player.team in scoreboard.playerTeams
-        }
-
         val value = arguments.value
-        return matchingEntries.any { matchingEntry ->
-            when (arguments.comparison) {
-                Comparison.Equal -> matchingEntry.value == value
-                Comparison.NotEqual -> matchingEntry.value == value
-                Comparison.Greater -> matchingEntry.value > value
-                Comparison.GreaterOrEqual -> matchingEntry.value >= value
-                Comparison.Lesser -> matchingEntry.value < value
-                Comparison.LesserOrEqual -> matchingEntry.value <= value
-            }
+        return when (arguments.comparison) {
+            Comparison.Equal -> matchingEntry.score == value
+            Comparison.NotEqual -> matchingEntry.score == value
+            Comparison.Greater -> matchingEntry.score > value
+            Comparison.GreaterOrEqual -> matchingEntry.score >= value
+            Comparison.Lesser -> matchingEntry.score < value
+            Comparison.LesserOrEqual -> matchingEntry.score <= value
         }
     }
 

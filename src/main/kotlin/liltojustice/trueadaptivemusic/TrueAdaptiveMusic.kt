@@ -1,56 +1,40 @@
 package liltojustice.trueadaptivemusic
 
-import com.mojang.serialization.Dynamic
-import com.mojang.serialization.JsonOps
-import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
+import com.google.gson.JsonParser
+import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
 import liltojustice.trueadaptivemusic.network.ServerStateProcessor
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
-import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.minecraft.util.StrictJsonParser
-import net.minecraft.world.level.storage.loot.LootContext
-import net.minecraft.world.level.storage.loot.LootParams
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition
+import net.minecraft.loot.LootDataType
+import net.minecraft.loot.context.LootContext
+import net.minecraft.loot.context.LootContextParameterSet
+import net.minecraft.loot.context.LootContextParameters
+import net.minecraft.loot.context.LootContextTypes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
 
 class TrueAdaptiveMusic: ModInitializer {
     override fun onInitialize() {
-        PayloadTypeRegistry.clientboundPlay().register(
-            CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC)
-        PayloadTypeRegistry.clientboundPlay().register(
-            SpawnPointPayload.TYPE, SpawnPointPayload.CODEC)
-        PayloadTypeRegistry.serverboundPlay().register(
-            CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC)
-        PayloadTypeRegistry.clientboundPlay().register(
-            CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC)
-        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.TYPE) { payload, context ->
-            val player = context.player()
-            val json = StrictJsonParser.parse(payload.predicateText)
-            val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
-                .result()
+        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.TYPE) { packet, player, _ ->
+            val json = JsonParser.parseString(packet.predicateText)
+            val condition = LootDataType.PREDICATES.parse(NULL_IDENTIFIER, json)
                 .getOrNull()
-                ?.value() ?: return@registerGlobalReceiver
+                ?: return@registerGlobalReceiver
             ServerPlayNetworking.send(
                 player,
                 CustomPredicateResponsePayload(
-                    payload.predicateId,
+                    packet.predicateId,
                     condition.test(
                         LootContext.Builder(
-                            LootParams.Builder(player.level())
-                                .withParameter(LootContextParams.ORIGIN, player.position())
-                                .withOptionalParameter(
-                                    LootContextParams.THIS_ENTITY, player.livingEntity)
-                                .create(LootContextParamSets.COMMAND)
-                        ).create(Optional.empty())
+                            LootContextParameterSet.Builder(player.serverWorld)
+                                .addOptional(LootContextParameters.ORIGIN, player.pos)
+                                .addOptional(LootContextParameters.THIS_ENTITY, player)
+                                .build(LootContextTypes.COMMAND)
+                        ).build(null)
                     )
                 )
             )

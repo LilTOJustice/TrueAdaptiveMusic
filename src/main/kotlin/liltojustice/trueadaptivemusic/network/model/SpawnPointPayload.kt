@@ -1,22 +1,29 @@
 package liltojustice.trueadaptivemusic.network.model
 
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.resources.Identifier
-import net.minecraft.world.level.storage.LevelData
+import net.fabricmc.fabric.api.networking.v1.FabricPacket
+import net.fabricmc.fabric.api.networking.v1.PacketType
+import net.minecraft.network.PacketByteBuf
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.util.Identifier
 
-data class SpawnPointPayload(val spawnPoint: LevelData.RespawnData): CustomPacketPayload {
-    override fun type(): CustomPacketPayload.Type<out SpawnPointPayload> {
+data class SpawnPointPayload(val spawnPoint: SpawnPoint): FabricPacket {
+    constructor(buf: PacketByteBuf):
+            this(
+                SpawnPoint(
+                    buf.readBlockPos(), buf.readRegistryKey(RegistryKeys.WORLD))
+            )
+
+    override fun write(buf: PacketByteBuf) {
+        buf.writeBlockPos(spawnPoint.blockPos)
+        buf.writeRegistryKey(spawnPoint.dimension)
+    }
+
+    override fun getType(): PacketType<*> {
         return TYPE
     }
 
     companion object {
-        val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "spawn_point")
-        val TYPE = CustomPacketPayload.Type<SpawnPointPayload>(ID)
-        val CODEC = StreamCodec.composite(
-            LevelData.RespawnData.STREAM_CODEC,
-            SpawnPointPayload::spawnPoint,
-            ::SpawnPointPayload
-        )
+        val ID = Identifier.of("trueadaptivemusic", "spawn_point")!!
+        val TYPE: PacketType<SpawnPointPayload> = PacketType.create(ID, ::SpawnPointPayload)
     }
 }

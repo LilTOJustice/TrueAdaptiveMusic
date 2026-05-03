@@ -264,7 +264,7 @@ class PackBrowserListWidget(
         if (widthDiff > heightDiff && widthDiff > 0) {
             finalImageWidth = maxImageWidth
             finalImageHeight = (finalImageWidth / aspectRatio).toInt()
-            yOffset = (height - finalImageHeight) / 2
+            yOffset = (maxImageHeight - finalImageHeight) / 2
         }
         else if (heightDiff > 0) {
             finalImageHeight = maxImageHeight
