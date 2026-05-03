@@ -16,6 +16,10 @@ object GameModePredicate: StaticPredicateType<GameModePredicate.Arguments>(
     data class Arguments(val gameMode: GameMode): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        return Minecraft.getInstance().player?.gameMode() == arguments.gameMode
+        val minecraft = MinecraftClient.getInstance()
+        val currentGameMode = minecraft.networkHandler
+            ?.getPlayerListEntry(minecraft.player?.uuid ?: return false)?.gameMode
+
+        return currentGameMode == arguments.gameMode
     }
 }
