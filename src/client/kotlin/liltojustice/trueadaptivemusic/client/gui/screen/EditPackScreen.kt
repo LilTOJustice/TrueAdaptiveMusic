@@ -73,10 +73,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
-            Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
-        }
-            .build()
+        openAssetsFolderButtonWidget = Button.Builder(OPEN_PACK_TEXT) {
+            Util.getPlatform().openUri(musicPack.packPath.toUri())
+        }.build()
 
         optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
             client?.setScreen(PackOptionsScreen(this, musicPack))
@@ -164,7 +163,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
+        openAssetsFolderButtonWidget.width = font.width(OPEN_PACK_TEXT) + 10
         openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
         optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
         optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
@@ -266,11 +265,11 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
         private const val TOP_MARGIN = 32
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
-        private const val LEFT_MARGIN = TOP_MARGIN / 4
-        private const val RIGHT_MARGIN = LEFT_MARGIN
-        private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.show_assets", "Show Assets")
-        private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
+        private const val LEFT_PADDING = TOP_MARGIN / 4
+        private const val RIGHT_PADDING = LEFT_PADDING
+        private val OPEN_PACK_TEXT = Component.translatableWithFallback(
+            "trueadaptivemusic.open_pack", "Open Pack")
+        private val SAVE_BUTTON_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
         private val OPTIONS_BUTTON_TEXT = Text.translatableWithFallback(
