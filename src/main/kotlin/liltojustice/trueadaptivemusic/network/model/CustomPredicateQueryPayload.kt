@@ -1,22 +1,23 @@
 package liltojustice.trueadaptivemusic.network.model
 
-import net.minecraft.network.codec.ByteBufCodecs
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.resources.Identifier
+import io.netty.buffer.ByteBuf
+import net.minecraft.network.codec.PacketCodec
+import net.minecraft.network.codec.PacketCodecs
+import net.minecraft.network.packet.CustomPayload
+import net.minecraft.util.Identifier
 
-data class CustomPredicateQueryPayload(val predicateId: String, val predicateText: String): CustomPacketPayload {
-    override fun type(): CustomPacketPayload.Type<out CustomPredicateQueryPayload> {
-        return TYPE
+data class CustomPredicateQueryPayload(val predicateId: String, val predicateText: String): CustomPayload {
+    override fun getId(): CustomPayload.Id<out CustomPayload?> {
+        return ID
     }
 
     companion object {
-        val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "custom_predicate_query")
-        val TYPE = CustomPacketPayload.Type<CustomPredicateQueryPayload>(ID)
-        val CODEC = StreamCodec.composite(
-            ByteBufCodecs.stringUtf8(MAX_CUSTOM_PREDICATE_ID_LENGTH),
+        val ID: CustomPayload.Id<CustomPredicateQueryPayload> = CustomPayload.Id(
+            Identifier.of("trueadaptivemusic", "custom_predicate_query"))
+        val CODEC: PacketCodec<ByteBuf, CustomPredicateQueryPayload> = PacketCodec.tuple(
+            PacketCodecs.string(MAX_CUSTOM_PREDICATE_ID_LENGTH),
             CustomPredicateQueryPayload::predicateId,
-            ByteBufCodecs.stringUtf8(MAX_CUSTOM_PREDICATE_LENGTH),
+            PacketCodecs.string(MAX_CUSTOM_PREDICATE_LENGTH),
             CustomPredicateQueryPayload::predicateText,
             ::CustomPredicateQueryPayload
         )
