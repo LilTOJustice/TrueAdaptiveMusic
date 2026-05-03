@@ -26,7 +26,7 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
         } ?: return false
 
         val matchingEntries = scoreboard.listPlayerScores(matchingObjective).filter { entry ->
-            entry.owner == player.name.string || player.team in scoreboard.playerTeams
+            entry.owner == player.scoreboardName || player.team in scoreboard.playerTeams
         }
 
         val value = arguments.value

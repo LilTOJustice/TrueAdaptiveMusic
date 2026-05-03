@@ -101,7 +101,7 @@ class PredicateViewWidget(
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(
+                    TAMAPI.makeInputWidget(
                         screen!!,
                         predicateArgs,
                         arg,

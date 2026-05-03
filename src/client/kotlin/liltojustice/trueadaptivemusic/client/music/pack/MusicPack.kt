@@ -60,10 +60,7 @@ class MusicPack private constructor(
         if (!assetsDir.exists()) {
             assetsDir.createDirectory()
             if (packWithAssets?.isZip == true) {
-                ZipFile(
-                    Path(
-                        Constants.MUSIC_PACK_DIR.pathString, packWithAssets.packName).pathString
-                ).use { zipFile ->
+                ZipFile(packWithAssets.packPath.invariantSeparatorsPathString).use { zipFile ->
                     zipFile.entries().toList().filter { entry -> isZipAsset(entry.name) }
                         .forEach { entry ->
                             val path = Path(
@@ -89,6 +86,28 @@ class MusicPack private constructor(
 
                 if (existingAssets.exists()) {
                     existingAssets.listDirectoryEntries().forEach { toCopy -> toCopy.copyTo(assetsDir) }
+                }
+            }
+        }
+
+        val predicatesDir = Path(packDir.pathString, Constants.PREDICATES_DIRNAME)
+        if (!predicatesDir.exists()) {
+            predicatesDir.createDirectory()
+            if (packWithAssets?.isZip == true) {
+                ZipFile(packWithAssets.packPath.invariantSeparatorsPathString).use { zipFile ->
+                    zipFile.entries().toList().forEach { entry ->
+                        val path = Path(
+                            predicatesDir.pathString,
+                            *Path(entry.name).drop(1).map { it.name }.toTypedArray()
+                        )
+                        path.createParentDirectories()
+                        if (path.isDirectory()) {
+                            return@forEach
+                        }
+
+                        FileOutputStream(path.pathString)
+                            .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                    }
                 }
             }
         }
@@ -172,26 +191,36 @@ class MusicPack private constructor(
     @OptIn(ExperimentalPathApi::class)
     fun save(progress: Reference<Double>? = null): Path {
         val packOngoingDir = Path(
-            Constants.MUSIC_PACK_DIR.pathString, "${Path(packName).nameWithoutExtension}.new")
+            Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString,
+            "${Path(packName).nameWithoutExtension}.new"
+        )
         val packDir = Path(
-            Constants.MUSIC_PACK_DIR.pathString, Path(packName).nameWithoutExtension)
-        val assetsDir = Path(packOngoingDir.pathString, Constants.ASSETS_DIRNAME)
-        val rulesFile = Path(packOngoingDir.pathString, Constants.RULES_FILENAME)
-        val metaFile = Path(packOngoingDir.pathString, Constants.META_FILENAME)
-        val optionsFile = Path(packOngoingDir.pathString, Constants.PACK_OPTIONS_FILENAME)
-        val iconFile = Path(packOngoingDir.pathString, Constants.ICON_FILENAME).takeIf { it.exists() }
+            Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString,
+            Path(packName).nameWithoutExtension
+        )
+        val assetsDir = Path(packOngoingDir.invariantSeparatorsPathString, Constants.ASSETS_DIRNAME)
+        val predicatesDir = Path(
+            packOngoingDir.invariantSeparatorsPathString, Constants.PREDICATES_DIRNAME)
+        val rulesFile = Path(packOngoingDir.invariantSeparatorsPathString, Constants.RULES_FILENAME)
+        val metaFile = Path(packOngoingDir.invariantSeparatorsPathString, Constants.META_FILENAME)
+        val optionsFile = Path(
+            packOngoingDir.invariantSeparatorsPathString, Constants.PACK_OPTIONS_FILENAME)
+        val iconFile = Path(
+            packOngoingDir.invariantSeparatorsPathString, Constants.ICON_FILENAME)
+            .takeIf { it.exists() }
 
         val gson = GsonBuilder().setPrettyPrinting().create()
         rulesFile.toFile().writeText(gson.toJson(rules.toJson()))
         metaFile.toFile().writeText(meta.jsonEncode())
         optionsFile.toFile().writeText(options.jsonEncode())
 
-        val outputPath = Path(packDir.pathString + ".zip")
-        val newZipPath = Path(outputPath.pathString + ".new")
+        val outputPath = Path(packDir.invariantSeparatorsPathString + ".zip")
+        val newZipPath = Path(outputPath.invariantSeparatorsPathString + ".new")
 
         val newZip = newZipPath.createFile()
         val assets = assetsDir.listDirectoryEntriesRecursive()
-        val totalFiles = 4 + assets.size
+        val predicates = predicatesDir.listDirectoryEntriesRecursive()
+        val totalFiles = 4 + assets.size + predicates.size
         var filesSaved = 0
         val increaseProgress = {
             filesSaved++
@@ -214,7 +243,7 @@ class MusicPack private constructor(
                 }
                 increaseProgress()
 
-                assetsDir.listDirectoryEntriesRecursive().forEach { entry ->
+                assets.forEach { entry ->
                     out.putNextEntry(
                         ZipEntry(
                             Path(
@@ -230,6 +259,20 @@ class MusicPack private constructor(
                     else {
                         entry.inputStream().use { it.copyTo(out) }
                     }
+                    increaseProgress()
+                }
+
+                predicates.forEach { entry ->
+                    out.putNextEntry(
+                        ZipEntry(
+                            Path(
+                                Constants.PREDICATES_DIRNAME,
+                                *entry.drop(3).map { it.name }.toTypedArray()
+                            ).invariantSeparatorsPathString + if (entry.isDirectory()) PATH_SEPARATOR else ""
+                        )
+                    )
+
+                    entry.inputStream().use { it.copyTo(out) }
                     increaseProgress()
                 }
             }
@@ -312,7 +355,12 @@ class MusicPack private constructor(
         }
 
         fun makeEmpty(packName: String): MusicPack {
-            return MusicPack(MusicPackOptions(), MusicPackMeta(), MusicTree.makeEmpty(), packName)
+            return MusicPack(
+                MusicPackOptions(),
+                MusicPackMeta(),
+                MusicTree.makeEmpty(),
+                "$packName.new"
+            )
         }
 
         fun fromFile(filePath: Path): MusicPack? {

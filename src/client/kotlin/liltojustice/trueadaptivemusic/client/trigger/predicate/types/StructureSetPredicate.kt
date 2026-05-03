@@ -1,15 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
 import liltojustice.trueadaptivemusic.client.identifier.StructureSetIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
-import net.minecraft.core.BlockPos
-import net.minecraft.core.registries.Registries
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.level.levelgen.structure.StructureSet
 import kotlin.collections.any
-import kotlin.jvm.optionals.getOrNull
 import kotlin.reflect.typeOf
 
 object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Arguments>(
@@ -26,36 +22,8 @@ object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Argument
     data class Arguments(val structureSets: List<StructureSetIdentifier>): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        val minecraft = Minecraft.getInstance()
-        val dimensionKey = minecraft.level?.dimension() ?: return false
-        val serverLevel = minecraft.singleplayerServer?.getLevel(dimensionKey) ?: return false
-        val x: Double = minecraft.player?.x ?: return false
-        val y: Double = minecraft.player?.y ?: return false
-        val z: Double = minecraft.player?.z ?: return false
-
-        return fullStructureTest(arguments.structureSets, serverLevel, x, y, z)
-    }
-
-    private fun fullStructureTest(
-        structureSets: List<StructureSetIdentifier>, level: ServerLevel, x: Double, y: Double, z: Double): Boolean {
-        val blockPos = BlockPos.containing(x, y, z)
-        val structureManager = level.structureManager()
-        val structuresNearby = structureManager.getAllStructuresAt(blockPos).keys
-
-        return (structureSets.takeIf { structureSets.isNotEmpty() }
-            ?.map { structureSet -> structureSet.id }
-            ?: StructureSetIdentifier.getRegistryIds())
-            .any { structureSetId ->
-                val structureSet: StructureSet =
-                    structureManager.registryAccess()
-                        .lookup(Registries.STRUCTURE_SET).getOrNull()?.getValue(structureSetId)
-                        ?: return false
-
-                structureSet.structures.any { structureSelectionEntry ->
-                    structuresNearby.any { structure ->
-                        structureSelectionEntry.structure.value().type() == structure.type()
-                    }
-                }
-            }
+        return Minecraft.getInstance().player != null &&
+                (arguments.structureSets.isEmpty() ||
+                        arguments.structureSets.any { it.id == TAMNetworkingClient.structureSetId })
     }
 }
