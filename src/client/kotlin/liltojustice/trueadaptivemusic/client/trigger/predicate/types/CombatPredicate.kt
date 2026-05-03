@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.monster.Guardian
 import net.minecraft.world.entity.monster.Monster
 import net.minecraft.world.entity.monster.Phantom
+import net.minecraft.world.entity.monster.warden.Warden
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
 import java.util.*
@@ -139,8 +140,9 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         return closeEnough && (
                 (entity as? Mob)?.isAggressive == true ||
                         (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
-                        entity is Phantom||
-                        (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true
+                        entity is Phantom ||
+                        (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
+                        entity is Warden
                 )
     }
 
