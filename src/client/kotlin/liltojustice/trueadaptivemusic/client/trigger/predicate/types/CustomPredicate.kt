@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
-import net.minecraft.client.Minecraft
+import net.minecraft.client.MinecraftClient
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
@@ -27,7 +27,7 @@ object CustomPredicate: StaticPredicateType<CustomPredicate.Arguments>(
     data class Arguments(val predicateFile: PredicateFile): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        if (Minecraft.getInstance().player == null) {
+        if (MinecraftClient.getInstance().player == null) {
             return false
         }
 

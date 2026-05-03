@@ -1,11 +1,11 @@
 package liltojustice.trueadaptivemusic.client.identifier
 
-import net.minecraft.client.Minecraft
-import net.minecraft.core.Holder
-import net.minecraft.core.Registry
-import net.minecraft.core.registries.Registries
-import net.minecraft.resources.Identifier
-import net.minecraft.world.level.biome.Biome
+import net.minecraft.client.MinecraftClient
+import net.minecraft.registry.Registry
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.registry.entry.RegistryEntry
+import net.minecraft.util.Identifier
+import net.minecraft.world.biome.Biome
 import kotlin.jvm.optionals.getOrNull
 
 class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
@@ -13,28 +13,25 @@ class BiomeIdentifier(id: Identifier): TypedIdentifier(id) {
         return id.toTranslationKey("biome")
     }
 
-    fun matches(biome: Holder<Biome>): Boolean {
+    fun matches(biome: RegistryEntry<Biome>): Boolean {
         val registry = getBiomeRegistry() ?: return false
-
-        return registry[id].getOrNull()?.let {
-            biome.`is`(it.key())
-        } ?: registry.tags.toList().firstOrNull { it.key().location == id }?.key()?.let {
-            biome.`is`(it)
-        } ?: false
+        return registry.streamTags().toList().firstOrNull { it.id == id }?.let {
+            biome.isIn(it)
+        } ?: (registry[id] == biome.value())
     }
 
     companion object: TypedIdentifierCompanion() {
         override fun getRegistryIds(): List<Identifier> {
             val registry = getBiomeRegistry() ?: return emptyList()
 
-            return registry.keySet().toList() +
-                    registry.tags.map { it.key().location }.filter { it.namespace != "c" }.toList()
+            return registry.keys.toList().map { it.value } +
+                    registry.streamTags().toList().map { it.id }.filter { it?.namespace != "c" }.toList()
         }
 
         private fun getBiomeRegistry(): Registry<Biome>? {
-            return Minecraft.getInstance().level
-                ?.registryAccess()
-                ?.lookup(Registries.BIOME)
+            return MinecraftClient.getInstance().world
+                ?.registryManager
+                ?.getOptional(RegistryKeys.BIOME)
                 ?.getOrNull()
         }
     }
