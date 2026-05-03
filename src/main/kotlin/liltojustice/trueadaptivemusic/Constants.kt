@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic
 
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import net.minecraft.resources.Identifier
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
@@ -27,7 +27,7 @@ class Constants {
             "trueadaptivemusic.join_discord", "Join the Discord!")
         val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
             PosixFilePermissions.fromString("rwxrwxrwx"))
-        val NULL_IDENTIFIER = Identifier.fromNamespaceAndPath("trueadaptivemusic", "null")
+        val NULL_IDENTIFIER: Identifier = Identifier.of("trueadaptivemusic", "null")
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
         const val FFPROBE_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffprobe.exe"
