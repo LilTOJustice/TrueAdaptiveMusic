@@ -1,20 +1,21 @@
 package liltojustice.trueadaptivemusic.network.model
 
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.resources.Identifier
-import net.minecraft.world.level.storage.LevelData
+import io.netty.buffer.ByteBuf
+import net.minecraft.network.codec.PacketCodec
+import net.minecraft.network.packet.CustomPayload
+import net.minecraft.util.Identifier
+import net.minecraft.world.WorldProperties
 
-data class SpawnPointPayload(val spawnPoint: LevelData.RespawnData): CustomPacketPayload {
-    override fun type(): CustomPacketPayload.Type<out SpawnPointPayload> {
-        return TYPE
+data class SpawnPointPayload(val spawnPoint: WorldProperties.SpawnPoint): CustomPayload {
+    override fun getId(): CustomPayload.Id<out CustomPayload?> {
+        return ID
     }
 
     companion object {
-        val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "spawn_point")
-        val TYPE = CustomPacketPayload.Type<SpawnPointPayload>(ID)
-        val CODEC = StreamCodec.composite(
-            LevelData.RespawnData.STREAM_CODEC,
+        val ID: CustomPayload.Id<SpawnPointPayload> = CustomPayload.Id(
+            Identifier.of("trueadaptivemusic", "spawn_point"))
+        val CODEC: PacketCodec<ByteBuf, SpawnPointPayload> = PacketCodec.tuple(
+            WorldProperties.SpawnPoint.PACKET_CODEC,
             SpawnPointPayload::spawnPoint,
             ::SpawnPointPayload
         )

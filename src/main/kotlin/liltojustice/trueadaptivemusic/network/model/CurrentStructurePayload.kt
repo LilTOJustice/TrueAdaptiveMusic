@@ -1,21 +1,23 @@
 package liltojustice.trueadaptivemusic.network.model
 
-import net.minecraft.network.codec.StreamCodec
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.resources.Identifier
+import io.netty.buffer.ByteBuf
+import net.minecraft.network.codec.PacketCodec
+import net.minecraft.network.packet.CustomPayload
+import net.minecraft.util.Identifier
 
-data class CurrentStructurePayload(val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): CustomPacketPayload {
-    override fun type(): CustomPacketPayload.Type<out CurrentStructurePayload> {
-        return TYPE
+data class CurrentStructurePayload(
+    val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): CustomPayload {
+    override fun getId(): CustomPayload.Id<out CustomPayload?> {
+        return ID
     }
 
     companion object {
-        val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "structure_payload")
-        val TYPE = CustomPacketPayload.Type<CurrentStructurePayload>(ID)
-        val CODEC = StreamCodec.composite(
-            Identifier.STREAM_CODEC,
+        val ID: CustomPayload.Id<CurrentStructurePayload> = CustomPayload.Id(
+            Identifier.of("trueadaptivemusic", "structure_payload"))
+        val CODEC: PacketCodec<ByteBuf, CurrentStructurePayload> = PacketCodec.tuple(
+            Identifier.PACKET_CODEC,
             CurrentStructurePayload::structureIdentifier,
-            Identifier.STREAM_CODEC,
+            Identifier.PACKET_CODEC,
             CurrentStructurePayload::structureSetIdentifier,
             ::CurrentStructurePayload
         )
