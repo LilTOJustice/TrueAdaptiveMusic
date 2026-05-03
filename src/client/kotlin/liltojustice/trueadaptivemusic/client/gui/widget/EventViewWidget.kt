@@ -176,7 +176,7 @@ class EventViewWidget(
         requiredEventArgs.forEach { arg ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(
+                    TAMAPI.makeInputWidget(
                         screen!!,
                         eventArgs,
                         arg,
@@ -193,7 +193,7 @@ class EventViewWidget(
         requiredEventParams.forEach { param ->
             addWidgetFromRender(
                 {
-                    TAMClient.makeInputWidget(
+                    TAMAPI.makeInputWidget(
                         screen!!,
                         eventParams,
                         param,

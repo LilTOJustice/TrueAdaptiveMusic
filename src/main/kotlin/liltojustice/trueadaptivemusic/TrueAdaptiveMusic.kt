@@ -1,51 +1,63 @@
 package liltojustice.trueadaptivemusic
 
+import com.mojang.serialization.Dynamic
+import com.mojang.serialization.JsonOps
+import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
+import liltojustice.trueadaptivemusic.network.ServerStateProcessor
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
+import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
+import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.loot.condition.LootCondition
+import net.minecraft.loot.context.LootContext
+import net.minecraft.loot.context.LootContextParameters
+import net.minecraft.loot.context.LootContextTypes
+import net.minecraft.loot.context.LootWorldContext
+import net.minecraft.util.StrictJsonParser
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.FileAttribute
-import java.nio.file.attribute.PosixFilePermission
-import java.nio.file.attribute.PosixFilePermissions
-import kotlin.io.path.*
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 
 class TrueAdaptiveMusic: ModInitializer {
-    @OptIn(ExperimentalPathApi::class)
     override fun onInitialize() {
-        Files.createDirectories(Constants.MUSIC_PACK_DIR)
-        Files.createDirectories(Constants.FFMPEG_DIR)
-        Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
-
-        if (isWindows) {
-            cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
-            cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
+        PayloadTypeRegistry.playS2C().register(
+            CurrentStructurePayload.ID, CurrentStructurePayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(
+            SpawnPointPayload.ID, SpawnPointPayload.CODEC)
+        PayloadTypeRegistry.playC2S().register(
+            CustomPredicateQueryPayload.ID, CustomPredicateQueryPayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(
+            CustomPredicateResponsePayload.ID, CustomPredicateResponsePayload.CODEC)
+        ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.ID) { payload, context ->
+            val player = context.player()
+            val json = StrictJsonParser.parse(payload.predicateText)
+            val condition = LootCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
+                .result()
+                .getOrNull()
+                ?: return@registerGlobalReceiver
+            ServerPlayNetworking.send(
+                player,
+                CustomPredicateResponsePayload(
+                    payload.predicateId,
+                    condition.test(
+                        LootContext.Builder(
+                            LootWorldContext.Builder(player.entityWorld)
+                                .addOptional(LootContextParameters.ORIGIN, player.entityPos)
+                                .addOptional(LootContextParameters.THIS_ENTITY, player.entity)
+                                .build(LootContextTypes.COMMAND)
+                        ).build(Optional.empty())
+                    )
+                )
+            )
         }
-        else {
-            cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
-            cloneResourceFile(Constants.FFPROBE_PATH, Constants.FFPROBE_RESOURCE)
-        }
+        ServerStateProcessor().let { ServerTickEvents.END_SERVER_TICK.register { server -> it.processServer(server) } }
     }
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(TrueAdaptiveMusic::class.java)
-        val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
-            PosixFilePermissions.fromString("rwxrwxrwx"))
-        val isWindows = "windows" in System.getProperty("os.name").lowercase()
-
-        fun cloneResourceFile(destinationPath: Path, resource: String) {
-            destinationPath.takeIf { !it.exists() }?.let { filePath ->
-                if (isWindows) {
-                    Files.createFile(filePath)
-                }
-                else {
-                    Files.createFile(filePath, POSIX_PERMISSIONS)
-                }
-
-                this::class.java.classLoader.getResourceAsStream(resource).use {
-                    it?.copyTo(filePath.outputStream())
-                }
-            }
-        }
     }
 }
