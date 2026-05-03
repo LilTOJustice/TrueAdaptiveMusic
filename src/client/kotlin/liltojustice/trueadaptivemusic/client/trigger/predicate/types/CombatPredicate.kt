@@ -4,15 +4,16 @@ import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
-import net.minecraft.client.MinecraftClient
-import net.minecraft.entity.Entity
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.mob.GuardianEntity
-import net.minecraft.entity.mob.HostileEntity
-import net.minecraft.entity.mob.MobEntity
-import net.minecraft.entity.mob.PhantomEntity
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.util.math.Vec3d
+import net.minecraft.client.Minecraft
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.monster.Guardian
+import net.minecraft.world.entity.monster.Monster
+import net.minecraft.world.entity.monster.Phantom
+import net.minecraft.world.entity.monster.warden.Warden
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.math.PI
@@ -135,13 +136,14 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
             )
         )
 
-            return closeEnough && (
-                    (entity as? MobEntity)?.isAttacking == true ||
-                            (entity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true ||
-                            entity is PhantomEntity ||
-                            (entity as? PlayerEntity)?.let { isEnemyPlayer(playerEntity, it) } == true
-                    )
-        }
+        return closeEnough && (
+                (entity as? Mob)?.isAggressive == true ||
+                        (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
+                        entity is Phantom ||
+                        (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
+                        entity is Warden
+                )
+    }
 
         private fun isEnemyPlayer(player: PlayerEntity, otherPlayer: PlayerEntity): Boolean {
             return player.scoreboardTeam != null &&
