@@ -32,10 +32,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var nodeViewWidget: NodeViewWidget
     private lateinit var predicateViewWidget: PredicateViewWidget
     private lateinit var eventViewWidget: EventViewWidget
-    private lateinit var saveButtonWidget: SpriteIconButton
-    private lateinit var closeButtonWidget: Button
-    private lateinit var openPackDirectory: Button
-    private lateinit var optionsButtonWidget: Button
+    private lateinit var saveButtonWidget: TextIconButtonWidget
+    private lateinit var closeButtonWidget: ButtonWidget
+    private lateinit var openPackDirectory: ButtonWidget
+    private lateinit var optionsButtonWidget: ButtonWidget
 
     private val predicateView: Boolean
         get() = predicateViewWidget.visible
@@ -93,8 +93,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        openPackDirectory = Button.Builder(OPEN_PACK_TEXT) {
-            Util.getPlatform().openUri(musicPack.packPath.toUri())
+        openPackDirectory = ButtonWidget.Builder(OPEN_PACK_TEXT) {
+            Util.getOperatingSystem().open(musicPack.packPath.toUri())
         }.build()
 
         optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
@@ -165,14 +165,14 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
             }
         )
 
-        addRenderableWidget(saveButtonWidget)
-        addRenderableWidget(closeButtonWidget)
-        addRenderableWidget(openPackDirectory)
-        addRenderableWidget(packStructureWidget)
-        addRenderableWidget(nodeViewWidget)
-        addRenderableWidget(predicateViewWidget)
-        addRenderableWidget(eventViewWidget)
-        addRenderableWidget(optionsButtonWidget)
+        addDrawableChild(saveButtonWidget)
+        addDrawableChild(closeButtonWidget)
+        addDrawableChild(openPackDirectory)
+        addDrawableChild(packStructureWidget)
+        addDrawableChild(nodeViewWidget)
+        addDrawableChild(predicateViewWidget)
+        addDrawableChild(eventViewWidget)
+        addDrawableChild(optionsButtonWidget)
 
         saveButtonWidget.width = textRenderer.getWidth(saveButtonWidget.message) + 20
         closeButtonWidget.x = saveButtonWidget.x + saveButtonWidget.width + 5
@@ -183,9 +183,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openPackDirectory.width = font.width(OPEN_PACK_TEXT) + 10
+        openPackDirectory.width = textRenderer.getWidth(OPEN_PACK_TEXT) + 10
         openPackDirectory.x = width - openPackDirectory.width
-        optionsButtonWidget.width = font.width(OPTIONS_BUTTON_TEXT) + 10
+        optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
         optionsButtonWidget.x = openPackDirectory.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
@@ -285,11 +285,11 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private val CHECKMARK: Identifier = Identifier.ofVanilla("icon/checkmark")
         private const val TOP_MARGIN = 32
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
-        private const val LEFT_PADDING = TOP_MARGIN / 4
-        private const val RIGHT_PADDING = LEFT_PADDING
-        private val OPEN_PACK_TEXT = Component.translatableWithFallback(
+        private const val LEFT_MARGIN = TOP_MARGIN / 4
+        private const val RIGHT_MARGIN = LEFT_MARGIN
+        private val OPEN_PACK_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.open_pack", "Open Pack")
-        private val SAVE_BUTTON_TEXT = Component.translatableWithFallback(
+        private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
         private val OPTIONS_BUTTON_TEXT = Text.translatableWithFallback(

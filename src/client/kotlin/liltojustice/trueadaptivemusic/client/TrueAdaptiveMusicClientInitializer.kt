@@ -56,8 +56,8 @@ import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
-import net.minecraft.client.gui.components.Tooltip
-import net.minecraft.network.chat.Component
+import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.text.Text
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.collections.map
@@ -141,10 +141,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         // Register base input widgets
         TAMAPI.registerInputWidget(
             typeOf<String>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
                 prompt,
-                { widget, text ->
+                { _, text ->
                     outArgs[arg.index] = text
                     onChange()
                     ""
@@ -160,10 +160,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             typeOf<Int>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
                 prompt,
-                { widget, text ->
+                { _, text ->
                     if (text.isBlank() || text == "-") {
                         return@TextInputWidget "0"
                     }
@@ -195,10 +195,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             typeOf<UInt>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
                 prompt,
-                { widget, text ->
+                { _, text ->
                     if (text.isBlank()) {
                         return@TextInputWidget "0"
                     }
@@ -226,10 +226,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             typeOf<Double>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = TextInputWidget(
                 prompt,
-                { widget, text ->
+                { _, text ->
                     if (text.isBlank() || text == "-") {
                         return@TextInputWidget "0"
                     }
@@ -289,7 +289,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             typeOf<Boolean>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
             val result = CheckboxWidget(
                 prompt,
                 { checked ->
@@ -306,7 +306,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<Enum<*>>()) },
-            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val enumClass = (arg.type.classifier as KClass<*>).java
                 val options = enumClass.enumConstants.map { enum -> enum as Enum<*> }
 
@@ -331,7 +331,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             { type -> isEnumList(type) },
-            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow Enum didn't have any type args. The world is chaos.")
                 val enumClass = (type.classifier as KClass<*>).java
@@ -356,7 +356,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             { type -> type.isSubtypeOf(typeOf<TypedIdentifier>()) },
-            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val prettify = TAMClient.options.prettifyIdentifiers
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(arg.type)
@@ -378,7 +378,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             { type -> isTypedIdentifierList(type) },
-            { prompt, screen, outArgs, arg, tooltipText, onChange ->
+            { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
                 val prettify = TAMClient.options.prettifyIdentifiers
@@ -407,7 +407,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
         TAMAPI.registerInputWidget(
             typeOf<TrueAdaptiveMusicOptions.LUFBoost>()
-        ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
+        ) { prompt, _, outArgs, arg, tooltipText, _ ->
             val result = SliderWidget(
                 0,
                 TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),

@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
-import net.minecraft.client.Minecraft
+import net.minecraft.client.MinecraftClient
 import kotlin.reflect.typeOf
 
 object SpawnPointNearbyPredicate: StaticPredicateType<SpawnPointNearbyPredicate.Arguments>(
@@ -17,10 +17,10 @@ object SpawnPointNearbyPredicate: StaticPredicateType<SpawnPointNearbyPredicate.
     data class Arguments(val blockRadius: UInt): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        val player = Minecraft.getInstance().player ?: return false
+        val player = MinecraftClient.getInstance().player ?: return false
         val spawnPoint = TAMNetworkingClient.spawnPoint ?: return false
         val blockRadiusSquared = arguments.blockRadius.toDouble().let { it * it }
-        return spawnPoint.dimension() == player.level().dimension() &&
-                spawnPoint.pos().distSqr(player.blockPosition()) <= blockRadiusSquared
+        return spawnPoint.dimension.value == player.entityWorld.dimensionEntry.key.get().value &&
+                spawnPoint.pos.getSquaredDistance(player.blockPos) <= blockRadiusSquared
     }
 }
