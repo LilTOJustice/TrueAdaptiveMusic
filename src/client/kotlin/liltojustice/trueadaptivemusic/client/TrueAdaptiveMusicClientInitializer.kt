@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
@@ -22,6 +23,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthP
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CustomPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DayTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DeathScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.DimensionPredicate
@@ -43,6 +45,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PlayerAttri
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpawnPointNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
@@ -55,7 +58,15 @@ import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.collections.map
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.outputStream
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -64,6 +75,21 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
+        // Config initialization
+        Files.createDirectories(Constants.MUSIC_PACK_DIR)
+        Files.createDirectories(Constants.FFMPEG_DIR)
+        Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
+
+        if (TAMClient.isWindows) {
+            cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
+            cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
+        }
+        else {
+            cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
+            cloneResourceFile(Constants.FFPROBE_PATH, Constants.FFPROBE_RESOURCE)
+        }
+
+        // Register base predicate types
         TAMAPI.registerPredicateType(BiomePredicate)
         TAMAPI.registerPredicateType(BossPredicate)
         TAMAPI.registerPredicateType(CombatPredicate)
@@ -96,7 +122,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(ScoreboardPredicate)
         TAMAPI.registerPredicateType(TeamPredicate)
         TAMAPI.registerPredicateType(PlayerAttributePredicate)
+        TAMAPI.registerPredicateType(SpawnPointNearbyPredicate)
+        TAMAPI.registerPredicateType(CustomPredicate)
 
+        // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
         TAMAPI.registerEventType(OnBossDefeatEvent)
         TAMAPI.registerEventType(OnDayStartEvent)
@@ -109,6 +138,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerEventType(OnWakeUpEvent)
         TAMAPI.registerEventType(OnPauseEvent)
 
+        // Register base input widgets
         TAMAPI.registerInputWidget(
             typeOf<String>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
@@ -382,6 +412,26 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
 
             result
         }
+
+        TAMAPI.registerInputWidget(
+            typeOf<CustomPredicate.PredicateFile>()
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            val options = TAMClient.musicPack?.packPath?.invariantSeparatorsPathString?.let {
+                Path(it, Constants.PREDICATES_DIRNAME)
+            }?.listDirectoryEntries()?.map { it.name } ?: emptyList()
+            DropdownWidget(
+                options,
+                { id ->
+                    outArgs[arg.index] = CustomPredicate.PredicateFile(id)
+                    onChange()
+                },
+                title = prompt,
+                startingOption = (outArgs[arg.index] as? CustomPredicate.PredicateFile)?.fileName,
+                tooltipText = tooltipText
+            )
+        }
+
+        TAMNetworkingClient.init()
     }
 
     companion object {
@@ -411,6 +461,21 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 "Lesser" -> "<"
                 "LesserOrEqual" -> "<="
                 else -> enumString.prettify()
+            }
+        }
+
+        fun cloneResourceFile(destinationPath: Path, resource: String) {
+            destinationPath.takeIf { !it.exists() }?.let { filePath ->
+                if (TAMClient.isWindows) {
+                    Files.createFile(filePath)
+                }
+                else {
+                    Files.createFile(filePath, Constants.POSIX_PERMISSIONS)
+                }
+
+                this::class.java.classLoader.getResourceAsStream(resource).use {
+                    it?.copyTo(filePath.outputStream())
+                }
             }
         }
     }

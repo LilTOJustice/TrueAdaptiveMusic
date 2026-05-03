@@ -11,7 +11,8 @@ import net.minecraft.network.chat.Component
 
 class MusicPredicate<TTrigger: PredicateTypeBase>(type: TTrigger, arguments: TriggerArguments, state: TriggerState)
     : MusicTrigger<TTrigger>(type, arguments, state) {
-    private var lastResult = false
+    var lastResult = false
+        private set
     private var ticksSinceResult = 0
 
     fun test(): Boolean {
@@ -25,6 +26,11 @@ class MusicPredicate<TTrigger: PredicateTypeBase>(type: TTrigger, arguments: Tri
         ticksSinceResult++
 
         return lastResult
+    }
+
+    fun resetCache() {
+        lastResult = false
+        ticksSinceResult = 0
     }
 
     private fun getFixedTickRate(): Int {

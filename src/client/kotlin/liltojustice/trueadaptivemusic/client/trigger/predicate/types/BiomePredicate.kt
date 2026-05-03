@@ -20,7 +20,7 @@ object BiomePredicate: StaticPredicateType<BiomePredicate.Arguments>(
         val player = minecraft.player ?: return false
         val playerBiome = minecraft.level?.getBiome(player.blockPosition()) ?: return false
 
-        return arguments.biomes.isEmpty() || arguments.biomes.any { biome -> playerBiome.`is`(biome.id) }
+        return arguments.biomes.isEmpty() || arguments.biomes.any { biome -> biome.matches(playerBiome) }
     }
 
     data class Arguments(val biomes: List<BiomeIdentifier>): TriggerArguments()
