@@ -11,6 +11,7 @@ import net.minecraft.entity.mob.GuardianEntity
 import net.minecraft.entity.mob.HostileEntity
 import net.minecraft.entity.mob.MobEntity
 import net.minecraft.entity.mob.PhantomEntity
+import net.minecraft.entity.mob.WardenEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.Vec3d
 import java.util.*
@@ -54,8 +55,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         entityGroups.add(level.entities.filterIsInstance<HostileEntity>().filter { state.filterEntity(it) })
         entityGroups.add(level.entities.filterIsInstance<PhantomEntity>().filter { state.filterEntity(it) })
         entityGroups.add(
-            level.entities.filterIsInstance<PlayerEntity>().filter { it != playerEntity && state.filterEntity(it) }
-        )
+            level.entities.filterIsInstance<PlayerEntity>().filter { it != playerEntity && state.filterEntity(it) })
 
         for (validEntities in entityGroups) {
             for (livingEntity: LivingEntity in validEntities) {
@@ -135,13 +135,14 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
             )
         )
 
-            return closeEnough && (
-                    (entity as? MobEntity)?.isAttacking == true ||
-                            (entity as? GuardianEntity)?.let { it.beamTarget?.id == playerEntity.id } == true ||
-                            entity is PhantomEntity ||
-                            (entity as? PlayerEntity)?.let { isEnemyPlayer(playerEntity, it) } == true
-                    )
-        }
+        return closeEnough && (
+                (entity as? MobEntity)?.isAttacking == true ||
+                        (entity as? GuardianEntity)?.let { it.target?.id == playerEntity.id } == true ||
+                        entity is PhantomEntity ||
+                        (entity as? PlayerEntity)?.let { isEnemyPlayer(playerEntity, it) } == true ||
+                        entity is WardenEntity
+                )
+    }
 
         private fun isEnemyPlayer(player: PlayerEntity, otherPlayer: PlayerEntity): Boolean {
             return player.scoreboardTeam != null &&

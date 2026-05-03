@@ -9,7 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
-import liltojustice.trueadaptivemusicapi.trigger.event.type.EventType
+import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.SimpleOption
 import net.minecraft.client.sound.PositionedSoundInstance
@@ -52,7 +52,7 @@ class MusicManager(private val minecraft: MinecraftClient) {
         musicPlayer.createTrack(ON_DEMAND_TRACK, false, ON_DEMAND_CROSSFADE_TICKS)
     }
 
-    fun <TInput: EventInput> invokeMusicEvent(eventType: EventType<*, *, TInput>, input: TInput) {
+    fun invokeMusicEvent(eventType: EventTypeBase, input: EventInput) {
         eventPool.firstOrNull { event ->
             eventType == event.type && runCatching { event.validate(input) }.getOrNull() == true }
             ?.let { event ->
