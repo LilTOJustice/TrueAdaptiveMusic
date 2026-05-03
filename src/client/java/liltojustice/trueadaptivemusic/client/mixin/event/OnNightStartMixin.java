@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnNightStartEvent;
+import liltojustice.trueadaptivemusicapi.TAMAPI;
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,9 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnNightStartMixin {
     @Inject(at = @At("HEAD"), method = "tick()V")
     public void tick(CallbackInfo ci) {
-        MinecraftClient thisObject = (MinecraftClient)(Object)this;
+        MinecraftClient thisObject = (MinecraftClient) (Object)this;
         if (thisObject.world != null && thisObject.world.getTimeOfDay() % 24000L == 13000L) {
-            TAMClient.INSTANCE.invokeMusicEvent(OnNightStartEvent.INSTANCE);
+            TAMAPI.INSTANCE.invokeEvent(OnNightStartEvent.INSTANCE);
         }
     }
 }

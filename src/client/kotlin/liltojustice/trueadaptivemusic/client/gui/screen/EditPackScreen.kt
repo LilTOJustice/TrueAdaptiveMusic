@@ -34,7 +34,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
     private lateinit var eventViewWidget: EventViewWidget
     private lateinit var saveButtonWidget: TextIconButtonWidget
     private lateinit var closeButtonWidget: ButtonWidget
-    private lateinit var openAssetsFolderButtonWidget: ButtonWidget
+    private lateinit var openPackDirectory: ButtonWidget
     private lateinit var optionsButtonWidget: ButtonWidget
 
     private val predicateView: Boolean
@@ -93,10 +93,9 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
             .build()
 
-        openAssetsFolderButtonWidget = ButtonWidget.Builder(OPEN_ASSETS_TEXT) {
-            Util.getOperatingSystem().open(musicPack.getEditPackAssetsPath().toUri())
-        }
-            .build()
+        openPackDirectory = ButtonWidget.Builder(OPEN_PACK_TEXT) {
+            Util.getOperatingSystem().open(musicPack.packPath.toUri())
+        }.build()
 
         optionsButtonWidget = ButtonWidget.Builder(OPTIONS_BUTTON_TEXT) {
             client?.setScreen(PackOptionsScreen(this, musicPack))
@@ -168,7 +167,7 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
 
         addDrawableChild(saveButtonWidget)
         addDrawableChild(closeButtonWidget)
-        addDrawableChild(openAssetsFolderButtonWidget)
+        addDrawableChild(openPackDirectory)
         addDrawableChild(packStructureWidget)
         addDrawableChild(nodeViewWidget)
         addDrawableChild(predicateViewWidget)
@@ -184,10 +183,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
                     "trueadaptivemusic.change_save", "Changes will be saved")
             )
         )
-        openAssetsFolderButtonWidget.width = textRenderer.getWidth(OPEN_ASSETS_TEXT) + 10
-        openAssetsFolderButtonWidget.x = width - openAssetsFolderButtonWidget.width
+        openPackDirectory.width = textRenderer.getWidth(OPEN_PACK_TEXT) + 10
+        openPackDirectory.x = width - openPackDirectory.width
         optionsButtonWidget.width = textRenderer.getWidth(OPTIONS_BUTTON_TEXT) + 10
-        optionsButtonWidget.x = openAssetsFolderButtonWidget.x - optionsButtonWidget.width - 5
+        optionsButtonWidget.x = openPackDirectory.x - optionsButtonWidget.width - 5
 
         switchToNodeView()
     }
@@ -288,8 +287,8 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         private const val BOTTOM_MARGIN = TOP_MARGIN / 4
         private const val LEFT_MARGIN = TOP_MARGIN / 4
         private const val RIGHT_MARGIN = LEFT_MARGIN
-        private val OPEN_ASSETS_TEXT = Text.translatableWithFallback(
-            "trueadaptivemusic.show_assets", "Show Assets")
+        private val OPEN_PACK_TEXT = Text.translatableWithFallback(
+            "trueadaptivemusic.open_pack", "Open Pack")
         private val SAVE_BUTTON_TEXT = Text.translatableWithFallback(
             "trueadaptivemusic.save_and_zip", "Export")
         private val CLOSE_BUTTON_TEXT = Text.translatableWithFallback("trueadaptivemusic.close", "Close")
