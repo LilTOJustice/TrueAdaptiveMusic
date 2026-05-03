@@ -94,19 +94,20 @@ class MusicPack private constructor(
             predicatesDir.createDirectory()
             if (packWithAssets?.isZip == true) {
                 ZipFile(packWithAssets.packPath.invariantSeparatorsPathString).use { zipFile ->
-                    zipFile.entries().toList().forEach { entry ->
-                        val path = Path(
-                            predicatesDir.pathString,
-                            *Path(entry.name).drop(1).map { it.name }.toTypedArray()
-                        )
-                        path.createParentDirectories()
-                        if (path.isDirectory()) {
-                            return@forEach
-                        }
+                    zipFile.entries().toList()
+                        .filter { it.name.contains("/${Constants.PREDICATES_DIRNAME}/") }.forEach { entry ->
+                            val path = Path(
+                                predicatesDir.pathString,
+                                *Path(entry.name).drop(1).map { it.name }.toTypedArray()
+                            )
+                            path.createParentDirectories()
+                            if (path.isDirectory()) {
+                                return@forEach
+                            }
 
-                        FileOutputStream(path.pathString)
-                            .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
-                    }
+                            FileOutputStream(path.pathString)
+                                .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }
+                        }
                 }
             }
         }
