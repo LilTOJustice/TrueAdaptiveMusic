@@ -51,7 +51,10 @@ jobs:
         with:
           distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
-
+          server-username: ${{ env.CENTRAL_USERNAME }}
+          server-password: ${{ env.CENTRAL_PASSWORD }}
+          gpg-private-key: ${{ env.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ env.GPG_PASSPHRASE }}
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
