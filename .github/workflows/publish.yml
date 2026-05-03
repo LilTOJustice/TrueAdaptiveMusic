@@ -10,10 +10,6 @@ on:
 env:
   JAVA_VERSION: 21
   MODRINTH_TOKEN: ${{ secrets.PUBLISH_MODRINTH_TOKEN }}
-  CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-  CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-  GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-  GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
 permissions:
   contents: write
@@ -80,6 +76,6 @@ jobs:
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
-
-          game-versions: "${{env.MINECRAFT_VERSION}}"
+          
+          game-versions: ">=${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
