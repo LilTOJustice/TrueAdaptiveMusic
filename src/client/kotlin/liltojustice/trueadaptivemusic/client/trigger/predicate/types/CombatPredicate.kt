@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState

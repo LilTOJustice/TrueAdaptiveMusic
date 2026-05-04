@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityTypeIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.StaticEventType

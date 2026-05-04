@@ -6,7 +6,6 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
-import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent
@@ -54,6 +53,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
 import net.minecraft.client.gui.components.Tooltip
