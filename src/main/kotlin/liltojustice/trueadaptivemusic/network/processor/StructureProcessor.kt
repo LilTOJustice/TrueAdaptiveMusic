@@ -17,7 +17,7 @@ class StructureProcessor: Processor() {
         val structureRegistry = registryAccess.lookup(Registries.STRUCTURE).get()
         val structureSetRegistry = registryAccess.lookup(Registries.STRUCTURE_SET).get()
         val nearby = structureManager.getAllStructuresAt(player.blockPosition()).keys
-            .firstOrNull()?.takeIf { structure ->
+            .firstOrNull { structure ->
                 val minMax = structureCache.getOrPut(structure) {
                     val starts = structureManager.startsForStructure(player.lastSectionPos, structure)
 
