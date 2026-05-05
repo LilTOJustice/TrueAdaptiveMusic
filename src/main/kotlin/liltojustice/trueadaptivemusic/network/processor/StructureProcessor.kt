@@ -10,13 +10,13 @@ import net.minecraft.world.gen.structure.Structure
 
 class StructureProcessor: Processor() {
     private val structureCache = mutableMapOf<Structure, Pair<Int, Int>>()
-    override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload {
-        val level = player.level()
-        val structureManager = level.structureManager()
-        val registryAccess = structureManager.registryAccess()
-        val structureRegistry = registryAccess.lookup(Registries.STRUCTURE).get()
-        val structureSetRegistry = registryAccess.lookup(Registries.STRUCTURE_SET).get()
-        val nearby = structureManager.getAllStructuresAt(player.blockPosition()).keys
+    override fun makePacket(server: MinecraftServer, player: ServerPlayerEntity): CustomPayload {
+        val level = player.world
+        val structureManager = level.structureAccessor
+        val registryAccess = structureManager.registryManager
+        val structureRegistry = registryAccess.getOptional(RegistryKeys.STRUCTURE).get()
+        val structureSetRegistry = registryAccess.getOptional(RegistryKeys.STRUCTURE_SET).get()
+        val nearby = structureManager.getStructureReferences(player.blockPos).keys
             .firstOrNull { structure ->
                 val minMax = structureCache.getOrPut(structure) {
                     val starts = structureManager.getStructureStarts(player.watchedSection, structure)
