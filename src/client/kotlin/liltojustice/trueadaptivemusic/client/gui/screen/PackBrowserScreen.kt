@@ -11,7 +11,6 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.Tooltip
-import net.minecraft.client.gui.components.MultiLineTextWidget
 import net.minecraft.client.gui.screens.ConfirmLinkScreen
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -104,7 +103,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         private val OPEN_MUSIC_PACKS_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.open_pack_folder", "Open Pack Folder")
         private val REFRESH_TEXT = Component.translatableWithFallback("trueadaptivemusic.refresh", "Refresh")
-        val LAST_REFRESHED_TEXT: MutableComponent = Component.translatableWithFallback(
+        private val LAST_REFRESHED_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.last_refreshed", "Last Refreshed")
     }
 }
