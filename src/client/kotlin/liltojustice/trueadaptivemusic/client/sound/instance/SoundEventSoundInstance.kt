@@ -37,7 +37,7 @@ class SoundEventSoundInstance(
 
     override fun getAudioStream(): AudioStream? {
         val sound = sound ?: return null
-        val inputStreamGetter = { soundManager.soundSystem.soundLoader.resourceFactory.open(sound.location) }
+        val inputStreamGetter = { soundManager.soundEngine.soundBuffers.resourceManager.open(sound.path) }
 
         return getAudioStream(sound.location.toString(), inputStreamGetter, isAmbient)
     }
