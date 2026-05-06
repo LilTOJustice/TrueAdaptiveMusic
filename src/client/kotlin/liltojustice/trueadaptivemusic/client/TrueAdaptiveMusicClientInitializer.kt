@@ -437,7 +437,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         private val DYNAMIC_REGISTRY_TEXT =
             Component.translatableWithFallback(
                 "trueadaptivemusic.dynamic_registry_warning",
-                "No options available to add due to a dynamic registry requirement. Try joining a world first."
+                "No options available to add due to a dynamic registry requirement. Try joining a " +
+                        "singleplayer world first."
             )
 
         private fun isEnumList(type: KType): Boolean {
