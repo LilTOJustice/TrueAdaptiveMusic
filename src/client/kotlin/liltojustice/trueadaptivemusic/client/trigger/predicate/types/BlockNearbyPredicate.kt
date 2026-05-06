@@ -26,12 +26,13 @@ object BlockNearbyPredicate: StaticPredicateType<BlockNearbyPredicate.Arguments>
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val level = minecraft.level ?: return false
+
         if (arguments.blocks.isEmpty()) {
             return true
         }
+
         val distance = arguments.blockDistance.toDouble()
         val vec = Vec3(distance, distance, distance)
-
         val aabb = AABB(playerEntity.position().subtract(vec), playerEntity.position().add(vec))
 
         return level.getBlockStates(aabb).anyMatch { blockState ->
