@@ -359,7 +359,7 @@ class PackStructureWidget(
                 )
 
                 if (node.predicates.isEmpty()) {
-                    widget.enableItalic()
+                    widget.withItalic()
                 }
 
                 widget.setTooltip(

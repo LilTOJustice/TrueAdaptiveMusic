@@ -28,6 +28,17 @@ class Constants {
         val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
             PosixFilePermissions.fromString("rwxrwxrwx"))
         val NULL_IDENTIFIER = Identifier.fromNamespaceAndPath("trueadaptivemusic", "null")
+        val REQUIRES_SERVER_SUPPORT_TRIGGERS = listOf(
+            "structure", "structure_set", "spawn_point_nearby", "scoreboard", "custom")
+        val REQUIRES_SERVER_SUPPORT_TEXT = "*${Component.translatableWithFallback(
+            "trueadaptivemusic.requires_server",
+            "Host must have TAM installed!"
+        ).string}*"
+        val REQUIRES_SERVER_SUPPORT_TOOLTIP = Component.translatableWithFallback(
+            "trueadaptivemusic.requires_server_tooltip",
+            "This trigger type will only work properly in singleplayer, or if the host of the world " +
+                    "(or server) has True Adaptive Music installed."
+        )
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
         const val FFPROBE_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffprobe.exe"
