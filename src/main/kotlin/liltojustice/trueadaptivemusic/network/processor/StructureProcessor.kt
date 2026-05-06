@@ -2,35 +2,46 @@ package liltojustice.trueadaptivemusic.network.processor
 
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
+import net.minecraft.core.SectionPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.levelgen.structure.Structure
+import net.minecraft.world.level.levelgen.structure.StructurePiece
 
 class StructureProcessor: Processor() {
-    private val structureCache = mutableMapOf<Structure, Pair<Int, Int>>()
+    private val structureCache = mutableMapOf<SectionPos, StructureData>()
     override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload {
         val level = player.level()
         val structureManager = level.structureManager()
         val registryAccess = structureManager.registryAccess()
         val structureRegistry = registryAccess.lookup(Registries.STRUCTURE).get()
         val structureSetRegistry = registryAccess.lookup(Registries.STRUCTURE_SET).get()
+        val structurePieceRegistry = registryAccess.lookup(Registries.STRUCTURE_PIECE).get()
         val nearby = structureManager.getAllStructuresAt(player.blockPosition()).keys
-            .firstOrNull { structure ->
-                val minMax = structureCache.getOrPut(structure) {
+            .map { structure ->
+                val sectionPos = player.lastSectionPos
+                structureCache.getOrPut(sectionPos) {
                     val starts = structureManager.startsForStructure(player.lastSectionPos, structure)
-                    if (starts.isEmpty()) {
-                        return@firstOrNull false
+                    val bounds = starts.takeIf { it.isNotEmpty() }?.let {
+                        starts.maxOf { it.boundingBox.minY() } to starts.minOf { it.boundingBox.maxY() }
                     }
 
-                    starts.maxOf { it.boundingBox.minY() } to starts.minOf { it.boundingBox.maxY() }
+                    StructureData(structure, starts.flatMap { it.pieces }.toSet(), bounds)
                 }
-
-                player.blockPosition().y.let { it >= minMax.first && it <= minMax.second }
+            }
+            .firstOrNull { structureData ->
+                structureData.yBounds?.let { yBounds ->
+                    player.blockPosition().y.let { it >= yBounds.first && it <= yBounds.second }
+                } ?: false
             }
 
-        val structureId = nearby?.let { structureRegistry.getKey(it) } ?: Constants.NULL_IDENTIFIER
+        val structurePieceId = nearby?.let {
+            it.pieces.firstOrNull { piece -> piece.boundingBox.isInside(player.blockPosition()) }
+                ?.let { piece -> structurePieceRegistry.getKey(piece.type) }
+        } ?: Constants.NULL_IDENTIFIER
+        val structureId = nearby?.let { structureRegistry.getKey(it.structure) } ?: Constants.NULL_IDENTIFIER
         val structureSetId = nearby?.let {
             structureSetRegistry.getKey(
                 structureSetRegistry.toList().first { set ->
@@ -41,6 +52,9 @@ class StructureProcessor: Processor() {
             )
         } ?: Constants.NULL_IDENTIFIER
 
-        return CurrentStructurePayload(structureId, structureSetId)
+        return CurrentStructurePayload(
+            structureId, structureSetId, structurePieceId)
     }
+
+    data class StructureData(val structure: Structure, val pieces: Set<StructurePiece>, val yBounds: Pair<Int, Int>?)
 }
