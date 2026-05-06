@@ -20,6 +20,9 @@ class StructureProcessor: Processor() {
             .firstOrNull { structure ->
                 val minMax = structureCache.getOrPut(structure) {
                     val starts = structureManager.startsForStructure(player.lastSectionPos, structure)
+                    if (starts.isEmpty()) {
+                        return@firstOrNull false
+                    }
 
                     starts.maxOf { it.boundingBox.minY() } to starts.minOf { it.boundingBox.maxY() }
                 }
