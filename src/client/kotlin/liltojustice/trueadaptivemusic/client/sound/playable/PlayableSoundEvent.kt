@@ -13,4 +13,8 @@ class PlayableSoundEvent(private val identifier: Identifier): PlayableSound {
     override fun getSoundName(): String {
         return identifier.toString()
     }
+
+    fun getId(): Identifier {
+        return identifier
+    }
 }

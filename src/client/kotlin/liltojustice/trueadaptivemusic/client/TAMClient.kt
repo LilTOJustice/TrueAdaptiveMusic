@@ -166,6 +166,10 @@ object TAMClient {
         packBrowserScreenProducer = screenProducer
     }
 
+    fun isCompatibilityMode(): Boolean {
+        return musicManager?.isCompatibilityMode() ?: false
+    }
+
     private fun start() {
         if (started) {
             return
