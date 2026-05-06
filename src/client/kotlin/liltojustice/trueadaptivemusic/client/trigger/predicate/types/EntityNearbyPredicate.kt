@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusicapi.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
@@ -18,7 +18,7 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
     override val tickRate: Int
         get() = super.tickRate * 5
 
-    data class Arguments(val entities: List<EntityTypeIdentifier>, val blockRadius: UInt): TriggerArguments()
+    data class Arguments(val entities: List<EntityIdentifier>, val blockRadius: UInt): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()

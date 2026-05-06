@@ -18,6 +18,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockE
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BlockNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
@@ -124,6 +125,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(PlayerAttributePredicate)
         TAMAPI.registerPredicateType(SpawnPointNearbyPredicate)
         TAMAPI.registerPredicateType(CustomPredicate)
+        TAMAPI.registerPredicateType(BlockNearbyPredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
