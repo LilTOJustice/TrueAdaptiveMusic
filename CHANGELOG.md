@@ -21,6 +21,6 @@
 - Bumped api support to 1.1.3
 - Browser now auto-refreshes the first time it opens after game startup
 
-Next up is [2.4](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/16)
+Next up is [2.5](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/17)
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
