@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.event.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.StaticEventType
@@ -14,9 +14,9 @@ object OnBossDefeatEvent : StaticEventType<OnBossDefeatEvent.Arguments, OnBossDe
         get() = super.argDescriptions + mapOf(
             Arguments::bosses.name to "Which entities the music should play for when their boss bar hits zero.")
 
-    data class Arguments(val bosses: List<EntityTypeIdentifier>): TriggerArguments()
+    data class Arguments(val bosses: List<EntityIdentifier>): TriggerArguments()
 
-    data class Input(val boss: EntityTypeIdentifier): EventInput()
+    data class Input(val boss: EntityIdentifier): EventInput()
 
     override fun validate(arguments: Arguments, input: Input): Boolean {
         val bossId = input.boss

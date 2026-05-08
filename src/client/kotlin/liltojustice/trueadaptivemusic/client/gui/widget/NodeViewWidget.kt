@@ -79,6 +79,9 @@ class NodeViewWidget(
                     MusicTree.Node.Parameters::loopStartPoints.name,
                 )
             }
+            else {
+                result += MusicTree.Node.Parameters::compatibilityMode.name
+            }
 
             if (node.parameters.parallelMusic) {
                 result += listOf(
@@ -438,7 +441,8 @@ class NodeViewWidget(
                 {
                     var clicked = false
                     ClickableTextWidget(
-                        Component.translatableWithFallback("trueadaptivemusic.delete", "Delete").string,
+                        Component.translatableWithFallback("trueadaptivemusic.delete", "Delete")
+                            .string,
                         onClick = { widget ->
                             if (!clicked) {
                                 clicked = true

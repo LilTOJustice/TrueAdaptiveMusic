@@ -57,12 +57,15 @@ class PackBrowserListWidget(
     private val noPacksFoundWidget = MultiLineTextWidget(NO_PACKS_TEXT, client.font)
     private val loadFailureWidget = MultiLineTextWidget(LOAD_FAILURE_TEXT, client.font)
     private val downloadedPacks
-        get() = Constants.MUSIC_PACK_DIR
-            .toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
+        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
     private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {
-        reload()
+        reload(firstLoad)
+
+        if (firstLoad) {
+            firstLoad = false
+        }
     }
 
     fun reload(ignoreCache: Boolean = false) {
@@ -269,6 +272,7 @@ class PackBrowserListWidget(
     }
 
     companion object {
+        private var firstLoad = true
         private val LOADING_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.downloading_packs", "Downloading Pack List")
         private val NO_PACKS_TEXT: MutableComponent = Component.translatableWithFallback(

@@ -8,7 +8,9 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 
 fun SoundInstance.shouldIgnore(): Boolean {
-    return TAMClient.musicPack != null && (this.source == SoundSource.MUSIC || uiToastCheck(this))
+    return TAMClient.musicPack != null &&
+            !TAMClient.isCompatibilityMode() &&
+            (this.source == SoundSource.MUSIC || uiToastCheck(this))
 }
 
 private fun uiToastCheck(sound: SoundInstance): Boolean {

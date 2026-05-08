@@ -6,7 +6,6 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
-import liltojustice.trueadaptivemusic.client.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnDayStartEvent
@@ -19,6 +18,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.types.OnRecipeUnlockE
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnTutorialPopupEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BlockNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
@@ -47,6 +47,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredica
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpawnPointNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePiecePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TeamPredicate
@@ -54,6 +55,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
 import net.minecraft.client.gui.components.Tooltip
@@ -62,7 +64,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.collections.map
 import kotlin.io.path.Path
-import kotlin.io.path.exists
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -83,6 +85,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         if (TAMClient.isWindows) {
             cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
             cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
+            cloneResourceFile(
+                Constants.LIBWINPTHREAD_WINDOWS_PATH, Constants.LIBWINPTHREAD_WINDOWS_RESOURCE)
         }
         else {
             cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
@@ -124,6 +128,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(PlayerAttributePredicate)
         TAMAPI.registerPredicateType(SpawnPointNearbyPredicate)
         TAMAPI.registerPredicateType(CustomPredicate)
+        TAMAPI.registerPredicateType(BlockNearbyPredicate)
+        TAMAPI.registerPredicateType(StructurePiecePredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
@@ -435,7 +441,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         private val DYNAMIC_REGISTRY_TEXT =
             Component.translatableWithFallback(
                 "trueadaptivemusic.dynamic_registry_warning",
-                "No options available to add due to a dynamic registry requirement. Try joining a world first."
+                "No options available to add due to a dynamic registry requirement. Try joining a " +
+                        "singleplayer world first."
             )
 
         private fun isEnumList(type: KType): Boolean {
@@ -461,17 +468,17 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         fun cloneResourceFile(destinationPath: Path, resource: String) {
-            destinationPath.takeIf { !it.exists() }?.let { filePath ->
-                if (TAMClient.isWindows) {
-                    Files.createFile(filePath)
-                }
-                else {
-                    Files.createFile(filePath, Constants.POSIX_PERMISSIONS)
-                }
+            destinationPath.deleteIfExists()
 
-                this::class.java.classLoader.getResourceAsStream(resource).use {
-                    it?.copyTo(filePath.outputStream())
-                }
+            if (TAMClient.isWindows) {
+                Files.createFile(destinationPath)
+            }
+            else {
+                Files.createFile(destinationPath, Constants.POSIX_PERMISSIONS)
+            }
+
+            this::class.java.classLoader.getResourceAsStream(resource).use {
+                it?.copyTo(destinationPath.outputStream())
             }
         }
     }
