@@ -12,6 +12,7 @@ import net.minecraft.world.level.storage.LevelData
 object TAMNetworkingClient {
     var structureId: Identifier = NULL_IDENTIFIER
     var structureSetId: Identifier = NULL_IDENTIFIER
+    var structurePieceId: Identifier = NULL_IDENTIFIER
     var spawnPoint: LevelData.RespawnData? = null
     val customPredicateResults = mutableMapOf<String, Boolean>()
 
@@ -19,6 +20,7 @@ object TAMNetworkingClient {
         ClientPlayNetworking.registerGlobalReceiver(CurrentStructurePayload.TYPE) { payload, _ ->
             structureId = payload.structureIdentifier
             structureSetId = payload.structureSetIdentifier
+            structurePieceId = payload.structurePieceIdentifier
         }
         ClientPlayNetworking.registerGlobalReceiver(SpawnPointPayload.TYPE) { payload, _ ->
             spawnPoint = payload.spawnPoint

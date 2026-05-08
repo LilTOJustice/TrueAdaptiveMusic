@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
@@ -71,7 +71,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         return state.isAggro
     }
 
-    data class Arguments(val isBlacklist: Boolean, val entities: List<EntityTypeIdentifier>): TriggerArguments()
+    data class Arguments(val isBlacklist: Boolean, val entities: List<EntityIdentifier>): TriggerArguments()
 
     class State(private val arguments: Arguments): TriggerState() {
         val aggroTimer: Timer = Timer()

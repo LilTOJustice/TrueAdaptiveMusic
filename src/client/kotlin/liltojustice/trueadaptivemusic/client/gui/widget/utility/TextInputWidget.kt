@@ -22,7 +22,7 @@ class TextInputWidget(
     private val font = Minecraft.getInstance().font
     private val promptWidget = run {
         val widget = ClickableTextWidget(prompt)
-        widget.disableBold()
+        widget.withoutBold()
 
         widget
     }

@@ -98,6 +98,17 @@ class PredicateViewWidget(
             "predicateTypeChoice"
         )
 
+        if (selectedPredicateTypeName in Constants.REQUIRES_SERVER_SUPPORT_TRIGGERS) {
+            addWidgetFromRender(
+                {
+                    val widget = ClickableTextWidget(Constants.REQUIRES_SERVER_SUPPORT_TEXT).withItalic()
+                    widget.setTooltip(Tooltip.create(Constants.REQUIRES_SERVER_SUPPORT_TOOLTIP))
+                    widget
+                },
+                "serverOnlyWarning"
+            )
+        }
+
         requiredPredicateArgs.forEach { arg ->
             addWidgetFromRender(
                 {

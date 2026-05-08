@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
@@ -24,5 +24,5 @@ object BossPredicate: StaticPredicateType<BossPredicate.Arguments>(
         }
     }
 
-    data class Arguments(val bosses: List<EntityTypeIdentifier>): TriggerArguments()
+    data class Arguments(val bosses: List<EntityIdentifier>): TriggerArguments()
 }
