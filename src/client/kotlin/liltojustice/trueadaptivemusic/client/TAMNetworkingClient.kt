@@ -12,6 +12,7 @@ import net.minecraft.world.WorldProperties
 object TAMNetworkingClient {
     var structureId: Identifier = NULL_IDENTIFIER
     var structureSetId: Identifier = NULL_IDENTIFIER
+    var structurePieceId: Identifier = NULL_IDENTIFIER
     var spawnPoint: WorldProperties.SpawnPoint? = null
     val customPredicateResults = mutableMapOf<String, Boolean>()
 
@@ -19,6 +20,7 @@ object TAMNetworkingClient {
         ClientPlayNetworking.registerGlobalReceiver(CurrentStructurePayload.ID) { payload, _ ->
             structureId = payload.structureIdentifier
             structureSetId = payload.structureSetIdentifier
+            structurePieceId = payload.structurePieceIdentifier
         }
         ClientPlayNetworking.registerGlobalReceiver(SpawnPointPayload.ID) { payload, _ ->
             spawnPoint = payload.spawnPoint
