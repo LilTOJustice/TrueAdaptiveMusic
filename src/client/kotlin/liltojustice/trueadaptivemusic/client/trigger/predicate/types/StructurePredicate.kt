@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
-import liltojustice.trueadaptivemusic.client.identifier.StructureIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.StructureIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
