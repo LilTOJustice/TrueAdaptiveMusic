@@ -79,6 +79,9 @@ class NodeViewWidget(
                     MusicTree.Node.Parameters::loopStartPoints.name,
                 )
             }
+            else {
+                result += MusicTree.Node.Parameters::compatibilityMode.name
+            }
 
             if (node.parameters.parallelMusic) {
                 result += listOf(
