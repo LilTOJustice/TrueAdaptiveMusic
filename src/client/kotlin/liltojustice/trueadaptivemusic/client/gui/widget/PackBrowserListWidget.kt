@@ -59,7 +59,11 @@ class PackBrowserListWidget(
     private val loadedPackImages = mutableSetOf<Identifier>()
 
     init {
-        reload()
+        reload(firstLoad)
+
+        if (firstLoad) {
+            firstLoad = false
+        }
     }
 
     fun reload(ignoreCache: Boolean = false) {
@@ -288,6 +292,7 @@ class PackBrowserListWidget(
     }
 
     companion object {
+        private var firstLoad = true
         private val LOADING_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.downloading_packs", "Downloading Pack List")
         private val NO_PACKS_TEXT: MutableText = Text.translatableWithFallback(
