@@ -63,6 +63,9 @@ class VolumeManager(private val soundSystem: SoundSystem) {
         if (allowPause && volume == 0F) {
             soundSystem.pauseInstance(soundInstance)
         }
+        else {
+            soundSystem.resumeInstance(soundInstance)
+        }
     }
 
     private class Fade(
