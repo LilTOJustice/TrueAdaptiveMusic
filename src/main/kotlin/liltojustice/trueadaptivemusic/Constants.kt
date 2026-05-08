@@ -20,6 +20,8 @@ class Constants {
         val OPTIONS_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "trueadaptivemusic.json")
         val FFMPEG_WINDOWS_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffmpeg.exe")
         val FFPROBE_WINDOWS_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffprobe.exe")
+        val LIBWINPTHREAD_WINDOWS_PATH = Path(
+            FFMPEG_DIR.invariantSeparatorsPathString, "libwinpthread-1.dll")
         val FFMPEG_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffmpeg")
         val FFPROBE_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffprobe")
         val PACK_BROWSER_CACHE_DIR = Path(".trueadaptivemusiccache")
@@ -42,6 +44,7 @@ class Constants {
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
         const val FFPROBE_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffprobe.exe"
+        const val LIBWINPTHREAD_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/libwinpthread-1.dll"
         const val FFMPEG_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg"
         const val FFPROBE_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffprobe"
         const val RULES_FILENAME = "rules.json"

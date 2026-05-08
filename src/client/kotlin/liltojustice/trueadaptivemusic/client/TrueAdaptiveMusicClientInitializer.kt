@@ -64,7 +64,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.collections.map
 import kotlin.io.path.Path
-import kotlin.io.path.exists
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -85,6 +85,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         if (TAMClient.isWindows) {
             cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
             cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
+            cloneResourceFile(
+                Constants.LIBWINPTHREAD_WINDOWS_PATH, Constants.LIBWINPTHREAD_WINDOWS_RESOURCE)
         }
         else {
             cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
@@ -466,17 +468,17 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         }
 
         fun cloneResourceFile(destinationPath: Path, resource: String) {
-            destinationPath.takeIf { !it.exists() }?.let { filePath ->
-                if (TAMClient.isWindows) {
-                    Files.createFile(filePath)
-                }
-                else {
-                    Files.createFile(filePath, Constants.POSIX_PERMISSIONS)
-                }
+            destinationPath.deleteIfExists()
 
-                this::class.java.classLoader.getResourceAsStream(resource).use {
-                    it?.copyTo(filePath.outputStream())
-                }
+            if (TAMClient.isWindows) {
+                Files.createFile(destinationPath)
+            }
+            else {
+                Files.createFile(destinationPath, Constants.POSIX_PERMISSIONS)
+            }
+
+            this::class.java.classLoader.getResourceAsStream(resource).use {
+                it?.copyTo(destinationPath.outputStream())
             }
         }
     }
