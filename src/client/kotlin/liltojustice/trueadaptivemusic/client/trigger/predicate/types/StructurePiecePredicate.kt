@@ -1,29 +1,29 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
-import liltojustice.trueadaptivemusicapi.identifier.StructureSetIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.StructurePieceIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
 import kotlin.collections.any
 import kotlin.reflect.typeOf
 
-object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Arguments>(
-    "structure_set", typeOf<Arguments>()
+object StructurePiecePredicate: StaticPredicateType<StructurePiecePredicate.Arguments>(
+    "structure_piece", typeOf<Arguments>()
 ) {
     override val argDescriptions: Map<String, String>
         get() = super.argDescriptions + mapOf(
-            Arguments::structureSets.name to "Which structure sets the player must be in for the music should play. " +
+            Arguments::structurePieces.name to "Which structure pieces the player must be in for the music should play. " +
                     "If none, any structure set will trigger the music."
         )
     override val tickRate: Int
         get() = super.tickRate * 20
 
-    data class Arguments(val structureSets: List<StructureSetIdentifier>): TriggerArguments()
+    data class Arguments(val structurePieces: List<StructurePieceIdentifier>): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         return MinecraftClient.getInstance().player != null &&
-                (arguments.structureSets.isEmpty() ||
-                        arguments.structureSets.any { it.id == TAMNetworkingClient.structureSetId })
+                (arguments.structurePieces.isEmpty() ||
+                        arguments.structurePieces.any { it.id == TAMNetworkingClient.structurePieceId })
     }
 }
