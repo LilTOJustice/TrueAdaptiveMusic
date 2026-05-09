@@ -19,7 +19,7 @@ class TextInputWidget(
     private val textRenderer = MinecraftClient.getInstance().textRenderer
     private val promptWidget = run {
         val widget = ClickableTextWidget(prompt)
-        widget.disableBold()
+        widget.withoutBold()
 
         widget
     }

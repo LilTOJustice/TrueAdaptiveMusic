@@ -6,9 +6,12 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
 
 data class CurrentStructurePayload(
-    val structureIdentifier: Identifier, val structureSetIdentifier: Identifier): FabricPacket {
+    val structureIdentifier: Identifier,
+    val structureSetIdentifier: Identifier,
+    val structurePieceIdentifier: Identifier
+): FabricPacket {
     constructor(buf: PacketByteBuf): this(
-        buf.readIdentifier(), buf.readIdentifier())
+        buf.readIdentifier(), buf.readIdentifier(), buf.readIdentifier())
 
     override fun write(buf: PacketByteBuf) {
         buf.writeIdentifier(structureIdentifier)
