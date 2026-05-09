@@ -346,6 +346,7 @@ class MusicTree {
 
         data class Parameters(
             var vanillaMusic: Boolean = false,
+            var compatibilityMode: Boolean = false,
             var ignorePersistence: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
@@ -367,6 +368,10 @@ class MusicTree {
                                 "Use this if you want music to fallback to vanilla in this node, (i.e. you want " +
                                 "mod-specific music to play).\n\nCertain music-related parameters can't be used with " +
                                 "this enabled.",
+                        Parameters::compatibilityMode.name to "When selected with " +
+                                "\"${getParamDisplayName(Parameters::vanillaMusic.name)!!.string}\", " +
+                                "fully disables TAM to allow other music to play. Great for if a mod has specific " +
+                                "music with complicated logic that TAM doesn't account for.",
                         Parameters::ignorePersistence.name to "\"${MusicPackOptions.getArgDisplayName(
                             MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
                                 "ignored when this node is selected. Music for this node will start playing right " +
