@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.client.identifier.EntityTypeIdentifier
+import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
@@ -15,7 +15,7 @@ object RidingPredicate: StaticPredicateType<RidingPredicate.Arguments>(
                     "trigger the music."
         )
 
-    data class Arguments(val entities: List<EntityTypeIdentifier>): TriggerArguments()
+    data class Arguments(val entities: List<EntityIdentifier>): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         val vehicle = MinecraftClient.getInstance().player?.vehicle ?: return false

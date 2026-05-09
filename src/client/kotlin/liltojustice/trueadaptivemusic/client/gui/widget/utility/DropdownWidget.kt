@@ -20,8 +20,7 @@ class DropdownWidget<TKey>(
     tooltipText: Text? = null,
     x: Int = 0,
     y: Int = 0
-)
-    : ContainerWidget(
+): ContainerWidget(
     width,
     0,
     "Dropdown: $title",
@@ -62,7 +61,7 @@ class DropdownWidget<TKey>(
     private val titleTextWidget = ClickableTextWidget(titleText.string)
 
     init {
-        titleTextWidget.disableBold()
+        titleTextWidget.withoutBold()
         tooltipText?.let { setTooltip(Tooltip.of(it)) }
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(
@@ -185,7 +184,7 @@ class DropdownWidget<TKey>(
                                     onSelectOption(option.first)
                                 },
                                 onMouseOn = { option -> onHoverOption(option.text) },
-                                onMouseOff = { option -> onHoverOption(null) })
+                                onMouseOff = { _ -> onHoverOption(null) })
                         },
                         option.first.hashCode().toString(),
                         index
@@ -199,9 +198,6 @@ class DropdownWidget<TKey>(
         fun setSearchText(searchText: String) {
             this.searchText = searchText
             clearWidgetsFromRender()
-        }
-
-        override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
         }
 
         companion object {
