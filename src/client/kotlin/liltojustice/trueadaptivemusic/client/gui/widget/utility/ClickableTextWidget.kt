@@ -96,18 +96,22 @@ open class ClickableTextWidget(
     override fun appendClickableNarrations(builder: NarrationMessageBuilder?) {
     }
 
-    fun disableBold() {
+    fun withoutBold(): ClickableTextWidget {
         disableBold = true
         coloredText?.let {
             this.width = textRenderer.getWidth(it)
         }
+
+        return this
     }
 
-    fun enableItalic() {
+    fun withItalic(): ClickableTextWidget {
         enableItalic = true
         coloredText?.let {
             this.width = textRenderer.getWidth(it)
         }
+
+        return this
     }
 
     fun setText(text: String) {

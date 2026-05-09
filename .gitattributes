@@ -1,3 +1,0 @@
-*.exe filter=lfs diff=lfs merge=lfs -text
-ffmpeg filter=lfs diff=lfs merge=lfs -text
-ffprobe filter=lfs diff=lfs merge=lfs -text
