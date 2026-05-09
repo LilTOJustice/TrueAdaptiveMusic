@@ -16,6 +16,7 @@ data class CurrentStructurePayload(
     override fun write(buf: PacketByteBuf) {
         buf.writeIdentifier(structureIdentifier)
         buf.writeIdentifier(structureSetIdentifier)
+        buf.writeIdentifier(structurePieceIdentifier)
     }
 
     override fun getType(): PacketType<*> {
