@@ -1,12 +1,12 @@
 # Creating an Input Widget 
 
-If your modded trigger type requires an argument that isn't within the [Supported Input Widget Types](Supported%20Input%20Widget%20Types.md) list, then you need to create the widget for it to work with the pack creation UI.
+If your modded trigger type requires an argument that isn't within the [client-provided input widget types](../Reference/Provided%20Input%20Widget%20Types.md) list, then you need to create the widget for it to work with the pack creation UI.
 
 Inside your client initializer step, you must register an input widget maker that describes how to construct the widget, which is done similarly to registering a predicate type.
 
 Below is an example showing how the checkbox (boolean) input widget is created in Kotlin.
 ```kotlin
-TAMClient.registerInputWidget(
+TAMAPI.registerInputWidget(
     typeOf<Boolean>()
 ) { prompt, screen, outArgs, arg, tooltipText, onChange ->
     val result = CheckboxWidget(

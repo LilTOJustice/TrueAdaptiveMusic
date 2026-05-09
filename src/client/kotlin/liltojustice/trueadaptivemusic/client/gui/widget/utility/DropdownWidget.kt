@@ -62,7 +62,7 @@ class DropdownWidget<TKey>(
     private val titleTextWidget = ClickableTextWidget(titleText.string)
 
     init {
-        titleTextWidget.disableBold()
+        titleTextWidget.withoutBold()
         tooltipText?.let { setTooltip(Tooltip.create(it)) }
         this.width = realizedWidth
         dropdownResultsWidget = DropdownResultsWidget(

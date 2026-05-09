@@ -42,6 +42,7 @@ class MusicManager(private val minecraft: Minecraft) {
     private var musicPool = mutableSetOf<PlayableSound>()
     private var ambiencePool = mutableSetOf<PlayableSound>()
     private var vanillaSoundEvent: PlayableSoundEvent? = null
+    private var compatibilityMode = false
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -62,6 +63,10 @@ class MusicManager(private val minecraft: Minecraft) {
 
                 playingEvent = event
             }
+    }
+
+    fun isCompatibilityMode(): Boolean {
+        return compatibilityMode
     }
 
     fun refreshSoundVolume() {
@@ -94,6 +99,8 @@ class MusicManager(private val minecraft: Minecraft) {
         val parameters = treeResult.parameters
         val parallelMusic = parameters.parallelMusic
         val vanillaMusic = parameters.vanillaMusic && !parallelMusic
+        val lastCompatibilityMode = compatibilityMode
+        compatibilityMode = parameters.compatibilityMode && vanillaMusic
         val musicToPlay = treeResult.accumulatedMusic.takeIf { !vanillaMusic }
             ?: vanillaSoundEvent?.let { listOf(it) }
             ?: emptyList()
@@ -116,10 +123,14 @@ class MusicManager(private val minecraft: Minecraft) {
             lastIgnorePersistence = parameters.ignorePersistence
         }
 
+        if (!compatibilityMode && lastCompatibilityMode) {
+            vanillaSoundEvent?.let { minecraft.soundManager.stop(it.getId(), SoundSource.MUSIC) }
+        }
+
         eventPool = treeResult.accumulatedEvents
 
         val isPaused = isPaused(minecraft)
-        val shouldStop = shouldStopMain(minecraft, musicPlayer, musicToPlay)
+        val shouldStop = compatibilityMode || shouldStopMain(minecraft, musicPlayer, musicToPlay)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
