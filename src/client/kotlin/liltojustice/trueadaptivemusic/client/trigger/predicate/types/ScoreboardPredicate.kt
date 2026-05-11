@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.TAMNetworkingClient
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.MinecraftClient
@@ -18,6 +19,10 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
     data class Arguments(val objectiveId: String, val value: Int, val comparison: Comparison): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
+        TAMNetworkingClient.scoreboardState[arguments.objectiveId]?.let {
+            return compare(arguments.comparison, it, arguments.value)
+        }
+
         val minecraft = MinecraftClient.getInstance()
         val scoreboard = minecraft.world?.scoreboard ?: return false
         val playerName = minecraft.player?.name?.string ?: return false
@@ -25,15 +30,17 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
             objective.name == arguments.objectiveId
         } ?: return false
         val matchingEntry = scoreboard.getPlayerScore(playerName, matchingObjective)
+        return compare(arguments.comparison, matchingEntry.score, arguments.value)
+    }
 
-        val value = arguments.value
-        return when (arguments.comparison) {
-            Comparison.Equal -> matchingEntry.score == value
-            Comparison.NotEqual -> matchingEntry.score == value
-            Comparison.Greater -> matchingEntry.score > value
-            Comparison.GreaterOrEqual -> matchingEntry.score >= value
-            Comparison.Lesser -> matchingEntry.score < value
-            Comparison.LesserOrEqual -> matchingEntry.score <= value
+    private fun compare(comparison: Comparison, value: Int, otherValue: Int): Boolean {
+        return when (comparison) {
+            Comparison.Equal -> value == otherValue
+            Comparison.NotEqual -> value == otherValue
+            Comparison.Greater -> value > otherValue
+            Comparison.GreaterOrEqual -> value >= otherValue
+            Comparison.Lesser -> value < otherValue
+            Comparison.LesserOrEqual -> value <= otherValue
         }
     }
 
