@@ -4,7 +4,6 @@
   "package": "liltojustice.trueadaptivemusic.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "ClientPlayNetworkHandlerMixin",
     "DebugHudMixin",
     "GameOptionsScreenMixin",
     "MusicTrackerMixin",
@@ -24,7 +23,6 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "PlayerManagerMixin",
     "ServerScoreboardMixin"
   ]
 }
