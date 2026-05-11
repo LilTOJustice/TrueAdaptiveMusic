@@ -15,13 +15,11 @@ data class CustomPredicateQueryPayload(val predicateId: String, val predicateTex
         val ID: CustomPayload.Id<CustomPredicateQueryPayload> = CustomPayload.Id(
             Identifier.of("trueadaptivemusic", "custom_predicate_query"))
         val CODEC: PacketCodec<ByteBuf, CustomPredicateQueryPayload> = PacketCodec.tuple(
-            PacketCodecs.string(MAX_CUSTOM_PREDICATE_ID_LENGTH),
+            PacketCodecs.STRING,
             CustomPredicateQueryPayload::predicateId,
-            PacketCodecs.string(MAX_CUSTOM_PREDICATE_LENGTH),
+            PacketCodecs.STRING,
             CustomPredicateQueryPayload::predicateText,
             ::CustomPredicateQueryPayload
         )
-        const val MAX_CUSTOM_PREDICATE_ID_LENGTH = 1000
-        const val MAX_CUSTOM_PREDICATE_LENGTH = 10000
     }
 }
