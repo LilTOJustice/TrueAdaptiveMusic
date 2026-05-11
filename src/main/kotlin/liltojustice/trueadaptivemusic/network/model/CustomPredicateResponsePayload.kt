@@ -15,8 +15,7 @@ data class CustomPredicateResponsePayload(val predicateId: String, val predicate
         val ID: CustomPayload.Id<CustomPredicateResponsePayload> = CustomPayload.Id(
             Identifier.of("trueadaptivemusic", "custom_predicate_response"))
         val CODEC: PacketCodec<ByteBuf, CustomPredicateResponsePayload> = PacketCodec.tuple(
-            PacketCodecs.string(
-                CustomPredicateQueryPayload.MAX_CUSTOM_PREDICATE_ID_LENGTH),
+            PacketCodecs.STRING,
             CustomPredicateResponsePayload::predicateId,
             PacketCodecs.BOOLEAN,
             CustomPredicateResponsePayload::predicateResponse,
