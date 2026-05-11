@@ -6,6 +6,7 @@ import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
 import liltojustice.trueadaptivemusic.network.ServerStateProcessor
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
+import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -32,6 +33,8 @@ class TrueAdaptiveMusic: ModInitializer {
             CustomPredicateQueryPayload.ID, CustomPredicateQueryPayload.CODEC)
         PayloadTypeRegistry.playS2C().register(
             CustomPredicateResponsePayload.ID, CustomPredicateResponsePayload.CODEC)
+        PayloadTypeRegistry.playS2C().register(
+            ScoreboardStatePayload.ID, ScoreboardStatePayload.CODEC)
         ServerPlayNetworking.registerGlobalReceiver(CustomPredicateQueryPayload.ID) { payload, context ->
             val player = context.player()
             val json = StrictJsonParser.parse(payload.predicateText)
