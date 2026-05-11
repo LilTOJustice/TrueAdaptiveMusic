@@ -14,8 +14,7 @@ data class CustomPredicateResponsePayload(val predicateId: String, val predicate
         val ID = Identifier.fromNamespaceAndPath("trueadaptivemusic", "custom_predicate_response")
         val TYPE = CustomPacketPayload.Type<CustomPredicateResponsePayload>(ID)
         val CODEC = StreamCodec.composite(
-            ByteBufCodecs.stringUtf8(
-                CustomPredicateQueryPayload.MAX_CUSTOM_PREDICATE_ID_LENGTH),
+            ByteBufCodecs.STRING_UTF8,
             CustomPredicateResponsePayload::predicateId,
             ByteBufCodecs.BOOL,
             CustomPredicateResponsePayload::predicateResponse,

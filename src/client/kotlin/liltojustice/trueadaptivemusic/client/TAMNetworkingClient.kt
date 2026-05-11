@@ -4,6 +4,7 @@ import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
 import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
+import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.resources.Identifier
@@ -15,6 +16,7 @@ object TAMNetworkingClient {
     var structurePieceId: Identifier = NULL_IDENTIFIER
     var spawnPoint: LevelData.RespawnData? = null
     val customPredicateResults = mutableMapOf<String, Boolean>()
+    val scoreboardState = mutableMapOf<String, Int>()
 
     fun init() {
         ClientPlayNetworking.registerGlobalReceiver(CurrentStructurePayload.TYPE) { payload, _ ->
@@ -27,6 +29,9 @@ object TAMNetworkingClient {
         }
         ClientPlayNetworking.registerGlobalReceiver(CustomPredicateResponsePayload.TYPE) { payload, _ ->
             customPredicateResults[payload.predicateId] = payload.predicateResponse
+        }
+        ClientPlayNetworking.registerGlobalReceiver(ScoreboardStatePayload.TYPE) { payload, _ ->
+            scoreboardState[payload.objectiveName] = payload.value
         }
     }
 
