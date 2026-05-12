@@ -45,9 +45,9 @@ class StructureProcessor: Processor() {
         val structureSetId = nearby?.let {
             structureSetRegistry.toList().firstOrNull { set ->
                 set.structures.any { structureSelection ->
-                    structureId == structureSelection.structure().unwrapKey().get().identifier()
+                    structureId == structureSelection.structure().key.get().value
                 }
-            }?.let { structureSetRegistry.getKey(it) }
+            }?.let { structureSetRegistry.getId(it) }
         } ?: Constants.NULL_IDENTIFIER
 
         return CurrentStructurePayload(
