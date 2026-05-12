@@ -1,7 +1,6 @@
-# True Adaptive Music v2.4.2
+# True Adaptive Music v2.4.3
 
-- Migrated scoreboard logic to new server-side system with clientside fallback.
-- Fixed scoreboard not displaying scores
+- Fixed a crash due to structure predicate syncing
 
 Next up is [2.5](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/17)
 
