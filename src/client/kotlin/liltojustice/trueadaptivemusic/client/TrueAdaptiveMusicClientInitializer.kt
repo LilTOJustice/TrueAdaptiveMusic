@@ -46,6 +46,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpawnPointNearbyPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpeedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePiecePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
@@ -130,6 +131,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(CustomPredicate)
         TAMAPI.registerPredicateType(BlockNearbyPredicate)
         TAMAPI.registerPredicateType(StructurePiecePredicate)
+        TAMAPI.registerPredicateType(SpeedPredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
