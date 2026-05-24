@@ -381,10 +381,10 @@ class MusicTree {
                         Parameters::trackDelayNoise.name to "Add randomly + or - this many seconds to track delay.",
                         Parameters::enterDelay.name to "Wait this many seconds before starting music when entering " +
                                 "this predicate. Disables music resuming for this predicate.",
-                        Parameters::inheritMusic.name to "Include this predicate's parent's music along with this " +
-                                "predicate's music.",
-                        Parameters::inheritAmbience.name to "Include this predicate's parent's ambience along with " +
-                                "this predicate's ambience.",
+                        Parameters::inheritMusic.name to "Include this nodes's parent's music instead of overriding " +
+                                "it.",
+                        Parameters::inheritAmbience.name to "Include this nodes's parent's ambience instead of " +
+                                "overriding it.",
                         Parameters::parallelMusic.name to "Allow music across nodes to be played in parallel and " +
                                 "transition between music as the active node changes.\n\nSelecting this makes all " +
                                 "descendants automatically have this checked to participate in the parallelism.\n\n" +
