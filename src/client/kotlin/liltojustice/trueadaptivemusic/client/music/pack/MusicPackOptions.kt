@@ -1,14 +1,28 @@
 package liltojustice.trueadaptivemusic.client.music.pack
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.TypeAdapter
+import com.google.gson.TypeAdapterFactory
+import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import liltojustice.trueadaptivemusic.ReflectionHelper
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.text.Text
+import liltojustice.trueadaptivemusicapi.identifier.MusicSoundEventIdentifier
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
 
-data class MusicPackOptions(val description: String = "", val persistentNodeMusic: Boolean = false) {
+data class MusicPackOptions(
+    val description: String = "",
+    val persistentNodeMusic: Boolean = false,
+    val prioritySoundEvents: List<MusicSoundEventIdentifier> = emptyList()
+) {
     fun getArgs(): List<Any?> {
         return ReflectionHelper.getConstructorParameterValues(this).map { param -> param.value }
     }
@@ -32,6 +46,7 @@ data class MusicPackOptions(val description: String = "", val persistentNodeMusi
 
         private val json = GsonBuilder()
             .setPrettyPrinting()
+            .registerTypeAdapterFactory(ListAdapterFactory)
             .create()
 
         fun jsonDecode(string: String): MusicPackOptions {
@@ -50,6 +65,32 @@ data class MusicPackOptions(val description: String = "", val persistentNodeMusi
         fun getArgDescription(argName: String): Text? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.pack_options.${argName}.description", descriptions[argName])
+        }
+    }
+
+    private class SoundEventIdentifierListInstanceCreator(
+        private val gson: Gson
+    ): TypeAdapter<List<MusicSoundEventIdentifier>>() {
+        override fun write(p0: JsonWriter, p1: List<MusicSoundEventIdentifier>) {
+            p0.jsonValue(gson.toJson(p1))
+        }
+
+        @OptIn(ExperimentalStdlibApi::class)
+        override fun read(p0: JsonReader): List<MusicSoundEventIdentifier> {
+            return gson.fromJson(p0, typeOf<List<MusicSoundEventIdentifier>>().javaType)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private object ListAdapterFactory: TypeAdapterFactory {
+        override fun <T> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
+            val rawType = type.rawType
+            if (rawType.isAssignableFrom(List::class.java) &&
+                rawType.kotlin.typeParameters.firstOrNull()?.starProjectedType == typeOf<MusicSoundEventIdentifier>()) {
+                return SoundEventIdentifierListInstanceCreator(gson) as? TypeAdapter<T>
+            }
+
+            return null
         }
     }
 }
