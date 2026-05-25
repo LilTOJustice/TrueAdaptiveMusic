@@ -80,17 +80,7 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     fun crossfadeTracks(fadeOutTrackName: String, fadeInTrackName: String) {
         val fadeOutTrack = getTrack(fadeOutTrackName) ?: return
         val fadeInTrack = getTrack(fadeInTrackName) ?: return
-        val fadeOutInstance = fadeOutTrack.currentSoundInstance ?: return
-        val fadeInInstance = fadeInTrack.currentSoundInstance ?: return
-        fadeOutTrack.desiredVolume = 0F
-        fadeInTrack.desiredVolume = 1F
-        beginCrossfade(
-            fadeOutInstance,
-            fadeInInstance,
-            fadeOutTrack.crossFadeTicks,
-            fadeInTrack.crossFadeTicks,
-            fadeInTrack.clampedVolume
-        )
+        beginCrossfade(fadeOutTrack, fadeInTrack)
     }
 
     fun startNew(
@@ -102,11 +92,11 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         loopStartPoint: UInt = 0U
     ) {
         val track = getTrack(trackName) ?: return
-        val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint)
         track.currentSoundInstance?.let {
             volumeManager.startFade(
                 it, track.crossFadeTicks, 0F, true)
         }
+        val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint) ?: return
 
         track.updateSound(newMusic, newInstance)
         track.startDelay(delayMillis) { startNewInstance(track, newMusic, fadeIn, isLooping, loopStartPoint) }
@@ -152,11 +142,11 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     private fun startNewInstance(
         track: Track, newMusic: PlayableSound, fadeIn: Boolean, isLooping: Boolean, loopStartPoint: UInt) {
         synchronized(lock) {
-            val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint)
             soundSystem.stop(track.currentSoundInstance)
+            val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint)
+                ?: return@synchronized
             track.updateSound(newMusic, newInstance)
             playInstance(newInstance)
-
 
             if (fadeIn) {
                 volumeManager.setInstanceVolume(newInstance, 0F, false)
@@ -199,20 +189,34 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         }
     }
 
-    private fun beginCrossfade(
-        outSoundInstance: TAMSoundInstance,
-        inSoundInstance: TAMSoundInstance,
-        outFadeTicks: Int,
-        inFadeTicks: Int,
-        inVolume: Float) {
+    private fun beginCrossfade(fadeOutTrack: Track, fadeInTrack: Track) {
         synchronized(lock) {
-            if (inSoundInstance.desiredVolume == 0F || inSoundInstance.desiredVolume == 1F) {
-                volumeManager.setInstanceVolume(inSoundInstance, 0.01F)
+            fadeOutTrack.desiredVolume = 0F
+            fadeInTrack.desiredVolume = 1F
+            fadeInTrack.currentSoundInstance
+                ?.takeIf { it.desiredVolume == 0F || it.desiredVolume == 1F }
+                ?.let { fadeInInstance ->
+                    volumeManager.setInstanceVolume(fadeInInstance, 0.01F)
+                }
+
+            fadeInTrack.currentSoundInstance?.let {
+                soundSystem.resumeInstance(it)
+                volumeManager.startFade(
+                    it,
+                    fadeInTrack.crossFadeTicks,
+                    fadeInTrack.clampedVolume,
+                    false
+                )
             }
 
-            soundSystem.resumeInstance(inSoundInstance)
-            volumeManager.startFade(inSoundInstance, inFadeTicks, inVolume, false)
-            volumeManager.startFade(outSoundInstance, outFadeTicks, 0F, false)
+            fadeOutTrack.currentSoundInstance?.let {
+                volumeManager.startFade(
+                    it,
+                    fadeOutTrack.crossFadeTicks,
+                    0F,
+                    false
+                )
+            }
         }
     }
 

@@ -20,6 +20,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
 import net.minecraft.util.CommonColors
 import java.util.Timer
 import kotlin.collections.toMutableList
@@ -112,6 +113,13 @@ class NodeViewWidget(
                 )
             }
 
+            if (node.parent == null) {
+                result += listOf(
+                    MusicTree.Node.Parameters::inheritMusic.name,
+                    MusicTree.Node.Parameters::inheritAmbience.name
+                )
+            }
+
             result.toSet()
         }
 
@@ -147,6 +155,7 @@ class NodeViewWidget(
         if (shouldSave) {
             save(shouldExit)
         }
+
         shouldExit = false
         shouldSave = false
     }
@@ -176,10 +185,8 @@ class NodeViewWidget(
                             },
                             width,
                             Component.translatableWithFallback(
-                                "trueadaptivemusic.music_choice", "Music Choice"
-                            ).string,
-                            null,
-                            {
+                                "trueadaptivemusic.music_choice", "Music Choice").string,
+                            getOptions = {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
                                         BuiltInRegistries.SOUND_EVENT.keySet()
@@ -188,8 +195,10 @@ class NodeViewWidget(
                                     )
                                     .sorted()
                             },
-                            selectedMusicPaths.firstOrNull() ?: Component.translatableWithFallback(
-                                "trueadaptivemusic.select_track", "Select tracks").string,
+                            notSelectedPlaceholder = selectedMusicPaths.firstOrNull()
+                                ?: Component
+                                    .translatableWithFallback(
+                                        "trueadaptivemusic.select_track", "Select tracks").string,
                             onHoverOption = { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
@@ -225,13 +234,14 @@ class NodeViewWidget(
                                 "trueadaptivemusic.select_track", "Select tracks"
                             ).string,
                             selectedMusicPaths,
-                            onHoverOption = { option ->
+                            { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            tooltipText = Component.translatableWithFallback(
+                            Component.translatableWithFallback(
                                 "trueadaptivemusic.music_choice.description",
                                 "Select any amount of music to be chosen randomly to play"
-                            )
+                            ),
+                            customCreator = { text -> Identifier.tryParse(text)?.toString() }
                         )
                     }
                 },
@@ -263,11 +273,12 @@ class NodeViewWidget(
                     Component.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedAmbiencePaths,
-                    onHoverOption = { option ->
+                    { option ->
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
-                    tooltipText = Component.translatableWithFallback(
+                    Component.translatableWithFallback(
                         "trueadaptivemusic.ambience_choice.description",
-                        "Select any amount of ambience to be chosen randomly to play")
+                        "Select any amount of ambience to be chosen randomly to play"),
+                    customCreator = { text -> Identifier.tryParse(text)?.toString() }
                 )
             },
             "ambienceChoice"
@@ -377,7 +388,9 @@ class NodeViewWidget(
         addWidgetFromRender(
             {
                 val newWidget = ClickableTextWidget(
-                    "${Component.translatableWithFallback("trueadaptivemusic.events", "Events").string}:")
+                    "${Component.translatableWithFallback(
+                        "trueadaptivemusic.events", "Events").string}:"
+                )
                 newWidget.active = false
                 newWidget
             }, "events"

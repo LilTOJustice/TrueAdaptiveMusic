@@ -17,6 +17,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
 import net.minecraft.util.CommonColors
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -157,12 +158,14 @@ class EventViewWidget(
                     Component.translatableWithFallback(
                         "trueadaptivemusic.select_track", "Select tracks").string,
                     selectedMusicPaths,
-                    onHoverOption = { option ->
+                    { option ->
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                     },
-                    tooltipText = Component.translatableWithFallback(
+                    Component.translatableWithFallback(
                         "trueadaptivemusic.music_choice.description",
-                        "Select any amount of music to be chosen randomly to play")
+                        "Select any amount of music to be chosen randomly to play"
+                    ),
+                    customCreator = { text -> Identifier.tryParse(text)?.toString() }
                 )
             },
             "musicChoice"
