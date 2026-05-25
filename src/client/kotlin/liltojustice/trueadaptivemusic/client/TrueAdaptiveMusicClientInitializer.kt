@@ -60,7 +60,6 @@ import liltojustice.trueadaptivemusicapi.identifier.MusicSoundEventIdentifier
 import liltojustice.trueadaptivemusicapi.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
-import net.minecraft.IdentifierException
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
 import java.nio.file.Files
@@ -410,15 +409,9 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     tooltipText = actualTooltipText,
                     customCreator =
                         if (isMusicIdentifier)
-                                ({ text ->
-                                    try {
-                                        TypedIdentifier.initializeFromIdString(type, text)
-                                    }
-                                    catch (_: IdentifierException) {
-                                        null
-                                    }
-                                })
-                        else null
+                                ({ text -> TypedIdentifier.tryInitializeFromIdString(type, text) })
+                        else
+                            null
                 )
             }
         )
