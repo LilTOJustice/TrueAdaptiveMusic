@@ -178,8 +178,7 @@ class NodeViewWidget(
                             Component.translatableWithFallback(
                                 "trueadaptivemusic.music_choice", "Music Choice"
                             ).string,
-                            null,
-                            {
+                            getOptions = {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
                                         BuiltInRegistries.SOUND_EVENT.keySet()
@@ -188,7 +187,7 @@ class NodeViewWidget(
                                     )
                                     .sorted()
                             },
-                            selectedMusicPaths.firstOrNull() ?: Component.translatableWithFallback(
+                            notSelectedPlaceholder = selectedMusicPaths.firstOrNull() ?: Component.translatableWithFallback(
                                 "trueadaptivemusic.select_track", "Select tracks").string,
                             onHoverOption = { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })

@@ -74,8 +74,7 @@ abstract class ContainerWidget(
             return
         }
 
-        if (showHeader)
-        {
+        if (showHeader) {
             renderDarkening(graphics)
             renderDarkening(graphics, this.width, TOP_MARGIN)
 
@@ -243,8 +242,7 @@ abstract class ContainerWidget(
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
-                if (child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY))
-                {
+                if (child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY)) {
                     return@mouseScrolled isMouseOver(mouseX, mouseY)
                 }
             }
@@ -287,7 +285,8 @@ abstract class ContainerWidget(
         widgetId: String,
         row: Int? = null,
         xOffset: Int = 0,
-        shouldRecompute: () -> Boolean = { false }): AbstractWidget {
+        shouldRecompute: () -> Boolean = { false }
+    ): AbstractWidget {
         if (!children.containsKey(widgetId) || shouldRecompute()) {
             children[widgetId] = ChildWidget(widgetId, widgetMaker(), row ?: 0, xOffset, true)
         }
@@ -511,7 +510,7 @@ abstract class ContainerWidget(
         val y2 = (y + end + headerOffset).toInt()
         val diff = y2 - y1
 
-        return Triple(y1, if (diff < 2) y2+ (2 - diff) else y2, getVerticalScrollbarXPosition())
+        return Triple(y1, if (diff < 2) y2 + (2 - diff) else y2, getVerticalScrollbarXPosition())
     }
 
     private fun getHorizontalScrollbarExtent(): Triple<Int, Int, Int>? {
