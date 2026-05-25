@@ -113,6 +113,13 @@ class NodeViewWidget(
                 )
             }
 
+            if (node.parent == null) {
+                result += listOf(
+                    MusicTree.Node.Parameters::inheritMusic.name,
+                    MusicTree.Node.Parameters::inheritAmbience.name
+                )
+            }
+
             result.toSet()
         }
 
@@ -148,6 +155,7 @@ class NodeViewWidget(
         if (shouldSave) {
             save(shouldExit)
         }
+
         shouldExit = false
         shouldSave = false
     }
@@ -380,7 +388,9 @@ class NodeViewWidget(
         addWidgetFromRender(
             {
                 val newWidget = ClickableTextWidget(
-                    "${Component.translatableWithFallback("trueadaptivemusic.events", "Events").string}:")
+                    "${Component.translatableWithFallback(
+                        "trueadaptivemusic.events", "Events").string}:"
+                )
                 newWidget.active = false
                 newWidget
             }, "events"
