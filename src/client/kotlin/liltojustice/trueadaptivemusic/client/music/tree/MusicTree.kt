@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client.music.tree
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.TAMClient
@@ -44,9 +45,23 @@ class MusicTree {
 
     fun getMusicToPlay(): Result {
         val result = root.getSatisfiedNode()
-        val parallel = result.node.parameters.parallelMusic
+            ?: return Result(
+                Constants.ROOT_PREDICATE_NAME,
+                root.parameters,
+                root.music,
+                root.ambience,
+                root.events,
+                root.music
+                    .takeIf { root.parameters.parallelMusic }
+                    ?.let { music ->
+                        ParallelMusicContext(
+                            music + root.getMusicRecursive(),
+                            root.parameters.loopStartPoints.values.firstOrNull() ?: 0U
+                        )
+                    }
+            )
         val parallelMusic = result.music
-            .takeIf { parallel }
+            .takeIf { result.node.parameters.parallelMusic }
             ?.let { music ->
                 result.parallelRoot?.let { parallelRoot ->
                     ParallelMusicContext(
@@ -141,7 +156,7 @@ class MusicTree {
             musicCollection: Set<PlayableSound> = emptySet(),
             ambienceCollection: Set<PlayableSound> = emptySet(),
             parallelRoot: Node? = null
-        ): Result {
+        ): Result? {
             val parallelRoot = this.takeIf { parallelRoot == null } ?: parallelRoot
             predicates.forEach { predicate ->
                 try {
@@ -161,28 +176,15 @@ class MusicTree {
                     Logger.logError(
                         "Testing predicates failed due to a class loader error. " +
                                 "Are you missing a mod?\nError: $e",
-                        true)
-
-                    return Result(
-                        this,
-                        emptyList(),
-                        emptyMap(),
-                        emptyList(),
-                        emptyList(),
-                        parallelRoot
+                        true
                     )
+
+                    return null
                 }
                 catch (e: Exception) {
                     Logger.logError("Testing predicates threw an exception.\nError: $e", true)
 
-                    return Result(
-                        this,
-                        emptyList(),
-                        emptyMap(),
-                        emptyList(),
-                        emptyList(),
-                        parallelRoot
-                    )
+                    return null
                 }
 
                 val newPath = path + predicates.joinToString(", ") { it.getTriggerId() }
@@ -200,37 +202,30 @@ class MusicTree {
                             emptySet()
 
                 for (child in children) {
-                    val result = child.getSatisfiedNode(
+                    child.getSatisfiedNode(
                         newPath,
                         newEvents,
                         newMusic,
                         newAmbience,
                         parallelRoot
-                    )
-
-                    if (result.path.isNotEmpty()) {
-                        return result
-                    }
+                    )?.let { return it }
                 }
 
-                return Result(
-                    this,
-                    newPath,
-                    newEvents,
-                    newMusic.toList(),
-                    newAmbience.toList(),
-                    parallelRoot
-                )
+                return if (parameters.requireChildren) {
+                    null
+                } else {
+                    Result(
+                        this,
+                        newPath,
+                        newEvents,
+                        newMusic.toList(),
+                        newAmbience.toList(),
+                        parallelRoot
+                    )
+                }
             }
 
-            return Result(
-                this,
-                emptyList(),
-                emptyMap(),
-                emptyList(),
-                emptyList(),
-                parallelRoot
-            )
+            return null
         }
 
         fun newChild(
@@ -354,8 +349,9 @@ class MusicTree {
             var inheritMusic: Boolean = false,
             var inheritAmbience: Boolean = true,
             var parallelMusic: Boolean = false,
+            var requireChildren: Boolean = false,
             var loopMusic: Boolean = false,
-            var loopStartPoints: Map<String, UInt> = mapOf(),
+            var loopStartPoints: Map<String, UInt> = mapOf()
         ): MusicParameters() {
             companion object: ParametersCompanion<Parameters> {
                 override val displayNames: Map<String, String>
@@ -381,21 +377,24 @@ class MusicTree {
                         Parameters::trackDelayNoise.name to "Add randomly + or - this many seconds to track delay.",
                         Parameters::enterDelay.name to "Wait this many seconds before starting music when entering " +
                                 "this predicate. Disables music resuming for this predicate.",
-                        Parameters::inheritMusic.name to "Include this predicate's parent's music along with this " +
-                                "predicate's music.",
-                        Parameters::inheritAmbience.name to "Include this predicate's parent's ambience along with " +
-                                "this predicate's ambience.",
+                        Parameters::inheritMusic.name to "Include this nodes's parent's music instead of overriding " +
+                                "it.",
+                        Parameters::inheritAmbience.name to "Include this nodes's parent's ambience instead of " +
+                                "overriding it.",
                         Parameters::parallelMusic.name to "Allow music across nodes to be played in parallel and " +
                                 "transition between music as the active node changes.\n\nSelecting this makes all " +
                                 "descendants automatically have this checked to participate in the parallelism.\n\n" +
                                 "Only one track is allowed per node with this property.\n\nMusic inheritance and " +
                                 "delays are disabled, and looping is forced on.",
+                        Parameters::requireChildren.name to "If checked, this node will be ignored unless one of " +
+                                "its immediate children can also be activated.",
                         Parameters::loopMusic.name to "A random selected track is picked once, and then looped " +
                                 "forever until the node is left.\n\n* Disables ${MusicPackOptions.getArgDisplayName(
                                     MusicPackOptions::persistentNodeMusic.name)!!.string} for this node.",
                         Parameters::loopStartPoints.name to "Some looping music has an intro before the loop starts." +
                                 "\n\nThis denotes, for each looping track, where the intro ends and the loop starts." +
-                                "\n\nGive a value in milliseconds from the start. Leave this as 0 if there is no intro."
+                                "\n\nGive a value in milliseconds from the start. Leave this as 0 if there is no " +
+                                "intro."
                     )
                 private val json = GsonBuilder()
                     .setPrettyPrinting()

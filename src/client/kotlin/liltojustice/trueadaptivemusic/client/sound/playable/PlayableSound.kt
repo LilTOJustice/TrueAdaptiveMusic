@@ -6,7 +6,7 @@ import net.minecraft.resources.Identifier
 
 interface PlayableSound {
     fun makeSoundInstance(
-        isAmbient: Boolean = false, isLooping: Boolean = false, loopStartPoint: UInt = 0U): TAMSoundInstance
+        isAmbient: Boolean = false, isLooping: Boolean = false, loopStartPoint: UInt = 0U): TAMSoundInstance?
     fun getSoundName(): String
 
     companion object {

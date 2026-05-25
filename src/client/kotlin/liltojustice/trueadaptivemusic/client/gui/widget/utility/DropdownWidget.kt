@@ -10,7 +10,7 @@ import kotlin.math.max
 
 class DropdownWidget<TKey>(
     options: List<TKey>,
-    onSelectOption: (optionKey: TKey) -> Unit,
+    onSelectOption: (TKey) -> Unit,
     width: Int = 0,
     title: String = "",
     getDisplay: ((TKey) -> String)? = null,
@@ -20,7 +20,8 @@ class DropdownWidget<TKey>(
     private val onHoverOption: (option: String?) -> Unit = {},
     tooltipText: Component? = null,
     x: Int = 0,
-    y: Int = 0
+    y: Int = 0,
+    customCreator: ((String) -> TKey?)? = null
 ): ContainerWidget(
     width,
     0,
@@ -77,7 +78,9 @@ class DropdownWidget<TKey>(
             startingOption,
             onHoverOption,
             x,
-            y)
+            y,
+            customCreator
+        )
         textInputWidget.setResponder { newText -> dropdownResultsWidget.setSearchText(newText) }
         addWidget(titleTextWidget, 0)
         addWidget(selectedOptionWidget, 1)
@@ -130,19 +133,23 @@ class DropdownWidget<TKey>(
     companion object {
         const val TEXT_WIDTH_BUFFER = 25
         const val TEXT_HEIGHT_BUFFER = 5
+        private val ADD_CUSTOM_TEXT = Component.translatableWithFallback(
+            "trueadaptivemusic.add_custom", "Use Custom")
+        const val MAX_DISPLAYED_OPTIONS = 10
     }
 
-    private class DropdownResultsWidget<TKey>(
+    private inner class DropdownResultsWidget<TKey>(
         private val options: List<TKey>,
-        val onSelectOption: (optionKey: TKey) -> Unit,
+        private val onSelectOption: (TKey) -> Unit,
         private val getDisplay: ((TKey) -> String)?,
         private val getOptions: (() -> List<TKey>)?,
         notSelectedPlaceholder: String?,
         startingOption: TKey?,
         private val onHoverOption: (option: String?) -> Unit,
         x: Int = 0,
-        y: Int = 0)
-        : ContainerWidget(
+        y: Int = 0,
+        private val customCreator: ((String) -> TKey?)?
+    ): ContainerWidget(
         0,
         0,
         "Dropdown List",
@@ -152,11 +159,13 @@ class DropdownWidget<TKey>(
         false,
         true,
         x,
-        y) {
+        y
+    ) {
         private var selectedOption = run {
             val combinedOptions = options + (getOptions?.invoke() ?: listOf())
             startingOption ?: combinedOptions.firstOrNull()
         }
+
         private var searchText = ""
 
         init {
@@ -170,10 +179,31 @@ class DropdownWidget<TKey>(
                 return
             }
 
+            var rowOffset = 0
+            customCreator
+                ?.takeIf { textInputWidget.value.let { it.isNotEmpty() && customCreator(it) != null } }
+                ?.let {
+                    addWidgetFromRender(
+                        {
+                            ClickableTextWidget(
+                                ADD_CUSTOM_TEXT.string,
+                                onClick = { _ ->
+                                    customCreator(textInputWidget.value)?.let { customInput ->
+                                        selectedOption = customInput
+                                        onSelectOption(customInput)
+                                    }
+                                }
+                            )
+                        },
+                        "customCreatorWidget",
+                        rowOffset++
+                    )
+                }
+
             ((getOptions?.invoke() ?: listOf()) + options)
                 .map { it to (getDisplay?.invoke(it) ?: it.toString()) }
                 .filter { option -> option.second.lowercase().contains(searchText.lowercase()) }
-                .mapIndexed { index, option ->
+                .forEach { option ->
                     addWidgetFromRender(
                         {
                             ClickableTextWidget(
@@ -186,7 +216,7 @@ class DropdownWidget<TKey>(
                                 onMouseOff = { _ -> onHoverOption(null) })
                         },
                         option.first.hashCode().toString(),
-                        index
+                        rowOffset++
                     )
                 }
 
@@ -200,10 +230,6 @@ class DropdownWidget<TKey>(
         }
 
         override fun updateWidgetNarration(output: NarrationElementOutput) {
-        }
-
-        companion object {
-            const val MAX_DISPLAYED_OPTIONS = 10
         }
     }
 }
