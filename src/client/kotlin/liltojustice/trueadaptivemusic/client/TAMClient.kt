@@ -197,11 +197,16 @@ object TAMClient {
     }
 
     private fun tick() {
-        currentPredicateResult = musicPack?.let { pack ->
-            val result = pack.rules.getMusicToPlay()
-            musicManager?.tick(result, pack.options)
+        try {
+            currentPredicateResult = musicPack?.let { pack ->
+                val result = pack.rules.getMusicToPlay()
+                musicManager?.tick(result, pack.options)
 
-            result
+                result
+            }
+        }
+        catch (e: Exception) {
+            Logger.logWarning("True Adaptive Music manager encountered an error:\n${e.stackTraceToString()}")
         }
     }
 }
