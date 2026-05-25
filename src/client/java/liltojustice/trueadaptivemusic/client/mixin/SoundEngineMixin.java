@@ -1,17 +1,21 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import com.mojang.blaze3d.audio.DeviceList;
-import com.mojang.blaze3d.audio.Library;
 import liltojustice.trueadaptivemusic.client.TAMClient;
+import net.minecraft.client.sounds.SoundEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Library.class)
+@Mixin(SoundEngine.class)
 public class SoundEngineMixin {
-    @Inject(method = "init", at = @At("TAIL"))
-    public void init(String preferredDevice, DeviceList currentDevices, boolean useHrtf, CallbackInfo ci) {
+    @Inject(method = "destroy", at = @At("HEAD"))
+    public void destroy(CallbackInfo ci) {
+        TAMClient.INSTANCE.stop();
+    }
+
+    @Inject(method = "loadLibrary", at = @At("TAIL"))
+    public void loadLibrary(CallbackInfo ci) {
         TAMClient.INSTANCE.initialize();
     }
 }
