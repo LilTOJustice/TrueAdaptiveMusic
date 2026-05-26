@@ -8,7 +8,8 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 
 fun SoundInstance.shouldIgnore(): Boolean {
-    return TAMClient.musicPack != null &&
+    val musicPack = TAMClient.musicPack ?: return false
+    return musicPack.options.prioritySoundEvents.none { it.id == id } &&
             !TAMClient.isCompatibilityMode() &&
             (this.category == SoundCategory.MUSIC || uiToastCheck(this))
 }
