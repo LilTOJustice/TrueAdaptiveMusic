@@ -46,6 +46,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpawnPointNearbyPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpeedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePiecePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
@@ -55,6 +56,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.identifier.MusicSoundEventIdentifier
 import liltojustice.trueadaptivemusicapi.identifier.TypedIdentifier
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import net.fabricmc.api.ClientModInitializer
@@ -72,6 +74,7 @@ import kotlin.io.path.outputStream
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
 import kotlin.toString
 
@@ -130,6 +133,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(CustomPredicate)
         TAMAPI.registerPredicateType(BlockNearbyPredicate)
         TAMAPI.registerPredicateType(StructurePiecePredicate)
+        TAMAPI.registerPredicateType(SpeedPredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
@@ -325,10 +329,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             outArgs[arg.index] = enum
                             onChange()
                         },
+                        title = prompt,
                         getDisplay = {
                             Text.translatableWithFallback(
                                 "trueadaptivemusic.enum.$it", prettifyEnum(it)).string },
-                        title = prompt,
                         startingOption = (outArgs[arg.index] as? Enum<*>),
                         tooltipText = tooltipText
                     )
@@ -374,8 +378,8 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                         outArgs[arg.index] = id
                         onChange()
                     },
-                    getDisplay = { if (prettify) it.prettify() else it.toString() },
                     title = prompt,
+                    getDisplay = { if (prettify) it.prettify() else it.toString() },
                     startingOption = outArgs[arg.index] as? TypedIdentifier,
                     tooltipText = actualTooltipText
                 )
@@ -387,11 +391,16 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
             { prompt, _, outArgs, arg, tooltipText, onChange ->
                 val type = arg.type.arguments.firstOrNull()?.type
                     ?: throw Exception("Somehow List didn't have any type args. The world is chaos.")
-                val prettify = TAMClient.options.prettifyIdentifiers
+                val isMusicIdentifier = type == MusicSoundEventIdentifier::class.starProjectedType
+                val prettify = TAMClient.options.prettifyIdentifiers && !isMusicIdentifier
                 val options = TypedIdentifier
                     .getRegistryIdsFromType(type)
                     .map { id -> TypedIdentifier.initializeFromIdString(type, id.toString()) }
-                val actualTooltipText = tooltipText.takeIf { !options.isEmpty() } ?: DYNAMIC_REGISTRY_TEXT
+                val actualTooltipText =
+                    if (options.isEmpty())
+                        DYNAMIC_REGISTRY_TEXT
+                    else
+                        tooltipText
                 MultiSelectDropdownWidget(
                     options,
                     0,
@@ -406,7 +415,12 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     alreadySelected =
                         (outArgs[arg.index] as? List<*>)?.mapNotNull { it as? TypedIdentifier }
                             ?: listOf(),
-                    tooltipText = actualTooltipText
+                    tooltipText = actualTooltipText,
+                    customCreator =
+                        if (isMusicIdentifier)
+                                ({ text -> TypedIdentifier.tryInitializeFromIdString(type, text) })
+                        else
+                            null
                 )
             }
         )

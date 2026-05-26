@@ -5,7 +5,8 @@ import liltojustice.trueadaptivemusic.client.sound.instance.AudioFileSoundInstan
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 
 class PlayableSoundFile(private val file: SoundFile): PlayableSound {
-    override fun makeSoundInstance(isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
+    override fun makeSoundInstance(
+        isAmbient: Boolean, isLooping: Boolean, loopStartPoint: UInt): TAMSoundInstance {
         return AudioFileSoundInstance(this, file, isAmbient, isLooping, loopStartPoint)
     }
 

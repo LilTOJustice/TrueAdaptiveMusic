@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MusicTracker.class)
 public class MusicTrackerMixin {
-    @Inject(method = "play", at = @At("HEAD")   , cancellable = true)
+    @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     public void play(MusicInstance instance, CallbackInfo ci) {
         var music = instance.music();
         if (music == null) {
