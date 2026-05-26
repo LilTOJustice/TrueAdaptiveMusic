@@ -39,6 +39,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredic
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InFluidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.OnFluidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PausedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PillagerRaidPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PlayerAttributePredicate
@@ -134,6 +135,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         TAMAPI.registerPredicateType(BlockNearbyPredicate)
         TAMAPI.registerPredicateType(StructurePiecePredicate)
         TAMAPI.registerPredicateType(SpeedPredicate)
+        TAMAPI.registerPredicateType(OnFluidPredicate)
 
         // Register base event types
         TAMAPI.registerEventType(OnAdvancementGetEvent)
