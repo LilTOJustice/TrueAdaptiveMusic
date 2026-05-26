@@ -30,11 +30,10 @@ import kotlin.time.Duration.Companion.milliseconds
 
 object TAMClient {
     const val TPS = 20
-    val TICK_MS = (1.0 / TPS * 1000).milliseconds
-    val minecraft: MinecraftClient = MinecraftClient.getInstance()
     val musicPredicateFactory = MusicPredicateFactory()
     val musicEventFactory = MusicEventFactory()
     var currentPredicateResult: MusicTree.Result? = null
+        private set
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
         set(value) {
             field = value
@@ -54,8 +53,11 @@ object TAMClient {
         }
     val isWindows = "windows" in System.getProperty("os.name").lowercase()
 
-    private lateinit var backgroundScope: CoroutineScope
+    private val TICK_MS = (1.0 / TPS * 1000).milliseconds
+    private val minecraft: MinecraftClient = MinecraftClient.getInstance()
+
     private var musicManager: MusicManager? = null
+    private lateinit var backgroundScope: CoroutineScope
     private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
     private var started = false
 
@@ -68,6 +70,7 @@ object TAMClient {
     @Suppress("UNNECESSARY_SAFE_CALL")
     fun initialize() {
         if (musicManager != null) {
+            start()
             return
         }
 
@@ -194,11 +197,16 @@ object TAMClient {
     }
 
     private fun tick() {
-        currentPredicateResult = musicPack?.let { pack ->
-            val result = pack.rules.getMusicToPlay()
-            musicManager?.tick(result, pack.options)
+        try {
+            currentPredicateResult = musicPack?.let { pack ->
+                val result = pack.rules.getMusicToPlay()
+                musicManager?.tick(result, pack.options)
 
-            result
+                result
+            }
+        }
+        catch (e: Exception) {
+            Logger.logWarning("True Adaptive Music manager encountered an error:\n${e.stackTraceToString()}")
         }
     }
 }
