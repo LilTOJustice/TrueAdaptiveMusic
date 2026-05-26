@@ -67,10 +67,11 @@ class MusicPack private constructor(
                                 assetsDir.pathString,
                                 *Path(entry.name).drop(1).map { it.name }.toTypedArray()
                             )
-                            path.createParentDirectories()
-                            if (path.isDirectory()) {
+                            if (entry.isDirectory) {
                                 return@forEach
                             }
+
+                            path.createParentDirectories()
 
                             FileOutputStream(path.pathString)
                                 .use { out -> zipFile.getInputStream(entry).use { stream -> stream.copyTo(out) } }

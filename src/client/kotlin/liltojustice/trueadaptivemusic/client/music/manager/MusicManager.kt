@@ -130,7 +130,9 @@ class MusicManager(private val minecraft: Minecraft) {
         eventPool = treeResult.accumulatedEvents
 
         val isPaused = isPaused(minecraft)
-        val shouldStop = compatibilityMode || shouldStopMain(minecraft, musicPlayer, musicToPlay)
+        val shouldStop = compatibilityMode ||
+                packOptions.prioritySoundEvents.any { it.id == vanillaSoundEvent?.getId() } ||
+                shouldStopMain(minecraft, musicPlayer, musicToPlay)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
