@@ -17,9 +17,9 @@ class MultiSelectDropdownWidget<TKey>(
     private val onHoverOption: (option: String?) -> Unit = {},
     private val tooltipText: Text? = null,
     x: Int = 0,
-    y: Int = 0
-)
-    : ContainerWidget(
+    y: Int = 0,
+    private val customCreator: ((text: String) -> TKey?)? = null
+): ContainerWidget(
     width.takeUnless { it == 0 } ?: 500,
     500,
     "Dropdown: $title",
@@ -30,7 +30,8 @@ class MultiSelectDropdownWidget<TKey>(
     false,
     x,
     y,
-    true) {
+    true
+) {
     private val selected = mutableListOf<TKey>()
 
     init {
@@ -71,7 +72,8 @@ class MultiSelectDropdownWidget<TKey>(
                     onHoverOption,
                     tooltipText,
                     x,
-                    y
+                    y,
+                    customCreator
                 )
             },
             "dropdown"
@@ -88,7 +90,8 @@ class MultiSelectDropdownWidget<TKey>(
                             onChange(selected)
                             clearWidgetsFromRender { widget -> !widget.id.startsWith("selectedOption: ") } },
                         onMouseOn = { option -> onHoverOption(option.text) },
-                        onMouseOff = { option -> onHoverOption(null) })
+                        onMouseOff = { _ -> onHoverOption(null) }
+                    )
                     widget.setTooltip(
                         Tooltip.of(
                             Text.translatableWithFallback(
