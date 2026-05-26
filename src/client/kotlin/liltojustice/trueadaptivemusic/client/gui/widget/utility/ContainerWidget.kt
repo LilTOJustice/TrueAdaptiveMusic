@@ -28,8 +28,8 @@ abstract class ContainerWidget(
     x: Int = 0,
     y: Int = 0,
     private val translucentInteract: Boolean = false,
-    backButtonCallback: (() -> Unit)? = null)
-    : ClickableWidget(x, y, width, height, Text.literal(message)) {
+    backButtonCallback: (() -> Unit)? = null
+): ClickableWidget(x, y, width, height, Text.literal(message)) {
     private val children = mutableMapOf<String, ChildWidget>()
     private val renderChildren = mutableMapOf<String, ChildWidget>()
     private val client = MinecraftClient.getInstance()
@@ -73,8 +73,7 @@ abstract class ContainerWidget(
 
         super.render(context, mouseX, mouseY, delta)
 
-        if (showHeader)
-        {
+        if (showHeader) {
             context?.setShaderColor(0f, 0f, 0f, if (bordered) 1f else 0.5f)
             context?.fill(x, y, x + this.width, y + this.height, Colors.BLACK)
             context?.fill(x, y,  x + width, y + TOP_MARGIN, Colors.BLACK)
@@ -242,8 +241,7 @@ abstract class ContainerWidget(
         children.forEach { (_, child) ->
             if (child.widget.isMouseOver(mouseX, mouseY)) {
                 child.widget.mouseScrolled(mouseX, mouseY, verticalAmount)
-                if (child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY))
-                {
+                if (child.widget is ContainerWidget && child.widget.shouldBlockScroll(mouseX, mouseY)) {
                     return@mouseScrolled isMouseOver(mouseX, mouseY)
                 }
             }
@@ -282,7 +280,8 @@ abstract class ContainerWidget(
         widgetId: String,
         row: Int? = null,
         xOffset: Int = 0,
-        shouldRecompute: () -> Boolean = { false }): ClickableWidget {
+        shouldRecompute: () -> Boolean = { false }
+    ): ClickableWidget {
         if (!children.containsKey(widgetId) || shouldRecompute()) {
             children[widgetId] = ChildWidget(widgetId, widgetMaker(), row ?: 0, xOffset, true)
         }
@@ -474,7 +473,7 @@ abstract class ContainerWidget(
         val y2 = (y + end + headerOffset).toInt()
         val diff = y2 - y1
 
-        return Triple(y1, if (diff < 2) y2+ (2 - diff) else y2, getVerticalScrollbarXPosition())
+        return Triple(y1, if (diff < 2) y2 + (2 - diff) else y2, getVerticalScrollbarXPosition())
     }
 
     private fun getHorizontalScrollbarExtent(): Triple<Int, Int, Int>? {
