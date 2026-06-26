@@ -493,8 +493,10 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 Files.createFile(destinationPath, Constants.POSIX_PERMISSIONS)
             }
 
-            this::class.java.classLoader.getResourceAsStream(resource).use {
-                it?.copyTo(destinationPath.outputStream())
+            this::class.java.classLoader.getResourceAsStream(resource).use { resourceStream ->
+                destinationPath.outputStream().use { destinationStream ->
+                    resourceStream?.copyTo(destinationStream)
+                }
             }
         }
     }
