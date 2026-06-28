@@ -14,15 +14,14 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
-import net.minecraft.client.gui.GuiGraphicsExtractor
-import net.minecraft.client.gui.components.Tooltip
-import net.minecraft.client.gui.narration.NarrationElementOutput
-import net.minecraft.client.input.MouseButtonEvent
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import net.minecraft.resources.Identifier
-import net.minecraft.util.CommonColors
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
+import net.minecraft.client.gui.tooltip.Tooltip
+import net.minecraft.registry.Registries
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Colors
+import net.minecraft.util.Identifier
 import java.util.Timer
 import kotlin.collections.toMutableList
 import kotlin.concurrent.schedule
@@ -586,9 +585,9 @@ class NodeViewWidget(
     }
 
     companion object {
-        val AMBIENCE_CHOICE_TEXT = Component.translatableWithFallback(
+        val AMBIENCE_CHOICE_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.ambience_choice", "Ambience Choice")
-        val AMBIENCE_CHOICE_TOOLTIP_TEXT: MutableComponent = Component.translatableWithFallback(
+        val AMBIENCE_CHOICE_TOOLTIP_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.ambience_choice.description",
             "Select any amount of ambience to be chosen randomly to play"
         ).append("\n\n").append(Constants.ALLOWED_FILE_TYPES_TEXT)
