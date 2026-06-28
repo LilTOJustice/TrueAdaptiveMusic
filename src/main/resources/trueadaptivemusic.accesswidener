@@ -1,24 +1,16 @@
-accessWidener v2 named
-accessible field net/minecraft/client/sound/SoundManager soundSystem Lnet/minecraft/client/sound/SoundSystem;
-accessible field net/minecraft/client/sound/SoundSystem sources Ljava/util/Map;
-accessible field net/minecraft/client/gui/hud/BossBarHud bossBars Ljava/util/Map;
-accessible field net/minecraft/client/gui/screen/Screen client Lnet/minecraft/client/MinecraftClient;
-accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
-accessible field net/minecraft/client/option/SimpleOption callbacks Lnet/minecraft/client/option/SimpleOption$Callbacks;
-accessible class net/minecraft/client/option/SimpleOption$Callbacks
-accessible method net/minecraft/client/gui/widget/CheckboxWidget <init> (IIILnet/minecraft/text/Text;Lnet/minecraft/client/font/TextRenderer;ZLnet/minecraft/client/gui/widget/CheckboxWidget$Callback;)V
-extendable class net/minecraft/util/Identifier
-accessible method net/minecraft/util/Identifier <init> (Ljava/lang/String;Ljava/lang/String;)V
-accessible field net/minecraft/client/gui/screen/option/GameOptionsScreen body Lnet/minecraft/client/gui/widget/OptionListWidget;
-extendable method net/minecraft/client/gui/widget/PressableWidget renderWidget (Lnet/minecraft/client/gui/DrawContext;IIF)V
-accessible method net/minecraft/client/sound/Source getSourceState ()I
-accessible field net/minecraft/client/sound/MusicTracker current Lnet/minecraft/client/sound/SoundInstance;
-accessible field net/minecraft/client/sound/SoundSystem soundEngine Lnet/minecraft/client/sound/SoundEngine;
-accessible field net/minecraft/client/sound/SoundSystem soundLoader Lnet/minecraft/client/sound/SoundLoader;
-accessible field net/minecraft/client/sound/SoundLoader resourceFactory Lnet/minecraft/resource/ResourceFactory;
-accessible field net/minecraft/client/sound/SoundSystem started Z
-accessible method net/minecraft/client/sound/Source create ()Lnet/minecraft/client/sound/Source;
-accessible field net/minecraft/client/sound/Source pointer I
-accessible method net/minecraft/client/sound/AlUtil checkErrors (Ljava/lang/String;)Z
-accessible method net/minecraft/client/sound/StaticSound getStreamBufferPointer ()Ljava/util/OptionalInt;
-accessible field net/minecraft/scoreboard/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
+accessWidener v2 official
+accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
+accessible field net/minecraft/client/sounds/SoundEngine loaded Z
+accessible method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V
+accessible field net/minecraft/client/gui/components/Checkbox selected Z
+accessible field net/minecraft/client/gui/components/BossHealthOverlay events Ljava/util/Map;
+accessible field net/minecraft/client/sounds/SoundEngine instanceToChannel Ljava/util/Map;
+accessible method com/mojang/blaze3d/audio/OpenAlUtil checkALError (Ljava/lang/String;)Z
+accessible field net/minecraft/client/sounds/SoundEngine soundBuffers Lnet/minecraft/client/sounds/SoundBufferLibrary;
+accessible field net/minecraft/client/sounds/SoundBufferLibrary resourceManager Lnet/minecraft/server/packs/resources/ResourceProvider;
+accessible field net/minecraft/client/multiplayer/ClientLevel environmentAttributes Lnet/minecraft/world/attribute/EnvironmentAttributeSystem;
+accessible class net/minecraft/client/OptionInstance$ValueSet
+accessible field net/minecraft/client/sounds/SoundEngine library Lcom/mojang/blaze3d/audio/Library;
+accessible field net/minecraft/client/gui/screens/options/OptionsSubScreen list Lnet/minecraft/client/gui/components/OptionsList;
+accessible field net/minecraft/server/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/world/entity/Entity fluidInteraction Lnet/minecraft/world/entity/EntityFluidInteraction;
