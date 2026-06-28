@@ -131,7 +131,8 @@ class EventViewWidget(
                 )
             },
             "eventTypeChoice",
-            row = 1)
+            row = 1
+        )
 
         val musicDropdownWidget = addWidgetFromRender(
             {
@@ -143,8 +144,7 @@ class EventViewWidget(
                         selectedMusicPaths = selected.toMutableList()
                         save()
                     },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.music_choice", "Music Choice").string,
+                    Constants.MUSIC_CHOICE_TEXT.string,
                     {
                         musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
@@ -154,16 +154,12 @@ class EventViewWidget(
                             )
                             .sorted()
                     },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select tracks").string,
+                    Constants.SELECT_TRACKS_TEXT.string,
                     selectedMusicPaths,
                     { option ->
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                     },
-                    tooltipText = Text.translatableWithFallback(
-                        "trueadaptivemusic.music_choice.description",
-                        "Select any amount of music to be chosen randomly to play"
-                    ),
+                    Constants.MUSIC_CHOICE_TOOLTIP_TEXT,
                     customCreator = { text -> Identifier.tryParse(text)?.toString() }
                 )
             },
