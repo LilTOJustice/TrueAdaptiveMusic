@@ -342,6 +342,7 @@ class MusicTree {
         data class Parameters(
             var vanillaMusic: Boolean = false,
             var compatibilityMode: Boolean = false,
+            var disableFading: Boolean = false,
             var ignorePersistence: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
@@ -360,14 +361,16 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
-                        Parameters::vanillaMusic.name to "When this node is selected, TAM will use vanilla music.\n\n" +
-                                "Use this if you want music to fallback to vanilla in this node, (i.e. you want " +
-                                "mod-specific music to play).\n\nCertain music-related parameters can't be used with " +
-                                "this enabled.",
-                        Parameters::compatibilityMode.name to "When selected with " +
+                        Parameters::vanillaMusic.name to "If checked, TAM will use vanilla music when this node is " +
+                                "selected.\n\nUse this if you want music to fallback to vanilla in this node, (i.e. " +
+                                "you want mod-specific music to play).\n\nCertain music-related parameters can't be " +
+                                "used with this enabled.",
+                        Parameters::compatibilityMode.name to "If checked with " +
                                 "\"${getParamDisplayName(Parameters::vanillaMusic.name)!!.string}\", " +
                                 "fully disables TAM to allow other music to play. Great for if a mod has specific " +
                                 "music with complicated logic that TAM doesn't account for.",
+                        Parameters::disableFading.name to "If checked, music that is already playing will " +
+                                "immediately stop rather than fading out when entering this node.",
                         Parameters::ignorePersistence.name to "\"${MusicPackOptions.getArgDisplayName(
                             MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
                                 "ignored when this node is selected. Music for this node will start playing right " +

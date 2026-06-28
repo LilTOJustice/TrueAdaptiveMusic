@@ -135,6 +135,7 @@ class MusicPack private constructor(
 
     fun getEditPackSoundLibrary(): SoundLibrary {
         return getEditPackAssetsPath().listDirectoryEntriesRecursive()
+            .filter { file -> file.isDirectory() || file.extension in Constants.ALLOWED_FILE_TYPES }
             .map { file -> makePlayableSound(file) }
             .associateBy { file -> file.getSoundName() }
     }
