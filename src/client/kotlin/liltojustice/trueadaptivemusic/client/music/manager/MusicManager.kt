@@ -348,7 +348,7 @@ class MusicManager(private val minecraft: MinecraftClient) {
             musicPlayer.stop(oldTrack, true)
         }
 
-        minecraft.toastManager.showNowPlayingToast()
+        minecraft.toastManager.onMusicTrackStart()
     }
 
     private fun playNextAmbience(newAmbience: PlayableSound) {
