@@ -18,6 +18,7 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder
 import net.minecraft.client.gui.tooltip.Tooltip
 import net.minecraft.registry.Registries
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Identifier
@@ -184,9 +185,7 @@ class NodeViewWidget(
                                 onChange()
                             },
                             width,
-                            Text.translatableWithFallback(
-                                "trueadaptivemusic.music_choice", "Music Choice"
-                            ).string,
+                            Constants.MUSIC_CHOICE_TEXT.string,
                             getOptions = {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
@@ -197,16 +196,11 @@ class NodeViewWidget(
                                     .sorted()
                             },
                             notSelectedPlaceholder = selectedMusicPaths.firstOrNull()
-                                ?: Text
-                                    .translatableWithFallback(
-                                        "trueadaptivemusic.select_track", "Select tracks").string,
+                                ?: Constants.SELECT_TRACKS_TEXT.string,
                             onHoverOption = { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            tooltipText = Text.translatableWithFallback(
-                                "trueadaptivemusic.music_choice.description",
-                                "Select any amount of music to be chosen randomly to play"
-                            )
+                            tooltipText = Constants.MUSIC_CHOICE_TOOLTIP_TEXT
                         )
                     }
                     else {
@@ -219,9 +213,7 @@ class NodeViewWidget(
                                 clearLoopIntroEndpointWidgets()
                                 onChange()
                             },
-                            Text.translatableWithFallback(
-                                "trueadaptivemusic.music_choice", "Music Choice"
-                            ).string,
+                            Constants.MUSIC_CHOICE_TEXT.string,
                             {
                                 musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                                     .union(
@@ -231,17 +223,12 @@ class NodeViewWidget(
                                     )
                                     .sorted()
                             },
-                            Text.translatableWithFallback(
-                                "trueadaptivemusic.select_track", "Select tracks"
-                            ).string,
+                            Constants.SELECT_TRACKS_TEXT.string,
                             selectedMusicPaths,
                             { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            Text.translatableWithFallback(
-                                "trueadaptivemusic.music_choice.description",
-                                "Select any amount of music to be chosen randomly to play"
-                            ),
+                            Constants.MUSIC_CHOICE_TOOLTIP_TEXT,
                             customCreator = { text -> Identifier.tryParse(text)?.toString() }
                         )
                     }
@@ -260,25 +247,21 @@ class NodeViewWidget(
                         selectedAmbiencePaths = selected.toMutableList()
                         onChange()
                     },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.ambience_choice", "Ambience Choice").string,
+                    AMBIENCE_CHOICE_TEXT.string,
                     {
                         musicPack.getEditPackSoundLibrary().map { (assetName, _) -> assetName }.toMutableSet()
                             .union(
                                 Registries.SOUND_EVENT.ids
                                     .map { id -> id.toString() }
-                                    .filter { path -> path.contains("music.") }
+                                    .filter { path -> path.contains("ambient.") }
                             )
                             .toList()
                     },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.select_track", "Select tracks").string,
+                    Constants.SELECT_TRACKS_TEXT.string,
                     selectedAmbiencePaths,
                     { option ->
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) }) },
-                    Text.translatableWithFallback(
-                        "trueadaptivemusic.ambience_choice.description",
-                        "Select any amount of ambience to be chosen randomly to play"),
+                    AMBIENCE_CHOICE_TOOLTIP_TEXT,
                     customCreator = { text -> Identifier.tryParse(text)?.toString() }
                 )
             },
@@ -600,6 +583,13 @@ class NodeViewWidget(
     }
 
     companion object {
+        val AMBIENCE_CHOICE_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.ambience_choice", "Ambience Choice")
+        val AMBIENCE_CHOICE_TOOLTIP_TEXT: MutableText = Text.translatableWithFallback(
+            "trueadaptivemusic.ambience_choice.description",
+            "Select any amount of ambience to be chosen randomly to play"
+        ).append("\n\n").append(Constants.ALLOWED_FILE_TYPES_TEXT)
+
         private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTree.Node): Boolean {
             node.parent?.let {
                 if (it.parameters.parallelMusic) {
