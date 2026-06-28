@@ -4,11 +4,10 @@ import liltojustice.trueadaptivemusicapi.identifier.FluidIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
 import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
-import net.minecraft.client.Minecraft
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.core.registries.Registries
-import net.minecraft.tags.TagKey
-import net.minecraft.world.entity.Entity
+import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.Entity
+import net.minecraft.registry.Registries
+import net.minecraft.registry.tag.TagKey
 import kotlin.reflect.typeOf
 
 object OnFluidPredicate: PredicateType<OnFluidPredicate.Arguments, OnFluidPredicate.State>(
@@ -25,7 +24,7 @@ object OnFluidPredicate: PredicateType<OnFluidPredicate.Arguments, OnFluidPredic
     private const val GRACE_PERIOD_TICKS = 6
 
     override fun test(arguments: Arguments, state: State): Boolean {
-        val player = Minecraft.getInstance().player ?: return false
+        val player = MinecraftClient.getInstance().player ?: return false
         val result = entityOnFluids(player, arguments.fluids) ||
                 (arguments.includeVehicle && player.vehicle?.let { entityOnFluids(it, arguments.fluids) } ?: false)
 
@@ -45,9 +44,9 @@ object OnFluidPredicate: PredicateType<OnFluidPredicate.Arguments, OnFluidPredic
 
     private fun entityOnFluids(entity: Entity, fluids: List<FluidIdentifier>): Boolean {
         return (fluids.isEmpty() &&
-                BuiltInRegistries.FLUID.tags.anyMatch { entity.fluidInteraction.isInFluid(it.key()) }) ||
+                Registries.FLUID.streamTags().anyMatch { entity.getFluidHeight(it) != 0.0 }) ||
                 fluids.any {
-                    entity.fluidInteraction.isInFluid(TagKey.create(Registries.FLUID, it.id))
+                    entity.getFluidHeight(TagKey.of(Registries.FLUID.key, it.id)) != 0.0
                 }
     }
 
