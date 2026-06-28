@@ -13,3 +13,4 @@ accessible class net/minecraft/client/OptionInstance$ValueSet
 accessible field net/minecraft/client/sounds/SoundEngine library Lcom/mojang/blaze3d/audio/Library;
 accessible field net/minecraft/client/gui/screens/options/OptionsSubScreen list Lnet/minecraft/client/gui/components/OptionsList;
 accessible field net/minecraft/server/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/world/entity/Entity fluidInteraction Lnet/minecraft/world/entity/EntityFluidInteraction;

@@ -112,6 +112,7 @@ class MusicManager(private val minecraft: Minecraft) {
         val loopStartPoints = parameters.loopStartPoints
         val shouldResume = oldNodeId == identifier && enterDelay == 0U
         val isEnter = currentNodeId != identifier
+        val disableFading = parameters.disableFading
         val persistNodeMusic = packOptions.persistentNodeMusic &&
                 (!parameters.ignorePersistence && !lastIgnorePersistence) &&
                 !loopMusic &&
@@ -234,7 +235,8 @@ class MusicManager(private val minecraft: Minecraft) {
             shouldResume,
             !isEnter,
             loopMusic,
-            loopStartPoints[newMusic.getSoundName()] ?: 0U
+            loopStartPoints[newMusic.getSoundName()] ?: 0U,
+            disableFading
         )
     }
 
@@ -305,7 +307,8 @@ class MusicManager(private val minecraft: Minecraft) {
         resume: Boolean,
         keepTrack: Boolean,
         loopMusic: Boolean,
-        loopIntroEndpoint: UInt
+        loopIntroEndpoint: UInt,
+        disableFading: Boolean
     ) {
         val delayMillis = delay.toLong() * 1000L
         if (keepTrack) {
@@ -314,7 +317,8 @@ class MusicManager(private val minecraft: Minecraft) {
                 newMusic,
                 delayMillis,
                 isLooping = loopMusic,
-                loopStartPoint = loopIntroEndpoint
+                loopStartPoint = loopIntroEndpoint,
+                disableFading = disableFading
             )
 
             return
@@ -324,12 +328,26 @@ class MusicManager(private val minecraft: Minecraft) {
         swapMainTrack()
         if (resume && musicPlayer.isTrackPlaying(mainTrack)) {
             musicPlayer.crossfadeTracks(oldTrack, mainTrack)
+
             return
         }
 
         musicPlayer.startNew(
-            mainTrack, newMusic, delayMillis, isLooping = loopMusic, loopStartPoint = loopIntroEndpoint)
-        musicPlayer.crossfadeTracks(oldTrack, mainTrack)
+            mainTrack,
+            newMusic,
+            delayMillis,
+            isLooping = loopMusic,
+            loopStartPoint = loopIntroEndpoint,
+            disableFading = disableFading
+        )
+
+        if (!disableFading) {
+            musicPlayer.crossfadeTracks(oldTrack, mainTrack)
+        }
+        else {
+            musicPlayer.stop(oldTrack, true)
+        }
+
         minecraft.toastManager.showNowPlayingToast()
     }
 
