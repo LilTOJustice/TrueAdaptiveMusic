@@ -35,11 +35,12 @@ class Constants {
             "trueadaptivemusic.requires_server",
             "Host must have TAM installed!"
         ).string}*"
-        val REQUIRES_SERVER_SUPPORT_TOOLTIP = Text.translatableWithFallback(
+        val REQUIRES_SERVER_SUPPORT_TOOLTIP: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.requires_server_tooltip",
             "This trigger type will only work properly in singleplayer, or if the host of the world " +
                     "(or server) has True Adaptive Music installed."
         )
+        val NULL_IDENTIFIER: Identifier = Identifier.of("trueadaptivemusic", "null")
         val ALLOWED_FILE_TYPES = setOf("wav", "flac", "ogg", "mp3")
         const val TAM_ICON_RESOURCE_PATH = "assets/trueadaptivemusic/icon.png"
         const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusic/ffmpeg/ffmpeg.exe"
