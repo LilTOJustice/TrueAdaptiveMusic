@@ -33,7 +33,7 @@ class MainScreen(private val parent: Screen): Screen(
     override fun init() {
         createNewPackButton = Button.Builder(CREATE_PACK_TEXT)
         {
-            minecraft.setScreen(PackNameScreen(this))
+            minecraft.gui.setScreen(PackNameScreen(this))
         }.build()
         createNewPackButton.width = font.width(CREATE_PACK_TEXT) + 10
         createNewPackButton.x = 1
@@ -53,7 +53,7 @@ class MainScreen(private val parent: Screen): Screen(
             editButton.visible = musicPack != null
         }
 
-        doneButton = makeDoneButton(font, width, height) { minecraft.setScreen(parent) }
+        doneButton = makeDoneButton(font, width, height) { minecraft.gui.setScreen(parent) }
 
         editButton = Button.Builder(EDIT_TEXT)
         {
@@ -61,13 +61,13 @@ class MainScreen(private val parent: Screen): Screen(
             val ongoingEdit = getOngoingEdit(Path(currentPack.packName))
             val editScreen = EditPackScreen(this, currentPack)
             if (ongoingEdit != null && ongoingEdit.name != currentPack.packName) {
-                minecraft.setScreen(
+                minecraft.gui.setScreen(
                     ConfirmBackupScreen(this, ongoingEdit, editScreen))
 
                 return@Builder
             }
 
-            minecraft.setScreen(editScreen)
+            minecraft.gui.setScreen(editScreen)
         }.build()
         editButton.width = font.width(EDIT_TEXT) + 10
         editButton.y = height - editButton.height - 2
@@ -86,20 +86,20 @@ class MainScreen(private val parent: Screen): Screen(
         wikiButton.x = width - wikiButton.width - 1
 
         optionsButton = Button.builder(OPTIONS_TEXT)
-        { _: Button? -> minecraft.setScreen(OptionsScreen(this)) }.build()
+        { _: Button? -> minecraft.gui.setScreen(OptionsScreen(this)) }.build()
         optionsButton.y = doneButton.y - doneButton.height - 3
         optionsButton.width = font.width(OPTIONS_TEXT) + 10
         optionsButton.x = width - optionsButton.width - 1
 
         discordButton = Button.builder(Constants.DISCORD_JOIN_TEXT)
-        { _: Button? -> minecraft.setScreen(
+        { _: Button? -> minecraft.gui.setScreen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
                         Util.getPlatform().openUri(Constants.DISCORD_JOIN_URL)
                     }
 
-                    minecraft.setScreen(this)
+                    minecraft.gui.setScreen(this)
                 },
                 Constants.DISCORD_JOIN_URL,
                 true
@@ -110,7 +110,7 @@ class MainScreen(private val parent: Screen): Screen(
         discordButton.x = wikiButton.x - discordButton.width - 5
 
         packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
-        { _: Button? -> minecraft.setScreen(PackBrowserScreen(this)) }.build()
+        { _: Button? -> minecraft.gui.setScreen(PackBrowserScreen(this)) }.build()
         packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
         packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
         packBrowserButton.x = (this.width - packBrowserButton.width) / 2
@@ -128,7 +128,7 @@ class MainScreen(private val parent: Screen): Screen(
     }
 
     override fun onClose() {
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

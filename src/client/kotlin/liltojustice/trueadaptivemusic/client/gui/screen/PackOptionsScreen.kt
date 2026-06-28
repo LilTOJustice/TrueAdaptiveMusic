@@ -40,7 +40,7 @@ class PackOptionsScreen(private val parent: Screen, private val musicPack: Music
     override fun onClose() {
         musicPack.options = packOptionsViewWidget.getCurrentOptions()
         musicPack.initOptions()
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

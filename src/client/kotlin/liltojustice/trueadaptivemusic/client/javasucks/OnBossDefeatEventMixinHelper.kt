@@ -25,7 +25,7 @@ object OnBossDefeatEventMixinHelper {
 
     private fun isBoss(entity: LivingEntity): Boolean {
         val minecraft = Minecraft.getInstance()
-        return minecraft.gui.bossOverlay.events.values.any { bossBar ->
+        return minecraft.gui.hud.bossOverlay.events.values.any { bossBar ->
             val bossName = (bossBar.name.contents as? TranslatableContents)?.key ?: return@any false
             bossName == entity.type.descriptionId
         }

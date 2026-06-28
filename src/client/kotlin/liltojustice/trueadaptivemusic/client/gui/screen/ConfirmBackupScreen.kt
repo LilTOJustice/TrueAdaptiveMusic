@@ -26,7 +26,7 @@ class ConfirmBackupScreen(
                 val backup = MusicPack.fromFile(backupPath)
                 TAMClient.musicPack = backup
                 TAMClient.musicPack?.let {
-                    minecraft.setScreen(EditPackScreen(parent, it))
+                    minecraft.gui.setScreen(EditPackScreen(parent, it))
                 } ?: run {
                     Logger.logError("Failed to load existing pack.")
                 }
@@ -36,7 +36,7 @@ class ConfirmBackupScreen(
         val deleteButtonWidget = Button.Builder(
             Component.translatableWithFallback("trueadaptivemusic.delete", "Delete")) {
             backupPath.deleteRecursively()
-            minecraft.setScreen(deleteDestination)
+            minecraft.gui.setScreen(deleteDestination)
         }
             .build()
         acceptButtonWidget.width = 60
@@ -51,7 +51,7 @@ class ConfirmBackupScreen(
     }
 
     override fun onClose() {
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

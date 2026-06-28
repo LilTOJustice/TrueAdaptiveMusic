@@ -51,7 +51,7 @@ class PackNameScreen(private val parent: Screen): Screen(
                     return@builder
                 }
 
-                minecraft.setScreen(EditPackScreen(parent, MusicPack.makeEmpty(packName)))
+                minecraft.gui.setScreen(EditPackScreen(parent, MusicPack.makeEmpty(packName)))
             },
             false
         ).sprite(CHECKMARK, 9, 8).build()
@@ -65,7 +65,7 @@ class PackNameScreen(private val parent: Screen): Screen(
     }
 
     override fun onClose() {
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

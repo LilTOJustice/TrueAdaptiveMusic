@@ -7,6 +7,6 @@ object PausedPredicate: BasicPredicateType("paused") {
     override fun test(): Boolean {
         val minecraft = Minecraft.getInstance()
 
-        return minecraft.level != null && minecraft.screen?.isPauseScreen ?: false
+        return minecraft.level != null && minecraft.gui.screen()?.isPauseScreen ?: false
     }
 }

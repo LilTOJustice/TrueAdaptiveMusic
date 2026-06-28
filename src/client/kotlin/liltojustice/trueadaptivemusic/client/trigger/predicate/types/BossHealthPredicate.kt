@@ -17,7 +17,7 @@ object BossHealthPredicate: StaticPredicateType<BossHealthPredicate.Arguments>(
         )
 
     override fun test(arguments: Arguments): Boolean {
-        return Minecraft.getInstance().gui.bossOverlay.events.any { bossBar ->
+        return Minecraft.getInstance().gui.hud.bossOverlay.events.any { bossBar ->
             healthTest(
                 arguments.healthPercentage / 100F,
                 arguments.direction,

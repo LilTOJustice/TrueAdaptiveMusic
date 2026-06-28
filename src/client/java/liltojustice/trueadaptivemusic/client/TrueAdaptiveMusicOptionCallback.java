@@ -15,28 +15,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
 public record TrueAdaptiveMusicOptionCallback(Minecraft minecraft) implements OptionInstance.ValueSet<Unit> {
     @Override
     public @NonNull Function<OptionInstance<Unit>, AbstractWidget> createButton(
-            OptionInstance.@NonNull TooltipSupplier<Unit> tooltipFactory,
+            OptionInstance.@NonNull TooltipSupplier<Unit> tooltip,
             @NonNull Options options,
             int x,
             int y,
             int width,
-            @NonNull Consumer<Unit> changeCallback
+            OptionInstance.@NonNull ValueUpdateListener<? super Unit> onValueChanged
     ) {
         return _ -> {
-            assert minecraft.screen != null;
+            assert minecraft.gui.screen() != null;
             return new Button.Builder(
                     Component.translatableWithFallback(
                             "trueadaptivemusic.trueadaptivemusic",
                             "True Adaptive Music"
                     ),
-                    _ -> minecraft.setScreen(new MainScreen(minecraft.screen))
+                    _ -> minecraft.gui.setScreen(new MainScreen(minecraft.gui.screen()))
             ).bounds(x, y, width, 20).build();
         };
     }

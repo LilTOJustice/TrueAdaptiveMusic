@@ -40,7 +40,7 @@ abstract class ContainerWidget(
     private val renderChildren = mutableMapOf<String, ChildWidget>()
     private val client = Minecraft.getInstance()
     protected val font: Font = client.font
-    protected val screen: Screen? = client.screen
+    protected val screen: Screen? = client.gui.screen()
     private var verticalScrollPosition = 0.0
     private var horizontalScrollPosition = 0.0
     private var verticalScrollHeld = false

@@ -94,7 +94,7 @@ class PackListWidget(
                     }
                 }
 
-            addEntry(PackBrowserEntry { minecraft.setScreen(PackBrowserScreen(screen)) })
+            addEntry(PackBrowserEntry { minecraft.gui.setScreen(PackBrowserScreen(screen)) })
             renderState = RenderState.Success
         }
     }

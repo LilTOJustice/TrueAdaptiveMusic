@@ -348,7 +348,7 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPlayer.stop(oldTrack, true)
         }
 
-        minecraft.toastManager.showNowPlayingToast()
+        minecraft.gui.toastManager().showNowPlayingToast()
     }
 
     private fun playNextAmbience(newAmbience: PlayableSound) {
@@ -422,7 +422,7 @@ class MusicManager(private val minecraft: Minecraft) {
         private const val BACKGROUND_VOLUME = 0.1F
 
         private fun isPaused(minecraft: Minecraft): Boolean {
-            return minecraft.level != null && minecraft.screen?.isPauseScreen ?: false
+            return minecraft.level != null && minecraft.gui.screen()?.isPauseScreen ?: false
         }
 
         private fun shouldStopMain(

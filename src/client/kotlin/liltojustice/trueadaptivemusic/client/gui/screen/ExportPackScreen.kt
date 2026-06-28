@@ -38,7 +38,7 @@ class ExportPackScreen(
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
         if (done) {
-            minecraft.setScreen(destination)
+            minecraft.gui.setScreen(destination)
 
             return
         }
