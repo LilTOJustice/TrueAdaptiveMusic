@@ -40,7 +40,7 @@ class OptionsScreen(private val parent: Screen): Screen(
     override fun onClose() {
         TAMClient.options = optionsViewWidget.getCurrentOptions()
         TAMClient.resetSound()
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

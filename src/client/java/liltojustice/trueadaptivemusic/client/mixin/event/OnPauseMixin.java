@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnPauseMixin {
     @Inject(method = "pauseGame", at = @At("HEAD"))
     public void openGameMenu(boolean suppressPauseMenuIfWeReallyArePausing, CallbackInfo ci) {
-        if (Minecraft.getInstance().screen == null) {
+        if (Minecraft.getInstance().gui.screen() == null) {
             TAMAPI.INSTANCE.invokeEvent(OnPauseEvent.INSTANCE);
         }
     }

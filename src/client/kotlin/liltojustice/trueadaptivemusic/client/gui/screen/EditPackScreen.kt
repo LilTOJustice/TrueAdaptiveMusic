@@ -52,7 +52,7 @@ class EditPackScreen(
     }
 
     private fun exportAndClose() {
-        minecraft.setScreen(ExportPackScreen(musicPack, parent))
+        minecraft.gui.setScreen(ExportPackScreen(musicPack, parent))
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
@@ -96,7 +96,7 @@ class EditPackScreen(
         }.build()
 
         optionsButtonWidget = Button.Builder(OPTIONS_BUTTON_TEXT) {
-            minecraft.setScreen(PackOptionsScreen(this, musicPack))
+            minecraft.gui.setScreen(PackOptionsScreen(this, musicPack))
         }.build()
 
         val containerWidth = getContainerWidth()
@@ -198,7 +198,7 @@ class EditPackScreen(
             parent.reload()
         }
 
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

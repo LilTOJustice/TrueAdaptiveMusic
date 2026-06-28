@@ -3,8 +3,8 @@ package liltojustice.trueadaptivemusic.client.javasucks
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.extensions.drawBorder
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
-import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
@@ -22,7 +22,7 @@ object DebugHudMixinHelper {
         val musicPack = TAMClient.musicPack ?: return
 
         val minecraft = Minecraft.getInstance()
-        if (minecraft.gui.debugOverlay.showDebugScreen()) {
+        if (minecraft.gui.hud.debugOverlay.showDebugScreen() || minecraft.player == null) {
             return
         }
 

@@ -144,13 +144,11 @@ object TAMClient {
     }
 
     fun errorToast(errorMessage: Component, exceptionMessage: String? = null) {
-        minecraft.toastManager.addToast(
-            SystemToast.multiline(
-                minecraft,
-                SystemToast.SystemToastId.FILE_DROP_FAILURE,
-                errorMessage,
-                Component.literal(exceptionMessage ?: "")
-            )
+        SystemToast.add(
+            minecraft.gui.toastManager(),
+            SystemToast.SystemToastId.FILE_DROP_FAILURE,
+            errorMessage,
+            Component.literal(exceptionMessage ?: "")
         )
     }
 

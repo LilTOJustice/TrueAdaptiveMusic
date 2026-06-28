@@ -43,7 +43,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             minecraft, this.width, this.height - 96, 48, 36)
         { musicPack -> selectedPack = musicPack }
 
-        doneButton = makeDoneButton(font, width, height) { minecraft.setScreen(parent) }
+        doneButton = makeDoneButton(font, width, height) { minecraft.gui.setScreen(parent) }
 
         refreshButton = Button.builder(REFRESH_TEXT) { _: Button? -> runBlocking { coroutineScope { reload() } } }.build()
         refreshButton.x = 1
@@ -51,14 +51,14 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         refreshButton.width = font.width(REFRESH_TEXT) + 10
 
         discordButton = Button.builder(Constants.DISCORD_JOIN_TEXT)
-        { _: Button? -> minecraft.setScreen(
+        { _: Button? -> minecraft.gui.setScreen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
                         Util.getPlatform().openUri(Constants.DISCORD_JOIN_URL)
                     }
 
-                    minecraft.setScreen(this)
+                    minecraft.gui.setScreen(this)
                 },
                 Constants.DISCORD_JOIN_URL,
                 true
@@ -76,7 +76,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
     }
 
     override fun onClose() {
-        minecraft.setScreen(parent)
+        minecraft.gui.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
