@@ -32,7 +32,7 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
     }
 
     fun removeTrack(trackName: String) {
-        tracks.remove(trackName)?.let { stop(it) }
+        tracks.remove(trackName)?.let { stop(it, true) }
     }
 
     fun isTrackPlaying(trackName: String): Boolean {
@@ -89,7 +89,8 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         delayMillis: Long = 0L,
         fadeIn: Boolean = false,
         isLooping: Boolean = false,
-        loopStartPoint: UInt = 0U
+        loopStartPoint: UInt = 0U,
+        disableFading: Boolean = false
     ) {
         val track = getTrack(trackName) ?: return
         track.currentSoundInstance?.let {
@@ -99,11 +100,13 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         val newInstance = newMusic.makeSoundInstance(track.isAmbient, isLooping, loopStartPoint) ?: return
 
         track.updateSound(newMusic, newInstance)
-        track.startDelay(delayMillis) { startNewInstance(track, newMusic, fadeIn, isLooping, loopStartPoint) }
+        track.startDelay(delayMillis) {
+            startNewInstance(track, newMusic, fadeIn && !disableFading, isLooping, loopStartPoint)
+        }
     }
 
-    fun stop(trackName: String) {
-        getTrack(trackName)?.let { stop(it) }
+    fun stop(trackName: String, disableFading: Boolean = false) {
+        getTrack(trackName)?.let { stop(it, disableFading) }
     }
 
     fun stopAll() {
@@ -126,12 +129,21 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         getTrack(trackName)?.cancelDelay()
     }
 
-    private fun stop(track: Track) {
+    private fun stop(track: Track, disableFading: Boolean) {
         synchronized(lock) {
             if (isTrackPlaying(track)) {
                 track.currentSoundInstance?.let {
-                    volumeManager.startFade(
-                        it, track.crossFadeTicks, 0F, true)
+                    if (disableFading) {
+                        soundSystem.stop(it)
+                    }
+                    else {
+                        volumeManager.startFade(
+                            it,
+                            track.crossFadeTicks,
+                            0F,
+                            true
+                        )
+                    }
                 }
 
                 track.resetSounds()
