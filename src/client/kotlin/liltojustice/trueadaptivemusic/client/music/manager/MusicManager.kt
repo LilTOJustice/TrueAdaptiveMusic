@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
@@ -229,7 +230,7 @@ class MusicManager(private val minecraft: Minecraft) {
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-        val newMusic = getPseudoRandomMusic(musicToPlay)
+        val newMusic = getPseudoRandomMusic(musicToPlay, parameters.musicWeights)
         playNextMusic(
             newMusic,
             delay,
@@ -387,12 +388,16 @@ class MusicManager(private val minecraft: Minecraft) {
         }
     }
 
-    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>): PlayableSound {
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: Map<String, NInt>): PlayableSound {
         if (musicPool.isEmpty()) {
             musicPool = musicToPlay.toMutableSet()
         }
 
-        val randomSound = musicPool.random()
+        val weightedMusicPool = musicPool.flatMap {
+            List(max(weights[it.getSoundName()]?.toInt() ?: 1, 1)) { _ -> it }
+        }
+
+        val randomSound = weightedMusicPool.random()
         musicPool.remove(randomSound)
 
         return randomSound

@@ -17,6 +17,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicParameters
 import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
@@ -340,6 +341,7 @@ class MusicTree {
         )
 
         data class Parameters(
+            var musicWeights: Map<String, NInt> = mapOf(),
             var vanillaMusic: Boolean = false,
             var compatibilityMode: Boolean = false,
             var disableFading: Boolean = false,
@@ -362,6 +364,8 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
+                        Parameters::musicWeights.name to "Change these values to adjust how likely different tracks " +
+                                "are to play. The higher the value, the more often they will play relative to others.",
                         Parameters::vanillaMusic.name to "If checked, TAM will use vanilla music when this node is " +
                                 "selected.\n\nUse this if you want music to fallback to vanilla in this node, (i.e. " +
                                 "you want mod-specific music to play).\n\nCertain music-related parameters can't be " +
