@@ -343,6 +343,7 @@ class MusicTree {
             var vanillaMusic: Boolean = false,
             var compatibilityMode: Boolean = false,
             var disableFading: Boolean = false,
+            var disableResuming: Boolean = false,
             var ignorePersistence: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
@@ -371,6 +372,8 @@ class MusicTree {
                                 "music with complicated logic that TAM doesn't account for.",
                         Parameters::disableFading.name to "If checked, music that is already playing will " +
                                 "immediately stop rather than fading out when entering this node.",
+                        Parameters::disableResuming.name to "If checked, music will not resume when returning to " +
+                                "this node.",
                         Parameters::ignorePersistence.name to "\"${MusicPackOptions.getArgDisplayName(
                             MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
                                 "ignored when this node is selected. Music for this node will start playing right " +

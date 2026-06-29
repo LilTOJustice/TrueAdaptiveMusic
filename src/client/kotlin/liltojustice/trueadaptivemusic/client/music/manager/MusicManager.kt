@@ -110,7 +110,8 @@ class MusicManager(private val minecraft: Minecraft) {
         val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
         val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaMusic
         val loopStartPoints = parameters.loopStartPoints
-        val shouldResume = oldNodeId == identifier && enterDelay == 0U
+        val disableResuming = parameters.disableResuming
+        val shouldResume = oldNodeId == identifier && enterDelay == 0U && !disableResuming
         val isEnter = currentNodeId != identifier
         val disableFading = parameters.disableFading
         val persistNodeMusic = packOptions.persistentNodeMusic &&
