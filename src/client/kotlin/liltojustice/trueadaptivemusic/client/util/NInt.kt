@@ -1,8 +1,13 @@
 package liltojustice.trueadaptivemusic.client.util
 
-data class NInt(private val internal: UInt = 1U): Number() {
+import com.google.gson.TypeAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
+import kotlin.math.max
+
+data class NInt(private var internal: UInt = 1U): Number(), Comparable<NInt> {
     init {
-        require(internal > 0U)
+        internal = max(1U, internal)
     }
 
     override fun toDouble(): Double {
@@ -32,6 +37,22 @@ data class NInt(private val internal: UInt = 1U): Number() {
     override fun toString(): String {
         return internal.toString()
     }
-}
 
-fun String.toNIntOrNull(): NInt? = toUIntOrNull(radix = 10)?.let { NInt(it) }
+    override fun compareTo(other: NInt): Int {
+        return internal.toInt() - other.internal.toInt()
+    }
+
+    fun toUInt(): UInt {
+        return internal
+    }
+
+    object NIntTypeAdapter: TypeAdapter<NInt>() {
+        override fun write(p0: JsonWriter, p1: NInt?) {
+            p0.value(p1?.toInt() ?: 1)
+        }
+
+        override fun read(p0: JsonReader): NInt {
+            return NInt(p0.nextInt().toUInt())
+        }
+    }
+}

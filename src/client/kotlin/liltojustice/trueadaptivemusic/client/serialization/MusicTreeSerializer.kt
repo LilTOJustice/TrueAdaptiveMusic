@@ -14,6 +14,7 @@ import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.util.NInt
 import java.lang.reflect.Type
 
 object MusicTreeSerializer {
@@ -51,6 +52,7 @@ object MusicTreeSerializer {
                 MusicTree.Node.Parameters::class.java,
                 MusicTreeNodeParametersDeserializer
             )
+            .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
             .addSerializationExclusionStrategy(MusicTreeNodeDeserializationStrategy)
             .create()
     }

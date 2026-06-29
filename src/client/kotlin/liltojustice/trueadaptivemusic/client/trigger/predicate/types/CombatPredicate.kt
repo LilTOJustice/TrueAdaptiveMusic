@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
@@ -21,7 +22,6 @@ import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan
 import kotlin.math.cbrt
-import kotlin.math.max
 import kotlin.math.tan
 import kotlin.reflect.typeOf
 
@@ -49,13 +49,12 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
     }
 
     data class Arguments(
-        val isBlacklist: Boolean, val entities: List<EntityIdentifier>, val minimumCount: UInt): TriggerArguments()
+        val isBlacklist: Boolean, val entities: List<EntityIdentifier>, val minimumCount: NInt): TriggerArguments()
 
     class State(private val arguments: Arguments): TriggerState() {
         val aggroTimer: Timer = Timer()
         var aggroTimerTask: TimerTask? = null
         var isAggro: Boolean = false
-        val actualCount = max(1U, arguments.minimumCount)
 
         fun test(minecraft: Minecraft): Boolean {
             val playerEntity = minecraft.player ?: return false
@@ -84,7 +83,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
                 }
             }
 
-            if (count >= actualCount) {
+            if (count >= arguments.minimumCount.toUInt()) {
                 isAggro = true
                 aggroTimerTask?.cancel()
                 aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {

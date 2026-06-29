@@ -1,10 +1,11 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.toNInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
-import kotlin.math.max
 import kotlin.reflect.typeOf
 
 object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Arguments>(
@@ -15,19 +16,18 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
             Arguments::entities.name to "List of entities the music should play for. If none, any entity will " +
                     "trigger the music.",
             Arguments::blockRadius.name to "Minimum radius for the entity to trigger the predicate.",
-            Arguments::minimumCount.name to "Select how many minimum mobs it takes to trigger the music. 0 counts a 1."
+            Arguments::minimumCount.name to "Select how many minimum mobs it takes to trigger the music."
         )
     override val tickRate: Int
         get() = super.tickRate * 5
 
     data class Arguments(
-        val entities: List<EntityIdentifier>, val blockRadius: UInt, val minimumCount: UInt): TriggerArguments()
+        val entities: List<EntityIdentifier>, val blockRadius: UInt, val minimumCount: NInt): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val level = minecraft.level ?: return false
-        val actualCount = max(1U, arguments.minimumCount)
         val validEntities =
             (if (arguments.entities.isNotEmpty()) {
                 level.entitiesForRendering()
@@ -40,6 +40,6 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
 
         return validEntities
             .count { playerEntity.position().distanceTo(it.position()).toUInt() <= arguments.blockRadius }
-            .toUInt() >= actualCount
+            .toNInt() >= arguments.minimumCount
     }
 }

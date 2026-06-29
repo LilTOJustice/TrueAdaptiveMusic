@@ -262,7 +262,7 @@ class NodeViewWidget(
                 }, "musicWeights"
             )
 
-            val musicWeightsParam = requiredNodeParams.last()
+            val musicWeightsParam = requiredNodeParams.first()
             val soundNames = getSoundNames(node)
             soundNames.forEach { soundName ->
                 addWidgetFromRender(
@@ -324,7 +324,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.dropLast(2).filter { it.name !in restrictedParameters }.forEach { param ->
+        requiredNodeParams.drop(1).dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
                     TAMAPI.makeInputWidget(
@@ -345,7 +345,7 @@ class NodeViewWidget(
                 return@let
             }
 
-            val loopStartPointsParam = requiredNodeParams.dropLast(1).last()
+            val loopStartPointsParam = requiredNodeParams.last()
             if (node.parameters.parallelMusic) {
                 clearLoopIntroEndpointWidgets()
                 addWidgetFromRender(

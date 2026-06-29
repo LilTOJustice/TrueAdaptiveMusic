@@ -407,6 +407,7 @@ class MusicTree {
                                 "intro."
                     )
                 private val json = GsonBuilder()
+                    .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
                     .setPrettyPrinting()
                     .create()
 

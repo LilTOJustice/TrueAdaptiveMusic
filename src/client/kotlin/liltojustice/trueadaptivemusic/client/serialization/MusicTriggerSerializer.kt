@@ -21,6 +21,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import net.minecraft.resources.Identifier
 import net.minecraft.util.GsonHelper
@@ -127,6 +128,7 @@ object MusicTriggerSerializer {
     }
 
     private fun getGson(soundLibrary: SoundLibrary? = null): Gson {
+        // Need to do crack to write this function
         return GsonBuilder()
             .addDeserializationExclusionStrategy(MusicTriggerExclusionStrategy)
             .addSerializationExclusionStrategy(MusicTriggerExclusionStrategy)
@@ -135,6 +137,7 @@ object MusicTriggerSerializer {
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
             )
             .registerTypeAdapter(Identifier::class.java, IdentifierTypeAdapter)
+            .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
             .create()
     }
 
