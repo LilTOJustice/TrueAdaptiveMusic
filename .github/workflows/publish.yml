@@ -75,6 +75,4 @@ jobs:
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: release
           changelog-file: CHANGELOG.md
-          
-          game-versions: ">=${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
