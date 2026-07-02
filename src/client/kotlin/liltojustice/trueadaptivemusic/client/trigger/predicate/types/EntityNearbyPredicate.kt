@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.client.util.NInt
-import liltojustice.trueadaptivemusic.client.util.toNInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
@@ -42,7 +41,8 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
                 .filter { it != playerEntity }
 
         return validEntities
-            .count { playerEntity.position().distanceTo(it.position()).toUInt() <= arguments.blockRadius }
-            .toNInt() >= arguments.minimumCount
+            .count {
+                playerEntity.position().distanceTo(it.position()).toUInt() <= arguments.blockRadius
+            } >= arguments.minimumCount.toInt()
     }
 }
