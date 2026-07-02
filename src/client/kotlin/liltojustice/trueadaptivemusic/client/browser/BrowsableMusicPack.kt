@@ -38,7 +38,8 @@ data class BrowsableMusicPack(
 
     enum class SourceType {
         Discord,
-        GDrive
+        GDrive,
+        MEGA
     }
 
     data class Image(val extension: String, val source: String)

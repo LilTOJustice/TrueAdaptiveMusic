@@ -93,17 +93,20 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
         private fun initConfigs() {
             Files.createDirectories(Constants.MUSIC_PACK_DIR)
             Files.createDirectories(Constants.FFMPEG_DIR)
+            Files.createDirectories(Constants.GIGA_GRABBER_DIR)
             Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
 
             if (TAMClient.isWindows) {
                 cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
                 cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
                 cloneResourceFile(
-                    Constants.LIBWINPTHREAD_WINDOWS_PATH, Constants.LIBWINPTHREAD_WINDOWS_RESOURCE
-                )
+                    Constants.LIBWINPTHREAD_WINDOWS_PATH, Constants.LIBWINPTHREAD_WINDOWS_RESOURCE)
+                cloneResourceFile(
+                    Constants.GIGA_GRABBER_WINDOWS_PATH, Constants.GIGA_GRABBER_WINDOWS_RESOURCE)
             } else {
                 cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
                 cloneResourceFile(Constants.FFPROBE_PATH, Constants.FFPROBE_RESOURCE)
+                cloneResourceFile(Constants.GIGA_GRABBER_PATH, Constants.GIGA_GRABBER_RESOURCE)
             }
         }
 

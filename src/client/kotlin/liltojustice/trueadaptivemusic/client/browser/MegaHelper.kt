@@ -2,12 +2,13 @@ package liltojustice.trueadaptivemusic.client.browser
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.io.IOException
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import java.nio.file.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
-object CurlHelper {
+object MegaHelper {
     suspend fun get(url: String, outputPath: Path, progressOutput: Reference<Float>? = null) {
         coroutineScope {
             processRequest(
@@ -15,7 +16,9 @@ object CurlHelper {
                     .getRuntime()
                     .exec(
                         arrayOf(
-                            "curl", "-L", "-o", outputPath.invariantSeparatorsPathString, url, "--progress-bar")
+                            Constants.GIGA_GRABBER_WINDOWS_PATH.invariantSeparatorsPathString, url,
+                            "--output_path", outputPath.invariantSeparatorsPathString
+                        )
                     ),
                 progressOutput
             )
@@ -24,12 +27,10 @@ object CurlHelper {
 
     private fun processRequest(process: Process, progressOutput: Reference<Float>?) {
         val progressReaderThread = Thread {
-            process.errorReader().use { reader ->
+            process.inputReader().use { reader ->
                 try {
                     while (true) {
-                        reader.readLine()?.filter { char -> char.isDigit() || char == '.' }?.toFloatOrNull()?.let {
-                            progressOutput?.value = it / 100F
-                        }
+                        reader.readLine()?.toFloatOrNull()?.let { progressOutput?.value = it }
                     }
                 }
                 catch (_: IOException) { }
@@ -44,10 +45,10 @@ object CurlHelper {
         catch (e: Exception) {
             process.destroyForcibly()
 
-            Logger.logError("Curl error:\n${e.stackTraceToString()}")
+            Logger.logError("Mega error:\n${e.stackTraceToString()}")
         }
 
-        process.errorStream.close()
+        process.inputStream.close()
         progressReaderThread.join()
     }
 }
