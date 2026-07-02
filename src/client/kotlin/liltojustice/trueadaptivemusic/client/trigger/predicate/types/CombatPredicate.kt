@@ -50,7 +50,10 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
     }
 
     data class Arguments(
-        val isBlacklist: Boolean, val entities: List<EntityIdentifier>, val minimumCount: NInt): TriggerArguments()
+        val isBlacklist: Boolean = false,
+        val entities: List<EntityIdentifier> = emptyList(),
+        val minimumCount: NInt = NInt()
+    ): TriggerArguments()
 
     class State(private val arguments: Arguments): TriggerState() {
         val aggroTimer: Timer = Timer()

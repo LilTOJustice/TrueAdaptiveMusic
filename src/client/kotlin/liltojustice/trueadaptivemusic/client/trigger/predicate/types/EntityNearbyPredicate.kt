@@ -22,7 +22,10 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
         get() = super.tickRate * 5
 
     data class Arguments(
-        val entities: List<EntityIdentifier>, val blockRadius: UInt, val minimumCount: NInt): TriggerArguments()
+        val entities: List<EntityIdentifier> = emptyList(),
+        val blockRadius: UInt = 0U,
+        val minimumCount: NInt = NInt()
+    ): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         val minecraft = Minecraft.getInstance()

@@ -5,6 +5,10 @@ import com.google.gson.FieldAttributes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.TypeAdapter
@@ -23,8 +27,10 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.TAMAPI
+import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import net.minecraft.resources.Identifier
 import net.minecraft.util.GsonHelper
+import java.lang.reflect.Type
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
@@ -138,6 +144,8 @@ object MusicTriggerSerializer {
             )
             .registerTypeAdapter(Identifier::class.java, IdentifierTypeAdapter)
             .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
+            .registerTypeHierarchyAdapter(
+                TriggerArguments::class.java, TriggerArgumentsDeserializer)
             .create()
     }
 
@@ -194,6 +202,34 @@ object MusicTriggerSerializer {
             reader.endObject()
 
             return Identifier.fromNamespaceAndPath(namespace, path)
+        }
+    }
+
+    private object TriggerArgumentsDeserializer: JsonDeserializer<TriggerArguments> {
+        override fun deserialize(p0: JsonElement, p1: Type, p2: JsonDeserializationContext): TriggerArguments {
+            val gson = Gson()
+            val defaults = try {
+                p1.javaClass.kotlin.primaryConstructor?.callBy(mapOf())
+            }
+            catch (_: Exception) {
+                null
+            }
+                ?.let { gson.toJsonTree(it).asJsonObject.asMap() }
+                ?: mapOf()
+
+            val newValues = p0.asJsonObject.asMap()
+            val allKeys = newValues.keys + defaults.keys
+            val mergedMap = mutableMapOf<String, JsonElement>()
+            allKeys.forEach { key ->
+                mergedMap[key] = newValues[key]?.takeIf { !it.isJsonNull } ?: defaults[key] ?: JsonNull.INSTANCE
+            }
+
+            val result = JsonObject()
+            mergedMap.forEach { (key, element) ->
+                result.add(key, element)
+            }
+
+            return gson.fromJson(result, p1)
         }
     }
 }
