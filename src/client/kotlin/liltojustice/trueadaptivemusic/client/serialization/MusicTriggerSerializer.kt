@@ -133,9 +133,13 @@ object MusicTriggerSerializer {
         }
     }
 
-    private fun getGson(soundLibrary: SoundLibrary? = null): Gson {
-        // Need to do crack to write this function
+    private fun getTriggerArgGsonBuilder(): GsonBuilder {
         return GsonBuilder()
+            .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
+    }
+
+    private fun getGson(soundLibrary: SoundLibrary? = null): Gson {
+        return getTriggerArgGsonBuilder()
             .addDeserializationExclusionStrategy(MusicTriggerExclusionStrategy)
             .addSerializationExclusionStrategy(MusicTriggerExclusionStrategy)
             .registerTypeHierarchyAdapter(
@@ -207,9 +211,9 @@ object MusicTriggerSerializer {
 
     private object TriggerArgumentsDeserializer: JsonDeserializer<TriggerArguments> {
         override fun deserialize(p0: JsonElement, p1: Type, p2: JsonDeserializationContext): TriggerArguments {
-            val gson = Gson()
+            val gson = getTriggerArgGsonBuilder().create()
             val defaults = try {
-                p1.javaClass.kotlin.primaryConstructor?.callBy(mapOf())
+                (p1 as Class<*>).kotlin.primaryConstructor?.callBy(mapOf())
             }
             catch (_: Exception) {
                 null
