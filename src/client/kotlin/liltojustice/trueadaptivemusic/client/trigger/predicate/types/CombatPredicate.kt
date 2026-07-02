@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.monster.ElderGuardian
 import net.minecraft.world.entity.monster.Guardian
 import net.minecraft.world.entity.monster.Monster
 import net.minecraft.world.entity.monster.Phantom
@@ -149,7 +150,8 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
         return closeEnough && (
                 (entity as? Mob)?.isAggressive == true ||
-                        (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
+                        (entity as? Guardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true ||
+                        (entity as? ElderGuardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true ||
                         entity is Phantom ||
                         (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
                         entity is Warden
