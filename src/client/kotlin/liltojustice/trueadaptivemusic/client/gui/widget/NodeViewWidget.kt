@@ -204,7 +204,7 @@ class NodeViewWidget(
                             onHoverOption = { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            tooltipText = Constants.MUSIC_CHOICE_TOOLTIP_TEXT
+                            tooltipText = MUSIC_CHOICE_TOOLTIP_TEXT
                         )
                     }
                     else {
@@ -232,7 +232,7 @@ class NodeViewWidget(
                             { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            Constants.MUSIC_CHOICE_TOOLTIP_TEXT,
+                            MUSIC_CHOICE_TOOLTIP_TEXT,
                             customCreator = { text -> Identifier.tryParse(text)?.toString() }
                         )
                     }
@@ -654,7 +654,20 @@ class NodeViewWidget(
         val AMBIENCE_CHOICE_TOOLTIP_TEXT: MutableComponent = Component.translatableWithFallback(
             "trueadaptivemusic.ambience_choice.description",
             "Select any amount of ambience to be chosen randomly to play"
-        ).append("\n\n").append(Constants.ALLOWED_FILE_TYPES_TEXT)
+        )
+            .append("\n\n")
+            .append(
+                "${
+                    Component
+                        .translatableWithFallback(
+                            "trueadaptivemusic.allowed_file_types", "Allowed file types")
+                        .string
+                }: ${TAMClient.allowedFileTypes.joinToString(", ")}"
+            )
+        val MUSIC_CHOICE_TOOLTIP_TEXT: MutableComponent = Component.translatableWithFallback(
+            "trueadaptivemusic.music_choice.description",
+            "Select any amount of music to be chosen randomly to play"
+        ).append("\n\n").append(TAMClient.allowedFileTypesText())
 
         private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTree.Node): Boolean {
             node.parent?.let {

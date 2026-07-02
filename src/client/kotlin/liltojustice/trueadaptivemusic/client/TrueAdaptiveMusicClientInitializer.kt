@@ -66,14 +66,11 @@ import net.fabricmc.api.ClientModInitializer
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
 import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.collections.map
 import kotlin.io.path.Path
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
-import kotlin.io.path.outputStream
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -83,31 +80,16 @@ import kotlin.toString
 
 class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
     override fun onInitializeClient() {
-        initConfigs()
+        initDirectories()
         registerTriggerTypes()
         registerInputWidgets()
         TAMNetworkingClient.init()
     }
 
     companion object {
-        private fun initConfigs() {
+        private fun initDirectories() {
             Files.createDirectories(Constants.MUSIC_PACK_DIR)
-            Files.createDirectories(Constants.FFMPEG_DIR)
-            Files.createDirectories(Constants.GIGA_GRABBER_DIR)
             Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
-
-            if (TAMClient.isWindows) {
-                cloneResourceFile(Constants.FFMPEG_WINDOWS_PATH, Constants.FFMPEG_WINDOWS_RESOURCE)
-                cloneResourceFile(Constants.FFPROBE_WINDOWS_PATH, Constants.FFPROBE_WINDOWS_RESOURCE)
-                cloneResourceFile(
-                    Constants.LIBWINPTHREAD_WINDOWS_PATH, Constants.LIBWINPTHREAD_WINDOWS_RESOURCE)
-                cloneResourceFile(
-                    Constants.GIGA_GRABBER_WINDOWS_PATH, Constants.GIGA_GRABBER_WINDOWS_RESOURCE)
-            } else {
-                cloneResourceFile(Constants.FFMPEG_PATH, Constants.FFMPEG_RESOURCE)
-                cloneResourceFile(Constants.FFPROBE_PATH, Constants.FFPROBE_RESOURCE)
-                cloneResourceFile(Constants.GIGA_GRABBER_PATH, Constants.GIGA_GRABBER_RESOURCE)
-            }
         }
 
         private fun registerTriggerTypes() {
@@ -527,22 +509,6 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                 "Lesser" -> "<"
                 "LesserOrEqual" -> "<="
                 else -> enumString.prettify()
-            }
-        }
-
-        private fun cloneResourceFile(destinationPath: Path, resource: String) {
-            destinationPath.deleteIfExists()
-
-            if (TAMClient.isWindows) {
-                Files.createFile(destinationPath)
-            } else {
-                Files.createFile(destinationPath, Constants.POSIX_PERMISSIONS)
-            }
-
-            this::class.java.classLoader.getResourceAsStream(resource).use { resourceStream ->
-                destinationPath.outputStream().use { destinationStream ->
-                    resourceStream?.copyTo(destinationStream)
-                }
             }
         }
     }
