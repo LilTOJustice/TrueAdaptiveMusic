@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.RenderState
+import liltojustice.trueadaptivemusic.client.gui.screen.ExtensionsSuggestionScreen
 import liltojustice.trueadaptivemusic.client.gui.screen.PackBrowserScreen
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextDisplayWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -123,7 +124,16 @@ class PackListWidget(
                     }
                 }
 
-            addEntry(PackBrowserEntry { client.setScreen(PackBrowserScreen(screen)) })
+            addEntry(
+                PackBrowserEntry {
+                    minecraft.gui.setScreen(
+                        if (TAMClient.extensions != null)
+                            PackBrowserScreen(screen)
+                        else
+                            ExtensionsSuggestionScreen(screen)
+                    )
+                }
+            )
             renderState = RenderState.Success
         }
     }
