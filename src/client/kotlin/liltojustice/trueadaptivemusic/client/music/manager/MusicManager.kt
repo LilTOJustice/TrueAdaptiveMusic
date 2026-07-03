@@ -7,6 +7,7 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
@@ -110,7 +111,8 @@ class MusicManager(private val minecraft: MinecraftClient) {
         val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
         val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaMusic
         val loopStartPoints = parameters.loopStartPoints
-        val shouldResume = oldNodeId == identifier && enterDelay == 0U
+        val disableResuming = parameters.disableResuming
+        val shouldResume = oldNodeId == identifier && enterDelay == 0U && !disableResuming
         val isEnter = currentNodeId != identifier
         val disableFading = parameters.disableFading
         val persistNodeMusic = packOptions.persistentNodeMusic &&
@@ -228,7 +230,7 @@ class MusicManager(private val minecraft: MinecraftClient) {
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-        val newMusic = getPseudoRandomMusic(musicToPlay)
+        val newMusic = getPseudoRandomMusic(musicToPlay, parameters.musicWeights)
         playNextMusic(
             newMusic,
             delay,
@@ -384,12 +386,16 @@ class MusicManager(private val minecraft: MinecraftClient) {
         }
     }
 
-    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>): PlayableSound {
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: Map<String, NInt>): PlayableSound {
         if (musicPool.isEmpty()) {
             musicPool = musicToPlay.toMutableSet()
         }
 
-        val randomSound = musicPool.random()
+        val weightedMusicPool = musicPool.flatMap {
+            List(max(weights[it.getSoundName()]?.toInt() ?: 1, 1)) { _ -> it }
+        }
+
+        val randomSound = weightedMusicPool.random()
         musicPool.remove(randomSound)
 
         return randomSound
