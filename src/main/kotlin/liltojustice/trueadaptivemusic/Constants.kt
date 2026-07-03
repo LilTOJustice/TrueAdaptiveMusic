@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusic
 
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
-import net.minecraft.resources.Identifier
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -22,7 +22,7 @@ class Constants {
         val PACK_BROWSER_CACHE_DIR = Path(".trueadaptivemusiccache")
         val DISCORD_JOIN_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.join_discord", "Join the Discord!")
-        val NULL_IDENTIFIER = Identifier.fromNamespaceAndPath("trueadaptivemusic", "null")
+        val NULL_IDENTIFIER: Identifier = Identifier.of("trueadaptivemusic", "null")
         val REQUIRES_SERVER_SUPPORT_TRIGGERS = listOf(
             "structure", "structure_set", "spawn_point_nearby", "scoreboard", "custom")
         val REQUIRES_SERVER_SUPPORT_TEXT = "*${Text.translatableWithFallback(
