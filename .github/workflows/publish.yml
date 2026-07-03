@@ -77,6 +77,6 @@ jobs:
 
           name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
-          version-type: alpha
+          version-type: release
           changelog-file: CHANGELOG.md
           java: "${{env.JAVA_VERSION}}"
