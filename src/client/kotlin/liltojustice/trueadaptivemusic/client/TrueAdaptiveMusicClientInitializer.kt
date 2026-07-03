@@ -165,7 +165,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     },
                     outArgs[arg.index]?.toString() ?: ""
                 )
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
 
                 result
             }
@@ -199,7 +199,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     },
                     outArgs[arg.index]?.toString() ?: ""
                 )
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
 
                 result
             }
@@ -226,7 +226,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     },
                     outArgs[arg.index]?.toString() ?: ""
                 )
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
 
                 result
             }
@@ -253,7 +253,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     },
                     outArgs[arg.index]?.toString() ?: ""
                 )
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
 
                 result
             }
@@ -315,7 +315,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     outArgs[arg.index]?.toString() ?: ""
                 )
                 tooltipText?.let {
-                    result.setTooltip(Tooltip.create(it))
+                    result.setTooltip(Tooltip.of(it))
                 }
                 result
             }
@@ -331,7 +331,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     },
                     checked = outArgs[arg.index] as? Boolean ?: false
                 )
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
                 result
             }
 
@@ -352,7 +352,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             },
                             title = prompt,
                             getDisplay = {
-                                Component.translatableWithFallback(
+                                Text.translatableWithFallback(
                                     "trueadaptivemusic.enum.$it", prettifyEnum(it)
                                 ).string
                             },
@@ -378,7 +378,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             onChange()
                         },
                         prompt,
-                        notSelectedPlaceholder = Component.translatableWithFallback(
+                        notSelectedPlaceholder = Text.translatableWithFallback(
                             "trueadaptivemusic.enum_placeholder", "Select values"
                         ).string,
                         alreadySelected = (outArgs[arg.index] as? List<*>)?.filterIsInstance<Enum<*>>()
@@ -434,7 +434,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                             onChange()
                         },
                         prompt,
-                        notSelectedPlaceholder = Component.translatableWithFallback(
+                        notSelectedPlaceholder = Text.translatableWithFallback(
                             "trueadaptivemusic.identifier_placeholder", "Select identifiers"
                         ).string,
                         alreadySelected =
@@ -459,7 +459,7 @@ class TrueAdaptiveMusicClientInitializer: ClientModInitializer {
                     (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
                     prompt
                 ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
-                tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+                tooltipText?.let { result.setTooltip(Tooltip.of(it)) }
 
                 result
             }
