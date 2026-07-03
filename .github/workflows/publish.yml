@@ -60,14 +60,38 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build
         run: ./gradlew clean build
-      - name: Publish
+      - name: Publish Fabric
         env:
           MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
+          loaders: |
+            fabric
           files: |
-            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/fabric/libs/!(*-@(dev|sources|javadoc)).jar
+
+          modrinth-id: UeDAoEyD
+          modrinth-token: "${{env.MODRINTH_TOKEN}}"
+
+          curseforge-id: true-adaptive-music
+          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
+
+          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
+          version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+          java: "${{env.JAVA_VERSION}}"
+      - name: Publish NeoForge
+        env:
+          MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
+          MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          loaders: |
+            forge
+          files: |
+            build/neoforge/libs/!(*-@(dev|sources|javadoc)).jar
 
           modrinth-id: UeDAoEyD
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
