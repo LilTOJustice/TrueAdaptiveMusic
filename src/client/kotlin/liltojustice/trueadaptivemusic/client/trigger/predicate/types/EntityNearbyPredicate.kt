@@ -41,7 +41,7 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
 
         return validEntities
             .count {
-                playerEntity.position().distanceTo(it.position()).toUInt() <= arguments.blockRadius
+                playerEntity.entityPos.distanceTo(it.entityPos).toUInt() <= arguments.blockRadius
             } >= arguments.minimumCount.toInt()
     }
 }
