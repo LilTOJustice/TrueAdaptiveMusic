@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
@@ -13,12 +14,17 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
         get() = super.argDescriptions + mapOf(
             Arguments::entities.name to "List of entities the music should play for. If none, any entity will " +
                     "trigger the music.",
-            Arguments::blockRadius.name to "Minimum radius for the entity to trigger the predicate."
+            Arguments::blockRadius.name to "Minimum radius for the entity to trigger the predicate.",
+            Arguments::minimumCount.name to "Select how many minimum mobs it takes to trigger the music."
         )
     override val tickRate: Int
         get() = super.tickRate * 5
 
-    data class Arguments(val entities: List<EntityIdentifier>, val blockRadius: UInt): TriggerArguments()
+    data class Arguments(
+        val entities: List<EntityIdentifier> = emptyList(),
+        val blockRadius: UInt = 0U,
+        val minimumCount: NInt = NInt()
+    ): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
         val minecraft = MinecraftClient.getInstance()
@@ -34,6 +40,8 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
                 .filter { it != playerEntity }
 
         return validEntities
-            .any { playerEntity.entityPos.distanceTo(it.entityPos).toUInt() <= arguments.blockRadius }
+            .count {
+                playerEntity.position().distanceTo(it.position()).toUInt() <= arguments.blockRadius
+            } >= arguments.minimumCount.toInt()
     }
 }
