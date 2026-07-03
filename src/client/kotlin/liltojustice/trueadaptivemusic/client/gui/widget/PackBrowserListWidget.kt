@@ -3,11 +3,11 @@ package liltojustice.trueadaptivemusic.client.gui.widget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.browser.BrowsableMusicPack
-import liltojustice.trueadaptivemusic.client.browser.BrowsableMusicPackDownloader
-import liltojustice.trueadaptivemusic.client.browser.Constants
 import liltojustice.trueadaptivemusic.client.browser.DataSizeHelper
 import liltojustice.trueadaptivemusic.client.browser.DownloadButtonWidget
 import liltojustice.trueadaptivemusic.client.browser.PackManifest
@@ -70,9 +70,8 @@ class PackBrowserListWidget(
         clearEntries()
         backgroundScope.launch {
             try {
-                packManifest = BrowsableMusicPackDownloader.fetchPacksFromRepository(ignoreCache)
+                packManifest = TAMClient.extensions?.packFetcher(ignoreCache)
                 initEntries()
-
                 renderState = RenderState.Success
             }
             catch (e: Exception) {
@@ -304,10 +303,7 @@ class PackBrowserListWidget(
 
             DownloadButtonWidget(packPath in downloadedPacks, oldPack != null, progress) {
                 runBlocking {
-                    BrowsableMusicPackDownloader.downloadMusicPack(
-                        musicPack,
-                        progress
-                    )
+                    TAMClient.extensions?.packDownloader(musicPack, progress) ?: return@runBlocking
                     oldPack?.let { oldPack.deleteIfExists() }
                 }
             }

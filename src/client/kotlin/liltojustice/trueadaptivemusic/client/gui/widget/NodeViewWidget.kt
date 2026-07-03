@@ -11,6 +11,7 @@ import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
@@ -79,6 +80,7 @@ class NodeViewWidget(
                     MusicTree.Node.Parameters::parallelMusic.name,
                     MusicTree.Node.Parameters::loopMusic.name,
                     MusicTree.Node.Parameters::loopStartPoints.name,
+                    MusicTree.Node.Parameters::musicWeights.name
                 )
             }
             else {
@@ -94,6 +96,7 @@ class NodeViewWidget(
                     MusicTree.Node.Parameters::enterDelay.name,
                     MusicTree.Node.Parameters::inheritMusic.name,
                     MusicTree.Node.Parameters::loopMusic.name,
+                    MusicTree.Node.Parameters::musicWeights.name
                 )
             }
 
@@ -111,6 +114,7 @@ class NodeViewWidget(
                     MusicTree.Node.Parameters::inheritMusic.name,
                     MusicTree.Node.Parameters::loopMusic.name,
                     MusicTree.Node.Parameters::loopStartPoints.name,
+                    MusicTree.Node.Parameters::musicWeights.name
                 )
             }
 
@@ -200,7 +204,7 @@ class NodeViewWidget(
                             onHoverOption = { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            tooltipText = Constants.MUSIC_CHOICE_TOOLTIP_TEXT
+                            tooltipText = MUSIC_CHOICE_TOOLTIP_TEXT
                         )
                     }
                     else {
@@ -228,13 +232,65 @@ class NodeViewWidget(
                             { option ->
                                 TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                             },
-                            Constants.MUSIC_CHOICE_TOOLTIP_TEXT,
+                            MUSIC_CHOICE_TOOLTIP_TEXT,
                             customCreator = { text -> Identifier.tryParse(text)?.toString() }
                         )
                     }
                 },
                 "musicChoice"
             )
+        }
+
+        selectedNode?.let { node ->
+            if ("musicWeights" in restrictedParameters) {
+                clearMusicWeightWidgets()
+                return@let
+            }
+
+            addWidgetFromRender({ EmptyClickableWidget() }, "musicWeightsSpacer")
+            addWidgetFromRender(
+                {
+                    val newWidget = ClickableTextWidget(
+                        "${
+                            Component.translatableWithFallback(
+                                "trueadaptivemusic.music_weights", "Music Weights").string}:"
+                    )
+                    newWidget.active = false
+                    newWidget.setTooltip(
+                        Tooltip.create(MusicTree.Node.Parameters.getParamDescription("musicWeights")))
+                    newWidget
+                }, "musicWeights"
+            )
+
+            val musicWeightsParam = requiredNodeParams.first()
+            val soundNames = getSoundNames(node)
+            soundNames.forEach { soundName ->
+                addWidgetFromRender(
+                    {
+                        val outArg = mutableListOf(node.parameters.musicWeights[soundName] as Any?)
+                        TAMAPI.makeInputWidget(
+                            screen!!,
+                            outArg,
+                            WidgetArg(typeOf<NInt>(), "musicWeights", 0),
+                            Component.literal(soundName),
+                            null
+                        ) {
+                            val copy = mutableMapOf<String, NInt>()
+                            soundNames.forEach { copy[it] = NInt() }
+                            node.parameters.musicWeights.entries.forEach { entry ->
+                                if (entry.key in copy) {
+                                    copy[entry.key] = entry.value
+                                }
+                            }
+
+                            copy[soundName] = outArg[0] as NInt
+                            nodeParams[musicWeightsParam.index] = copy.toMap()
+                            onChange()
+                        }
+                    },
+                    "musicWeights: $soundName"
+                )
+            }
         }
 
         addWidgetFromRender(
@@ -268,7 +324,7 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
+        requiredNodeParams.drop(1).dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
             addWidgetFromRender(
                 {
                     TAMAPI.makeInputWidget(
@@ -328,18 +384,10 @@ class NodeViewWidget(
                 }, "loopStartPoints"
             )
 
-            val soundNames = node.music
-                .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
-                .flatMap { sound ->
-                    (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
-                        ?: (sound as? PlayableSoundDirectory)
-                            ?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
-                        ?: emptyList()
-                }
-
             queueClearWidgetsFromRender { it.id != "loopStartPoint: parallel" }
 
-            soundNames.sorted().forEach { soundName ->
+            val soundNames = getSoundNames(node)
+            soundNames.forEach { soundName ->
                 addWidgetFromRender(
                     {
                         val outArg = mutableListOf(node.parameters.loopStartPoints[soundName] as Any?)
@@ -578,8 +626,23 @@ class NodeViewWidget(
         queueClearWidgetsFromRender { !it.id.startsWith("loopStartPoint") }
     }
 
+    private fun clearMusicWeightWidgets() {
+        queueClearWidgetsFromRender { !it.id.startsWith("musicWeight") }
+    }
+
     private fun clearRestrictedWidgets() {
         queueClearWidgetsFromRender { widget -> restrictedParameters.none { widget.id.contains(it) } }
+    }
+
+    private fun getSoundNames(node: MusicTree.Node): List<String> {
+        return node.music
+            .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
+            .flatMap { sound ->
+                (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
+                    ?: (sound as? PlayableSoundDirectory)
+                        ?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
+                    ?: emptyList()
+            }.sorted()
     }
 
     companion object {
@@ -588,7 +651,20 @@ class NodeViewWidget(
         val AMBIENCE_CHOICE_TOOLTIP_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.ambience_choice.description",
             "Select any amount of ambience to be chosen randomly to play"
-        ).append("\n\n").append(Constants.ALLOWED_FILE_TYPES_TEXT)
+        )
+            .append("\n\n")
+            .append(
+                "${
+                    Component
+                        .translatableWithFallback(
+                            "trueadaptivemusic.allowed_file_types", "Allowed file types")
+                        .string
+                }: ${TAMClient.allowedFileTypes.joinToString(", ")}"
+            )
+        val MUSIC_CHOICE_TOOLTIP_TEXT: MutableComponent = Component.translatableWithFallback(
+            "trueadaptivemusic.music_choice.description",
+            "Select any amount of music to be chosen randomly to play"
+        ).append("\n\n").append(TAMClient.allowedFileTypesText())
 
         private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTree.Node): Boolean {
             node.parent?.let {
