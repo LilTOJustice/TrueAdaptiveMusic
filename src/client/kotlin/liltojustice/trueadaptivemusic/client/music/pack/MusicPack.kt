@@ -301,7 +301,7 @@ class MusicPack private constructor(
         val usedExtensions = getPackAssetNames().map { name -> Path(name).extension }.toSet()
         if (usedExtensions.any { !TAMClient.allowedFileTypes.contains(it) }) {
             validation.addWarning(
-                Component.translatableWithFallback(
+                Text.translatableWithFallback(
                     "trueadaptivemusic.filetype_warning",
                     "This pack contains music that is not one of the expected types. This music will not " +
                             "play unless FFmpeg is installed on your system. FFmpeg is included with the True " +
