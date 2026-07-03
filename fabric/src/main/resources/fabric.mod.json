@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "trueadaptivemusic",
-  "version": "${version}",
-  "name": "True Adaptive Music",
-  "description": "Experience dynamic music that adapts to what happens in Minecraft!",
-  "authors": [],
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "{mod_description}",
+  "authors": ["${mod_authors}"],
   "contact": {
-    "homepage": "https://liltojustice.github.io/TrueAdaptiveMusic/",
-    "issues": "https://github.com/LilTOJustice/TrueAdaptiveMusic/issues",
-    "sources": "https://github.com/LilTOJustice/TrueAdaptiveMusic"
+    "homepage": "${mod_home}",
+    "issues": "${mod_issues}",
+    "sources": "${mod_source}"
   },
-  "license": "GPL-3.0",
-  "icon": "assets/trueadaptivemusic/icon.png",
+  "license": "${mod_license}",
+  "icon": "${mod_icon}",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -34,7 +34,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}.*",
+    "minecraft": "${minecraft_version_range}",
     "trueadaptivemusicapi": "~1.2.2"
   },
   "suggests": {
