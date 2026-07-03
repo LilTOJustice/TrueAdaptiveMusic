@@ -32,7 +32,7 @@ class ExportPackScreen(
             }
             catch (e: Exception) {
                 TAMClient.errorToast(
-                    Component.literal("Failed to export pack."), e.message)
+                    Text.literal("Failed to export pack."), e.message)
             }
             finally {
                 done = true
