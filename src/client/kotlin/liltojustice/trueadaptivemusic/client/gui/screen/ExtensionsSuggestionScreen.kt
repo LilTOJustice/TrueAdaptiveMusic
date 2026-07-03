@@ -26,14 +26,14 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
             CommonComponents.GUI_YES,
             {
                 Util.getPlatform().openUri(Constants.TAM_EXTENSIONS_URL)
-                minecraft.gui.setScreen(parent)
+                minecraft.setScreen(parent)
             },
             false
         )
             .sprite(CHECKMARK, 9, 8)
             .build()
         val noButtonWidget = Button.Builder(CommonComponents.GUI_NO) {
-            minecraft.gui.setScreen(parent)
+            minecraft.setScreen(parent)
         }
             .build()
         yesButtonWidget.width = 60
@@ -48,7 +48,7 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
     }
 
     override fun onClose() {
-        minecraft.gui.setScreen(parent)
+        minecraft.setScreen(parent)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {

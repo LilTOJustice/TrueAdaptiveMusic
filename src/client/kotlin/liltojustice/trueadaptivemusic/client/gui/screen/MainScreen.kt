@@ -111,7 +111,7 @@ class MainScreen(private val parent: Screen): Screen(
 
         packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
         { _: Button? ->
-            minecraft.gui.setScreen(
+            minecraft.setScreen(
                 if (TAMClient.extensions != null)
                     PackBrowserScreen(this)
                 else
