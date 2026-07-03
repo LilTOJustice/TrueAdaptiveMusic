@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.browser
 
+import liltojustice.trueadaptivemusic.Constants
 import java.nio.file.Path
 import java.util.Date
 import kotlin.io.path.Path
@@ -36,9 +37,11 @@ data class BrowsableMusicPack(
         private val fileNameRegex = Regex("[^ a-zA-Z0-9.\\-_/\\\\]")
     }
 
+    @Suppress("UNUSED")
     enum class SourceType {
         Discord,
-        GDrive
+        GDrive,
+        MEGA
     }
 
     data class Image(val extension: String, val source: String)

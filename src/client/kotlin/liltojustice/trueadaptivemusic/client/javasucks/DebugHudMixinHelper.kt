@@ -14,15 +14,15 @@ object DebugHudMixinHelper {
     private const val INDENT = 10
 
     @JvmStatic
-    fun render(context: DrawContext) {
-        if (!TAMClient.options.useDebugHud) {
+    fun render(graphics: GuiGraphicsExtractor) {
+        val minecraft = Minecraft.getInstance()
+        if (!TAMClient.options.useDebugHud || minecraft.gui.screen() != null) {
             return
         }
 
         val musicPack = TAMClient.musicPack ?: return
 
-        val client = MinecraftClient.getInstance()
-        if (client.options.debugEnabled) {
+        if (minecraft.gui.hud.debugOverlay.showDebugScreen()) {
             return
         }
 
