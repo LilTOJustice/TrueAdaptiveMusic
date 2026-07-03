@@ -120,19 +120,19 @@ class MainScreen(private val parent: Screen): Screen(
         discordButton.y = wikiButton.y
         discordButton.x = wikiButton.x - discordButton.width - 5
 
-        packBrowserButton = Button.builder(PACK_BROWSER_TEXT)
-        { _: Button? ->
-            minecraft.gui.setScreen(
+        packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
+        { _: ButtonWidget? ->
+            client?.setScreen(
                 if (TAMClient.extensions != null)
                     PackBrowserScreen(this)
                 else
                     ExtensionsSuggestionScreen(this)
             )
         }.build()
-        packBrowserButton.width = font.width(PACK_BROWSER_TEXT) + 10
-        packBrowserButton.y = packListWidget.bottom + ((height - packListWidget.bottom) - packBrowserButton.height) / 2
+        packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = packListWidget.getBottom() + ((height - packListWidget.getBottom()) - packBrowserButton.height) / 2
         packBrowserButton.x = (this.width - packBrowserButton.width) / 2
-        addRenderableWidget(packBrowserButton)
+        addDrawableChild(packBrowserButton)
 
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)

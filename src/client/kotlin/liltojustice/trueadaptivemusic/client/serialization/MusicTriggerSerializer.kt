@@ -28,8 +28,8 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
-import net.minecraft.resources.Identifier
-import net.minecraft.util.GsonHelper
+import net.minecraft.util.Identifier
+import net.minecraft.util.JsonHelper
 import java.lang.reflect.Type
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf

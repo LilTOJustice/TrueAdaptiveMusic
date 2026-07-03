@@ -254,12 +254,12 @@ class NodeViewWidget(
                 {
                     val newWidget = ClickableTextWidget(
                         "${
-                            Component.translatableWithFallback(
+                            Text.translatableWithFallback(
                                 "trueadaptivemusic.music_weights", "Music Weights").string}:"
                     )
                     newWidget.active = false
                     newWidget.setTooltip(
-                        Tooltip.create(MusicTree.Node.Parameters.getParamDescription("musicWeights")))
+                        Tooltip.of(MusicTree.Node.Parameters.getParamDescription("musicWeights")))
                     newWidget
                 }, "musicWeights"
             )
@@ -274,7 +274,7 @@ class NodeViewWidget(
                             screen!!,
                             outArg,
                             WidgetArg(typeOf<NInt>(), "musicWeights", 0),
-                            Component.literal(soundName),
+                            Text.literal(soundName),
                             null
                         ) {
                             val copy = mutableMapOf<String, NInt>()
@@ -657,13 +657,13 @@ class NodeViewWidget(
             .append("\n\n")
             .append(
                 "${
-                    Component
+                    Text
                         .translatableWithFallback(
                             "trueadaptivemusic.allowed_file_types", "Allowed file types")
                         .string
                 }: ${TAMClient.allowedFileTypes.joinToString(", ")}"
             )
-        val MUSIC_CHOICE_TOOLTIP_TEXT: MutableComponent = Component.translatableWithFallback(
+        val MUSIC_CHOICE_TOOLTIP_TEXT: MutableText = Text.translatableWithFallback(
             "trueadaptivemusic.music_choice.description",
             "Select any amount of music to be chosen randomly to play"
         ).append("\n\n").append(TAMClient.allowedFileTypesText())

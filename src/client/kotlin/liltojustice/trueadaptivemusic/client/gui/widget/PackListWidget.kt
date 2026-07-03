@@ -124,7 +124,7 @@ class PackListWidget(
 
             addEntry(
                 PackBrowserEntry {
-                    minecraft.gui.setScreen(
+                    client.setScreen(
                         if (TAMClient.extensions != null)
                             PackBrowserScreen(screen)
                         else

@@ -16,10 +16,10 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusicapi.TAMAPI
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.components.toasts.SystemToast
-import net.minecraft.network.chat.Component
-import net.minecraft.sounds.SoundEvent
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.toast.SystemToast
+import net.minecraft.sound.SoundEvent
+import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
