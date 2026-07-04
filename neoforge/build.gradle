@@ -26,7 +26,6 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 kotlin.jvmToolchain(25)
 
 neoForge {
-    // Specify the version of NeoForge to use.
     version = project.neoforge_version
 
     parchment {
@@ -84,7 +83,6 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
 }
@@ -132,4 +130,8 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
+}
+
+tasks.jar {
+    archiveVersion = "neoforge-${version}"
 }
