@@ -39,11 +39,13 @@ In place of the `???`, we need to define two things.
 
 First, the structure of the arguments that our event type needs. In our example, we want to know what type of battle we are in so we can play different music depending on the battle type.
 
-Elsewhere we have defined an enum `BattleType`, so we'll use that as our argument. We are only able to use an enum as an argument because it is one of the [provided input widget types](../Reference/Provided%20Input%20Widget%20Types.md). If you need an argument whose type that is not in that list, you need to [create the input widget](../How%20To/Creating%20an%20Input%20Widget.md) for that type, or you will not be able to create an event of this type in the UI.
+Elsewhere, we have defined an enum `BattleType`, so we'll use that as our argument. We are only able to use an enum as an argument because it is one of the [provided input widget types](../Reference/Provided%20Input%20Widget%20Types.md). If you need an argument whose type that is not in that list, you need to [create the input widget](../How%20To/Creating%20an%20Input%20Widget.md) for that type, or you will not be able to create an event of this type in the UI.
+
+**Important Note**: It is **HIGHLY RECOMMENDED** that your arguments class is a `data class` with all members given a default value within the primary constructor.
 
 ```kotlin
 object OnPokeBattleVictoryEvent: StaticEventType<OnPokeBattleVictoryEvent.Arguments, ???>("on_poke_battle_victory", typeOf<Arguments>()) {
-    data class Arguments(val battleType: BattleType): TriggerArguments()
+    data class Arguments(val battleType: BattleType = BattleType.Any): TriggerArguments()
 }
 ```
 
@@ -53,7 +55,7 @@ For those last `???` we need to define the structure of the input that we need o
 
 ```kotlin
 object OnPokeBattleVictoryEvent: StaticEventType<OnPokeBattleVictoryEvent.Arguments, OnPokeBattleVictoryEvent.Input>("on_poke_battle_victory", typeOf<Arguments>()) {
-    data class Arguments(val battleType: BattleType): TriggerArguments()
+    data class Arguments(val battleType: BattleType = BattleType.Any): TriggerArguments()
     data class Input(val battleType: BattleType): EventInput()
 }
 ```
@@ -73,7 +75,7 @@ Now we need to implement the `validate()` function which allows us to use both t
 
 ```kotlin
 object OnPokeBattleVictoryEvent: StaticEventType<OnPokeBattleVictoryEvent.Arguments, OnPokeBattleVictoryEvent.Input>("on_poke_battle_victory", typeOf<Arguments>()) {
-    data class Arguments(val battleType: BattleType): TriggerArguments()
+    data class Arguments(val battleType: BattleType = BattleType.Any): TriggerArguments()
     data class Input(val battleType: BattleType): EventInput()
 
     override fun validate(arguments: Arguments, input: Input): Boolean {

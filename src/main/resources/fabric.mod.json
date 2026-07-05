@@ -37,5 +37,8 @@
     "minecraft": "${minecraft_version}.*",
     "trueadaptivemusicapi": "~1.2.2"
   },
+  "suggests": {
+    "trueadaptivemusicextensions": "1.*"
+  },
   "accessWidener" : "trueadaptivemusic.accesswidener"
 }
