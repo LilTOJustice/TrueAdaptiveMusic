@@ -88,6 +88,7 @@ object TrueAdaptiveMusicClientInitializer {
     private fun initDirectories() {
         Files.createDirectories(Constants.MUSIC_PACK_DIR)
         Files.createDirectories(Constants.PACK_BROWSER_CACHE_DIR)
+        Files.createDirectories(Constants.OPTIONS_DIR)
     }
 
     private fun registerTriggerTypes() {

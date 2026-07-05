@@ -54,9 +54,11 @@ object TAMClient {
         }
     var extensions: Extensions? = null
         private set
+    val hasFFmpeg
+        get() = (isWindows && Constants.FFMPEG_WINDOWS_PATH.exists()) || (!isWindows && Constants.FFMPEG_PATH.exists())
     val allowedFileTypes
         get() =
-            if ((isWindows && Constants.FFMPEG_WINDOWS_PATH.exists()) || (!isWindows && Constants.FFMPEG_PATH.exists()))
+            if (hasFFmpeg)
                 Constants.ALL_ALLOWED_FILE_TYPES
             else
                 listOf("ogg")
