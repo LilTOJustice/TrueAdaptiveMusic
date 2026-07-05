@@ -120,6 +120,19 @@ class MainScreen(private val parent: Screen): Screen(
         discordButton.y = wikiButton.y
         discordButton.x = wikiButton.x - discordButton.width - 5
 
+        packBrowserButton = ButtonWidget.builder(PACK_BROWSER_TEXT)
+        { _: ButtonWidget? ->
+            client?.setScreen(
+                if (TAMClient.extensions != null)
+                    PackBrowserScreen(this)
+                else
+                    ExtensionsSuggestionScreen(this)
+            )
+        }.build()
+        packBrowserButton.width = textRenderer.getWidth(PACK_BROWSER_TEXT) + 10
+        packBrowserButton.y = packListWidget.getBottom() + ((height - packListWidget.getBottom()) - packBrowserButton.height) / 2
+        packBrowserButton.x = (this.width - packBrowserButton.width) / 2
+        addDrawableChild(packBrowserButton)
 
         addSelectableChild(packListWidget)
         addDrawableChild(createNewPackButton)

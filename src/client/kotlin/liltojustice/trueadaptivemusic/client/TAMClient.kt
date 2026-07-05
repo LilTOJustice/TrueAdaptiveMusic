@@ -17,13 +17,13 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEventFactory
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicateFactory
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.toast.SystemToast
 import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 import java.io.IOException
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.pathString
 import kotlin.time.Duration.Companion.milliseconds
@@ -32,6 +32,7 @@ object TAMClient {
     const val TPS = 20
     val musicPredicateFactory = MusicPredicateFactory()
     val musicEventFactory = MusicEventFactory()
+    val isWindows = "windows" in System.getProperty("os.name").lowercase()
     var currentPredicateResult: MusicTree.Result? = null
         private set
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
@@ -51,14 +52,20 @@ object TAMClient {
                 Logger.logError("Failed to save selected pack \"$packName\"")
             }
         }
-    val isWindows = "windows" in System.getProperty("os.name").lowercase()
+    var extensions: Extensions? = null
+        private set
+    val allowedFileTypes
+        get() =
+            if ((isWindows && Constants.FFMPEG_WINDOWS_PATH.exists()) || (!isWindows && Constants.FFMPEG_PATH.exists()))
+                Constants.ALL_ALLOWED_FILE_TYPES
+            else
+                listOf("ogg")
 
     private val TICK_MS = (1.0 / TPS * 1000).milliseconds
     private val minecraft: MinecraftClient = MinecraftClient.getInstance()
 
     private var musicManager: MusicManager? = null
     private lateinit var backgroundScope: CoroutineScope
-    private var packBrowserScreenProducer: ((Screen) -> Screen)? = null
     private var started = false
 
     init {
@@ -164,13 +171,13 @@ object TAMClient {
             .invariantSeparatorsPathString
     }
 
-    @Suppress("UNUSED")
-    fun addPackBrowserSupport(screenProducer: (parent: Screen) -> Screen) {
-        packBrowserScreenProducer = screenProducer
-    }
-
     fun isCompatibilityMode(): Boolean {
         return musicManager?.isCompatibilityMode() ?: false
+    }
+
+    @Suppress("UNUSED")
+    fun addExtensions(externalExtensions: Extensions) {
+        extensions = externalExtensions
     }
 
     private fun start() {
