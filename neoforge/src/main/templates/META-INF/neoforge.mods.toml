@@ -2,6 +2,7 @@ modLoader = "kotlinforforge"
 loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
 issueTrackerURL = "${mod_issues}"
+
 [[mods]]
 modId = "${mod_id}"
 version = "${mod_version}"

@@ -8,7 +8,15 @@
     "GameOptionsScreenMixin",
     "MusicTrackerMixin",
     "SoundEngineMixin",
-    "SoundManagerMixin"
+    "SoundManagerMixin",
+    "event.OnBossDefeatEventMixin",
+    "event.OnDayStartEventMixin",
+    "event.OnDeathEventMixin",
+    "event.OnJoinWorldEventMixin",
+    "event.OnNightStartMixin",
+    "event.OnPauseMixin",
+    "event.OnToastMixin",
+    "event.OnWakeUpEventMixin"
   ],
   "injectors": {
     "defaultRequire": 1
