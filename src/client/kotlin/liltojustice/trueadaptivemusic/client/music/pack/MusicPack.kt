@@ -134,7 +134,7 @@ class MusicPack private constructor(
 
     fun getEditPackSoundLibrary(): SoundLibrary {
         return getEditPackAssetsPath().listDirectoryEntriesRecursive()
-            .filter { file -> file.isDirectory() || file.extension in Constants.ALLOWED_FILE_TYPES }
+            .filter { file -> file.isDirectory() || file.extension in Constants.ALL_ALLOWED_FILE_TYPES }
             .map { file -> makePlayableSound(file) }
             .associateBy { file -> file.getSoundName() }
     }
@@ -298,6 +298,20 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
+        val usedExtensions = getPackAssetNames().map { name -> Path(name).extension }.toSet()
+        if (usedExtensions.any { !TAMClient.allowedFileTypes.contains(it) }) {
+            validation.addWarning(
+                Text.translatableWithFallback(
+                    "trueadaptivemusic.filetype_warning",
+                    "This pack contains music that is not one of the expected types. This music will not " +
+                            "play unless FFmpeg is installed on your system. FFmpeg is included with the True " +
+                            "Adaptive Music extensions mod. Otherwise, you can get an official build from FFmpeg.org " +
+                            "and place both the ffmpeg and ffprobe files into \"" +
+                            "${Constants.FFMPEG_DIR.invariantSeparatorsPathString}\""
+                ).string
+            )
+        }
+
         if (isZip) {
             ZipFile(packPath.toFile()).use { zipFile ->
                 if (zipFile.entries().toList().any { it.name.contains("\\") }) {
@@ -329,6 +343,32 @@ class MusicPack private constructor(
                 }
             }
         }
+    }
+
+    private fun getPackAssetNames(): List<String> {
+        return if (packPath.extension == "zip") {
+            getZipAssetNames()
+        } else {
+            getDirAssetNames()
+        }
+    }
+
+    private fun getZipAssetNames(): List<String> {
+        return ZipFile(packPath.toFile()).use { zipFile ->
+            zipFile
+                .entries()
+                .toList()
+                .filter { entry -> isZipAsset(entry.name) }
+                .map { entry -> Path(entry.name).name }
+        }
+    }
+
+    private fun getDirAssetNames(): List<String> {
+        return Path(packPath.pathString, Constants.ASSETS_DIRNAME)
+            .toFile()
+            .listFiles()
+            ?.map { file -> file.name }
+            ?: emptyList()
     }
 
     private fun getEditPackDir(): Path {
