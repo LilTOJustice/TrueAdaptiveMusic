@@ -160,7 +160,7 @@ class EventViewWidget(
                     { option ->
                         TAMClient.playSoundNow(option?.let { PlayableSound.of(it, soundLibrary) })
                     },
-                    Constants.MUSIC_CHOICE_TOOLTIP_TEXT,
+                    TAMClient.allowedFileTypesText(),
                     customCreator = { text -> Identifier.tryParse(text)?.toString() }
                 )
             },
