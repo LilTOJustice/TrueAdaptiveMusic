@@ -13,19 +13,19 @@ object DebugHudMixinHelper {
     private const val INDENT = 10
 
     @JvmStatic
-    fun render(context: DrawContext) {
-        if (!TAMClient.options.useDebugHud) {
+    fun render(graphics: DrawContext) {
+        val minecraft = MinecraftClient.getInstance()
+        if (!TAMClient.options.useDebugHud || minecraft.currentScreen != null) {
             return
         }
 
         val musicPack = TAMClient.musicPack ?: return
 
-        val client = MinecraftClient.getInstance()
-        if (client.inGameHud.debugHud.shouldShowDebugHud()) {
+        if (minecraft.debugHud.shouldShowDebugHud()) {
             return
         }
 
-        val textRenderer = client.textRenderer
+        val textRenderer = minecraft.textRenderer
         val predicateTreeLines = mutableListOf<Line>()
         val rules = musicPack.rules
         val currentNodePath = TAMClient.currentPredicateResult?.path ?: return
@@ -65,7 +65,7 @@ object DebugHudMixinHelper {
         val playingEvent = TAMClient.getPlayingEvent()
         val eventMusic = TAMClient.getCurrentEventMusic()
         playingEvent?.let {
-            context.drawText(
+            graphics.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
                     "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
@@ -79,7 +79,7 @@ object DebugHudMixinHelper {
 
         val playingMusic = TAMClient.getCurrentMusic()
         playingMusic?.let {
-            context.drawText(
+            graphics.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
                     "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
@@ -92,7 +92,7 @@ object DebugHudMixinHelper {
 
         val playingAmbience = TAMClient.getCurrentAmbience()
         playingAmbience?.let {
-            context.drawText(
+            graphics.drawText(
                 textRenderer,
                 "${Text.translatableWithFallback(
                     "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
@@ -112,14 +112,15 @@ object DebugHudMixinHelper {
             val x: Int = line.indent * INDENT + 1
             val y: Int = getY(row + rowOffset, fontHeight)
 
-            context.drawText(textRenderer, line.text, x, y, line.color, true)
+            graphics.drawText(textRenderer, line.text, x, y, line.color, true)
 
             if (line.selected) {
-                context.drawBorder(
+                graphics.drawBorder(
                     x - 2,
                     y - 2,
                     textRenderer.getWidth(line.text) + 3,
-                    fontHeight + 3, Colors.WHITE
+                    fontHeight + 3,
+                    Colors.WHITE
                 )
             }
         }
