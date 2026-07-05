@@ -22,14 +22,21 @@ class ExportPackScreen(
     private var done = false
     init {
         backgroundScope.launch {
-            TAMClient.musicPack = null
-            val path = musicPack.save(progress)
-            TAMClient.musicPack = MusicPack.fromFile(path)
-            if (destination is MainScreen) {
-                destination.reload()
+            try {
+                TAMClient.musicPack = null
+                val path = musicPack.save(progress)
+                TAMClient.musicPack = MusicPack.fromFile(path)
+                if (destination is MainScreen) {
+                    destination.reload()
+                }
             }
-
-            done = true
+            catch (e: Exception) {
+                TAMClient.errorToast(
+                    Text.literal("Failed to export pack."), e.message)
+            }
+            finally {
+                done = true
+            }
         }
     }
 
