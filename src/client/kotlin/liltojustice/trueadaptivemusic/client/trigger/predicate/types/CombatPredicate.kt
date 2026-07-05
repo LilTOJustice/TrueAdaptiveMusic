@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.PredicateType
@@ -8,6 +9,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.monster.ElderGuardian
 import net.minecraft.world.entity.monster.Guardian
 import net.minecraft.world.entity.monster.Monster
 import net.minecraft.world.entity.monster.Phantom
@@ -34,7 +36,8 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
             Arguments::isBlacklist.name to "Whether the list of mob entities attacking should not (if " +
                     "checked) or should (if not checked) make the music play.",
             Arguments::entities.name to "Select mob entities for this predicate. If none, any entity " +
-                    "will trigger the music."
+                    "will trigger the music.",
+            Arguments::minimumCount.name to "Select how many minimum mobs it takes to trigger the music. 0 counts a 1."
         )
 
     override fun createState(arguments: Arguments): State {
@@ -43,40 +46,58 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
     override fun test(arguments: Arguments, state: State): Boolean {
         val minecraft = Minecraft.getInstance()
-        val playerEntity = minecraft.player ?: return false
-        val level = minecraft.level ?: return false
-        val verticalFov = minecraft.options.fov().get().toDouble() / DEG_PER_RAD
-        val horizontalFov = 2 * atan(tan(verticalFov / 2) * minecraft.window.width / minecraft.window.height)
-        val verticalAngle = acos(playerEntity.rotationVector.y)
-        val horizontalAngle = acos(playerEntity.rotationVector.x)
-
-        val entityGroups = mutableListOf<List<LivingEntity>>()
-
-        entityGroups.add(level.entitiesForRendering().filterIsInstance<Monster>().filter { state.filterEntity(it) })
-        entityGroups.add(level.entitiesForRendering().filterIsInstance<Phantom>().filter { state.filterEntity(it) })
-        entityGroups.add(
-            level.entitiesForRendering().filterIsInstance<Player>()
-                .filter { it != playerEntity && state.filterEntity(it) }
-        )
-
-        for (validEntities in entityGroups) {
-            for (livingEntity: LivingEntity in validEntities) {
-                if (state.processEntity(
-                        livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
-                    return true
-                }
-            }
-        }
-
-        return state.isAggro
+        return state.test(minecraft)
     }
 
-    data class Arguments(val isBlacklist: Boolean, val entities: List<EntityIdentifier>): TriggerArguments()
+    data class Arguments(
+        val isBlacklist: Boolean = false,
+        val entities: List<EntityIdentifier> = emptyList(),
+        val minimumCount: NInt = NInt()
+    ): TriggerArguments()
 
     class State(private val arguments: Arguments): TriggerState() {
         val aggroTimer: Timer = Timer()
         var aggroTimerTask: TimerTask? = null
         var isAggro: Boolean = false
+
+        fun test(minecraft: Minecraft): Boolean {
+            val playerEntity = minecraft.player ?: return false
+            val level = minecraft.level ?: return false
+            val verticalFov = minecraft.options.fov().get().toDouble() / DEG_PER_RAD
+            val horizontalFov = 2 * atan(tan(verticalFov / 2) * minecraft.window.width / minecraft.window.height)
+            val verticalAngle = acos(playerEntity.rotationVector.y)
+            val horizontalAngle = acos(playerEntity.rotationVector.x)
+
+            val entityGroups = mutableListOf<List<LivingEntity>>()
+
+            entityGroups.add(level.entitiesForRendering().filterIsInstance<Monster>().filter { filterEntity(it) })
+            entityGroups.add(level.entitiesForRendering().filterIsInstance<Phantom>().filter { filterEntity(it) })
+            entityGroups.add(
+                level.entitiesForRendering().filterIsInstance<Player>()
+                    .filter { it != playerEntity && filterEntity(it) }
+            )
+
+            var count = 0U
+            for (validEntities in entityGroups) {
+                for (livingEntity: LivingEntity in validEntities) {
+                    if (processEntity(
+                            livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
+                        count++
+                    }
+                }
+            }
+
+            if (count >= arguments.minimumCount.toUInt()) {
+                isAggro = true
+                aggroTimerTask?.cancel()
+                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
+                    isAggro = false
+                    aggroTimerTask = null
+                }
+            }
+
+            return isAggro
+        }
 
         fun processEntity(
             entity: LivingEntity,
@@ -92,19 +113,12 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
             val entityVerticalAngle = acos(relativeEntityPosN.y)
             val entityHorizontalAngle = acos(relativeEntityPosN.x)
 
-            if (!isAggro && (abs(entityVerticalAngle - verticalAngle) > verticalFov / 2
+            if ((abs(entityVerticalAngle - verticalAngle) > verticalFov / 2
                         || abs(entityHorizontalAngle - horizontalAngle) > horizontalFov / 2)) {
                 return false
             }
 
             if (isValidAttacker(entity, playerEntity, relativeEntityPos)) {
-                isAggro = true
-                aggroTimerTask?.cancel()
-                aggroTimerTask = aggroTimer.schedule(1000L * AGGRO_TIMER_SECONDS) {
-                    isAggro = false
-                    aggroTimerTask = null
-                }
-
                 return true
             }
 
@@ -139,7 +153,8 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
         return closeEnough && (
                 (entity as? Mob)?.isAggressive == true ||
-                        (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
+                        (entity as? Guardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true ||
+                        (entity as? ElderGuardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true ||
                         entity is Phantom ||
                         (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
                         entity is Warden
