@@ -33,7 +33,7 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
 
-    accessTransformers.from('src/main/resources/META-INF/accesstransformer.cfg')
+    accessTransformers.from('src/main/templates/META-INF/accesstransformer.cfg')
 
     runs {
         client {
@@ -80,7 +80,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
-    api(files("../TrueAdaptiveMusicAPI-neoforge-1.2.3.jar"))
+    api files("../TrueAdaptiveMusicAPI-neoforge-1.2.3.jar")
     implementation project(":common")
 }
 
@@ -131,4 +131,8 @@ idea {
 
 tasks.jar {
     archiveVersion = "neoforge-${version}"
+}
+
+tasks.named("createMinecraftArtifacts") {
+    dependsOn "generateModMetadata"
 }

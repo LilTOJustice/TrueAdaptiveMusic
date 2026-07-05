@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "liltojustice.trueadaptivemusic.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "DebugHudMixin",
+    "GameOptionsScreenMixin",
+    "MusicTrackerMixin",
+    "SoundEngineMixin",
+    "SoundManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

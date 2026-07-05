@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic
 
+import liltojustice.trueadaptivemusic.common.client.TrueAdaptiveMusicClientInitializer
 import net.neoforged.fml.common.Mod
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -17,6 +18,7 @@ object TrueAdaptiveMusic {
     }
 
     private fun onClientSetup(event: FMLClientSetupEvent) {
+        TrueAdaptiveMusicClientInitializer.onInitializeClient()
     }
 
     private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
