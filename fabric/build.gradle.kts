@@ -47,9 +47,8 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
+    //implementation(project(":common"))
 
     api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
     api("curse.maven:trueadaptivemusicapi-1514598:8333444")

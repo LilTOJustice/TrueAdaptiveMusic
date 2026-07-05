@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "{mod_description}",
+  "authors": ["${mod_authors}"],
+  "contact": {
+    "homepage": "${mod_home}",
+    "issues": "${mod_issues}",
+    "sources": "${mod_source}"
+  },
+  "license": "${mod_license}",
+  "icon": "${mod_icon}",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicClientInitializer"
+    ],
+    "main": [
+      "liltojustice.trueadaptivemusic.TrueAdaptiveMusic"
+    ],
+    "modmenu": [
+      "liltojustice.trueadaptivemusic.client.integration.TrueAdaptiveMusicModMenu"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "trueadaptivemusic.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-language-kotlin": ">=${kotlin_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version_range}",
+    "trueadaptivemusicapi": "~1.2.2"
+  },
+  "suggests": {
+    "trueadaptivemusicextensions": "1.*"
+  },
+  "accessWidener" : "trueadaptivemusic.accesswidener"
+}
