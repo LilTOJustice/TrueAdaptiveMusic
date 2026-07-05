@@ -17,6 +17,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicParameters
 import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
+import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
@@ -340,9 +341,11 @@ class MusicTree {
         )
 
         data class Parameters(
+            var musicWeights: Map<String, NInt> = mapOf(),
             var vanillaMusic: Boolean = false,
             var compatibilityMode: Boolean = false,
             var disableFading: Boolean = false,
+            var disableResuming: Boolean = false,
             var ignorePersistence: Boolean = false,
             var trackDelay: UInt = 0U,
             var trackDelayNoise: UInt = 0U,
@@ -361,6 +364,8 @@ class MusicTree {
 
                 override val descriptions: Map<String, String>
                     get() = super.descriptions + mapOf(
+                        Parameters::musicWeights.name to "Change these values to adjust how likely different tracks " +
+                                "are to play. The higher the value, the more often they will play relative to others.",
                         Parameters::vanillaMusic.name to "If checked, TAM will use vanilla music when this node is " +
                                 "selected.\n\nUse this if you want music to fallback to vanilla in this node, (i.e. " +
                                 "you want mod-specific music to play).\n\nCertain music-related parameters can't be " +
@@ -371,6 +376,8 @@ class MusicTree {
                                 "music with complicated logic that TAM doesn't account for.",
                         Parameters::disableFading.name to "If checked, music that is already playing will " +
                                 "immediately stop rather than fading out when entering this node.",
+                        Parameters::disableResuming.name to "If checked, music will not resume when returning to " +
+                                "this node.",
                         Parameters::ignorePersistence.name to "\"${MusicPackOptions.getArgDisplayName(
                             MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
                                 "ignored when this node is selected. Music for this node will start playing right " +
@@ -400,6 +407,7 @@ class MusicTree {
                                 "intro."
                     )
                 private val json = GsonBuilder()
+                    .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
                     .setPrettyPrinting()
                     .create()
 
