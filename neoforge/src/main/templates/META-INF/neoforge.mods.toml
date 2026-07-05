@@ -11,9 +11,6 @@ logoFile = "${mod_icon}"
 authors = "${mod_authors}"
 description = "${mod_description}"
 
-[[accessTransformers]]
-file="accesstransformer.cfg"
-
 [[dependencies."${mod_id}"]]
 modId = "neoforge"
 type = "required"

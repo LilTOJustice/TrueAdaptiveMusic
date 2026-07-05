@@ -18,6 +18,7 @@ data class TrueAdaptiveMusicOptions(
     val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U)
 ) {
     fun save() {
+        Constants.OPTIONS_PATH.toFile()
         Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
     }
 

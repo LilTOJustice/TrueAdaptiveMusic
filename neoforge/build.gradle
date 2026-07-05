@@ -6,6 +6,17 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.3.20'
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs += "../common/src/main/java"
+        }
+        kotlin {
+            srcDirs += "../common/src/main/kotlin"
+        }
+    }
+}
+
 version = mod_version
 group = mod_group_id
 
@@ -32,8 +43,6 @@ neoForge {
         mappingsVersion = project.parchment_mappings_version
         minecraftVersion = project.parchment_minecraft_version
     }
-
-    accessTransformers.from('src/main/templates/META-INF/accesstransformer.cfg')
 
     runs {
         client {
@@ -81,7 +90,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
     api files("../TrueAdaptiveMusicAPI-neoforge-1.2.3.jar")
-    implementation project(":common")
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
