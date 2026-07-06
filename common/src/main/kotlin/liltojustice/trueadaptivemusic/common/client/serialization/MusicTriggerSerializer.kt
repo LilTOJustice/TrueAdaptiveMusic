@@ -136,6 +136,7 @@ object MusicTriggerSerializer {
     private fun getTriggerArgGsonBuilder(): GsonBuilder {
         return GsonBuilder()
             .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
+            .registerTypeAdapter(Identifier::class.java, IdentifierTypeAdapter)
     }
 
     private fun getGson(soundLibrary: SoundLibrary? = null): Gson {
@@ -146,8 +147,6 @@ object MusicTriggerSerializer {
                 PlayableSound::class.java,
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
             )
-            .registerTypeAdapter(Identifier::class.java, IdentifierTypeAdapter)
-            .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
             .registerTypeHierarchyAdapter(
                 TriggerArguments::class.java, TriggerArgumentsDeserializer)
             .create()
