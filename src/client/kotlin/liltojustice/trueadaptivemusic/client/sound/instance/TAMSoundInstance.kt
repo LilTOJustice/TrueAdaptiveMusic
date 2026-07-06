@@ -9,6 +9,7 @@ import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
 import net.minecraft.client.resources.sounds.Sound
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.client.sounds.AudioStream
+import net.minecraft.client.sounds.JOrbisAudioStream
 import net.minecraft.client.sounds.SoundManager
 import net.minecraft.client.sounds.WeighedSoundEvents
 import net.minecraft.resources.Identifier
@@ -91,6 +92,10 @@ abstract class TAMSoundInstance(
 
         fun getAudioStream(name: String, inputStreamGetter: () -> InputStream, isAmbient: Boolean): AudioStream {
             try {
+                if (!TAMClient.hasFFmpeg) {
+                    return JOrbisAudioStream(inputStreamGetter())
+                }
+
                 val loudnessUnits = if (isAmbient)
                     AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
                 else
