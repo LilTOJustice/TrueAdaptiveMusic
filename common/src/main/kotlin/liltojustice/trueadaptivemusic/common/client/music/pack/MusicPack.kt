@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.common.client.music.pack
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
+import liltojustice.trueadaptivemusic.ModReflectionCommon
 import liltojustice.trueadaptivemusic.common.Constants
 import liltojustice.trueadaptivemusic.common.Logger
 import liltojustice.trueadaptivemusic.common.Reference
@@ -322,12 +323,11 @@ class MusicPack private constructor(
             }
         }
 
-        /*val loader = FabricLoader.getInstance()
         meta.requiredBridgeMods.forEach { mod ->
-            if (!loader.isModLoaded(mod.id)) {
+            if (!ModReflectionCommon.isModLoaded(mod.id)) {
                 validation.addWarning("This pack uses the mod ${mod.name} (${mod.id}) which could not be found.")
             }
-        }*/
+        }
 
         rules.traverse { node, _ ->
             node.predicates.forEach { predicate ->

@@ -1,42 +1,45 @@
-package liltojustice.trueadaptivemusic.common.client
+package liltojustice.trueadaptivemusic.common.client.network
 
-import liltojustice.trueadaptivemusic.common.Constants.Companion.NULL_IDENTIFIER
+import liltojustice.trueadaptivemusic.common.Constants
 import liltojustice.trueadaptivemusic.common.network.model.CurrentStructurePayload
 import liltojustice.trueadaptivemusic.common.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.common.network.model.CustomPredicateResponsePayload
 import liltojustice.trueadaptivemusic.common.network.model.ScoreboardStatePayload
 import liltojustice.trueadaptivemusic.common.network.model.SpawnPointPayload
+import liltojustice.trueadaptivemusic.network.NetworkingCommon
 import net.minecraft.resources.Identifier
 import net.minecraft.world.level.storage.LevelData
 
-object TAMNetworkingClient {
-    var structureId: Identifier = NULL_IDENTIFIER
-    var structureSetId: Identifier = NULL_IDENTIFIER
-    var structurePieceId: Identifier = NULL_IDENTIFIER
+object TAMClientNetworking {
+    var structureId: Identifier = Constants.NULL_IDENTIFIER
+    var structureSetId: Identifier = Constants.NULL_IDENTIFIER
+    var structurePieceId: Identifier = Constants.NULL_IDENTIFIER
     var spawnPoint: LevelData.RespawnData? = null
     val customPredicateResults = mutableMapOf<String, Boolean>()
     val scoreboardState = mutableMapOf<String, Int>()
 
     fun init() {
-        /*
-        ClientPlayNetworking.registerGlobalReceiver(CurrentStructurePayload.TYPE) { payload, _ ->
+        NetworkingCommon.registerClientboundPacket(
+            CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC) { payload, _ ->
             structureId = payload.structureIdentifier
             structureSetId = payload.structureSetIdentifier
             structurePieceId = payload.structurePieceIdentifier
         }
-        ClientPlayNetworking.registerGlobalReceiver(SpawnPointPayload.TYPE) { payload, _ ->
+        NetworkingCommon.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC) { payload, _ ->
             spawnPoint = payload.spawnPoint
         }
-        ClientPlayNetworking.registerGlobalReceiver(CustomPredicateResponsePayload.TYPE) { payload, _ ->
+        NetworkingCommon.registerClientboundPacket(
+            CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC) { payload, _ ->
             customPredicateResults[payload.predicateId] = payload.predicateResponse
         }
-        ClientPlayNetworking.registerGlobalReceiver(ScoreboardStatePayload.TYPE) { payload, _ ->
+        NetworkingCommon.registerClientboundPacket(
+            ScoreboardStatePayload.TYPE, ScoreboardStatePayload.CODEC) { payload, _ ->
             scoreboardState[payload.objectiveName] = payload.value
-        }*/
+        }
     }
 
     fun queryCustomPredicate(predicateId: String, predicateString: String): Boolean {
-        //ClientPlayNetworking.send(CustomPredicateQueryPayload(predicateId, predicateString))
+        NetworkingCommon.sendToServer(CustomPredicateQueryPayload(predicateId, predicateString))
 
         return customPredicateResults[predicateId] ?: false
     }

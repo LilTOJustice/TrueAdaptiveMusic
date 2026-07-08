@@ -82,7 +82,6 @@ object TrueAdaptiveMusicClientInitializer {
         initDirectories()
         registerTriggerTypes()
         registerInputWidgets()
-        TAMNetworkingClient.init()
     }
 
     private fun initDirectories() {

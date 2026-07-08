@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.common.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.common.client.TAMNetworkingClient
+import liltojustice.trueadaptivemusic.common.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
@@ -19,7 +19,7 @@ object ScoreboardPredicate: StaticPredicateType<ScoreboardPredicate.Arguments>(
     data class Arguments(val objectiveId: String, val value: Int, val comparison: Comparison): TriggerArguments()
 
     override fun test(arguments: Arguments): Boolean {
-        TAMNetworkingClient.scoreboardState[arguments.objectiveId]?.let {
+        TAMClientNetworking.scoreboardState[arguments.objectiveId]?.let {
             return compare(arguments.comparison, it, arguments.value)
         }
 

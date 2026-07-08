@@ -11,7 +11,7 @@ object Logger {
             oneTimeLogs.add(message)
         }
 
-        val logger = TrueAdaptiveMusic.LOGGER
+        val logger = TrueAdaptiveMusicMainInitializer.LOGGER
         when(logLevel) {
             LogLevel.INFO -> logger.info(message)
             LogLevel.WARNING -> logger.warn(message)

@@ -2,7 +2,7 @@ package liltojustice.trueadaptivemusic.common.client.trigger.predicate.types
 
 import liltojustice.trueadaptivemusic.common.Constants
 import liltojustice.trueadaptivemusic.common.client.TAMClient
-import liltojustice.trueadaptivemusic.common.client.TAMNetworkingClient
+import liltojustice.trueadaptivemusic.common.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
 import net.minecraft.client.Minecraft
@@ -35,7 +35,7 @@ object CustomPredicate: StaticPredicateType<CustomPredicate.Arguments>(
         return Path(packPath, Constants.PREDICATES_DIRNAME, arguments.predicateFile.fileName)
             .takeIf { it.exists() }
             ?.let {
-                TAMNetworkingClient.queryCustomPredicate(
+                TAMClientNetworking.queryCustomPredicate(
                     it.nameWithoutExtension, it.readText())
             } ?: false
     }

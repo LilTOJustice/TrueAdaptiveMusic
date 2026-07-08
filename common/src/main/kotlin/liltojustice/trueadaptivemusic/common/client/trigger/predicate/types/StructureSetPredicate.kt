@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.common.client.trigger.predicate.types
 
-import liltojustice.trueadaptivemusic.common.client.TAMNetworkingClient
+import liltojustice.trueadaptivemusic.common.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusicapi.identifier.StructureSetIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
 import liltojustice.trueadaptivemusicapi.trigger.predicate.type.StaticPredicateType
@@ -24,6 +24,6 @@ object StructureSetPredicate: StaticPredicateType<StructureSetPredicate.Argument
     override fun test(arguments: Arguments): Boolean {
         return Minecraft.getInstance().player != null &&
                 (arguments.structureSets.isEmpty() ||
-                        arguments.structureSets.any { it.id == TAMNetworkingClient.structureSetId })
+                        arguments.structureSets.any { it.id == TAMClientNetworking.structureSetId })
     }
 }

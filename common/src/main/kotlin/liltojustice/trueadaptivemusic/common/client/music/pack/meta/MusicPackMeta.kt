@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.common.client.music.pack.meta
 
 import com.google.gson.GsonBuilder
+import liltojustice.trueadaptivemusic.ModReflectionCommon
 import liltojustice.trueadaptivemusic.common.client.music.tree.MusicTree
 
 data class MusicPackMeta(val requiredBridgeMods: List<ModDependency> = emptyList()) {
@@ -22,7 +23,6 @@ data class MusicPackMeta(val requiredBridgeMods: List<ModDependency> = emptyList
         }
 
         private fun getRequiredBridgeMods(rules: MusicTree): List<ModDependency> {
-            val requiredBridgeMods = mutableListOf<ModDependency>()
             val packageNames = mutableSetOf<String>()
             rules.traverse { node, _ ->
                 node.predicates.forEach { predicate ->
@@ -30,13 +30,7 @@ data class MusicPackMeta(val requiredBridgeMods: List<ModDependency> = emptyList
                 }
             }
 
-            /*FabricLoader.getInstance().allMods.map { it.metadata }.forEach { metadata ->
-                if (packageNames.any { packageName -> packageName.contains(metadata.id) }) {
-                    requiredBridgeMods.add(ModDependency(metadata.id, metadata.name))
-                }
-            }*/
-
-            return requiredBridgeMods.toList()
+            return ModReflectionCommon.getModDependencies(packageNames.toList())
         }
     }
 }

@@ -7,12 +7,18 @@ plugins {
     kotlin("jvm") version "2.3.20"
     id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     id("maven-publish")
-    //id("net.minecraftforge.gradle") version "7.0.17"
-    //id("org.spongepowered.mixin") version "0.7.38"
 }
 
 version = "${project.property("mod_version") as String}+${project.property("minecraft_version")}"
 group = project.property("mod_group_id") as String
+
+sourceSets {
+    named("main") {
+        kotlin {
+            srcDir("../neoforge/src/main/kotlin/liltojustice/trueadaptivemusic")
+        }
+    }
+}
 
 base {
     archivesName.set(project.property("archives_base_name") as String)
