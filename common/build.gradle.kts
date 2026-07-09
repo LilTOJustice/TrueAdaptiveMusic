@@ -12,13 +12,14 @@ plugins {
 version = "${project.property("mod_version") as String}+${project.property("minecraft_version")}"
 group = project.property("mod_group_id") as String
 
+/*
 sourceSets {
     named("main") {
         kotlin {
             srcDir("../neoforge/src/main/kotlin/liltojustice/trueadaptivemusic")
         }
     }
-}
+}*/
 
 base {
     archivesName.set(project.property("archives_base_name") as String)
@@ -28,11 +29,6 @@ val targetJavaVersion = 25
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
-
-loom {
-    accessWidenerPath = file("src/main/resources/trueadaptivemusic.accesswidener")
-}
-
 
 repositories {
     maven {
@@ -47,16 +43,7 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    //implementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")
-    //implementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    //implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
-
-    //api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    //api("curse.maven:trueadaptivemusicapi-1514598:8333444")
     api(files("../TrueAdaptiveMusicAPI-neoforge-1.2.3.jar"))
-    //annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 }
 
 tasks.processResources {

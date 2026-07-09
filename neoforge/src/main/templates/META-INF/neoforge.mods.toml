@@ -26,5 +26,12 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies."${mod_id}"]]
+modId = "trueadaptivemusicapi"
+type = "required"
+versionRange = "${tam_api_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
 [[mixins]]
 config="META-INF/trueadaptivemusic.mixins.json"
