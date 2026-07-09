@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import com.mojang.datafixers.util.Unit;
-import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
+import liltojustice.trueadaptivemusic.common.client.TrueAdaptiveMusicOptionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
