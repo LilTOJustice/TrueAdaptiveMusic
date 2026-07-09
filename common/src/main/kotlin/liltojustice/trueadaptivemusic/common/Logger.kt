@@ -1,6 +1,10 @@
 package liltojustice.trueadaptivemusic.common
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 object Logger {
+    private val LOGGER: Logger = LoggerFactory.getLogger(TAMMainInitializer::class.java)
     private val oneTimeLogs = mutableSetOf<String>()
     private fun log(message: String, logLevel: LogLevel = LogLevel.INFO, oneTime: Boolean = false) {
         if (oneTimeLogs.contains(message)) {
@@ -11,11 +15,10 @@ object Logger {
             oneTimeLogs.add(message)
         }
 
-        val logger = TrueAdaptiveMusicMainInitializer.LOGGER
         when(logLevel) {
-            LogLevel.INFO -> logger.info(message)
-            LogLevel.WARNING -> logger.warn(message)
-            LogLevel.ERROR -> logger.error(message)
+            LogLevel.INFO -> LOGGER.info(message)
+            LogLevel.WARNING -> LOGGER.warn(message)
+            LogLevel.ERROR -> LOGGER.error(message)
         }
     }
 

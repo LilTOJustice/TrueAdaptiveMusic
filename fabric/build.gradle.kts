@@ -108,3 +108,28 @@ publishing {
     repositories {
     }
 }
+
+sourceSets {
+    named("main") {
+        java {
+            srcDirs("../common/src/main/java")
+        }
+        kotlin {
+            srcDirs("../common/src/main/kotlin")
+        }
+        resources {
+            srcDirs("../common/src/main/resources")
+        }
+    }
+    named("client") {
+        java {
+            srcDirs("../common/src/client/java")
+        }
+        kotlin {
+            srcDirs("../common/src/client/kotlin")
+        }
+        resources {
+            srcDirs("../common/src/client/resources")
+        }
+    }
+}

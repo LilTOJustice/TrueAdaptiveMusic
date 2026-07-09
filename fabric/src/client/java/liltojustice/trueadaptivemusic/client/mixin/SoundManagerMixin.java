@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.client.TAMClient;
-import liltojustice.trueadaptivemusic.client.javasucks.SoundManagerMixinHelper;
+import liltojustice.trueadaptivemusic.common.client.TAMClient;
+import liltojustice.trueadaptivemusic.common.client.javasucks.SoundManagerMixinHelper;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundManager;

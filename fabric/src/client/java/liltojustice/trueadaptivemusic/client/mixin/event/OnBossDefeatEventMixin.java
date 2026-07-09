@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.javasucks.OnBossDefeatEventMixinHelper;
+import liltojustice.trueadaptivemusic.common.client.javasucks.OnBossDefeatEventMixinHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;

@@ -12,15 +12,6 @@ plugins {
 version = "${project.property("mod_version") as String}+${project.property("minecraft_version")}"
 group = project.property("mod_group_id") as String
 
-/*
-sourceSets {
-    named("main") {
-        kotlin {
-            srcDir("../neoforge/src/main/kotlin/liltojustice/trueadaptivemusic")
-        }
-    }
-}*/
-
 base {
     archivesName.set(project.property("archives_base_name") as String)
 }

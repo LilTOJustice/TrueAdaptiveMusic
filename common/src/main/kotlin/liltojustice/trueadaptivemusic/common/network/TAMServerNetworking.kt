@@ -4,7 +4,6 @@ import com.mojang.serialization.Dynamic
 import com.mojang.serialization.JsonOps
 import liltojustice.trueadaptivemusic.common.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.common.network.model.CustomPredicateResponsePayload
-import liltojustice.trueadaptivemusic.network.NetworkingCommon
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.StrictJsonParser
@@ -18,15 +17,15 @@ import kotlin.jvm.optionals.getOrNull
 
 object TAMServerNetworking {
     private val endTickEvents = mutableListOf<(MinecraftServer) -> Unit>()
-    fun init() {
-        NetworkingCommon.registerServerboundPacket(CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
+    fun init(serverNetworkInterface: ServerNetworkInterface) {
+        serverNetworkInterface.registerServerboundPacket(CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
             val player = context.player as ServerPlayer
             val json = StrictJsonParser.parse(payload.predicateText)
             val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
                 .result()
                 .getOrNull()
                 ?.value() ?: return@registerServerboundPacket
-            NetworkingCommon.sendToClient(
+            serverNetworkInterface.sendToClient(
                 player,
                 CustomPredicateResponsePayload(
                     payload.predicateId,
@@ -44,7 +43,7 @@ object TAMServerNetworking {
             )
         }
 
-        endTickEvents.add { server -> ServerStateProcessor.processServer(server) }
+        endTickEvents.add { server -> ServerStateProcessor.processServer(server, serverNetworkInterface) }
     }
 
     @Suppress("UNUSED")

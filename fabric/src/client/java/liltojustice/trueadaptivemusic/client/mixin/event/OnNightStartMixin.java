@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.client.trigger.event.types.OnNightStartEvent;
+import liltojustice.trueadaptivemusic.common.client.trigger.event.types.OnNightStartEvent;
 import liltojustice.trueadaptivemusicapi.TAMAPI;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;

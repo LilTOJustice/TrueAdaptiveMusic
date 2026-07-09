@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import com.mojang.datafixers.util.Unit;
-import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
@@ -9,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import liltojustice.trueadaptivemusic.common.client.TrueAdaptiveMusicOptionCallback;
 
 @Mixin(SoundOptionsScreen.class)
 public class GameOptionsScreenMixin {
