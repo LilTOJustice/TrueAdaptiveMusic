@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.common.client.trigger.event.types.OnWakeUpEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnWakeUpEvent;
 import liltojustice.trueadaptivemusicapi.TAMAPI;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import org.spongepowered.asm.mixin.Mixin;

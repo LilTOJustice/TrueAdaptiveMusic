@@ -1,8 +1,7 @@
 package liltojustice.trueadaptivemusic.network
 
 import io.netty.buffer.ByteBuf
-import liltojustice.trueadaptivemusic.common.network.ServerNetworkInterface
-import liltojustice.trueadaptivemusic.common.network.model.Context
+import liltojustice.trueadaptivemusic.network.model.Context
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.network.codec.StreamCodec

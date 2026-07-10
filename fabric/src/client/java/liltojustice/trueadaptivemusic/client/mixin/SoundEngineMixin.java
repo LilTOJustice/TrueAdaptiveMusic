@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.common.client.TAMClient;
+import liltojustice.trueadaptivemusic.client.TAMClient;
 import net.minecraft.client.sounds.SoundEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

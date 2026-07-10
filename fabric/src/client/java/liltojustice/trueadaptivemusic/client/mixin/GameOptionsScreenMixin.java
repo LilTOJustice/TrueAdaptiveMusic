@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import liltojustice.trueadaptivemusic.common.client.TrueAdaptiveMusicOptionCallback;
+import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
 
 @Mixin(SoundOptionsScreen.class)
 public class GameOptionsScreenMixin {

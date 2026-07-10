@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic;
 
 import liltojustice.trueadaptivemusic.client.network.NeoforgeClientNetworkingInterface;
-import liltojustice.trueadaptivemusic.common.network.TAMServerNetworking;
+import liltojustice.trueadaptivemusic.network.TAMServerNetworking;
 import liltojustice.trueadaptivemusic.network.NeoforgeServerNetworkingInterface;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import liltojustice.trueadaptivemusic.common.client.javasucks.DebugHudMixinHelper;
+import liltojustice.trueadaptivemusic.client.javasucks.DebugHudMixinHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

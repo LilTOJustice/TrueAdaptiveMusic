@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic
 
-import liltojustice.trueadaptivemusic.common.TAMMainInitializer
 import liltojustice.trueadaptivemusic.network.FabricServerNetworkInterface
 import net.fabricmc.api.ModInitializer
 

@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.common.network.model.ScoreboardStatePayload;
+import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.Objective;

@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
-import liltojustice.trueadaptivemusic.common.client.TAMClient;
-import liltojustice.trueadaptivemusic.common.client.javasucks.MusicTrackerMixinHelper;
+import liltojustice.trueadaptivemusic.client.TAMClient;
+import liltojustice.trueadaptivemusic.client.javasucks.MusicTrackerMixinHelper;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.sounds.Music;
 import org.spongepowered.asm.mixin.Mixin;

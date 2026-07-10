@@ -1,7 +1,6 @@
 package liltojustice.trueadaptivemusic.client
 
-import liltojustice.trueadaptivemusic.common.client.ClientModReflectionInterface
-import liltojustice.trueadaptivemusic.common.client.music.pack.meta.ModDependency
+import liltojustice.trueadaptivemusic.client.music.pack.meta.ModDependency
 import net.fabricmc.loader.api.FabricLoader
 
 object FabricClientModReflectionInterface: ClientModReflectionInterface {

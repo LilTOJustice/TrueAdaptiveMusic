@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin.event;
 
-import liltojustice.trueadaptivemusic.common.client.trigger.event.types.OnJoinWorldEvent;
+import liltojustice.trueadaptivemusic.client.trigger.event.types.OnJoinWorldEvent;
 import liltojustice.trueadaptivemusicapi.TAMAPI;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
