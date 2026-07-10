@@ -81,7 +81,7 @@ jobs:
           curseforge-id: "${{env.CURSEFORGE_ID}}"
           curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
 
-          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
+          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft Fabric ${{env.MINECRAFT_VERSION}}"
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: "${{env.VERSION_TYPE}}"
           changelog-file: "${{env.CHANGELOG_FILE}}"
@@ -103,7 +103,7 @@ jobs:
           curseforge-id: "${{env.CURSEFORGE_ID}}"
           curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
 
-          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft ${{env.MINECRAFT_VERSION}}"
+          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft Neoforge ${{env.MINECRAFT_VERSION}}"
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
           version-type: "${{env.VERSION_TYPE}}"
           changelog-file: "${{env.CHANGELOG_FILE}}"
