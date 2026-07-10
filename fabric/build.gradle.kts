@@ -43,7 +43,6 @@ repositories {
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
@@ -75,7 +74,8 @@ tasks.processResources {
             "minecraft_version" to project.property("minecraft_version")!!,
             "minecraft_version_range" to project.property("minecraft_version_range")!!,
             "loader_version" to project.property("fabric_loader_version")!!,
-            "kotlin_loader_version" to project.property("fabric_kotlin_version")!!
+            "kotlin_loader_version" to project.property("fabric_kotlin_version")!!,
+            "tam_api_version_range" to project.property("tam_api_version_range")!!
         )
     }
 }

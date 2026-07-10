@@ -35,7 +35,7 @@
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version_range}",
-    "trueadaptivemusicapi": "~1.2.2"
+    "trueadaptivemusicapi": "${tam_api_version_range}"
   },
   "suggests": {
     "trueadaptivemusicextensions": "1.*"
