@@ -11,4 +11,4 @@ pluginManagement {
     }
 }
 
-include("common", "fabric", "neoforge")
+include("fabric", "neoforge")
