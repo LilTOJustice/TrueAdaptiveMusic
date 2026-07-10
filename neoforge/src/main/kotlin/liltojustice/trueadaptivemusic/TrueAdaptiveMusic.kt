@@ -1,7 +1,10 @@
 package liltojustice.trueadaptivemusic
 
-import liltojustice.trueadaptivemusic.common.TrueAdaptiveMusicMainInitializer
-import liltojustice.trueadaptivemusic.common.client.TrueAdaptiveMusicClientInitializer
+import liltojustice.trueadaptivemusic.client.NeoforgeModReflectionInterface
+import liltojustice.trueadaptivemusic.client.network.NeoforgeClientNetworkingInterface
+import liltojustice.trueadaptivemusic.common.TAMMainInitializer
+import liltojustice.trueadaptivemusic.common.client.TAMClientInitializer
+import liltojustice.trueadaptivemusic.network.NeoforgeServerNetworkingInterface
 import net.neoforged.fml.common.Mod
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -21,12 +24,13 @@ object TrueAdaptiveMusic {
         )
     }
 
-    private fun onClientSetup(event: FMLClientSetupEvent) {
-        TrueAdaptiveMusicMainInitializer.onInitialize()
-        TrueAdaptiveMusicClientInitializer.onInitializeClient()
+    private fun onClientSetup(@Suppress("UNUSED") event: FMLClientSetupEvent) {
+        TAMMainInitializer.onInitialize(NeoforgeServerNetworkingInterface)
+        TAMClientInitializer.onInitializeClient(
+            NeoforgeClientNetworkingInterface, NeoforgeModReflectionInterface)
     }
 
-    private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
-        TrueAdaptiveMusicMainInitializer.onInitialize()
+    private fun onServerSetup(@Suppress("UNUSED") event: FMLDedicatedServerSetupEvent) {
+        TAMMainInitializer.onInitialize(NeoforgeServerNetworkingInterface)
     }
 }

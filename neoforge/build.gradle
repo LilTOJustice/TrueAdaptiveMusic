@@ -10,12 +10,15 @@ sourceSets {
     main {
         java {
             srcDirs += "../common/src/main/java"
+            srcDirs += "../common/src/client/java"
         }
         kotlin {
             srcDirs += "../common/src/main/kotlin"
+            srcDirs += "../common/src/client/kotlin"
         }
         resources {
             srcDirs += "../common/src/main/resources"
+            srcDirs += "../common/src/client/resources"
         }
     }
 }
