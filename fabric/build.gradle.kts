@@ -35,6 +35,9 @@ loom {
 
 repositories {
     maven("https://maven.terraformersmc.com/releases/")
+    maven("https://maven.fabricmc.net/") {
+        name = "Fabric"
+    }
 }
 
 dependencies {
@@ -87,18 +90,6 @@ tasks.withType<KotlinCompile>().configureEach {
 tasks.jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName}" }
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = project.property("archives_base_name") as String
-            from(components["java"])
-        }
-    }
-
-    repositories {
     }
 }
 
