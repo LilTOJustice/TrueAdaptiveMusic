@@ -1,7 +1,6 @@
 import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URI
 
 plugins {
     kotlin("jvm") version "2.3.20"
@@ -35,10 +34,6 @@ loom {
 }
 
 repositories {
-    maven {
-        url = URI("https://cursemaven.com")
-    }
-
     maven("https://maven.terraformersmc.com/releases/")
 }
 
@@ -49,8 +44,7 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    //api("curse.maven:trueadaptivemusicapi-1514598:8333444")
-    api(files("../TrueAdaptiveMusicAPI-fabric-1.3.0+26.1.jar"))
+    api("curse.maven:trueadaptivemusicapi-1514598:8410953")
 }
 
 tasks.processResources {
