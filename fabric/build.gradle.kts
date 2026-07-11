@@ -75,7 +75,8 @@ tasks.processResources {
             "minecraft_version_range" to project.property("minecraft_version_range")!!,
             "loader_version" to project.property("fabric_loader_version")!!,
             "kotlin_loader_version" to project.property("fabric_kotlin_version")!!,
-            "tam_api_version_range" to project.property("tam_api_version_range")!!
+            "tam_api_version_range" to project.property("tam_api_version_range")!!,
+            "tam_extensions_version_range" to project.property("tam_extensions_version_range")!!
         )
     }
 }
