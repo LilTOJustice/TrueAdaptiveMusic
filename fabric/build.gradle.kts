@@ -35,8 +35,8 @@ loom {
 
 repositories {
     maven("https://maven.terraformersmc.com/releases/")
-    maven("https://maven.fabricmc.net/") {
-        name = "Fabric"
+    maven("https://cursemaven.com") {
+        name = "CurseMaven"
     }
 }
 
