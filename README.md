@@ -1,7 +1,7 @@
 # True Adaptive Music
 
 
-![True adaptive music logo](src/main/resources/assets/trueadaptivemusic/icon.png)
+![True adaptive music logo](fabric/src/main/resources/assets/trueadaptivemusic/icon.png)
 
 True Adaptive Music is a fabric mod that enables adding custom adaptive music by creating Music Packs, and supports injection into numerous in-game events.
 
