@@ -6,11 +6,7 @@ import liltojustice.trueadaptivemusic.client.sound.FFmpeg
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.stream.FFmpegAudioStream
 import liltojustice.trueadaptivemusic.client.sound.stream.TruncatedAudioStream
-import net.minecraft.client.sound.AudioStream
-import net.minecraft.client.sound.Sound
-import net.minecraft.client.sound.SoundInstance
-import net.minecraft.client.sound.SoundManager
-import net.minecraft.client.sound.WeightedSoundSet
+import net.minecraft.client.sound.*
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import java.io.InputStream
@@ -42,7 +38,8 @@ abstract class TAMSoundInstance(
             Sound.RegistrationType.FILE,
             true,
             false,
-            0)
+            0
+        )
     }
 
     override fun getCategory(): SoundCategory? {
@@ -91,6 +88,10 @@ abstract class TAMSoundInstance(
 
         fun getAudioStream(name: String, inputStreamGetter: () -> InputStream, isAmbient: Boolean): AudioStream {
             try {
+                if (!TAMClient.hasFFmpeg) {
+                    return OggAudioStream(inputStreamGetter())
+                }
+
                 val loudnessUnits = if (isAmbient)
                     AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
                 else
