@@ -36,7 +36,7 @@ repositories {
 }
 
 base {
-    archivesName = archives_base_name
+    archivesName = archives_base_name + "-neoforge"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -44,11 +44,6 @@ kotlin.jvmToolchain(25)
 
 neoForge {
     version = project.neoforge_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     runs {
         client {
@@ -143,10 +138,6 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
-}
-
-tasks.jar {
-    archiveVersion = "neoforge-${version}"
 }
 
 tasks.named("createMinecraftArtifacts") {

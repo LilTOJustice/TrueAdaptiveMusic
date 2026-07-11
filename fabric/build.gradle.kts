@@ -13,7 +13,7 @@ version = "${project.property("mod_version") as String}+${project.property("mine
 group = project.property("mod_group_id") as String
 
 base {
-    archivesName.set(project.property("archives_base_name") as String)
+    archivesName.set(project.property("archives_base_name") as String + "-fabric")
 }
 
 val targetJavaVersion = 25
@@ -94,8 +94,6 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName}" }
     }
-
-    archiveVersion = "fabric-${version}"
 }
 
 publishing {
