@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
+import liltojustice.trueadaptivemusic.network.TAMServerNetworking;
 import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
@@ -21,6 +21,7 @@ public class ServerScoreboardMixin {
             return;
         }
 
-        ServerPlayNetworking.send(player, new ScoreboardStatePayload(objective.getName(), score.value()));
+        TAMServerNetworking.INSTANCE.sendToClient(
+                player, new ScoreboardStatePayload(objective.getName(), score.value()));
     }
 }

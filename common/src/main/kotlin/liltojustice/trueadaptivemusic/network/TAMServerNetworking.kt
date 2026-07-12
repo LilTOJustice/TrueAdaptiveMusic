@@ -4,6 +4,7 @@ import com.mojang.serialization.Dynamic
 import com.mojang.serialization.JsonOps
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.StrictJsonParser
@@ -17,7 +18,9 @@ import kotlin.jvm.optionals.getOrNull
 
 object TAMServerNetworking {
     private val endTickEvents = mutableListOf<(MinecraftServer) -> Unit>()
+    private var networkInterface: ServerNetworkInterface? = null
     fun init(serverNetworkInterface: ServerNetworkInterface) {
+        networkInterface = serverNetworkInterface
         serverNetworkInterface.registerServerboundPacket(CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
             val player = context.player as ServerPlayer
             val json = StrictJsonParser.parse(payload.predicateText)
@@ -44,6 +47,11 @@ object TAMServerNetworking {
         }
 
         endTickEvents.add { server -> ServerStateProcessor.processServer(server, serverNetworkInterface) }
+    }
+
+    fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
+        networkInterface?.sendToClient(player, payload)
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
     }
 
     @Suppress("UNUSED")
