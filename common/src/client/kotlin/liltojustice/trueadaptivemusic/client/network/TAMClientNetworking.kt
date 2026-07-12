@@ -13,12 +13,17 @@ import net.minecraft.world.level.storage.LevelData
 
 object TAMClientNetworking {
     var structureId: Identifier = Constants.NULL_IDENTIFIER
+        private set
     var structureSetId: Identifier = Constants.NULL_IDENTIFIER
+        private set
     var structurePieceId: Identifier = Constants.NULL_IDENTIFIER
+        private set
     var spawnPoint: LevelData.RespawnData? = null
+        private set
     val customPredicateResults = mutableMapOf<String, Boolean>()
     val scoreboardState = mutableMapOf<String, Int>()
-    var networkInterface: ClientNetworkInterface? = null
+
+    private var networkInterface: ClientNetworkInterface? = null
 
     fun init(clientNetworkInterface: ClientNetworkInterface) {
         networkInterface = clientNetworkInterface
