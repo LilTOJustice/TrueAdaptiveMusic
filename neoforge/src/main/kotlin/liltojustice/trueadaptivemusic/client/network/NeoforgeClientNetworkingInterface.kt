@@ -7,14 +7,22 @@ import liltojustice.trueadaptivemusic.network.transformHandler
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.neoforged.neoforge.client.network.ClientPacketDistributor
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
+import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
 object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
     private const val REGISTRAR_VERSION = "1"
-    private var payloadHandlersEvent: RegisterPayloadHandlersEvent? = null
+    private val registrations = mutableListOf<(RegisterClientPayloadHandlersEvent) -> Unit>()
+    private val commonRegistrations = mutableListOf<(PayloadRegistrar) -> Unit>()
 
-    fun registerPayloadHandlers(event: RegisterPayloadHandlersEvent) {
-        payloadHandlersEvent = event
+    fun registerCommonPayloadHandlers(event: RegisterPayloadHandlersEvent) {
+        val registrar = event.registrar(REGISTRAR_VERSION)
+        commonRegistrations.forEach { it(registrar) }
+    }
+
+    fun registerPayloadHandlers(event: RegisterClientPayloadHandlersEvent) {
+        registrations.forEach { it(event) }
     }
 
     override fun <T: CustomPacketPayload> registerClientboundPacket(
@@ -22,8 +30,12 @@ object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
         codec: StreamCodec<ByteBuf, T>,
         handler: (payload: T, context: Context) -> Unit
     ) {
-        val registrar = payloadHandlersEvent?.registrar(REGISTRAR_VERSION) ?: return
-        registrar.playToClient(type, codec, transformHandler(handler))
+        registrations.add { event ->
+            event.register(type, transformHandler(handler))
+        }
+        commonRegistrations.add { registrar ->
+            registrar.playToClient(type, codec)
+        }
     }
 
     override fun sendToServer(payload: CustomPacketPayload) {
