@@ -1,0 +1,26 @@
+accessWidener v2 named
+accessible field net/minecraft/client/sounds/SoundManager soundEngine Lnet/minecraft/client/sounds/SoundEngine;
+accessible field net/minecraft/client/sounds/SoundEngine instanceToChannel Ljava/util/Map;
+accessible field net/minecraft/client/gui/components/BossHealthOverlay events Ljava/util/Map;
+accessible field net/minecraft/client/gui/screens/Screen minecraft Lnet/minecraft/client/Minecraft;
+accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible field net/minecraft/client/OptionInstance values Lnet/minecraft/client/OptionInstance$ValueSet;
+accessible class net/minecraft/client/OptionInstance$ValueSet
+accessible method net/minecraft/client/gui/components/Checkbox <init> (IIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/Font;ZLnet/minecraft/client/gui/components/Checkbox$OnValueChange;)V
+extendable class net/minecraft/resources/ResourceLocation
+accessible method net/minecraft/resources/ResourceLocation <init> (Ljava/lang/String;Ljava/lang/String;)V
+accessible field net/minecraft/client/gui/screens/options/OptionsSubScreen list Lnet/minecraft/client/gui/components/OptionsList;
+extendable method net/minecraft/client/gui/components/AbstractButton renderWidget (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+accessible method com/mojang/blaze3d/audio/Channel getState ()I
+accessible field net/minecraft/client/sounds/MusicManager currentMusic Lnet/minecraft/client/resources/sounds/SoundInstance;
+accessible field net/minecraft/client/sounds/SoundEngine library Lcom/mojang/blaze3d/audio/Library;
+accessible field net/minecraft/client/sounds/SoundEngine soundBuffers Lnet/minecraft/client/sounds/SoundBufferLibrary;
+accessible field net/minecraft/client/sounds/SoundBufferLibrary resourceManager Lnet/minecraft/server/packs/resources/ResourceProvider;
+accessible field net/minecraft/client/sounds/SoundEngine loaded Z
+accessible method com/mojang/blaze3d/audio/Channel create ()Lcom/mojang/blaze3d/audio/Channel;
+accessible field com/mojang/blaze3d/audio/Channel source I
+accessible method com/mojang/blaze3d/audio/OpenAlUtil checkALError (Ljava/lang/String;)Z
+accessible method com/mojang/blaze3d/audio/SoundBuffer getAlBuffer ()Ljava/util/OptionalInt;
+accessible field net/minecraft/server/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
+extendable method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+accessible method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
