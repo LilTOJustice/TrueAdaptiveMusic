@@ -3,7 +3,7 @@
   "id": "${mod_id}",
   "version": "${mod_version}",
   "name": "${mod_name}",
-  "description": "{mod_description}",
+  "description": "${mod_description}",
   "authors": ["${mod_authors}"],
   "contact": {
     "homepage": "${mod_home}",
