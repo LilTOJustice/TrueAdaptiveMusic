@@ -1,0 +1,42 @@
+modLoader = "kotlinforforge"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "${mod_issues}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+displayURL = "${mod_home}"
+logoFile = "${mod_icon}"
+authors = "${mod_authors}"
+description = "${mod_description}"
+
+[[dependencies."${mod_id}"]]
+modId = "forge"
+mandatory = true
+versionRange = "${forge_version_range}"
+ordering = "NONE"
+
+[[dependencies."${mod_id}"]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+
+[[dependencies."${mod_id}"]]
+modId = "trueadaptivemusicapi"
+mandatory = true
+versionRange = "${tam_api_version_range}"
+ordering = "NONE"
+
+[[dependencies."${mod_id}"]]
+modId = "trueadaptivemusicextensions"
+mandatory = false
+versionRange = "${tam_extensions_version_range}"
+ordering = "NONE"
+
+[mc-publish]
+dependencies=[
+    "trueadaptivemusicextensions@${tam_extensions_version_range}(required)#(ignore:curseforge)"
+]

@@ -1,0 +1,153 @@
+buildscript {
+    repositories {
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'org.jetbrains.kotlin.jvm' version '2.3.20'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += "../common/src/main/java"
+            srcDirs += "../common/src/client/java"
+        }
+        kotlin {
+            srcDirs += "../common/src/main/kotlin"
+            srcDirs += "../common/src/client/kotlin"
+        }
+        resources {
+            srcDirs += "../common/src/main/resources"
+            srcDirs += "../common/src/client/resources"
+        }
+    }
+}
+
+group = mod_group_id
+version = mod_version + '+' + minecraft_version
+
+base {
+    archivesName = archives_base_name + "-forge"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+kotlin.jvmToolchain(17)
+
+minecraft {
+    mappings channel: "official", version: minecraft_version
+    copyIdeResources = true
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+mixin {
+    add sourceSets.main, 'trueadaptivemusic.refmap.json'
+    config 'META-INF/trueadaptivemusic.mixins.json'
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        content { includeGroup "thedarkcolour" }
+    }
+    maven {
+        name = "CurseMaven"
+        url ="https://cursemaven.com"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation 'thedarkcolour:kotlinforforge:' + forge_kotlin_version
+    implementation 'curse.maven:trueadaptivemusicapi-1514598:8442633'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
+// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version           : minecraft_version,
+            minecraft_version_range     : minecraft_version_range,
+            tam_api_version_range       : tam_api_version_range,
+            tam_extensions_version_range: tam_extensions_version_range,
+            forge_version               : forge_version,
+            forge_version_range         : forge_version_range,
+            loader_version_range        : forge_loader_version_range,
+            mod_id                      : mod_id,
+            mod_name                    : mod_name,
+            mod_issues                  : mod_issues,
+            mod_home                    : mod_home,
+            mod_icon                    : mod_icon,
+            mod_license                 : mod_license,
+            mod_version                 : mod_version,
+            mod_authors                 : mod_authors,
+            mod_description             : mod_description
+    ]
+
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes(["Specification-Title"     : mod_id,
+                    "Specification-Vendor"    : mod_authors,
+                    "Specification-Version"   : "1", // We are version 1 of ourselves
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : project.jar.archiveVersion,
+                    "Implementation-Vendor"   : mod_authors,
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
+    }
+
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
