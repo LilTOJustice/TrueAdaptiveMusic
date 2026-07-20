@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation
 object CustomPredicateResponsePayloadType
     : CustomPacketPayloadType<CustomPredicateResponsePayloadType.CustomPredicateResponsePayload> {
     override val identifier = ResourceLocation("trueadaptivemusic", "custom_predicate_response")
+    override val payloadClass = CustomPredicateResponsePayload::class
 
     data class CustomPredicateResponsePayload(
         val predicateId: String, val predicateResponse: Boolean): CustomPacketPayload

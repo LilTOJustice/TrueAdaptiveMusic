@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation
 
 object ScoreboardStatePayloadType: CustomPacketPayloadType<ScoreboardStatePayloadType.ScoreboardStatePayload> {
     override val identifier = ResourceLocation("trueadaptivemusic", "scoreboard_payload")
+    override val payloadClass = ScoreboardStatePayload::class
 
     data class ScoreboardStatePayload(val objectiveName: String, val value: Int): CustomPacketPayload
 

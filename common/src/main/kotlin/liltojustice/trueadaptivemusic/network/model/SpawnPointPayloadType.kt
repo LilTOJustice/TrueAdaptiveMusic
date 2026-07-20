@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation
 
 object SpawnPointPayloadType: CustomPacketPayloadType<SpawnPointPayloadType.SpawnPointPayload> {
     override val identifier = ResourceLocation("trueadaptivemusic", "spawn_point")
+    override val payloadClass = SpawnPointPayload::class
 
     data class SpawnPointPayload(val spawnPoint: SpawnPoint): CustomPacketPayload
 

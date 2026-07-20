@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation
 
 object CurrentStructurePayloadType: CustomPacketPayloadType<CurrentStructurePayloadType.CurrentStructurePayload> {
     override val identifier = ResourceLocation("trueadaptivemusic", "structure_payload")
+    override val payloadClass = CurrentStructurePayload::class
 
     data class CurrentStructurePayload(
         val structureIdentifier: ResourceLocation,
