@@ -3,8 +3,9 @@
   "minVersion": "0.8",
   "package": "liltojustice.trueadaptivemusic.client.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "trueadaptivemusic.refmap.json",
   "client": [
-    "DebugHudMixin",
+    "ForgeDebugHudMixin",
     "MusicManagerMixin",
     "SoundOptionsScreenMixin",
     "SoundEngineMixin",
