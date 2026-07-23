@@ -94,8 +94,8 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
-    api 'curse.maven:trueadaptivemusicapi-1514598:8420611'
-    jarJar 'curse.maven:trueadaptivemusicapi-1514598:8420611'
+    api 'curse.maven:trueadaptivemusicapi-1514598:8492638'
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:8492638'
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
