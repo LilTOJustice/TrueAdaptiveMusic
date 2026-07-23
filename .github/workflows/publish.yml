@@ -39,6 +39,7 @@ jobs:
         run: |
           grep 'mod_version=.*' gradle.properties >> "$GITHUB_OUTPUT"
   build-and-publish:
+    if: contains(github.ref_name, 'versions/') # Is version branch
     runs-on: ubuntu-latest
     needs: determine-versions
     steps:
