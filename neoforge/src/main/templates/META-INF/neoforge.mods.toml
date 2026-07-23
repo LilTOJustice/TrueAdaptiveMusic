@@ -26,24 +26,5 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies."${mod_id}"]]
-modId = "trueadaptivemusicapi"
-type = "required"
-versionRange = "${tam_api_version_range}"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies."${mod_id}"]]
-modId = "trueadaptivemusicextensions"
-type = "optional"
-versionRange = "${tam_extensions_version_range}"
-ordering = "NONE"
-side = "BOTH"
-
-[mc-publish]
-dependencies=[
-    "trueadaptivemusicextensions@${tam_extensions_version_range}(required)#(ignore:curseforge)"
-]
-
 [[mixins]]
 config="META-INF/trueadaptivemusic.mixins.json"
