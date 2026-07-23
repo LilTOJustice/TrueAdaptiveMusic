@@ -11,11 +11,13 @@ plugins {
 version = "${project.property("mod_version") as String}+${project.property("minecraft_version")}"
 group = project.property("mod_group_id") as String
 
+val isCurseForge = project.property("is_curseforge") == "true"
 base {
-    archivesName.set(project.property("archives_base_name") as String + "-fabric")
+    archivesName.set(
+        project.property("archives_base_name") as String + "-fabric" + if (isCurseForge) "-curseforge" else "")
 }
 
-val targetJavaVersion = 25
+val targetJavaVersion = (project.property("java_version") as String).toInt()
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
@@ -48,7 +50,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    modApi("curse.maven:trueadaptivemusicapi-1514598:8442745")
+    modApi("curse.maven:trueadaptivemusicapi-1514598:8492502")
+    include("curse.maven:trueadaptivemusicapi-1514598:8492502")
 }
 
 tasks.processResources {
@@ -72,9 +75,7 @@ tasks.processResources {
             "minecraft_version" to project.property("minecraft_version")!!,
             "minecraft_version_range" to project.property("minecraft_version_range")!!,
             "loader_version" to project.property("fabric_loader_version")!!,
-            "kotlin_loader_version" to project.property("fabric_kotlin_version")!!,
-            "tam_api_version_range" to project.property("tam_api_version_range")!!,
-            "tam_extensions_version_range" to project.property("tam_extensions_version_range")!!
+            "kotlin_loader_version" to project.property("fabric_kotlin_version")!!
         )
     }
 }
@@ -109,12 +110,24 @@ sourceSets {
     named("client") {
         java {
             srcDirs("../common/src/client/java")
+
+            if (!isCurseForge) {
+                srcDirs("../extensions/src/main/java")
+            }
         }
         kotlin {
             srcDirs("../common/src/client/kotlin")
+
+            if (!isCurseForge) {
+                srcDirs("../extensions/src/main/kotlin")
+            }
         }
         resources {
             srcDirs("../common/src/client/resources")
+
+            if (!isCurseForge) {
+                srcDirs("../extensions/src/main/resources")
+            }
         }
     }
 }
