@@ -1,0 +1,28 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "liltojustice.trueadaptivemusic.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "trueadaptivemusic.refmap.json",
+  "client": [
+    "ForgeDebugHudMixin",
+    "MusicManagerMixin",
+    "SoundOptionsScreenMixin",
+    "SoundEngineMixin",
+    "SoundManagerMixin",
+    "event.OnBossDefeatEventMixin",
+    "event.OnDayStartEventMixin",
+    "event.OnDeathEventMixin",
+    "event.OnJoinWorldEventMixin",
+    "event.OnNightStartMixin",
+    "event.OnPauseMixin",
+    "event.OnToastMixin",
+    "event.OnWakeUpEventMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "ServerScoreboardMixin"
+  ]
+}
