@@ -14,7 +14,7 @@ group = project.property("mod_group_id") as String
 val isCurseForge = project.property("is_curseforge") == "true"
 base {
     archivesName.set(
-        project.property("archives_base_name") as String + "-fabric" + if (isCurseForge) "-curseforge" else "")
+        project.property("archives_base_name") as String + "-fabric" + if (isCurseForge) "-cf" else "")
 }
 
 val targetJavaVersion = (project.property("java_version") as String).toInt()
