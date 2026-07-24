@@ -22,10 +22,10 @@ public class OptionsSubScreenMixin {
         var trueAdaptiveMusicButton = new OptionInstance<>(
                 "trueadaptivemusic",
                 OptionInstance.noTooltip(),
-                (optionText, _unused) -> optionText,
+                (optionText, object) -> optionText,
                 new TrueAdaptiveMusicOptionCallback<>(Minecraft.getInstance()),
                 "",
-                _unused -> {}
+                unused -> {}
         );
 
         if (thisObject.list != null) {
