@@ -75,6 +75,7 @@ import kotlin.io.path.name
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
 import kotlin.toString
@@ -87,6 +88,7 @@ object TAMClientInitializer {
         registerInputWidgets()
         TAMClient.injectModReflectionInterface(clientModReflectionInterface)
         TAMClientNetworking.init(clientNetworkInterface)
+        tryRegisterExtensions()
     }
 
     private fun initDirectories() {
@@ -484,6 +486,22 @@ object TAMClientInitializer {
                 tooltipText = tooltipText
             )
         }
+    }
+
+    private fun tryRegisterExtensions() {
+        try {
+            Class.forName("liltojustice.trueadaptivemusicextensions.client.TAMExtensionsInitializer")
+        }
+        catch (_: ClassNotFoundException) {
+            null
+        }
+            ?.let { clazz ->
+                val kClass = clazz.kotlin
+                kClass.memberFunctions
+                    .firstOrNull { it.name == "initialize" }
+                    ?.call(kClass.objectInstance) as? Extensions
+            }
+            ?.let { TAMClient.addExtensions(it) }
     }
 
     private val DYNAMIC_REGISTRY_TEXT =
