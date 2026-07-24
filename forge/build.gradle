@@ -47,7 +47,7 @@ group = mod_group_id
 version = mod_version + '+' + minecraft_version
 
 base {
-    archivesName = archives_base_name + "-forge" + (isCurseForge ? "-curseforge" : "")
+    archivesName = archives_base_name + "-forge" + (isCurseForge ? "-cf" : "")
 }
 
 var javaVersion = java_version.toInteger()
