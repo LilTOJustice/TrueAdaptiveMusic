@@ -13,19 +13,32 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
+var isCurseForge = is_curseforge == "true"
 sourceSets {
     main {
         java {
             srcDirs += "../common/src/main/java"
             srcDirs += "../common/src/client/java"
+
+            if (!isCurseForge) {
+                srcDirs += "../extensions/src/main/java"
+            }
         }
         kotlin {
             srcDirs += "../common/src/main/kotlin"
             srcDirs += "../common/src/client/kotlin"
+
+            if (!isCurseForge) {
+                srcDirs += "../extensions/src/main/kotlin"
+            }
         }
         resources {
             srcDirs += "../common/src/main/resources"
             srcDirs += "../common/src/client/resources"
+
+            if (!isCurseForge) {
+                srcDirs += "../extensions/src/main/resources"
+            }
         }
     }
 }
@@ -37,8 +50,9 @@ base {
     archivesName = archives_base_name + "-forge"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-kotlin.jvmToolchain(17)
+var javaVersion = java_version.toInteger()
+java.toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+kotlin.jvmToolchain(javaVersion)
 
 minecraft {
     mappings channel: "official", version: minecraft_version
@@ -99,8 +113,9 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation 'thedarkcolour:kotlinforforge:' + forge_kotlin_version
-    implementation fg.deobf('curse.maven:trueadaptivemusicapi-1514598:8442633')
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    api 'curse.maven:trueadaptivemusicapi-1514598:8442633'
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[8442633]'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -111,8 +126,6 @@ tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             minecraft_version           : minecraft_version,
             minecraft_version_range     : minecraft_version_range,
-            tam_api_version_range       : tam_api_version_range,
-            tam_extensions_version_range: tam_extensions_version_range,
             forge_version               : forge_version,
             forge_version_range         : forge_version_range,
             loader_version_range        : forge_loader_version_range,

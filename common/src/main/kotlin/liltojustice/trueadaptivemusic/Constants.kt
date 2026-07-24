@@ -45,7 +45,7 @@ class Constants {
         const val PREDICATES_DIRNAME = "predicates"
         const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
         const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
-        const val TAM_EXTENSIONS_URL = "https://modrinth.com/project/true-adaptive-music-extensions"
+        const val TAM_MODRINTH_URL = "https://modrinth.com/project/true-adaptive-music"
     }
 
     class Colors {

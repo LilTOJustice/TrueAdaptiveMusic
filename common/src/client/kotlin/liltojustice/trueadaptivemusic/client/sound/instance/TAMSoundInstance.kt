@@ -98,17 +98,22 @@ abstract class TAMSoundInstance(
                     return OggAudioStream(inputStreamGetter())
                 }
 
-                val loudnessUnits = if (isAmbient)
-                    AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
-                else
-                    MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
-                return TruncatedAudioStream(
-                    FFmpegAudioStream(
-                        inputStreamGetter(),
-                        FFmpeg.getFileAudioFormat(inputStreamGetter()),
-                        loudnessUnits
+                try {
+                    val loudnessUnits = if (isAmbient)
+                        AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
+                    else
+                        MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
+                    return TruncatedAudioStream(
+                        FFmpegAudioStream(
+                            inputStreamGetter(),
+                            FFmpeg.getFileAudioFormat(inputStreamGetter()),
+                            loudnessUnits
+                        )
                     )
-                )
+                }
+                catch (_: Exception) {
+                    return TruncatedAudioStream(OggAudioStream(inputStreamGetter()))
+                }
             }
             catch (e: Exception) {
                 throw MusicLoadException("Failed to load audio stream for '$name'", e)

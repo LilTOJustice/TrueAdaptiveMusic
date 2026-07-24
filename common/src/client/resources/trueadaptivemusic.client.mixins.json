@@ -4,7 +4,7 @@
   "package": "liltojustice.trueadaptivemusic.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "ForgeDebugHudMixin",
+    "DebugHudMixin",
     "MusicManagerMixin",
     "SoundOptionsScreenMixin",
     "SoundEngineMixin",

@@ -15,12 +15,12 @@ import kotlin.io.path.*
 class ExtensionsSuggestionScreen(private val parent: Screen)
     : Screen(
     Component.translatableWithFallback(
-        "trueadaptivemusic.extensions_suggested", "TAM Extensions Mod Recommended")
+        "trueadaptivemusic.extensions_suggested", "TAM Extensions Missing")
     ) {
     @OptIn(ExperimentalPathApi::class)
     override fun init() {
         val yesButtonWidget = TextAndImageButton.builder(CommonComponents.GUI_YES, CHECKMARK) {
-            Util.getPlatform().openUri(Constants.TAM_EXTENSIONS_URL)
+            Util.getPlatform().openUri(Constants.TAM_MODRINTH_URL)
             minecraft?.setScreen(parent)
         }
             .usedTextureSize(9, 8)
@@ -53,7 +53,7 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
             font,
             Component.translatableWithFallback(
                 "trueadaptivemusic.extensions_suggested_1",
-                "The True Adaptive Music Extensions mod is required for this, but wasn't found."
+                "The Modrinth version of TAM is required for this."
             ),
             width / 2,
             height / 2 - (font.lineHeight + 5),
@@ -63,7 +63,7 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
             font,
             Component.translatableWithFallback(
                 "trueadaptivemusic.extensions_suggested_2",
-                "This is usually because you got TAM from CurseForge, which doesn't support it."
+                "This is usually because you got TAM from CurseForge."
             ),
             width / 2,
             height / 2,
@@ -73,7 +73,7 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
             font,
             Component.translatableWithFallback(
                 "trueadaptivemusic.extensions_suggested_2",
-                "Do you want to open the mod page for TAM Extensions on Modrinth?"
+                "Do you want to open the mod page for the Modrinth version?"
             ),
             width / 2,
             height / 2 + font.lineHeight + 5,
