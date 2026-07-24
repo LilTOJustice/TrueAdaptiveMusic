@@ -53,7 +53,7 @@ repositories {
 }
 
 base {
-    archivesName = archives_base_name + "-neoforge" + (isCurseForge ? "-curseforge" : "")
+    archivesName = archives_base_name + "-neoforge" + (isCurseForge ? "-cf" : "")
 }
 
 var javaVersion = java_version.toInteger()
