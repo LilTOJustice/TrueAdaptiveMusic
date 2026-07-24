@@ -62,6 +62,8 @@ jobs:
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
+
+      # Non-CurseForge
       - name: Build
         run: ./gradlew clean build
       - name: Publish Fabric
@@ -70,16 +72,10 @@ jobs:
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          loaders: |
-            fabric
-          files: |
-            build/fabric/libs/!(*-@(dev|sources|javadoc)).jar
+          files: build/fabric/libs/!(*-@(dev|sources|javadoc)).jar
 
           modrinth-id: "${{env.MODRINTH_ID}}"
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
-
-          curseforge-id: "${{env.CURSEFORGE_ID}}"
-          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
 
           name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft Fabric ${{env.MINECRAFT_VERSION}}"
           version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
@@ -92,13 +88,43 @@ jobs:
           MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          loaders: |
-            forge
-          files: |
-            build/neoforge/libs/!(*-@(dev|sources|javadoc)).jar
+          files: build/neoforge/libs/!(*-@(dev|sources|javadoc)).jar
 
           modrinth-id: "${{env.MODRINTH_ID}}"
           modrinth-token: "${{env.MODRINTH_TOKEN}}"
+
+          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft Neoforge ${{env.MINECRAFT_VERSION}}"
+          version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
+          version-type: "${{env.VERSION_TYPE}}"
+          changelog-file: "${{env.CHANGELOG_FILE}}"
+          java: "${{env.JAVA_VERSION}}"
+
+      # CurseForge
+      - name: Build (CurseForge)
+        run: ./gradlew build -Pis_curseforge=true
+      - name: Publish Fabric (CurseForge)
+        env:
+          MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
+          MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          files: build/fabric/libs/!(*-@(dev|sources|javadoc)).jar
+
+          curseforge-id: "${{env.CURSEFORGE_ID}}"
+          curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
+
+          name: "True Adaptive Music ${{env.MOD_VERSION}} for Minecraft Fabric ${{env.MINECRAFT_VERSION}}"
+          version: "${{env.MOD_VERSION}}+${{env.MINECRAFT_VERSION}}"
+          version-type: "${{env.VERSION_TYPE}}"
+          changelog-file: "${{env.CHANGELOG_FILE}}"
+          java: "${{env.JAVA_VERSION}}"
+      - name: Publish NeoForge (CurseForge)
+        env:
+          MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
+          MOD_VERSION: ${{needs.determine-versions.outputs.mod_version}}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          files: build/neoforge/libs/!(*-@(dev|sources|javadoc)).jar
 
           curseforge-id: "${{env.CURSEFORGE_ID}}"
           curseforge-token: "${{env.CURSEFORGE_TOKEN}}"
