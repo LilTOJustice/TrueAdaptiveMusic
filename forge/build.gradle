@@ -115,7 +115,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation 'thedarkcolour:kotlinforforge:' + forge_kotlin_version
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    api 'curse.maven:trueadaptivemusicapi-1514598:8442633'
+    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:8442633')
     jarJar 'curse.maven:trueadaptivemusicapi-1514598:[8442633]'
 }
 
