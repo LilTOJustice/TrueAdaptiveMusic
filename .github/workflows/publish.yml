@@ -66,6 +66,7 @@ jobs:
       # Non-CurseForge
       - name: Build
         run: ./gradlew clean build
+
       - name: Publish Fabric
         env:
           MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
@@ -98,10 +99,13 @@ jobs:
           version-type: "${{env.VERSION_TYPE}}"
           changelog-file: "${{env.CHANGELOG_FILE}}"
           java: "${{env.JAVA_VERSION}}"
+          dependencies: |
+            kotlinforforge(required)
 
       # CurseForge
       - name: Build (CurseForge)
         run: ./gradlew build -Pis_curseforge=true
+
       - name: Publish Fabric (CurseForge)
         env:
           MINECRAFT_VERSION: ${{needs.determine-versions.outputs.minecraft_version}}
@@ -134,3 +138,6 @@ jobs:
           version-type: "${{env.VERSION_TYPE}}"
           changelog-file: "${{env.CHANGELOG_FILE}}"
           java: "${{env.JAVA_VERSION}}"
+          dependencies: |
+            kotlinforforge(required)
+
