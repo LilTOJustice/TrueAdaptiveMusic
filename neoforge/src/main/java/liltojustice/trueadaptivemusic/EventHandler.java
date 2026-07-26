@@ -12,6 +12,10 @@ public class EventHandler implements IModBusEvent {
     @SubscribeEvent
     public static void register(final RegisterPayloadHandlersEvent event) {
         NeoforgeServerNetworkingInterface.INSTANCE.registerPayloadHandlers(event);
+    }
+
+    @SubscribeEvent
+    public static void register(RegisterClientPayloadHandlersEvent event) {
         NeoforgeClientNetworkingInterface.INSTANCE.registerPayloadHandlers(event);
     }
 }
