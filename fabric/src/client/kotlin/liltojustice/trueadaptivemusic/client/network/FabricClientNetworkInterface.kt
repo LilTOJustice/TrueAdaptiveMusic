@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf
 import liltojustice.trueadaptivemusic.network.ClientNetworkInterface
 import liltojustice.trueadaptivemusic.network.model.Context
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
@@ -14,7 +13,6 @@ object FabricClientNetworkInterface: ClientNetworkInterface {
         codec: StreamCodec<ByteBuf, T>,
         handler: (payload: T, context: Context) -> Unit
     ) {
-        PayloadTypeRegistry.clientboundPlay().register(type, codec)
         ClientPlayNetworking.registerGlobalReceiver(type,  transformHandlerClient(handler))
     }
 

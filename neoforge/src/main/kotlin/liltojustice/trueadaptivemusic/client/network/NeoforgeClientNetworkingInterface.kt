@@ -8,18 +8,9 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.neoforged.neoforge.client.network.ClientPacketDistributor
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
-import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
 object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
-    private const val REGISTRAR_VERSION = "1"
     private val registrations = mutableListOf<(RegisterClientPayloadHandlersEvent) -> Unit>()
-    private val commonRegistrations = mutableListOf<(PayloadRegistrar) -> Unit>()
-
-    fun registerCommonPayloadHandlers(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar(REGISTRAR_VERSION)
-        commonRegistrations.forEach { it(registrar) }
-    }
 
     fun registerPayloadHandlers(event: RegisterClientPayloadHandlersEvent) {
         registrations.forEach { it(event) }
@@ -32,9 +23,6 @@ object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
     ) {
         registrations.add { event ->
             event.register(type, transformHandler(handler))
-        }
-        commonRegistrations.add { registrar ->
-            registrar.playToClient(type, codec)
         }
     }
 
