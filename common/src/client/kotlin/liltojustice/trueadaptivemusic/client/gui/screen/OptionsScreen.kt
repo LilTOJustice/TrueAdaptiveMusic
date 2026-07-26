@@ -41,6 +41,7 @@ class OptionsScreen(private val parent: Screen): Screen(
     }
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+        renderBackground(context)
         context.drawCenteredString(
             this.font, this.title, this.width / 2, TITLE_Y, CommonColors.WHITE)
         super.render(context, mouseX, mouseY, delta)
