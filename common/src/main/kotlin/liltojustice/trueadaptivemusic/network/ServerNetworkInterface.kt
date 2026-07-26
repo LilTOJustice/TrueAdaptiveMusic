@@ -14,5 +14,10 @@ interface ServerNetworkInterface {
         handler: (payload: T, context: Context) -> Unit
     )
 
+    fun <T: CustomPacketPayload> registerClientboundPacket(
+        type: CustomPacketPayload.Type<T>,
+        codec: StreamCodec<ByteBuf, T>,
+    )
+
     fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload)
 }
