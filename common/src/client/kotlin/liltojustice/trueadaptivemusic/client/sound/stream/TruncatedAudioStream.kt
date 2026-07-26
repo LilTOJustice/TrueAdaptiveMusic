@@ -8,9 +8,13 @@ import javax.sound.sampled.AudioFormat
 class TruncatedAudioStream(private val backingStream: AudioStream): AudioStream {
     private var nonZeroRead: Boolean = true
     private var isNew: Boolean = true
+    private var closed = false
 
     override fun close() {
-        backingStream.close()
+        if (!closed) {
+            backingStream.close()
+            closed = true
+        }
     }
 
     override fun getFormat(): AudioFormat {
