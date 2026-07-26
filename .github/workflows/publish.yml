@@ -104,7 +104,7 @@ jobs:
 
       # CurseForge
       - name: Build (CurseForge)
-        run: ./gradlew build -Pis_curseforge=true
+        run: ./gradlew clean build -Pis_curseforge=true
 
       - name: Publish Fabric (CurseForge)
         env:
