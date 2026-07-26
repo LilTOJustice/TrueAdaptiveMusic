@@ -95,7 +95,7 @@ abstract class TAMSoundInstance(
         fun getAudioStream(name: String, inputStreamGetter: () -> InputStream, isAmbient: Boolean): AudioStream {
             try {
                 if (!TAMClient.hasFFmpeg) {
-                    return OggAudioStream(inputStreamGetter())
+                    return TruncatedAudioStream(OggAudioStream(inputStreamGetter()))
                 }
 
                 try {
