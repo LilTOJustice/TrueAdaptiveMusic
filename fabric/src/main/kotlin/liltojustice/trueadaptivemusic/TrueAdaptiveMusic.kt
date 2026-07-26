@@ -8,6 +8,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 class TrueAdaptiveMusic: ModInitializer {
     override fun onInitialize() {
         TAMMainInitializer.onInitialize(FabricServerNetworkInterface)
-        ServerTickEvents.END_SERVER_TICK.register(TAMServerNetworking::processTick)
+        ServerTickEvents.END_SERVER_TICK.register { TAMServerNetworking.processTick(it) }
     }
 }
