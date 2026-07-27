@@ -8,11 +8,11 @@ import net.minecraft.resources.ResourceLocation
 
 data class ScoreboardStatePayload(val objectiveName: String, val value: Int): CustomPacketPayload {
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> {
-        return ID
+        return TYPE
     }
 
     companion object {
-        val ID: CustomPacketPayload.Type<ScoreboardStatePayload> = CustomPacketPayload.Type(
+        val TYPE: CustomPacketPayload.Type<ScoreboardStatePayload> = CustomPacketPayload.Type(
             ResourceLocation.fromNamespaceAndPath("trueadaptivemusic", "scoreboard_payload"))
         val CODEC: StreamCodec<ByteBuf, ScoreboardStatePayload> = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,
