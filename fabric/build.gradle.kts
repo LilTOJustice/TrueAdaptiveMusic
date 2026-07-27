@@ -50,8 +50,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
-    api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
+    modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
+    modApi("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
     include("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
 }
 

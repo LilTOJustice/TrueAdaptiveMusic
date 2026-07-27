@@ -8,11 +8,11 @@ import net.minecraft.world.level.storage.LevelData
 
 data class SpawnPointPayload(val spawnPoint: LevelData.RespawnData): CustomPacketPayload {
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> {
-        return ID
+        return TYPE
     }
 
     companion object {
-        val ID: CustomPacketPayload.Type<SpawnPointPayload> = CustomPacketPayload.Type(
+        val TYPE: CustomPacketPayload.Type<SpawnPointPayload> = CustomPacketPayload.Type(
             Identifier.fromNamespaceAndPath("trueadaptivemusic", "spawn_point"))
         val CODEC: StreamCodec<ByteBuf, SpawnPointPayload> = StreamCodec.composite(
             LevelData.RespawnData.STREAM_CODEC,

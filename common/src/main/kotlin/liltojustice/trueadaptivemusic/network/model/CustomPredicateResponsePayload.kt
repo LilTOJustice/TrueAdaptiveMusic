@@ -9,11 +9,11 @@ import net.minecraft.resources.Identifier
 data class CustomPredicateResponsePayload(val predicateId: String, val predicateResponse: Boolean):
     CustomPacketPayload {
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> {
-        return ID
+        return TYPE
     }
 
     companion object {
-        val ID: CustomPacketPayload.Type<CustomPredicateResponsePayload> = CustomPacketPayload.Type(
+        val TYPE: CustomPacketPayload.Type<CustomPredicateResponsePayload> = CustomPacketPayload.Type(
             Identifier.fromNamespaceAndPath("trueadaptivemusic", "custom_predicate_response"))
         val CODEC: StreamCodec<ByteBuf, CustomPredicateResponsePayload> = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,
