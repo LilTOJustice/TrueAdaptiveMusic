@@ -7,7 +7,6 @@ import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
 import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.StrictJsonParser
@@ -69,7 +68,7 @@ object TAMServerNetworking {
                                 LootParams.Builder(player.level())
                                     .withParameter(LootContextParams.ORIGIN, player.position())
                                     .withOptionalParameter(
-                                        LootContextParams.THIS_ENTITY, player.livingEntity
+                                        LootContextParams.THIS_ENTITY, player as LivingEntity
                                     )
                                     .create(LootContextParamSets.COMMAND)
                             ).create(Optional.empty())
