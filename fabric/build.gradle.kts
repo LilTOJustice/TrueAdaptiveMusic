@@ -42,7 +42,7 @@ repositories {
     }
 }
 
-val apiFileId = "8518038"
+val apiFileId = "8518041"
 dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings(loom.officialMojangMappings())
