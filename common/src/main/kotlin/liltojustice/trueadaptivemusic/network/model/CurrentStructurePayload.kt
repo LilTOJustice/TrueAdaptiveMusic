@@ -11,11 +11,11 @@ data class CurrentStructurePayload(
     val structurePieceIdentifier: ResourceLocation
 ): CustomPacketPayload {
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> {
-        return ID
+        return TYPE
     }
 
     companion object {
-        val ID: CustomPacketPayload.Type<CurrentStructurePayload> = CustomPacketPayload.Type(
+        val TYPE: CustomPacketPayload.Type<CurrentStructurePayload> = CustomPacketPayload.Type(
             ResourceLocation.fromNamespaceAndPath("trueadaptivemusic", "structure_payload"))
         val CODEC: StreamCodec<ByteBuf, CurrentStructurePayload> = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC,
