@@ -6,14 +6,17 @@ import liltojustice.trueadaptivemusic.network.model.Context
 import liltojustice.trueadaptivemusic.network.transformHandler
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.neoforged.neoforge.client.network.ClientPacketDistributor
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent
+import net.neoforged.neoforge.network.PacketDistributor
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
+import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
 object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
-    private val registrations = mutableListOf<(RegisterClientPayloadHandlersEvent) -> Unit>()
+    private const val REGISTRAR_VERSION = "1"
+    private val registrations = mutableListOf<(PayloadRegistrar) -> Unit>()
 
-    fun registerPayloadHandlers(event: RegisterClientPayloadHandlersEvent) {
-        registrations.forEach { it(event) }
+    fun registerPayloadHandlers(event: RegisterPayloadHandlersEvent) {
+        val registrar = event.registrar(REGISTRAR_VERSION)
+        registrations.forEach { it(registrar) }
     }
 
     override fun <T: CustomPacketPayload> registerClientboundPacket(
@@ -22,7 +25,7 @@ object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
         handler: (payload: T, context: Context) -> Unit
     ) {
         registrations.add { event ->
-            event.register(type, transformHandler(handler))
+            event.playToClient(type, codec, transformHandler(handler))
         }
     }
 

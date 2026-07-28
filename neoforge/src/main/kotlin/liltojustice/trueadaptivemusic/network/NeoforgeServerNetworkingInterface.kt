@@ -32,9 +32,6 @@ object NeoforgeServerNetworkingInterface: ServerNetworkInterface {
         type: CustomPacketPayload.Type<T>,
         codec: StreamCodec<ByteBuf, T>
     ) {
-        registrations.add { registrar ->
-            registrar.playToClient(type, codec)
-        }
     }
 
     override fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
