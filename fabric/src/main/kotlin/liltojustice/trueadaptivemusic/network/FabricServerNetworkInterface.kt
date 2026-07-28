@@ -14,8 +14,15 @@ object FabricServerNetworkInterface: ServerNetworkInterface {
         codec: StreamCodec<ByteBuf, T>,
         handler: (payload: T, context: Context) -> Unit
     ) {
-        PayloadTypeRegistry.playC2S() .register(type, codec)
+        PayloadTypeRegistry.playC2S().register(type, codec)
         ServerPlayNetworking.registerGlobalReceiver(type, transformHandlerServer(handler))
+    }
+
+    override fun <T : CustomPacketPayload> registerClientboundPacket(
+        type: CustomPacketPayload.Type<T>,
+        codec: StreamCodec<ByteBuf, T>
+    ) {
+        PayloadTypeRegistry.playS2C().register(type, codec)
     }
 
     override fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
