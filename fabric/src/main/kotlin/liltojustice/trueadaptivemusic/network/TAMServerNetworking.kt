@@ -20,30 +20,38 @@ object TAMServerNetworking {
     private var networkInterface: ServerNetworkInterface? = null
     fun init(serverNetworkInterface: ServerNetworkInterface) {
         networkInterface = serverNetworkInterface
-        serverNetworkInterface.registerServerboundPacket(CustomPredicateQueryPayloadType, { payload, context ->
-            val player = context.player as ServerPlayer
-            val json = JsonParser.parseString(payload.predicateText)
-            val condition = LootDataType.PREDICATE.deserialize(Constants.NULL_IDENTIFIER, json)
-                .getOrNull()
-                ?: return@registerServerboundPacket
-            serverNetworkInterface.sendToClient(
-                player,
-                CustomPredicateResponsePayloadType,
-                CustomPredicateResponsePayloadType.CustomPredicateResponsePayload(
-                    payload.predicateId,
-                    condition.test(
-                        LootContext.Builder(
-                            LootParams.Builder(player.serverLevel())
-                                .withOptionalParameter(LootContextParams.ORIGIN, player.position())
-                                .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
-                                .create(LootContextParamSets.COMMAND)
-                        ).create(null)
-                    )
-                )
-            )
-        })
+        registerServerbound()
 
         endTickEvents.add { server -> ServerStateProcessor.processServer(server, serverNetworkInterface) }
+    }
+
+    private fun registerServerbound() {
+        networkInterface?.let {
+            it.registerServerboundPacket(CustomPredicateQueryPayloadType, { payload, context ->
+                val player = context.player as ServerPlayer
+                val json = JsonParser.parseString(payload.predicateText)
+                val condition = LootDataType.PREDICATE.deserialize(Constants.NULL_IDENTIFIER, json)
+                    .getOrNull()
+                    ?: return@registerServerboundPacket
+                it.sendToClient(
+                    player,
+                    CustomPredicateResponsePayloadType,
+                    CustomPredicateResponsePayloadType.CustomPredicateResponsePayload(
+                        payload.predicateId,
+                        condition.test(
+                            LootContext.Builder(
+                                LootParams.Builder(player.serverLevel())
+                                    .withOptionalParameter(LootContextParams.ORIGIN, player.position())
+                                    .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
+                                    .create(LootContextParamSets.COMMAND)
+                            ).create(null)
+                        )
+                    )
+                )
+            })
+
+            endTickEvents.add { server -> ServerStateProcessor.processServer(server, it) }
+        } ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
     }
 
     fun <T: CustomPacketPayload> sendToClient(player: ServerPlayer, type: CustomPacketPayloadType<T>, payload: T) {

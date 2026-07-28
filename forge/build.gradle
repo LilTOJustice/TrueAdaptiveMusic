@@ -111,12 +111,13 @@ repositories {
     }
 }
 
+var apiFileId = "8518051"
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation 'thedarkcolour:kotlinforforge:' + forge_kotlin_version
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:8442633')
-    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[8442633]'
+    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:' + apiFileId)
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[' + apiFileId + ']'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
