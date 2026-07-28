@@ -8,7 +8,6 @@ import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
 import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload
 import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.LivingEntity
@@ -55,7 +54,7 @@ object TAMServerNetworking {
             it.registerServerboundPacket(
                 CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
                 val player = context.player as ServerPlayer
-                val json = StrictJsonParser.parse(payload.predicateText)
+                val json = JsonParser.parseString(payload.predicateText)
                 val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
                     .result()
                     .getOrNull()
@@ -66,10 +65,10 @@ object TAMServerNetworking {
                         payload.predicateId,
                         condition.test(
                             LootContext.Builder(
-                                LootParams.Builder(player.level())
+                                LootParams.Builder(player.serverLevel())
                                     .withParameter(LootContextParams.ORIGIN, player.position())
                                     .withOptionalParameter(
-                                        LootContextParams.THIS_ENTITY, player.livingEntity
+                                        LootContextParams.THIS_ENTITY, player as LivingEntity
                                     )
                                     .create(LootContextParamSets.COMMAND)
                             ).create(Optional.empty())
