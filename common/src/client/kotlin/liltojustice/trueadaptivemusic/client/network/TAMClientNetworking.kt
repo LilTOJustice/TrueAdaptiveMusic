@@ -23,20 +23,20 @@ object TAMClientNetworking {
     fun init(clientNetworkInterface: ClientNetworkInterface) {
         networkInterface = clientNetworkInterface
         clientNetworkInterface.registerClientboundPacket(
-            CurrentStructurePayload.ID, CurrentStructurePayload.CODEC) { payload, _ ->
+            CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC) { payload, _ ->
             structureId = payload.structureIdentifier
             structureSetId = payload.structureSetIdentifier
             structurePieceId = payload.structurePieceIdentifier
         }
-        clientNetworkInterface.registerClientboundPacket(SpawnPointPayload.ID, SpawnPointPayload.CODEC) { payload, _ ->
+        clientNetworkInterface.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC) { payload, _ ->
             spawnPoint = payload.spawnPoint
         }
         clientNetworkInterface.registerClientboundPacket(
-            CustomPredicateResponsePayload.ID, CustomPredicateResponsePayload.CODEC) { payload, _ ->
+            CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC) { payload, _ ->
             customPredicateResults[payload.predicateId] = payload.predicateResponse
         }
         clientNetworkInterface.registerClientboundPacket(
-            ScoreboardStatePayload.ID, ScoreboardStatePayload.CODEC) { payload, _ ->
+            ScoreboardStatePayload.TYPE, ScoreboardStatePayload.CODEC) { payload, _ ->
             scoreboardState[payload.objectiveName] = payload.value
         }
     }
