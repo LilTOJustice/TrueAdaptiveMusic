@@ -14,7 +14,6 @@ public class EventHandler {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         NeoforgeServerNetworkingInterface.INSTANCE.registerPayloadHandlers(event);
-        NeoforgeClientNetworkingInterface.INSTANCE.registerCommonPayloadHandlers(event);
     }
 
     @SubscribeEvent
