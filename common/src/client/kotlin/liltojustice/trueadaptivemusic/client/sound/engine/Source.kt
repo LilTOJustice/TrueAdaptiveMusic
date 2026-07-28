@@ -159,6 +159,10 @@ class Source private constructor(private val pointer: Int) {
     }
 
     private fun tickLooping() {
+        if (totalSeconds != null) {
+            return
+        }
+
         val newTimestamp = AL11.alGetSourcef(this.pointer, AL_SEC_OFFSET)
         if (newTimestamp < lastTimestamp) {
             AL11.alSourcef(this.pointer, AL_SEC_OFFSET, loopStartPointSeconds)
@@ -167,10 +171,9 @@ class Source private constructor(private val pointer: Int) {
 
         lastTimestamp = newTimestamp
 
-        if (!read() && totalSeconds == null) {
+        if (!read()) {
             totalSeconds = (totalBytes.toFloat() / bufferSize)
         }
-
     }
 
     private fun removeProcessedBuffers(): Int {
