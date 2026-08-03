@@ -11,7 +11,7 @@ object ForgeServerNetworkInterface: ServerNetworkInterface {
         type: CustomPacketPayloadType<T>,
         handler: (payload: T, context: Context) -> Unit
     ) {
-        CommonNetworkingInterface.registerToServer(type, handler)
+        CommonNetworkInterface.registerToServer(type, handler)
     }
 
     override fun <T : CustomPacketPayload> sendToClient(
@@ -19,6 +19,6 @@ object ForgeServerNetworkInterface: ServerNetworkInterface {
         type: CustomPacketPayloadType<T>,
         payload: T
     ) {
-        CommonNetworkingInterface.channel.send(PacketDistributor.PLAYER.with { player }, payload)
+        CommonNetworkInterface.channel.send(PacketDistributor.PLAYER.with { player }, payload)
     }
 }

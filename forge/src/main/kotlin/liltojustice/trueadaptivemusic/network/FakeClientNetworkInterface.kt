@@ -1,24 +1,20 @@
-package liltojustice.trueadaptivemusic.client.network
+package liltojustice.trueadaptivemusic.network
 
-import liltojustice.trueadaptivemusic.network.ClientNetworkInterface
-import liltojustice.trueadaptivemusic.network.CommonNetworkInterface
 import liltojustice.trueadaptivemusic.network.model.Context
 import liltojustice.trueadaptivemusic.network.model.CustomPacketPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPacketPayloadType
-import net.minecraft.client.Minecraft
 
-object ForgeClientNetworkInterface: ClientNetworkInterface {
+object FakeClientNetworkInterface: ClientNetworkInterface {
     override fun <T : CustomPacketPayload> registerClientboundPacket(
         type: CustomPacketPayloadType<T>,
         handler: (payload: T, context: Context) -> Unit
     ) {
-        CommonNetworkInterface.registerToClient({ Minecraft.getInstance().player }, type, handler)
+        CommonNetworkInterface.registerToClient(type)
     }
 
     override fun <T : CustomPacketPayload> sendToServer(
         type: CustomPacketPayloadType<T>,
         payload: T
     ) {
-        CommonNetworkInterface.channel.sendToServer(payload)
     }
 }

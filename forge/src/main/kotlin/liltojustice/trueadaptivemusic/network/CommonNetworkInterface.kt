@@ -9,7 +9,7 @@ import net.minecraftforge.network.NetworkDirection
 import net.minecraftforge.network.NetworkRegistry
 import net.minecraftforge.network.simple.SimpleChannel
 
-object CommonNetworkingInterface {
+object CommonNetworkInterface {
     val channel: SimpleChannel = NetworkRegistry.newSimpleChannel(
         ResourceLocation("trueadaptivemusic", "main"),
         { REGISTRAR_VERSION },
@@ -61,6 +61,26 @@ object CommonNetworkingInterface {
                     ?.let {
                         try {
                             playerGetter()?.let { player -> handler(msg, Context(player)) }
+                            it.packetHandled = true
+                        }
+                        catch (_: Exception) {}
+                    }
+            }
+        )
+    }
+
+    @Suppress("warnings")
+    fun <T: CustomPacketPayload> registerToClient(type: CustomPacketPayloadType<T>) {
+        channel.registerMessage(
+            messageId++,
+            type.payloadClass.java,
+            { msg, buf -> type.write(msg, buf) },
+            { buf -> type.read(buf) },
+            { msg, contextGetter ->
+                contextGetter.get()
+                    .takeIf { it.direction == NetworkDirection.PLAY_TO_CLIENT }
+                    ?.let {
+                        try {
                             it.packetHandled = true
                         }
                         catch (_: Exception) {}

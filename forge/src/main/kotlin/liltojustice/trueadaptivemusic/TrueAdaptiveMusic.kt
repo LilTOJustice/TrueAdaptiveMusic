@@ -3,6 +3,8 @@ package liltojustice.trueadaptivemusic
 import liltojustice.trueadaptivemusic.client.ForgeModReflectionInterface
 import liltojustice.trueadaptivemusic.client.TAMClientInitializer
 import liltojustice.trueadaptivemusic.client.network.ForgeClientNetworkInterface
+import liltojustice.trueadaptivemusic.client.network.TAMClientNetworking
+import liltojustice.trueadaptivemusic.network.FakeClientNetworkInterface
 import liltojustice.trueadaptivemusic.network.ForgeServerNetworkInterface
 import liltojustice.trueadaptivemusic.network.TAMServerNetworking.processTick
 import net.minecraft.client.Minecraft
@@ -53,5 +55,6 @@ object TrueAdaptiveMusic {
     }
 
     fun onServerSetup(@Suppress("UNUSED") event: FMLDedicatedServerSetupEvent) {
+        TAMClientNetworking.init(FakeClientNetworkInterface)
     }
 }
