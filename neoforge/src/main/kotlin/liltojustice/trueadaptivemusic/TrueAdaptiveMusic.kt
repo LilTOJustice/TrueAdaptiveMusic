@@ -18,6 +18,8 @@ import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
 @Mod("trueadaptivemusic")
 @EventBusSubscriber
 object TrueAdaptiveMusic {
+    val physicalServerServerNetworkingInterface = NeoforgeServerNetworkingInterface(true)
+    val physicalClientServerNetworkingInterface = NeoforgeServerNetworkingInterface(false)
     init {
         runForDist(
             clientTarget = {
@@ -35,13 +37,14 @@ object TrueAdaptiveMusic {
             NeoforgeClientNetworkingInterface,
             NeoforgeModReflectionInterface
         )
+        TAMMainInitializer.onInitialize(physicalClientServerNetworkingInterface)
     }
 
     @SubscribeEvent
     private fun onCommonSetup(@Suppress("UNUSED") event: FMLCommonSetupEvent) {
-        TAMMainInitializer.onInitialize(NeoforgeServerNetworkingInterface)
     }
 
     private fun onServerSetup(@Suppress("UNUSED") event: FMLDedicatedServerSetupEvent) {
+        TAMMainInitializer.onInitialize(physicalServerServerNetworkingInterface)
     }
 }

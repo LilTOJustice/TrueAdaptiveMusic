@@ -9,12 +9,12 @@ import net.neoforged.neoforge.network.PacketDistributor
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
-object NeoforgeServerNetworkingInterface: ServerNetworkInterface {
-    private const val REGISTRAR_VERSION = "1"
+class NeoforgeServerNetworkingInterface(private val isDedicatedServer: Boolean): ServerNetworkInterface {
+    private val registrarVersion = "1"
     private val registrations = mutableListOf<(PayloadRegistrar) -> Unit>()
 
     fun registerPayloadHandlers(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar(REGISTRAR_VERSION)
+        val registrar = event.registrar(registrarVersion)
         registrations.forEach { it(registrar) }
     }
 
@@ -32,7 +32,9 @@ object NeoforgeServerNetworkingInterface: ServerNetworkInterface {
         type: CustomPacketPayload.Type<T>,
         codec: StreamCodec<ByteBuf, T>
     ) {
-        registrations.add { registrar -> registrar.playToClient(type, codec, { _, _ -> }) }
+        if (isDedicatedServer) {
+            registrations.add { registrar -> registrar.playToClient(type, codec) { _, _ -> } }
+        }
     }
 
     override fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
