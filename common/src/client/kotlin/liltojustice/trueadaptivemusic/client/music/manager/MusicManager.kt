@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
@@ -183,7 +184,8 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPlayer.stop(ambienceTrack)
         }
 
-        if (!ambienceToPlay.isEmpty() &&
+        if (!TAMClient.options.disableAmbience &&
+            !ambienceToPlay.isEmpty() &&
             minecraft.player != null &&
             (!isAmbiencePlaying || !ambienceToPlay.contains(currentAmbience?.playableSound) || isAmbienceAlmostDone)) {
             val newAmbience = getPseudoRandomAmbience(ambienceToPlay)
