@@ -58,6 +58,7 @@ class PackBrowserListWidget(
         get() = Constants.MUSIC_PACK_DIR
             .toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
     private val loadedPackImages = mutableSetOf<ResourceLocation>()
+    private val failedPackImages = mutableSetOf<ResourceLocation>()
 
     init {
         reload(firstLoad)
@@ -241,12 +242,20 @@ class PackBrowserListWidget(
                     Util.sanitizeName(imagePath.name, ResourceLocation::validPathChar)
         ) ?: return false
 
+        if (identifier in failedPackImages) {
+            return false
+        }
+
         if (identifier !in loadedPackImages) {
             ImageProcessor.getNativeImage(imagePath)?.let { image ->
                 minecraft.textureManager.register(
                     identifier,
                     DynamicTexture(image)
                 )
+            } ?: run {
+                failedPackImages.add(identifier)
+
+                return false
             }
 
             loadedPackImages.add(identifier)
