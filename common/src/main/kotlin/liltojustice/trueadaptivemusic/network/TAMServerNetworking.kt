@@ -24,8 +24,9 @@ object TAMServerNetworking {
 
     private var networkInterface: ServerNetworkInterface? = null
 
-    private val network = networkInterface
-        ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+    private val network
+        get() = networkInterface
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
 
     fun init(serverNetworkInterface: ServerNetworkInterface) {
         networkInterface = serverNetworkInterface
