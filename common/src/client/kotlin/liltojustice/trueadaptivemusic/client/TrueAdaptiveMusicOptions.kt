@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client
 import com.google.gson.GsonBuilder
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.util.LUFBoost
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.network.chat.Component
@@ -73,12 +74,6 @@ data class TrueAdaptiveMusicOptions(
         fun getArgDescription(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.options.${argName}.description", descriptions[argName])
-        }
-    }
-
-    class LUFBoost(val value: UInt) {
-        companion object {
-            const val MAX_VALUE = 10U
         }
     }
 }

@@ -18,6 +18,7 @@ import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.TimeOfDay
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
@@ -408,6 +409,7 @@ class MusicTree {
                     )
                 private val json = GsonBuilder()
                     .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
+                    .registerTypeAdapter(TimeOfDay::class.java, TimeOfDay.TimeOfDayTypeAdapter)
                     .setPrettyPrinting()
                     .create()
 
