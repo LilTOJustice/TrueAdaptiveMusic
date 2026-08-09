@@ -249,7 +249,8 @@ class PackBrowserListWidget(
                     identifier,
                     DynamicTexture(identifier::toString, image)
                 )
-            } ?: return false
+            }
+
             loadedPackImages.add(identifier)
         }
 
@@ -262,8 +263,8 @@ class PackBrowserListWidget(
         val maxImageHeight = y + height - imageY - 3
         var finalImageWidth = image.width
         var finalImageHeight = image.height
-        val widthDiff = (image.width - maxImageWidth)
-        val heightDiff = (image.height - maxImageHeight)
+        val widthDiff = image.width - maxImageWidth
+        val heightDiff = image.height - maxImageHeight
         var xOffset = 0
         var yOffset = 0
 
