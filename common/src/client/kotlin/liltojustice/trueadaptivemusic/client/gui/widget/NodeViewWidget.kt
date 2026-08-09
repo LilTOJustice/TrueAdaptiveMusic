@@ -215,6 +215,7 @@ class NodeViewWidget(
                             { selected ->
                                 selectedMusicPaths = selected.toMutableList()
                                 clearLoopIntroEndpointWidgets()
+                                clearMusicWeightWidgets()
                                 onChange()
                             },
                             WidgetConstants.MUSIC_CHOICE_TEXT.string,
