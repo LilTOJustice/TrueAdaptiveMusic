@@ -259,7 +259,7 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
 
             if (music != currentMusic) {
-                musicPlayer.setTrackVolume(trackName, 0F)
+                musicPlayer.clampTrackVolume(trackName, 0F)
             }
         }
 
