@@ -57,8 +57,10 @@ class PackBrowserListWidget(
     private val noPacksFoundWidget = MultiLineTextWidget(NO_PACKS_TEXT, client.font)
     private val loadFailureWidget = MultiLineTextWidget(LOAD_FAILURE_TEXT, client.font)
     private val downloadedPacks
-        get() = Constants.MUSIC_PACK_DIR.toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
-    private val loadedPackImages = mutableSetOf<Identifier>()
+        get() = Constants.MUSIC_PACK_DIR
+            .toFile().listFiles().filter { it.extension == "zip" }.map { Path(it.path) }
+    private val loadedPackImages = mutableSetOf<ResourceLocation>()
+    private val failedPackImages = mutableSetOf<ResourceLocation>()
 
     init {
         reload(firstLoad)
@@ -220,10 +222,20 @@ class PackBrowserListWidget(
             "image/${Util.sanitizeName(imagePath.name, Identifier::validPathChar)}"
         )
 
+        if (identifier in failedPackImages) {
+            return false
+        }
+
         if (identifier !in loadedPackImages) {
             ImageProcessor.getNativeImage(imagePath)?.let { image ->
                 minecraft.textureManager.register(
-                    identifier, DynamicTexture(identifier::toString, image))
+                    identifier,
+                    DynamicTexture(image)
+                )
+            } ?: run {
+                failedPackImages.add(identifier)
+
+                return false
             }
 
             loadedPackImages.add(identifier)
