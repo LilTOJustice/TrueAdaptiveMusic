@@ -223,7 +223,9 @@ class PackBrowserListWidget(
         if (identifier !in loadedPackImages) {
             ImageProcessor.getNativeImage(imagePath)?.let { image ->
                 minecraft.textureManager.register(
-                    identifier, DynamicTexture(identifier::toString, image))
+                    identifier,
+                    DynamicTexture(identifier::toString, image)
+                )
             }
 
             loadedPackImages.add(identifier)
@@ -238,8 +240,8 @@ class PackBrowserListWidget(
         val maxImageHeight = y + height - imageY - 3
         var finalImageWidth = image.width
         var finalImageHeight = image.height
-        val widthDiff = (image.width - maxImageWidth)
-        val heightDiff = (image.height - maxImageHeight)
+        val widthDiff = image.width - maxImageWidth
+        val heightDiff = image.height - maxImageHeight
         var xOffset = 0
         var yOffset = 0
 
