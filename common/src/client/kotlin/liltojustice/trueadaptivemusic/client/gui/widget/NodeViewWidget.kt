@@ -9,6 +9,7 @@ import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.util.NInt
@@ -272,7 +273,7 @@ class NodeViewWidget(
             )
 
             val musicWeightsParam = requiredNodeParams.first()
-            val soundNames = getSoundNames(node)
+            val soundNames = getSoundNames(node, true)
             soundNames.forEach { soundName ->
                 addWidgetFromRender(
                     {
@@ -645,13 +646,12 @@ class NodeViewWidget(
         queueClearWidgetsFromRender { widget -> restrictedParameters.none { widget.id.contains(it) } }
     }
 
-    private fun getSoundNames(node: MusicTreeNode): List<String> {
+    private fun getSoundNames(node: MusicTreeNode, includeSoundEvents: Boolean = false): List<String> {
         return node.music
-            .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
             .flatMap { sound ->
-                (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
-                    ?: (sound as? PlayableSoundDirectory)
-                        ?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
+                (sound as? PlayableSoundEvent)?.takeIf { includeSoundEvents }?.let { listOf(it.getSoundName()) }
+                    ?: (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
+                    ?: (sound as? PlayableSoundDirectory)?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
                     ?: emptyList()
             }.sorted()
     }
