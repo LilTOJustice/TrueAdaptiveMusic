@@ -96,7 +96,11 @@ class NodeViewWidget(
                     MusicTreeNode.Parameters::enterDelay.name,
                     MusicTreeNode.Parameters::inheritMusic.name,
                     MusicTreeNode.Parameters::loopMusic.name,
-                    MusicTreeNode.Parameters::musicWeights.name
+                    MusicTreeNode.Parameters::musicWeights.name,
+                    MusicTreeNode.Parameters::disableFading.name,
+                    MusicTreeNode.Parameters::disableResuming.name,
+                    MusicTreeNode.Parameters::requireChildren.name,
+                    MusicTreeNode.Parameters::exitDelay.name
                 )
             }
 
@@ -114,7 +118,11 @@ class NodeViewWidget(
                     MusicTreeNode.Parameters::inheritMusic.name,
                     MusicTreeNode.Parameters::loopMusic.name,
                     MusicTreeNode.Parameters::loopStartPoints.name,
-                    MusicTreeNode.Parameters::musicWeights.name
+                    MusicTreeNode.Parameters::musicWeights.name,
+                    MusicTreeNode.Parameters::disableFading.name,
+                    MusicTreeNode.Parameters::disableResuming.name,
+                    MusicTreeNode.Parameters::requireChildren.name,
+                    MusicTreeNode.Parameters::exitDelay.name
                 )
             }
 
@@ -348,7 +356,6 @@ class NodeViewWidget(
 
             val loopStartPointsParam = requiredNodeParams.last()
             if (node.parameters.parallelMusic) {
-                clearLoopIntroEndpointWidgets()
                 addWidgetFromRender(
                     {
                         val outArg = mutableListOf(node.parameters.loopStartPoints.values.firstOrNull() as Any?)
