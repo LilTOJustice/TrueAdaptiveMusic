@@ -243,14 +243,22 @@ object TAMClientInitializer {
         TAMAPI.registerInputWidget(
             typeOf<NInt>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            var initialInput = true
             val result = TextInputWidget(
                 prompt,
                 { _, text ->
                     if (text.isBlank()) {
+                        initialInput = true
                         return@TextInputWidget "1"
                     }
 
                     val value = text.toNIntOrNull() ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "1"
+
+                    if (initialInput && value > NInt(11U)) {
+                        initialInput = false
+                        return@TextInputWidget (value.toInt() - 10).toString()
+                    }
+
 
                     if (text != value.toString()) {
                         return@TextInputWidget value.toString()
