@@ -9,6 +9,7 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -49,7 +50,7 @@ object MusicTreeSerializer {
                 PlayableSoundSerializer.PlayableSoundTypeAdapter(soundLibrary)
             )
             .registerTypeAdapter(
-                MusicTree.Node.Parameters::class.java,
+                MusicTreeNode.Parameters::class.java,
                 MusicTreeNodeParametersDeserializer
             )
             .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
@@ -59,7 +60,7 @@ object MusicTreeSerializer {
 
     private object MusicTreeNodeDeserializationStrategy: ExclusionStrategy {
         override fun shouldSkipField(f: FieldAttributes): Boolean {
-            return f.declaringClass == MusicTree.Node::class.java && f.name == "parent"
+            return f.declaringClass == MusicTreeNode::class.java && f.name == "parent"
         }
 
         override fun shouldSkipClass(clazz: Class<*>?): Boolean {
@@ -68,10 +69,10 @@ object MusicTreeSerializer {
     }
 
     @Suppress("USELESS_ELVIS")
-    private object MusicTreeNodeParametersDeserializer: JsonDeserializer<MusicTree.Node.Parameters> {
+    private object MusicTreeNodeParametersDeserializer: JsonDeserializer<MusicTreeNode.Parameters> {
         override fun deserialize(
-            json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTree.Node.Parameters {
-            val result = MusicTree.Node.Parameters.jsonDecode(json.asJsonObject)
+            json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTreeNode.Parameters {
+            val result = MusicTreeNode.Parameters.jsonDecode(json.asJsonObject)
             result.loopStartPoints = result.loopStartPoints ?: mapOf()
             result.musicWeights = result.musicWeights ?: mapOf()
 
