@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client
 import com.google.gson.GsonBuilder
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.util.LUFBoost
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import net.minecraft.network.chat.Component
@@ -15,7 +16,8 @@ data class TrueAdaptiveMusicOptions(
     val prettifyIdentifiers: Boolean = true,
     val audioNormalization: Boolean = true,
     val musicLoudnessBoost: LUFBoost = LUFBoost(0U),
-    val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U)
+    val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U),
+    val disableAmbience: Boolean = false
 ) {
     fun save() {
         Constants.OPTIONS_PATH.toFile().writeText(jsonEncode())
@@ -46,7 +48,9 @@ data class TrueAdaptiveMusicOptions(
             TrueAdaptiveMusicOptions::musicLoudnessBoost.name to "Increase the music volume by passing a higher " +
                     "LUFS value to FFmpeg. Requires FFmpeg.",
             TrueAdaptiveMusicOptions::ambienceLoudnessBoost.name to "Increase the ambience volume by passing a " +
-                    "higher LUFS value to FFmpeg. Requires FFmpeg."
+                    "higher LUFS value to FFmpeg. Requires FFmpeg.",
+            TrueAdaptiveMusicOptions::disableAmbience.name to "Disables any ambience played by the current pack. " +
+                    "Useful if using an ambience mod that clashes with your selected pack."
         )
 
         private val json = GsonBuilder()
@@ -69,12 +73,6 @@ data class TrueAdaptiveMusicOptions(
         fun getArgDescription(argName: String): Component? {
             return translatableWithFallbackOrNull(
                 "trueadaptivemusic.options.${argName}.description", descriptions[argName])
-        }
-    }
-
-    class LUFBoost(val value: UInt) {
-        companion object {
-            const val MAX_VALUE = 10U
         }
     }
 }
