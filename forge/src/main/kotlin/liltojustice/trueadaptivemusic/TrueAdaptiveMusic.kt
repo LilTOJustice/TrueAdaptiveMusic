@@ -2,14 +2,17 @@ package liltojustice.trueadaptivemusic
 
 import liltojustice.trueadaptivemusic.client.ForgeModReflectionInterface
 import liltojustice.trueadaptivemusic.client.TAMClientInitializer
+import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen
 import liltojustice.trueadaptivemusic.client.network.ForgeClientNetworkInterface
 import liltojustice.trueadaptivemusic.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusic.network.FakeClientNetworkInterface
 import liltojustice.trueadaptivemusic.network.ForgeServerNetworkInterface
 import liltojustice.trueadaptivemusic.network.TAMServerNetworking.processTick
 import net.minecraft.client.Minecraft
+import net.minecraftforge.client.ConfigScreenHandler
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.TickEvent.ServerTickEvent
+import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
@@ -19,7 +22,7 @@ import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runForDist
 
 
-@Mod("trueadaptivemusic")
+@Mod(Constants.TRUE_ADAPTIVE_MUSIC)
 @Mod.EventBusSubscriber
 object TrueAdaptiveMusic {
     init {
@@ -42,6 +45,16 @@ object TrueAdaptiveMusic {
             ForgeClientNetworkInterface,
             ForgeModReflectionInterface
         )
+
+        ModList
+            .get()
+            .getModContainerById(Constants.TRUE_ADAPTIVE_MUSIC)
+            .get()
+            .registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory::class.java) {
+            ConfigScreenHandler.ConfigScreenFactory { _, parent ->
+                MainScreen(parent)
+            }
+        }
     }
 
     fun onCommonSetup(@Suppress("UNUSED") event: FMLCommonSetupEvent) {
