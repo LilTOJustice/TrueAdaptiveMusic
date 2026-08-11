@@ -32,7 +32,7 @@ internal class MusicPlayer(private val client: Minecraft) {
     }
 
     fun removeTrack(trackName: String) {
-        tracks.remove(trackName)?.let { stop(it, true) }
+        tracks.remove(trackName)?.let { stop(it, false) }
     }
 
     fun isTrackPlaying(trackName: String): Boolean {
@@ -117,12 +117,6 @@ internal class MusicPlayer(private val client: Minecraft) {
 
     fun clampTrackVolume(trackName: String, clamp: Float) {
         getTrack(trackName)?.let { clampTrackVolume(it, clamp) }
-    }
-
-    fun setTrackVolume(trackName: String, volume: Float, allowPause: Boolean = false) {
-        val track = getTrack(trackName) ?: return
-        track.clampedVolume = volume
-        track.currentSoundInstance?.let { volumeManager.setInstanceVolume(it, volume, allowPause) }
     }
 
     fun cancelDelayedMusic(trackName: String) {
