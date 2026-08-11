@@ -194,6 +194,10 @@ class MusicManager(private val minecraft: Minecraft) {
             playNextAmbience(newAmbience)
         }
 
+        if (musicVolumeOption.get() == 0.0) {
+            return
+        }
+
 
         if (playingEvent != null && !musicPlayer.isTrackPlaying(EVENT_TRACK)) {
             playingEvent = null
