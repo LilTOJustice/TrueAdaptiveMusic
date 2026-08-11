@@ -9,7 +9,7 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-@EventBusSubscriber(modid = "trueadaptivemusic")
+@EventBusSubscriber(modid = Constants.TRUE_ADAPTIVE_MUSIC)
 public class EventHandler {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
