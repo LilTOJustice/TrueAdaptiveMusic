@@ -21,7 +21,13 @@ import kotlin.jvm.optionals.getOrNull
 
 object TAMServerNetworking {
     private val endTickEvents = mutableListOf<(MinecraftServer) -> Unit>()
+
     private var networkInterface: ServerNetworkInterface? = null
+
+    private val network
+        get() = networkInterface
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+
     fun init(serverNetworkInterface: ServerNetworkInterface) {
         networkInterface = serverNetworkInterface
         registerClientbound()
@@ -31,8 +37,7 @@ object TAMServerNetworking {
     }
 
     fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
-        networkInterface?.sendToClient(player, payload)
-            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+        network.sendToClient(player, payload)
     }
 
     @Suppress("UNUSED")

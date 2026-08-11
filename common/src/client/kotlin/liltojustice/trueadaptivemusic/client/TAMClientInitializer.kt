@@ -54,9 +54,12 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructurePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StructureSetPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TeamPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TimeOfDayPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
+import liltojustice.trueadaptivemusic.client.util.LUFBoost
 import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.TimeOfDay
 import liltojustice.trueadaptivemusic.client.util.toNIntOrNull
 import liltojustice.trueadaptivemusic.network.ClientNetworkInterface
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
@@ -141,6 +144,7 @@ object TAMClientInitializer {
         TAMAPI.registerPredicateType(StructurePiecePredicate)
         TAMAPI.registerPredicateType(SpeedPredicate)
         TAMAPI.registerPredicateType(OnFluidPredicate)
+        TAMAPI.registerPredicateType(TimeOfDayPredicate)
     }
 
     private fun registerEventTypes() {
@@ -239,14 +243,22 @@ object TAMClientInitializer {
         TAMAPI.registerInputWidget(
             typeOf<NInt>()
         ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            var initialInput = true
             val result = TextInputWidget(
                 prompt,
                 { _, text ->
                     if (text.isBlank()) {
+                        initialInput = true
                         return@TextInputWidget "1"
                     }
 
                     val value = text.toNIntOrNull() ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "1"
+
+                    if (initialInput && value > NInt(11U)) {
+                        initialInput = false
+                        return@TextInputWidget (value.toInt() - 10).toString()
+                    }
+
 
                     if (text != value.toString()) {
                         return@TextInputWidget value.toString()
@@ -456,14 +468,45 @@ object TAMClientInitializer {
         )
 
         TAMAPI.registerInputWidget(
-            typeOf<TrueAdaptiveMusicOptions.LUFBoost>()
+            typeOf<LUFBoost>()
         ) { prompt, _, outArgs, arg, tooltipText, _ ->
             val result = SliderWidget(
                 0,
-                TrueAdaptiveMusicOptions.LUFBoost.MAX_VALUE.toInt(),
-                (outArgs[arg.index] as? TrueAdaptiveMusicOptions.LUFBoost)?.value?.toInt() ?: 0,
+                LUFBoost.MAX_VALUE.toInt(),
+                (outArgs[arg.index] as? LUFBoost)?.value?.toInt() ?: 0,
                 prompt
-            ) { outArgs[arg.index] = TrueAdaptiveMusicOptions.LUFBoost(it.toUInt()) }
+            ) { outArgs[arg.index] = LUFBoost(it.toUInt()) }
+            tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+
+            result
+        }
+
+        TAMAPI.registerInputWidget(
+            typeOf<TimeOfDay>()
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
+                prompt,
+                { _, text ->
+                    if (text.isBlank()) {
+                        return@TextInputWidget "0"
+                    }
+
+                    val value = text.toUIntOrNull() ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "0"
+
+                    if (value > TimeOfDay.MAX_VALUE) {
+                        return@TextInputWidget TimeOfDay.MAX_VALUE.toString()
+                    }
+
+                    if (text != value.toString()) {
+                        return@TextInputWidget value.toString()
+                    }
+
+                    outArgs[arg.index] = TimeOfDay(value)
+                    onChange()
+                    ""
+                },
+                (outArgs[arg.index] as? TimeOfDay)?.value?.toString() ?: ""
+            )
             tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
 
             result

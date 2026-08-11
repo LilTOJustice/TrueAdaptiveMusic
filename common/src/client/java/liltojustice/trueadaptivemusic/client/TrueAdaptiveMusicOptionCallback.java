@@ -2,6 +2,7 @@ package liltojustice.trueadaptivemusic.client;
 
 import com.mojang.datafixers.util.Unit;
 import com.mojang.serialization.Codec;
+import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -29,7 +30,7 @@ public record TrueAdaptiveMusicOptionCallback(Minecraft minecraft) implements Op
             assert minecraft.gui.screen() != null;
             return new Button.Builder(
                     Component.translatableWithFallback(
-                            "trueadaptivemusic.trueadaptivemusic",
+                            Constants.TRUE_ADAPTIVE_MUSIC + '.' + Constants.TRUE_ADAPTIVE_MUSIC,
                             "True Adaptive Music"
                     ),
                     _ -> minecraft.gui.setScreen(new MainScreen(minecraft.gui.screen()))
