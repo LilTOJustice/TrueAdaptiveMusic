@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.trigger.MusicTrigger
 import liltojustice.trueadaptivemusic.client.trigger.MusicTriggerException
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
@@ -26,7 +26,7 @@ class PredicateViewWidget(
     height: Int,
     private val musicPack: MusicPack,
     private val onChangesSaved:
-        (targetNode: MusicTree.Node?, targetPredicate: MusicPredicate<*>?, exit: Boolean) -> Unit,
+        (targetNode: MusicTreeNode?, targetPredicate: MusicPredicate<*>?, exit: Boolean) -> Unit,
     x: Int = 0,
     y: Int = 0)
     : ContainerWidget(
@@ -46,7 +46,7 @@ class PredicateViewWidget(
     private var requiredPredicateArgs = listOf<WidgetArg>()
     private var predicateArgs = mutableListOf<Any?>()
     private var selectedPredicate: MusicPredicate<*>? = null
-    private var selectedNode: MusicTree.Node? = null
+    private var selectedNode: MusicTreeNode? = null
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
 
     override fun updateWidgetNarration(builder: NarrationElementOutput) {
@@ -180,7 +180,7 @@ class PredicateViewWidget(
         )
     }
 
-    fun setEditExistingPredicate(node: MusicTree.Node, predicate: MusicPredicate<*>) {
+    fun setEditExistingPredicate(node: MusicTreeNode, predicate: MusicPredicate<*>) {
         clearWidgetsFromRender()
         setSelectedPredicateTypeName(predicate.type.typeName)
         selectedPredicate = predicate
@@ -188,7 +188,7 @@ class PredicateViewWidget(
         resetScrolling()
     }
 
-    fun setCreateNewPredicate(parent: MusicTree.Node) {
+    fun setCreateNewPredicate(parent: MusicTreeNode) {
         clearWidgetsFromRender()
         selectedPredicate = null
         selectedNode = parent
@@ -281,7 +281,7 @@ class PredicateViewWidget(
         save()
     }
 
-    private fun makeNewPredicate(): MusicTree.Node? {
+    private fun makeNewPredicate(): MusicTreeNode? {
         return selectedNode?.newPredicate(selectedPredicateTypeName, predicateArgs)
     }
 }
