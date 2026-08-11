@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusicextensions.client
 
-import liltojustice.trueadaptivemusic.Constants.Companion.FFMPEG_DIR
-import liltojustice.trueadaptivemusic.Constants.Companion.OPTIONS_DIR
-import liltojustice.trueadaptivemusic.Constants.Companion.PACK_BROWSER_CACHE_DIR
+import liltojustice.trueadaptivemusic.Constants.FFMPEG_DIR
+import liltojustice.trueadaptivemusic.Constants.OPTIONS_DIR
+import liltojustice.trueadaptivemusic.Constants.PACK_BROWSER_CACHE_DIR
 import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.PosixFilePermission
 import java.nio.file.attribute.PosixFilePermissions
