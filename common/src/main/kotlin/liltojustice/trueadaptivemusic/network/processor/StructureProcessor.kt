@@ -11,7 +11,7 @@ import net.minecraft.core.SectionPos
 import net.minecraft.world.level.levelgen.structure.Structure
 
 class StructureProcessor: Processor() {
-    private val structureCache = mutableMapOf<SectionPos, StructureData>()
+    private val structureCache = mutableMapOf<Pair<SectionPos, Structure>, StructureData>()
     override fun makePacket(server: MinecraftServer, player: ServerPlayer): CustomPacketPayload {
         val level = player.level()
         val structureManager = level.structureManager()
@@ -22,7 +22,7 @@ class StructureProcessor: Processor() {
         val nearby = structureManager.getAllStructuresAt(player.blockPosition()).keys
             .map { structure ->
                 val sectionPos = player.lastSectionPos
-                structureCache.getOrPut(sectionPos) {
+                structureCache.getOrPut(sectionPos to structure) {
                     val starts = structureManager.startsForStructure(sectionPos, structure)
                     val bounds = starts.takeIf { it.isNotEmpty() }?.let {
                         starts.maxOf { it.boundingBox.minY() } to starts.minOf { it.boundingBox.maxY() }
