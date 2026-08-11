@@ -297,7 +297,9 @@ class MusicPack private constructor(
     }
 
     private fun performStaticValidation() {
-        val usedExtensions = getPackAssetNames().map { name -> Path(name).extension }.toSet()
+        val usedExtensions = getPackAssetNames()
+            .mapNotNull { name -> Path(name).extension.takeIf { it.isNotBlank() } }
+            .toSet()
         if (usedExtensions.any { !TAMClient.allowedFileTypes.contains(it) }) {
             validation.addWarning(
                 Component.translatableWithFallback(
