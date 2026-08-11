@@ -2,8 +2,11 @@ package liltojustice.trueadaptivemusic.network
 
 import com.mojang.serialization.Dynamic
 import com.mojang.serialization.JsonOps
+import liltojustice.trueadaptivemusic.network.model.CurrentStructurePayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateResponsePayload
+import liltojustice.trueadaptivemusic.network.model.ScoreboardStatePayload
+import liltojustice.trueadaptivemusic.network.model.SpawnPointPayload
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -18,17 +21,47 @@ import kotlin.jvm.optionals.getOrNull
 
 object TAMServerNetworking {
     private val endTickEvents = mutableListOf<(MinecraftServer) -> Unit>()
+
     private var networkInterface: ServerNetworkInterface? = null
+
+    private val network
+        get() = networkInterface
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+
     fun init(serverNetworkInterface: ServerNetworkInterface) {
         networkInterface = serverNetworkInterface
-        serverNetworkInterface.registerServerboundPacket(CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
+        registerClientbound()
+        registerServerbound()
+
+        endTickEvents.add { server -> ServerStateProcessor.processServer(server, serverNetworkInterface) }
+    }
+
+    fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
+        network.sendToClient(player, payload)
+    }
+
+    @Suppress("UNUSED")
+    fun processTick(server: MinecraftServer) {
+        endTickEvents.forEach { it(server) }
+    }
+
+    private fun registerClientbound() {
+        network.registerClientboundPacket(CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC)
+        network.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC)
+        network.registerClientboundPacket(CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC)
+        network.registerClientboundPacket(ScoreboardStatePayload.TYPE, ScoreboardStatePayload.CODEC)
+    }
+
+    private fun registerServerbound() {
+        network.registerServerboundPacket(
+            CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
             val player = context.player as ServerPlayer
             val json = StrictJsonParser.parse(payload.predicateText)
             val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
                 .result()
                 .getOrNull()
                 ?.value() ?: return@registerServerboundPacket
-            serverNetworkInterface.sendToClient(
+            network.sendToClient(
                 player,
                 CustomPredicateResponsePayload(
                     payload.predicateId,
@@ -45,17 +78,5 @@ object TAMServerNetworking {
                 )
             )
         }
-
-        endTickEvents.add { server -> ServerStateProcessor.processServer(server, serverNetworkInterface) }
-    }
-
-    fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
-        networkInterface?.sendToClient(player, payload)
-            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
-    }
-
-    @Suppress("UNUSED")
-    fun processTick(server: MinecraftServer) {
-        endTickEvents.forEach { it(server) }
     }
 }

@@ -14,7 +14,7 @@ group = project.property("mod_group_id") as String
 val isCurseForge = project.property("is_curseforge") == "true"
 base {
     archivesName.set(
-        project.property("archives_base_name") as String + "-fabric" + if (isCurseForge) "-curseforge" else "")
+        project.property("archives_base_name") as String + "-fabric" + if (isCurseForge) "-cf" else "")
 }
 
 val targetJavaVersion = (project.property("java_version") as String).toInt()
@@ -42,6 +42,7 @@ repositories {
     }
 }
 
+val apiFileId = "8518038"
 dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")
@@ -49,8 +50,8 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api("curse.maven:trueadaptivemusicapi-1514598:8410953")
-    include("curse.maven:trueadaptivemusicapi-1514598:8410953")
+    api("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
+    include("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
 }
 
 tasks.processResources {

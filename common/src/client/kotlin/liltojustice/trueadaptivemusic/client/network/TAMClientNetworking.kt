@@ -25,30 +25,42 @@ object TAMClientNetworking {
 
     private var networkInterface: ClientNetworkInterface? = null
 
+    private val network
+        get() = networkInterface
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM client network interface was not initialized!")
+
     fun init(clientNetworkInterface: ClientNetworkInterface) {
         networkInterface = clientNetworkInterface
-        clientNetworkInterface.registerClientboundPacket(
+        registerClientbound()
+        registerServerbound()
+    }
+
+    private fun registerClientbound() {
+        network.registerClientboundPacket(
             CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC) { payload, _ ->
             structureId = payload.structureIdentifier
             structureSetId = payload.structureSetIdentifier
             structurePieceId = payload.structurePieceIdentifier
         }
-        clientNetworkInterface.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC) { payload, _ ->
+        network.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC) { payload, _ ->
             spawnPoint = payload.spawnPoint
         }
-        clientNetworkInterface.registerClientboundPacket(
+        network.registerClientboundPacket(
             CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC) { payload, _ ->
             customPredicateResults[payload.predicateId] = payload.predicateResponse
         }
-        clientNetworkInterface.registerClientboundPacket(
+        network.registerClientboundPacket(
             ScoreboardStatePayload.TYPE, ScoreboardStatePayload.CODEC) { payload, _ ->
             scoreboardState[payload.objectiveName] = payload.value
         }
     }
 
+    fun registerServerbound() {
+        network.registerServerboundPacket(CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC)
+    }
+
     fun queryCustomPredicate(predicateId: String, predicateString: String): Boolean {
-        networkInterface?.sendToServer(CustomPredicateQueryPayload(predicateId, predicateString))
-            ?: throw TrueAdaptiveMusicNetworkingException("TAM client network interface was not initialized!")
+        network.sendToServer(CustomPredicateQueryPayload(predicateId, predicateString))
 
         return customPredicateResults[predicateId] ?: false
     }

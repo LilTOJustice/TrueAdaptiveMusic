@@ -53,7 +53,7 @@ repositories {
 }
 
 base {
-    archivesName = archives_base_name + "-neoforge" + (isCurseForge ? "-curseforge" : "")
+    archivesName = archives_base_name + "-neoforge" + (isCurseForge ? "-cf" : "")
 }
 
 var javaVersion = java_version.toInteger()
@@ -92,10 +92,11 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+var apiFileId = "8518039"
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
-    api 'curse.maven:trueadaptivemusicapi-1514598:8410954'
-    jarJar 'curse.maven:trueadaptivemusicapi-1514598:8410954'
+    api 'curse.maven:trueadaptivemusicapi-1514598:' + apiFileId
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:' + apiFileId
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
