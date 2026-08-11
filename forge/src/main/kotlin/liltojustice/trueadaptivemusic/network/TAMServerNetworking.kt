@@ -1,7 +1,7 @@
 package liltojustice.trueadaptivemusic.network
 
 import com.google.gson.JsonParser
-import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
+import liltojustice.trueadaptivemusic.Constants.NULL_IDENTIFIER
 import liltojustice.trueadaptivemusic.network.model.CustomPacketPayload
 import liltojustice.trueadaptivemusic.network.model.CustomPacketPayloadType
 import liltojustice.trueadaptivemusic.network.model.CustomPredicateQueryPayloadType
