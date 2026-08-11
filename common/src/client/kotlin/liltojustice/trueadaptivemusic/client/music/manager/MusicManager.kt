@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.music.manager
 
+import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
@@ -44,6 +45,7 @@ class MusicManager(private val minecraft: Minecraft) {
     private var ambiencePool = mutableSetOf<PlayableSound>()
     private var vanillaSoundEvent: PlayableSoundEvent? = null
     private var compatibilityMode = false
+    private var lastExitDelay = 0U
 
     init {
         musicPlayer.createTrack(MAIN_TRACK_1, false, MAIN_CROSSFADE_TICKS)
@@ -108,7 +110,7 @@ class MusicManager(private val minecraft: Minecraft) {
         val ambienceToPlay = treeResult.accumulatedAmbience
         val trackDelayNoise = parameters.trackDelayNoise.takeIf { !parallelMusic } ?: 0U
         val trackDelay = parameters.trackDelay.takeIf { !parallelMusic } ?: 0U
-        val enterDelay = parameters.enterDelay.takeIf { !parallelMusic } ?: 0U
+        val enterDelay = max(parameters.enterDelay.takeIf { !parallelMusic } ?: 0U, lastExitDelay)
         val loopMusic = (parameters.loopMusic || parallelMusic) && !vanillaMusic
         val loopStartPoints = parameters.loopStartPoints
         val disableResuming = parameters.disableResuming
@@ -121,6 +123,7 @@ class MusicManager(private val minecraft: Minecraft) {
                 isEnter
 
         if (isEnter) {
+            lastExitDelay = parameters.exitDelay.takeIf { !parallelMusic } ?: 0U
             musicPool.clear()
             ambiencePool.clear()
             lastIgnorePersistence = parameters.ignorePersistence
@@ -183,11 +186,16 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPlayer.stop(ambienceTrack)
         }
 
-        if (!ambienceToPlay.isEmpty() &&
+        if (!TAMClient.options.disableAmbience &&
+            !ambienceToPlay.isEmpty() &&
             minecraft.player != null &&
             (!isAmbiencePlaying || !ambienceToPlay.contains(currentAmbience?.playableSound) || isAmbienceAlmostDone)) {
             val newAmbience = getPseudoRandomAmbience(ambienceToPlay)
             playNextAmbience(newAmbience)
+        }
+
+        if (musicVolumeOption.get() == 0.0) {
+            return
         }
 
 
@@ -255,7 +263,7 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPlayer.startNew(trackName, music, isLooping = true, loopStartPoint = context.loopStartPoint)
 
             if (music != currentMusic) {
-                musicPlayer.setTrackVolume(trackName, 0F)
+                musicPlayer.clampTrackVolume(trackName, 0F)
             }
         }
 
