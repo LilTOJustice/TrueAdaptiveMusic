@@ -29,6 +29,12 @@ object NeoforgeClientNetworkingInterface: ClientNetworkInterface {
         }
     }
 
+    override fun <T : CustomPacketPayload> registerServerboundPacket(
+        type: CustomPacketPayload.Type<T>,
+        codec: StreamCodec<ByteBuf, T>
+    ) {
+    }
+
     override fun sendToServer(payload: CustomPacketPayload) {
         PacketDistributor.sendToServer(payload)
     }

@@ -16,6 +16,12 @@ object FabricClientNetworkInterface: ClientNetworkInterface {
         ClientPlayNetworking.registerGlobalReceiver(type,  transformHandlerClient(handler))
     }
 
+    override fun <T: CustomPacketPayload> registerServerboundPacket(
+        type: CustomPacketPayload.Type<T>,
+        codec: StreamCodec<ByteBuf, T>
+    ) {
+    }
+
     override fun sendToServer(payload: CustomPacketPayload) {
         ClientPlayNetworking.send(payload)
     }
