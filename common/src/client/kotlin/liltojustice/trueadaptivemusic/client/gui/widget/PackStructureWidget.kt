@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.ClickableTextWid
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.ContainerWidget
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
-import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.trigger.predicate.ErrorPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import net.minecraft.client.gui.GuiGraphics
@@ -21,10 +21,10 @@ class PackStructureWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onSelectEditExistingNode: (node: MusicTree.Node) -> Unit,
-    private val onSelectEditExistingPredicate: (node: MusicTree.Node, predicate: MusicPredicate<*>) -> Unit,
-    private val onSelectCreateNewNode: (node: MusicTree.Node) -> Unit,
-    private val onSelectCreateNewPredicate: (node: MusicTree.Node) -> Unit,
+    private val onSelectEditExistingNode: (node: MusicTreeNode) -> Unit,
+    private val onSelectEditExistingPredicate: (node: MusicTreeNode, predicate: MusicPredicate<*>) -> Unit,
+    private val onSelectCreateNewNode: (node: MusicTreeNode) -> Unit,
+    private val onSelectCreateNewPredicate: (node: MusicTreeNode) -> Unit,
     private val onUnselectNode: () -> Unit,
     private val onUnselectPredicate: () -> Unit,
     x: Int = 0,
@@ -45,20 +45,20 @@ class PackStructureWidget(
     private var shiftHeld = false
     private var ctrlHeld = false
     private var spaceHeld = false
-    private var targetedNode: MusicTree.Node? = null
+    private var targetedNode: MusicTreeNode? = null
     private var targetedPredicate: MusicPredicate<*>? = null
-    private var collapsed = mutableMapOf<MusicTree.Node, Boolean>()
+    private var collapsed = mutableMapOf<MusicTreeNode, Boolean>()
 
     init {
         initPredicateWidgets()
     }
 
-    fun setNode(node: MusicTree.Node?, predicate: MusicPredicate<*>?) {
+    fun setNode(node: MusicTreeNode?, predicate: MusicPredicate<*>?) {
         targetedNode = node
         targetedPredicate = predicate
     }
 
-    fun initPredicateWidgets(newTarget: MusicTree.Node? = null) {
+    fun initPredicateWidgets(newTarget: MusicTreeNode? = null) {
         targetedNode = newTarget
         clearWidgets()
         var row = 0
@@ -262,7 +262,7 @@ class PackStructureWidget(
         return mouseButtonHeld && targetedNode != null
     }
 
-    private fun expandRecursively(node: MusicTree.Node) {
+    private fun expandRecursively(node: MusicTreeNode) {
         collapsed[node] = false
         node.children.forEach { expandRecursively(it) }
     }
@@ -302,7 +302,7 @@ class PackStructureWidget(
             "trueadaptivemusic.collapse", "Click to Collapse Children")
     }
 
-    private inner class NodeWidget(node: MusicTree.Node, override val targetNode: TargetNode):
+    private inner class NodeWidget(node: MusicTreeNode, override val targetNode: TargetNode):
         AbstractNodeWidget,
         ClickableTextWidget(
             "", showHighlight = false, isHoveredOrFocused = { targetedNode === node && targetedPredicate == null })
@@ -456,11 +456,11 @@ class PackStructureWidget(
 
     private interface AbstractNodeWidget {
         val targetNode: TargetNode
-        fun isValidDestination(selectedNode: MusicTree.Node): Boolean {
+        fun isValidDestination(selectedNode: MusicTreeNode): Boolean {
             return (targetNode.node.parent != null || targetNode.isParent)
                     && targetNode.node.isValidNewChild(selectedNode)
         }
     }
 
-    private data class TargetNode(val node: MusicTree.Node, val isParent: Boolean)
+    private data class TargetNode(val node: MusicTreeNode, val isParent: Boolean)
 }
