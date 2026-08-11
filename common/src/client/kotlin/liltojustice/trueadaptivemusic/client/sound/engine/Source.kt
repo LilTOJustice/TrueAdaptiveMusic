@@ -167,10 +167,9 @@ class Source private constructor(private val pointer: Int) {
 
         lastTimestamp = newTimestamp
 
-        if (!read() && totalSeconds == null) {
+        if (totalSeconds == null && !read()) {
             totalSeconds = (totalBytes.toFloat() / bufferSize)
         }
-
     }
 
     private fun removeProcessedBuffers(): Int {

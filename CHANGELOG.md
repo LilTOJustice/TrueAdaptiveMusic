@@ -1,29 +1,27 @@
-# True Adaptive Music v2.7.0 - Very *Forgey* Indeed!
+# True Adaptive Music v2.8.0 - A bunch of fixes
 
 ---
-## Important Notice!
-### 2.7.0 marks a return to CurseForge. To remain compliant with CurseForge policy, certain functionality has been removed from the CurseForge version of TAM.
-### This functionality includes FFmpeg (ability to use non-ogg sound files) and the Pack Browser.
-
 ## New Features:
-### NeoForge/Forge Support!!!
-- TAM now officially supports NeoForge for MC 1.21.1-26.* and up. Forge is supported for 1.20.1.
-- If you want support for forge/neoforge to be extended to the other versions, please let me know!
-### TAM API Embedded
-- The True Adaptive Music API is now embedded into the base mod, so no need to download both anymore!
-### Mega Link Support
-- Mega links are now supported for Pack Browser upload!
-### Node Option: Music Weights
-- You can now specify how often certain music within a node should play relative to other music.
-- Toggle on "Music Weights" in the node parameter list to use it.
-### Node Option: Disable Resuming
-- Toggle on "Disable Resuming" in the node parameter list to disable resuming when re-entering that node.
-### Combat/Entity Nearby Mob Count Option
-- You can now set a minimum number of mobs to trigger music for the Combat/Entity Nearby predicate types.
+### Exit Delay Node Option
+- You can now set an exit delay for a node. This functions similar to an enter delay, just backwards. If a node is exited and the next node has an enter delay, the higher delay will be chosen to wait for the next track to play.
+### Disable Ambience User Option
+- From the user options (Sound Options -> TAM -> Options), you can now disable ambience played by TAM. This is useful if you are using an ambience mod and don't want the pack you are using to conflict.
+
+## New Predicate Types:
+### Time of day
+- The time of day predicate allows setting music to play during a specific time range during a minecraft day. E.g. playing specific music for ticks 8000-12000.
+
 
 ## Fixes
-- Fixed guardians/elder guardians not working for the Combat predicate type on 26.1 and up.
-- Unsupported OSs will fall back to non-ffmpeg.
+- Fixed natural number input being annoying
+- Fixed music weight option missing for sound event tracks
+- Fixed structure predicates sometimes not being detected until the world is rejoined
+- Fixed parallel music node option not giving a loop start point option
+- Fixed fading not occurring when entering/leaving a parallel node context
+- Fixed deleting tracks not removing the UI for music weight for that track
+- NeoForge/Forge: Fixed missing config button in mod menu
+
+Next up, [2.9](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/21) with a bunch more community-requested features!
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
 
