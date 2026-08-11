@@ -21,7 +21,13 @@ import kotlin.jvm.optionals.getOrNull
 
 object TAMServerNetworking {
     private val endTickEvents = mutableListOf<(MinecraftServer) -> Unit>()
+
     private var networkInterface: ServerNetworkInterface? = null
+
+    private val network
+        get() = networkInterface
+            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+
     fun init(serverNetworkInterface: ServerNetworkInterface) {
         networkInterface = serverNetworkInterface
         registerClientbound()
@@ -31,13 +37,47 @@ object TAMServerNetworking {
     }
 
     fun sendToClient(player: ServerPlayer, payload: CustomPacketPayload) {
-        networkInterface?.sendToClient(player, payload)
-            ?: throw TrueAdaptiveMusicNetworkingException("TAM server network interface was not initialized!")
+        network.sendToClient(player, payload)
     }
 
     @Suppress("UNUSED")
     fun processTick(server: MinecraftServer) {
         endTickEvents.forEach { it(server) }
+    }
+
+    private fun registerClientbound() {
+        network.registerClientboundPacket(CurrentStructurePayload.TYPE, CurrentStructurePayload.CODEC)
+        network.registerClientboundPacket(SpawnPointPayload.TYPE, SpawnPointPayload.CODEC)
+        network.registerClientboundPacket(CustomPredicateResponsePayload.TYPE, CustomPredicateResponsePayload.CODEC)
+        network.registerClientboundPacket(ScoreboardStatePayload.TYPE, ScoreboardStatePayload.CODEC)
+    }
+
+    private fun registerServerbound() {
+        network.registerServerboundPacket(
+            CustomPredicateQueryPayload.TYPE, CustomPredicateQueryPayload.CODEC) { payload, context ->
+            val player = context.player as ServerPlayer
+            val json = StrictJsonParser.parse(payload.predicateText)
+            val condition = LootItemCondition.CODEC.parse(Dynamic(JsonOps.INSTANCE, json))
+                .result()
+                .getOrNull()
+                ?.value() ?: return@registerServerboundPacket
+            network.sendToClient(
+                player,
+                CustomPredicateResponsePayload(
+                    payload.predicateId,
+                    condition.test(
+                        LootContext.Builder(
+                            LootParams.Builder(player.level())
+                                .withParameter(LootContextParams.ORIGIN, player.position())
+                                .withOptionalParameter(
+                                    LootContextParams.THIS_ENTITY, player.livingEntity
+                                )
+                                .create(LootContextParamSets.COMMAND)
+                        ).create(Optional.empty())
+                    )
+                )
+            )
+        }
     }
 
     private fun registerClientbound() {

@@ -7,8 +7,9 @@ import liltojustice.trueadaptivemusic.client.gui.widget.utility.*
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
-import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
 import liltojustice.trueadaptivemusic.client.util.NInt
@@ -34,7 +35,7 @@ class NodeViewWidget(
     width: Int,
     height: Int,
     private val musicPack: MusicPack,
-    private val onChangesSaved: (newTarget: MusicTree.Node?) -> Unit,
+    private val onChangesSaved: (newTarget: MusicTreeNode?) -> Unit,
     private val onEventClick: (event: MusicEvent<*>?) -> Unit,
     private val inEventView: () -> Boolean,
     x: Int = 0,
@@ -51,14 +52,14 @@ class NodeViewWidget(
     x,
     y
 ) {
-    private val defaultNodeParams = MusicTree.Node.Parameters.default().getMusicParams().map { it.value }
-    private val requiredNodeParams = MusicTree.Node.Parameters::class.primaryConstructor?.parameters
+    private val defaultNodeParams = MusicTreeNode.Parameters.default().getMusicParams().map { it.value }
+    private val requiredNodeParams = MusicTreeNode.Parameters::class.primaryConstructor?.parameters
         ?.map { WidgetArg.of(it) } ?: listOf()
-    private var newNodeParent: MusicTree.Node? = null
+    private var newNodeParent: MusicTreeNode? = null
     private var nodeParams: MutableList<Any?> = defaultNodeParams.toMutableList()
     private var events = mutableListOf<MusicEvent<*>>()
     private var selectedEvent: MusicEvent<*>? = null
-    private var selectedNode: MusicTree.Node? = null
+    private var selectedNode: MusicTreeNode? = null
     private var selectedMusicPaths = mutableListOf<String>()
     private var selectedAmbiencePaths = mutableListOf<String>()
     private var soundLibrary = musicPack.getEditPackSoundLibrary()
@@ -71,57 +72,65 @@ class NodeViewWidget(
             val result = mutableSetOf<String>()
 
             if (!musicPack.options.persistentNodeMusic) {
-                result += MusicTree.Node.Parameters::ignorePersistence.name
+                result += MusicTreeNode.Parameters::ignorePersistence.name
             }
 
             if (node.parameters.vanillaMusic) {
                 result += listOf(
-                    MusicTree.Node.Parameters::inheritMusic.name,
-                    MusicTree.Node.Parameters::parallelMusic.name,
-                    MusicTree.Node.Parameters::loopMusic.name,
-                    MusicTree.Node.Parameters::loopStartPoints.name,
-                    MusicTree.Node.Parameters::musicWeights.name
+                    MusicTreeNode.Parameters::inheritMusic.name,
+                    MusicTreeNode.Parameters::parallelMusic.name,
+                    MusicTreeNode.Parameters::loopMusic.name,
+                    MusicTreeNode.Parameters::loopStartPoints.name,
+                    MusicTreeNode.Parameters::musicWeights.name
                 )
             }
             else {
-                result += MusicTree.Node.Parameters::compatibilityMode.name
+                result += MusicTreeNode.Parameters::compatibilityMode.name
             }
 
             if (node.parameters.parallelMusic) {
                 result += listOf(
-                    MusicTree.Node.Parameters::ignorePersistence.name,
-                    MusicTree.Node.Parameters::vanillaMusic.name,
-                    MusicTree.Node.Parameters::trackDelay.name,
-                    MusicTree.Node.Parameters::trackDelayNoise.name,
-                    MusicTree.Node.Parameters::enterDelay.name,
-                    MusicTree.Node.Parameters::inheritMusic.name,
-                    MusicTree.Node.Parameters::loopMusic.name,
-                    MusicTree.Node.Parameters::musicWeights.name
+                    MusicTreeNode.Parameters::ignorePersistence.name,
+                    MusicTreeNode.Parameters::vanillaMusic.name,
+                    MusicTreeNode.Parameters::trackDelay.name,
+                    MusicTreeNode.Parameters::trackDelayNoise.name,
+                    MusicTreeNode.Parameters::enterDelay.name,
+                    MusicTreeNode.Parameters::inheritMusic.name,
+                    MusicTreeNode.Parameters::loopMusic.name,
+                    MusicTreeNode.Parameters::musicWeights.name,
+                    MusicTreeNode.Parameters::disableFading.name,
+                    MusicTreeNode.Parameters::disableResuming.name,
+                    MusicTreeNode.Parameters::requireChildren.name,
+                    MusicTreeNode.Parameters::exitDelay.name
                 )
             }
 
             if (node.parameters.loopMusic) {
-                result += MusicTree.Node.Parameters::ignorePersistence.name
+                result += MusicTreeNode.Parameters::ignorePersistence.name
             }
 
             if (node.parent?.parameters?.parallelMusic == true) {
                 result += listOf(
-                    MusicTree.Node.Parameters::vanillaMusic.name,
-                    MusicTree.Node.Parameters::parallelMusic.name,
-                    MusicTree.Node.Parameters::trackDelay.name,
-                    MusicTree.Node.Parameters::trackDelayNoise.name,
-                    MusicTree.Node.Parameters::enterDelay.name,
-                    MusicTree.Node.Parameters::inheritMusic.name,
-                    MusicTree.Node.Parameters::loopMusic.name,
-                    MusicTree.Node.Parameters::loopStartPoints.name,
-                    MusicTree.Node.Parameters::musicWeights.name
+                    MusicTreeNode.Parameters::vanillaMusic.name,
+                    MusicTreeNode.Parameters::parallelMusic.name,
+                    MusicTreeNode.Parameters::trackDelay.name,
+                    MusicTreeNode.Parameters::trackDelayNoise.name,
+                    MusicTreeNode.Parameters::enterDelay.name,
+                    MusicTreeNode.Parameters::inheritMusic.name,
+                    MusicTreeNode.Parameters::loopMusic.name,
+                    MusicTreeNode.Parameters::loopStartPoints.name,
+                    MusicTreeNode.Parameters::musicWeights.name,
+                    MusicTreeNode.Parameters::disableFading.name,
+                    MusicTreeNode.Parameters::disableResuming.name,
+                    MusicTreeNode.Parameters::requireChildren.name,
+                    MusicTreeNode.Parameters::exitDelay.name
                 )
             }
 
             if (node.parent == null) {
                 result += listOf(
-                    MusicTree.Node.Parameters::inheritMusic.name,
-                    MusicTree.Node.Parameters::inheritAmbience.name
+                    MusicTreeNode.Parameters::inheritMusic.name,
+                    MusicTreeNode.Parameters::inheritAmbience.name
                 )
             }
 
@@ -215,6 +224,7 @@ class NodeViewWidget(
                             { selected ->
                                 selectedMusicPaths = selected.toMutableList()
                                 clearLoopIntroEndpointWidgets()
+                                clearMusicWeightWidgets()
                                 onChange()
                             },
                             Constants.MUSIC_CHOICE_TEXT.string,
@@ -257,13 +267,13 @@ class NodeViewWidget(
                     )
                     newWidget.active = false
                     newWidget.setTooltip(
-                        Tooltip.create(MusicTree.Node.Parameters.getParamDescription("musicWeights")))
+                        Tooltip.create(MusicTreeNode.Parameters.getParamDescription("musicWeights")))
                     newWidget
                 }, "musicWeights"
             )
 
             val musicWeightsParam = requiredNodeParams.first()
-            val soundNames = getSoundNames(node)
+            val soundNames = getSoundNames(node, true)
             soundNames.forEach { soundName ->
                 addWidgetFromRender(
                     {
@@ -331,8 +341,8 @@ class NodeViewWidget(
                         screen!!,
                         nodeParams,
                         param,
-                        param.name?.let { MusicTree.Node.Parameters.getParamDisplayName(it) },
-                        param.name?.let { MusicTree.Node.Parameters.getParamDescription(it) }
+                        param.name?.let { MusicTreeNode.Parameters.getParamDisplayName(it) },
+                        param.name?.let { MusicTreeNode.Parameters.getParamDescription(it) }
                     ) { onChange() }
                 },
                 "nodeParams: ${param.name ?: param.index}"
@@ -347,7 +357,6 @@ class NodeViewWidget(
 
             val loopStartPointsParam = requiredNodeParams.last()
             if (node.parameters.parallelMusic) {
-                clearLoopIntroEndpointWidgets()
                 addWidgetFromRender(
                     {
                         val outArg = mutableListOf(node.parameters.loopStartPoints.values.firstOrNull() as Any?)
@@ -378,7 +387,7 @@ class NodeViewWidget(
                     )
                     newWidget.active = false
                     newWidget.setTooltip(
-                        Tooltip.create(MusicTree.Node.Parameters.getParamDescription("loopStartPoints")))
+                        Tooltip.create(MusicTreeNode.Parameters.getParamDescription("loopStartPoints")))
                     newWidget
                 }, "loopStartPoints"
             )
@@ -529,7 +538,7 @@ class NodeViewWidget(
         )
     }
 
-    fun setEditExistingNode(node: MusicTree.Node) {
+    fun setEditExistingNode(node: MusicTreeNode) {
         clearWidgetsFromRender()
         selectedNode = node
         selectedEvent = null
@@ -540,7 +549,7 @@ class NodeViewWidget(
         resetScrolling()
     }
 
-    fun setCreateNewNode(parent: MusicTree.Node) {
+    fun setCreateNewNode(parent: MusicTreeNode) {
         clearWidgetsFromRender()
         newNodeParent = parent
         selectedNode = null
@@ -608,13 +617,13 @@ class NodeViewWidget(
             node.music = selectedMusicPaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) }
             node.ambience = selectedAmbiencePaths.mapNotNull { path -> PlayableSound.of(path, soundLibrary) }
             node.events = events.toList()
-            node.parameters = MusicTree.Node.Parameters.fromArgs(nodeParams.filterNotNull())
+            node.parameters = MusicTreeNode.Parameters.fromArgs(nodeParams.filterNotNull())
         }
 
         shouldSave = true
     }
 
-    private fun makeNewChild(): MusicTree.Node? {
+    private fun makeNewChild(): MusicTreeNode? {
         return newNodeParent?.newChild(
             nodeParams.filterNotNull(),
             events,
@@ -637,13 +646,12 @@ class NodeViewWidget(
         queueClearWidgetsFromRender { widget -> restrictedParameters.none { widget.id.contains(it) } }
     }
 
-    private fun getSoundNames(node: MusicTree.Node): List<String> {
+    private fun getSoundNames(node: MusicTreeNode, includeSoundEvents: Boolean = false): List<String> {
         return node.music
-            .filter { it is PlayableSoundFile || it is PlayableSoundDirectory }
             .flatMap { sound ->
-                (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
-                    ?: (sound as? PlayableSoundDirectory)
-                        ?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
+                (sound as? PlayableSoundEvent)?.takeIf { includeSoundEvents }?.let { listOf(it.getSoundName()) }
+                    ?: (sound as? PlayableSoundFile)?.let { listOf(it.getSoundName()) }
+                    ?: (sound as? PlayableSoundDirectory)?.getInteriorSounds(soundLibrary)?.map { it.getSoundName() }
                     ?: emptyList()
             }.sorted()
     }
@@ -669,7 +677,7 @@ class NodeViewWidget(
             "Select any amount of music to be chosen randomly to play"
         ).append("\n\n").append(TAMClient.allowedFileTypesText())
 
-        private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTree.Node): Boolean {
+        private fun enforceParameterConstraints(musicPack: MusicPack, node: MusicTreeNode): Boolean {
             node.parent?.let {
                 if (it.parameters.parallelMusic) {
                     node.parameters.parallelMusic = true
