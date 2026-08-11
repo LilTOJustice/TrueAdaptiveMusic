@@ -3,7 +3,7 @@ package liltojustice.trueadaptivemusic.client.serialization.legacy.v1
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.serialization.legacy.v1.model.trigger.predicate.MusicPredicate
 
@@ -34,7 +34,7 @@ object V1MusicTreeJsonConverter {
 
         result.add(
             "parameters",
-            json.get("parameters") ?: Gson().toJsonTree(MusicTree.Node.Parameters.default())
+            json.get("parameters") ?: Gson().toJsonTree(MusicTreeNode.Parameters.default())
         )
 
         val children = JsonArray()

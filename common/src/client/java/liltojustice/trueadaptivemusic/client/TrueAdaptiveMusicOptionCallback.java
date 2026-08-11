@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client;
 
 import com.mojang.serialization.Codec;
+import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.client.gui.screen.MainScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -27,7 +28,7 @@ public record TrueAdaptiveMusicOptionCallback<T>(Minecraft client)
             assert client.screen != null;
             return new Button.Builder(
                     Component.translatableWithFallback(
-                            "trueadaptivemusic.trueadaptivemusic",
+                            Constants.TRUE_ADAPTIVE_MUSIC + '.' + Constants.TRUE_ADAPTIVE_MUSIC,
                             "True Adaptive Music"
                     ),
                     widget -> client.setScreen(new MainScreen(client.screen))
