@@ -1,6 +1,6 @@
 package liltojustice.trueadaptivemusic.client.sound.instance
 
-import liltojustice.trueadaptivemusic.Constants.Companion.NULL_IDENTIFIER
+import liltojustice.trueadaptivemusic.Constants.NULL_IDENTIFIER
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.sound.FFmpeg
