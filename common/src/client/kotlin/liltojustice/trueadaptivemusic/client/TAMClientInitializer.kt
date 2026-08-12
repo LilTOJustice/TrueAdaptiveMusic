@@ -49,6 +49,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.PlayerAttri
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RidingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScoreboardPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpawnPointNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.SpeedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.StatusEffectPredicate
@@ -87,7 +88,10 @@ import kotlin.toString
 
 object TAMClientInitializer {
     fun onInitializeClient(
-        clientNetworkInterface: ClientNetworkInterface, clientModReflectionInterface: ClientModReflectionInterface) {
+        clientNetworkInterface: ClientNetworkInterface,
+        clientModReflectionInterface: ClientModReflectionInterface
+    ) {
+        TAMClientCache.init()
         initDirectories()
         registerTriggerTypes()
         registerInputWidgets()
@@ -149,6 +153,7 @@ object TAMClientInitializer {
         TAMAPI.registerPredicateType(TimeOfDayPredicate)
         TAMAPI.registerPredicateType(ItemPredicate)
         TAMAPI.registerPredicateType(ItemNearbyPredicate)
+        TAMAPI.registerPredicateType(ScreenPredicate)
     }
 
     private fun registerEventTypes() {
@@ -472,6 +477,29 @@ object TAMClientInitializer {
         )
 
         TAMAPI.registerInputWidget(
+            { type -> isScreenIdentifier(type) },
+            { prompt, _, outArgs, arg, tooltipText, onChange ->
+                MultiSelectDropdownWidget(
+                    TAMClientCache.screenClasses.map { ScreenPredicate.ScreenIdentifier(it) },
+                    0,
+                    getDisplay = { it.id },
+                    onChange = { selected ->
+                        outArgs[arg.index] = selected
+                        onChange()
+                    },
+                    title = prompt,
+                    notSelectedPlaceholder = Component.translatableWithFallback(
+                        "trueadaptivemusic.identifier_placeholder", "Select identifiers"
+                    ).string,
+                    alreadySelected =
+                        (outArgs[arg.index] as? List<*>)?.filterIsInstance<ScreenPredicate.ScreenIdentifier>()
+                            ?: listOf(),
+                    tooltipText = tooltipText
+                )
+            }
+        )
+
+        TAMAPI.registerInputWidget(
             typeOf<LUFBoost>()
         ) { prompt, _, outArgs, arg, tooltipText, _ ->
             val result = SliderWidget(
@@ -566,6 +594,13 @@ object TAMClientInitializer {
     private fun isTypedIdentifierList(type: KType): Boolean {
         return type.isSubtypeOf(typeOf<List<*>>())
                 && type.arguments.any { typeArg -> typeArg.type?.isSubtypeOf(typeOf<TypedIdentifier>()) == true }
+    }
+
+    private fun isScreenIdentifier(type: KType): Boolean {
+        return type.isSubtypeOf(typeOf<List<*>>()) &&
+                type.arguments.any { typeArg ->
+                    typeArg.type?.isSubtypeOf(typeOf<ScreenPredicate.ScreenIdentifier>()) == true
+                }
     }
 
     private fun prettifyEnum(enum: Enum<*>): String {
