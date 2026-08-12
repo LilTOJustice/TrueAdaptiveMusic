@@ -38,6 +38,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredi
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InBedPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.InFluidPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.ItemPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.MoonPhasePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.NightTimePredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.OnFluidPredicate
@@ -145,6 +146,7 @@ object TAMClientInitializer {
         TAMAPI.registerPredicateType(SpeedPredicate)
         TAMAPI.registerPredicateType(OnFluidPredicate)
         TAMAPI.registerPredicateType(TimeOfDayPredicate)
+        TAMAPI.registerPredicateType(ItemPredicate)
     }
 
     private fun registerEventTypes() {
