@@ -32,7 +32,7 @@ class MusicManager(private val minecraft: Minecraft) {
     private val musicPlayer = MusicPlayer(minecraft)
     private var currentNodeId: String = ""
     private var oldNodeId: String = ""
-    private var lastIgnorePersistence = false
+    private var lastPersistDesired = false
     private var musicVolumeOption: OptionInstance<Double> =
         minecraft.options.getSoundSourceOptionInstance(SoundSource.MUSIC)
     private var masterVolumeOption: OptionInstance<Double> =
@@ -117,8 +117,9 @@ class MusicManager(private val minecraft: Minecraft) {
         val shouldResume = oldNodeId == identifier && enterDelay == 0U && !disableResuming
         val isEnter = currentNodeId != identifier
         val disableFading = parameters.disableFading
-        val persistNodeMusic = packOptions.persistentNodeMusic &&
-                (!parameters.ignorePersistence && !lastIgnorePersistence) &&
+        val persistDesired = packOptions.persistentNodeMusic xor parameters.ignorePersistence
+        val persistNodeMusic = persistDesired &&
+                !lastPersistDesired &&
                 !loopMusic &&
                 isEnter
 
@@ -126,7 +127,7 @@ class MusicManager(private val minecraft: Minecraft) {
             lastExitDelay = parameters.exitDelay.takeIf { !parallelMusic } ?: 0U
             musicPool.clear()
             ambiencePool.clear()
-            lastIgnorePersistence = parameters.ignorePersistence
+            lastPersistDesired = persistDesired
         }
 
         if (!compatibilityMode && lastCompatibilityMode) {

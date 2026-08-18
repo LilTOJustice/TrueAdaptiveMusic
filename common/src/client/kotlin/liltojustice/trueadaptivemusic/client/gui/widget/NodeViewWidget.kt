@@ -71,10 +71,6 @@ class NodeViewWidget(
             val node = selectedNode ?: return emptySet<String>()
             val result = mutableSetOf<String>()
 
-            if (!musicPack.options.persistentNodeMusic) {
-                result += MusicTreeNode.Parameters::ignorePersistence.name
-            }
-
             if (node.parameters.vanillaMusic) {
                 result += listOf(
                     MusicTreeNode.Parameters::inheritMusic.name,

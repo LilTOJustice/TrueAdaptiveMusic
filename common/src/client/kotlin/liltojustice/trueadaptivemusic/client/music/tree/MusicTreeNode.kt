@@ -281,8 +281,8 @@ class MusicTreeNode private constructor(
                         Parameters::ignorePersistence.name to "\"${
                             MusicPackOptions.getArgDisplayName(
                             MusicPackOptions::persistentNodeMusic.name)!!.string}\" pack option will be " +
-                                "ignored when this node is selected. Music for this node will start playing right " +
-                                "when it is selected, and the music in this node will not persist.",
+                                "ignored when this node is selected, making this node perform opposite of that " +
+                                 "setting.",
                         Parameters::trackDelay.name to "After a track finishes, wait this many seconds before " +
                                 "playing the next.",
                         Parameters::trackDelayNoise.name to "Add randomly + or - this many seconds to track delay.",
