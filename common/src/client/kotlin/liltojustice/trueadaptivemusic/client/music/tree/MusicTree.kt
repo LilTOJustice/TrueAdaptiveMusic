@@ -66,27 +66,16 @@ class MusicTree {
         root.initializeParents()
     }
 
-    private fun traverseRecursive(
-        root: MusicTreeNode,
-        preorderVisitor: NodeVisitor? = null,
-        postorderVisitor: NodeVisitor? = null,
-        path: List<String> = emptyList()) {
-        var newPath = emptyList<String>()
-        try {
-            newPath = path + root.predicates.joinToString { it.getTriggerId() }
-        }
-        catch (_: Exception) {}
-        preorderVisitor?.invoke(root, newPath)
-        root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, newPath) }
-        postorderVisitor?.invoke(root, newPath)
-    }
-
     fun traverse(preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null) {
         traverseRecursive(root, preorderVisitor, postorderVisitor)
     }
 
     fun preorderTraverse(preorderVisitor: NodeVisitor) {
         traverseRecursive(root, preorderVisitor = preorderVisitor)
+    }
+
+    fun getNodeTitle(path: List<String>): String? {
+        return getNodeTitleRecursive(root, path)?.takeIf { it.isNotBlank() }
     }
 
     companion object {
@@ -102,6 +91,39 @@ class MusicTree {
             } catch (e: Exception) {
                 throw RulesParserException("Failed to parse rules.", e)
             }
+        }
+
+        private fun traverseRecursive(
+            root: MusicTreeNode,
+            preorderVisitor: NodeVisitor? = null,
+            postorderVisitor: NodeVisitor? = null,
+            path: List<String> = emptyList()) {
+            var newPath = emptyList<String>()
+            try {
+                newPath = path + root.predicates.joinToString { it.getTriggerId() }
+            }
+            catch (_: Exception) {}
+            preorderVisitor?.invoke(root, newPath)
+            root.forEachChild { node -> traverseRecursive(node, preorderVisitor, postorderVisitor, newPath) }
+            postorderVisitor?.invoke(root, newPath)
+        }
+
+        private fun getNodeTitleRecursive(root: MusicTreeNode, path: List<String>): String? {
+            if (path.isEmpty()) {
+                return null
+            }
+
+            if (path.size > 1) {
+                val nextPathSegments = path.drop(1)
+                return root.children
+                    .firstNotNullOf { getNodeTitleRecursive(it, nextPathSegments) }
+            }
+
+            if (path[0] == root.getPathSegment()) {
+                return root.parameters.title
+            }
+
+            return null
         }
     }
 
