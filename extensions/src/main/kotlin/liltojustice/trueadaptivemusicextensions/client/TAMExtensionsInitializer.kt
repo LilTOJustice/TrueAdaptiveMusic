@@ -72,9 +72,9 @@ object TAMExtensionsInitializer {
             Files.createFile(destinationPath, ExtensionConstants.POSIX_PERMISSIONS)
         }
 
-        this::class.java.classLoader.getResourceAsStream(resource).use { resourceStream ->
+        this::class.java.classLoader.getResourceAsStream(resource)?.use { resourceStream ->
             destinationPath.outputStream().use { destinationStream ->
-                resourceStream?.copyTo(destinationStream)
+                resourceStream.copyTo(destinationStream)
             }
         }
     }
