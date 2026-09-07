@@ -116,7 +116,7 @@ class MusicTree {
             if (path.size > 1) {
                 val nextPathSegments = path.drop(1)
                 return root.children
-                    .firstNotNullOf { getNodeTitleRecursive(it, nextPathSegments) }
+                    .firstNotNullOfOrNull { getNodeTitleRecursive(it, nextPathSegments) }
             }
 
             if (path[0] == root.getPathSegment()) {

@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic.client.music.manager
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
+import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
@@ -32,7 +33,8 @@ class MusicManager(private val minecraft: Minecraft) {
     private val musicPlayer = MusicPlayer(minecraft)
     private var currentNodeId: String = ""
     private var oldNodeId: String = ""
-    private var lastPersistDesired = false
+    private var lastTickNodeParameters: MusicTreeNode.Parameters? = null
+    private var lastNodeParameters: MusicTreeNode.Parameters? = null
     private var musicVolumeOption: OptionInstance<Double> =
         minecraft.options.getSoundSourceOptionInstance(SoundSource.MUSIC)
     private var masterVolumeOption: OptionInstance<Double> =
@@ -117,18 +119,19 @@ class MusicManager(private val minecraft: Minecraft) {
         val shouldResume = oldNodeId == identifier && enterDelay == 0U && !disableResuming
         val isEnter = currentNodeId != identifier
         val disableFading = parameters.disableFading
-        val persistDesired = packOptions.persistentNodeMusic xor parameters.ignorePersistence
-        val persistNodeMusic = persistDesired &&
-                !lastPersistDesired &&
-                !loopMusic &&
-                isEnter
 
         if (isEnter) {
             lastExitDelay = parameters.exitDelay.takeIf { !parallelMusic } ?: 0U
             musicPool.clear()
             ambiencePool.clear()
-            lastPersistDesired = persistDesired
+            lastNodeParameters = lastTickNodeParameters
         }
+
+        val persistNodeMusic = (packOptions.persistentNodeMusic xor
+                (parameters.ignorePersistence || lastNodeParameters?.ignorePersistence == true)) && !loopMusic
+
+
+        lastTickNodeParameters = parameters
 
         if (!compatibilityMode && lastCompatibilityMode) {
             vanillaSoundEvent?.let { minecraft.soundManager.stop(it.getId(), SoundSource.MUSIC) }
@@ -139,7 +142,7 @@ class MusicManager(private val minecraft: Minecraft) {
         val isPaused = isPaused(minecraft)
         val shouldStop = compatibilityMode ||
                 packOptions.prioritySoundEvents.any { it.id == vanillaSoundEvent?.getId() } ||
-                shouldStopMain(minecraft, musicPlayer, musicToPlay)
+                shouldStopMain(minecraft, musicPlayer, musicToPlay, persistNodeMusic)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
@@ -239,7 +242,7 @@ class MusicManager(private val minecraft: Minecraft) {
         }
 
         val delay = if (isEnter) enterDelay else getRandomDelay(trackDelay, trackDelayNoise)
-        val newMusic = getPseudoRandomMusic(musicToPlay, parameters.musicWeights)
+        val newMusic = getPseudoRandomMusic(musicToPlay, parameters.musicWeights) ?: return
         playNextMusic(
             newMusic,
             delay,
@@ -397,7 +400,7 @@ class MusicManager(private val minecraft: Minecraft) {
         }
     }
 
-    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: Map<String, NInt>): PlayableSound {
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: Map<String, NInt>): PlayableSound? {
         if (musicPool.isEmpty()) {
             musicPool = musicToPlay.toMutableSet()
         }
@@ -406,7 +409,7 @@ class MusicManager(private val minecraft: Minecraft) {
             List(max(weights[it.getSoundName()]?.toInt() ?: 1, 1)) { _ -> it }
         }
 
-        val randomSound = weightedMusicPool.random()
+        val randomSound = weightedMusicPool.randomOrNull() ?: return null
         musicPool.remove(randomSound)
 
         return randomSound
@@ -441,8 +444,12 @@ class MusicManager(private val minecraft: Minecraft) {
         }
 
         private fun shouldStopMain(
-            minecraft: Minecraft, musicPlayer: MusicPlayer, musicToPlay: List<PlayableSound>): Boolean {
-            return musicToPlay.isEmpty() ||
+            minecraft: Minecraft,
+            musicPlayer: MusicPlayer,
+            musicToPlay: List<PlayableSound>,
+            shouldPersist: Boolean
+        ): Boolean {
+            return (musicToPlay.isEmpty() && !shouldPersist) ||
                     jukeboxPlaying(minecraft) ||
                     musicPlayer.isTrackPlaying(ON_DEMAND_TRACK)
         }
