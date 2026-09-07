@@ -8,9 +8,10 @@ import java.io.InputStreamReader
 import javax.sound.sampled.AudioFormat
 
 object FFmpeg {
-    fun getFileAudioFormat(inputStream: InputStream): AudioFormat {
+    fun getFileAudioFormat(inputStream: InputStream): AudioFormat? {
+        val command = TAMClient.getFFProbeCommand() ?: return null
         val ffprobe = ProcessBuilder(
-            TAMClient.getFFProbeCommand(),
+            command,
             "-hide_banner",
             "-i", "pipe:0",
             "-v", "panic",
