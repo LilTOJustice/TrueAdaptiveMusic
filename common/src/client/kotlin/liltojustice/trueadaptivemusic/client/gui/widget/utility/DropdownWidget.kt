@@ -32,7 +32,8 @@ class DropdownWidget<TKey>(
     false,
     x,
     y,
-    true) {
+    true
+) {
     private val titleText = Component.literal(title)
     private var dropdownResultsWidget: DropdownResultsWidget<TKey>
     private val realizedWidth = width.takeUnless { width == 0 }
@@ -50,7 +51,7 @@ class DropdownWidget<TKey>(
         realizedWidth,
         textRenderer.lineHeight + TEXT_HEIGHT_BUFFER,
         Component.literal("Dropdown Search")
-    )
+    ).also { it.setMaxLength(MAX_INPUT) }
     private val selectedOptionWidget = run {
         val combinedOptions = options + (getOptions?.invoke() ?: listOf())
         ClickableTextDisplayWidget(
@@ -134,9 +135,11 @@ class DropdownWidget<TKey>(
     companion object {
         const val TEXT_WIDTH_BUFFER = 25
         const val TEXT_HEIGHT_BUFFER = 5
+        const val MAX_DISPLAYED_OPTIONS = 10
+
         private val ADD_CUSTOM_TEXT = Component.translatableWithFallback(
             "trueadaptivemusic.add_custom", "Use Custom")
-        const val MAX_DISPLAYED_OPTIONS = 10
+        private const val MAX_INPUT = 1000
     }
 
     private inner class DropdownResultsWidget<TKey>(
