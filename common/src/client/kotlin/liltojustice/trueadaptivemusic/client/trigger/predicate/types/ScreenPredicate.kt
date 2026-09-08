@@ -15,7 +15,7 @@ object ScreenPredicate: StaticPredicateType<ScreenPredicate.Arguments>(
         )
 
     override fun test(arguments: Arguments): Boolean {
-        val screen = Minecraft.getInstance().gui.screen() ?: return false
+        val screen = Minecraft.getInstance().screen ?: return false
 
         return arguments.screens.isEmpty() || arguments.screens.any { screen::class.qualifiedName == it.id }
     }

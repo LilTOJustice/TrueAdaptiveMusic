@@ -25,10 +25,10 @@ public class GameOptionsScreenMixin {
         var trueAdaptiveMusicButton = new OptionInstance<>(
                 Constants.TRUE_ADAPTIVE_MUSIC,
                 OptionInstance.noTooltip(),
-                (optionText, _) -> optionText,
+                (optionText, unused) -> optionText,
                 new TrueAdaptiveMusicOptionCallback(Minecraft.getInstance()),
                 Unit.INSTANCE,
-                _ -> {}
+                unused -> {}
         );
 
         if (soundOptionsScreen.list != null) {

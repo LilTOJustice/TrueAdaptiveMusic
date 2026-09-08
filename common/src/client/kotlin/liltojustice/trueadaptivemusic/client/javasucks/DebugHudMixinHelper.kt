@@ -126,6 +126,7 @@ object DebugHudMixinHelper {
         return row * (fontHeight + 2) + 1
     }
 
-    private data class Line(val indent: Int, val text: String, val color: Int = CommonColors.WHITE, val selected: Boolean = false)
+    private data class Line(
+        val indent: Int, val text: String, val color: Int = CommonColors.WHITE, val selected: Boolean = false)
 }
 

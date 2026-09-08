@@ -19,6 +19,7 @@ import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.TrueAdaptiveMusicException
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
+import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.util.Util
 import net.minecraft.util.Util.OS

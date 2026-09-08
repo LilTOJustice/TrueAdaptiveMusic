@@ -48,12 +48,12 @@ object ItemPredicate: StaticPredicateType<ItemPredicate.Arguments>(
     }
 
     private fun playerHasInInventory(player: Player, item: ItemIdentifier): Boolean {
-        return player.inventory.contains { item.matches(it.typeHolder()) }
+        return player.inventory.contains { item.matches(it.itemHolder) }
     }
 
     private fun playerHasInHotbar(player: Player, item: ItemIdentifier): Boolean {
         for (i in 0..8) {
-            player.inventory.getSlot(i)?.takeIf { item.matches(it.get().typeHolder()) }?.run { return true }
+            player.inventory.getSlot(i)?.takeIf { item.matches(it.get().itemHolder) }?.run { return true }
         }
 
         return false
@@ -64,10 +64,10 @@ object ItemPredicate: StaticPredicateType<ItemPredicate.Arguments>(
     }
 
     private fun playerHasInMainHand(player: Player, item: ItemIdentifier): Boolean {
-        return item.matches(player.mainHandItem.typeHolder())
+        return item.matches(player.mainHandItem.itemHolder)
     }
 
     private fun playerHasInOffhand(player: Player, item: ItemIdentifier): Boolean {
-        return item.matches(player.offhandItem.typeHolder())
+        return item.matches(player.offhandItem.itemHolder)
     }
 }
