@@ -383,11 +383,20 @@ class PackStructureWidget(
                     onSelectEditExistingNode(node)
                 }
             )
-            val tooltipText = if (targetedNode !== node)
-                CONFIGURE_NODE_TEXT.plainCopy().append(LINE_SPACE).append(MOVE_NODE_TEXT)
+            val tooltipText = (if (targetedNode !== node)
+                CONFIGURE_NODE_TEXT.copy().append(LINE_SPACE).append(MOVE_NODE_TEXT)
             else
-                MOVE_NODE_TEXT
-            widget.setTooltip(Tooltip.create(tooltipText))
+                MOVE_NODE_TEXT.copy())
+            widget.setTooltip(
+                Tooltip.create(
+                    (node.parameters.title
+                        .takeIf { it.isNotBlank() }
+                        ?.let { Component.literal("$it:") }
+                        ?.append(LINE_SPACE)
+                        ?: Component.empty())
+                        .append(tooltipText)
+                )
+            )
 
             widget
         }
