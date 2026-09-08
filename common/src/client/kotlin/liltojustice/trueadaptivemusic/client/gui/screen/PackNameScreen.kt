@@ -34,7 +34,8 @@ class PackNameScreen(private val parent: Screen): Screen(
         packNameWidget.setResponder { packName ->
             errorText = ""
             this.packName = packName
-            if (Path(Constants.MUSIC_PACK_DIR.pathString, "$packName.zip").exists()) {
+            if (validPackName(packName)
+                && Path(Constants.MUSIC_PACK_DIR.pathString, "$packName.zip").exists()) {
                 errorText = Component.translatableWithFallback(
                     "trueadaptivemusic.name_already_exists",
                     "%s.zip already exists",

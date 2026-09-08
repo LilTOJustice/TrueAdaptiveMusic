@@ -17,7 +17,8 @@ data class TrueAdaptiveMusicOptions(
     val audioNormalization: Boolean = true,
     val musicLoudnessBoost: LUFBoost = LUFBoost(0U),
     val ambienceLoudnessBoost: LUFBoost = LUFBoost(0U),
-    val disableAmbience: Boolean = false
+    val disableAmbience: Boolean = false,
+    val disableTrueAdaptiveMusicButton: Boolean = false
 ) {
     fun save() {
         Constants.OPTIONS_PATH.toFile()
@@ -51,7 +52,9 @@ data class TrueAdaptiveMusicOptions(
             TrueAdaptiveMusicOptions::ambienceLoudnessBoost.name to "Increase the ambience volume by passing a " +
                     "higher LUFS value to FFmpeg. Requires FFmpeg.",
             TrueAdaptiveMusicOptions::disableAmbience.name to "Disables any ambience played by the current pack. " +
-                    "Useful if using an ambience mod that clashes with your selected pack."
+                    "Useful if using an ambience mod that clashes with your selected pack.",
+            TrueAdaptiveMusicOptions::disableTrueAdaptiveMusicButton.name to "Disables the \"True Adaptive Music\" button from the " +
+                    "sound options menu."
         )
 
         private val json = GsonBuilder()

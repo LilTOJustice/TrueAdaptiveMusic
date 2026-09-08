@@ -21,7 +21,10 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
+import net.minecraft.util.Util
+import net.minecraft.util.Util.OS
 import java.io.IOException
+import java.nio.file.Path
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -33,7 +36,7 @@ object TAMClient {
     const val TPS = 20
     val musicPredicateFactory = MusicPredicateFactory()
     val musicEventFactory = MusicEventFactory()
-    val isWindows = "windows" in System.getProperty("os.name").lowercase()
+    val platform = Util.getPlatform()
     var currentPredicateResult: MusicTree.Result? = null
         private set
     var options: TrueAdaptiveMusicOptions = TrueAdaptiveMusicOptions()
@@ -55,8 +58,7 @@ object TAMClient {
         }
     var extensions: Extensions? = null
         private set
-    val hasFFmpeg
-        get() = (isWindows && Constants.FFMPEG_WINDOWS_PATH.exists()) || (!isWindows && Constants.FFMPEG_PATH.exists())
+    val hasFFmpeg get() = getFFmpeg()?.exists() == true && getFFProbe()?.exists() == true
     val allowedFileTypes
         get() =
             if (hasFFmpeg)
@@ -165,14 +167,12 @@ object TAMClient {
         )
     }
 
-    fun getFFProbeCommand(): String {
-        return (if (isWindows) Constants.FFPROBE_WINDOWS_PATH else Constants.FFPROBE_PATH)
-            .invariantSeparatorsPathString
+    fun getFFmpegCommand(): String? {
+        return getFFmpeg()?.invariantSeparatorsPathString
     }
 
-    fun getFFmpegCommand(): String {
-        return (if (isWindows) Constants.FFMPEG_WINDOWS_PATH else Constants.FFMPEG_PATH)
-            .invariantSeparatorsPathString
+    fun getFFProbeCommand(): String? {
+        return getFFProbe()?.invariantSeparatorsPathString
     }
 
     fun isCompatibilityMode(): Boolean {
@@ -227,6 +227,24 @@ object TAMClient {
         }
         catch (e: Exception) {
             Logger.logWarning("True Adaptive Music manager encountered an error:\n${e.stackTraceToString()}")
+        }
+    }
+
+    private fun getFFmpeg(): Path? {
+        return when(platform) {
+            OS.WINDOWS -> Constants.FFMPEG_WINDOWS_PATH
+            OS.LINUX -> Constants.FFMPEG_PATH
+            OS.OSX -> Constants.FFMPEG_PATH
+            else -> null
+        }
+    }
+
+    private fun getFFProbe(): Path? {
+        return when(platform) {
+            OS.WINDOWS -> Constants.FFPROBE_WINDOWS_PATH
+            OS.LINUX -> Constants.FFPROBE_PATH
+            OS.OSX -> Constants.FFPROBE_PATH
+            else -> null
         }
     }
 }
