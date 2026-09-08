@@ -26,6 +26,7 @@
 - Fixed wither combat detection.
 - Fixed a crash on certain systems when typing an illegal filename character (e.g. ':').
 - Forge 1.20.1 - Fixed crash on startup for dedicated servers.
+- Fixed platform handling, Mac OS support for FFmpeg/Giga grabber coming soon.
 
 Next up, [2.10](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/22) with a bunch more community-requested features!
 
