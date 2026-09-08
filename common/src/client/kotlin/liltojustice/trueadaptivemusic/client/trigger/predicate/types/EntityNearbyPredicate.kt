@@ -15,7 +15,7 @@ object EntityNearbyPredicate: StaticPredicateType<EntityNearbyPredicate.Argument
             Arguments::entities.name to "List of entities the music should play for. If none, any entity will " +
                     "trigger the music.",
             Arguments::blockRadius.name to "Minimum radius for the entity to trigger the predicate.",
-            Arguments::minimumCount.name to "Select how many minimum mobs it takes to trigger the music."
+            Arguments::minimumCount.name to "Select how many minimum entities it takes to trigger the music."
         )
     override val tickRate: Int
         get() = super.tickRate * 5
