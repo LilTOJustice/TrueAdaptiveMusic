@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
+import net.minecraft.util.Util
 
 object DebugHudMixinHelper {
     private const val INDENT = 10
@@ -28,35 +29,31 @@ object DebugHudMixinHelper {
         val textRenderer = minecraft.font
         val predicateTreeLines = mutableListOf<Line>()
         val rules = musicPack.rules
-        val currentNodePath = TAMClient.currentPredicateResult?.path ?: return
+        val currentResult = TAMClient.currentPredicateResult ?: return
+        val currentNodePath = currentResult.path
         val currentNodePathElements = currentNodePath.split(MusicTree.PATH_SEPARATOR)
         val currentNodeDepth = currentNodePathElements.size
+        val shouldShowTitles = Util.getMillis() % 4000 > 2000
 
         rules.preorderTraverse { _, path ->
-            val text = MusicTrigger.getTruncatedTriggerId(path.last()).takeIf { it.isNotEmpty() } ?: "empty"
+            val indent = path.size - 1
+            val title = rules.getNodeTitle(path)?.takeIf { shouldShowTitles }
+            val shouldShowTitle = title != null
+            val text = title ?: MusicTrigger.getTruncatedTriggerId(path.last()).takeIf { it.isNotEmpty() } ?: "empty"
 
             if (path.all { pathElement -> currentNodePathElements.contains(pathElement) }) {
                 predicateTreeLines.add(
-                    Line(
-                        path.size - 1,
-                        text,
-                        CommonColors.GREEN,
-                        currentNodeDepth == path.size
-                    )
-                )
+                    Line(indent, text, CommonColors.GREEN, currentNodeDepth == path.size))
             }
-            else if (path.size <= currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, text))
-            }
-            else if (path.size - 1 == currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, text))
+            else if (shouldShowTitle || path.size <= currentNodeDepth || path.size - 1 == currentNodeDepth) {
+                predicateTreeLines.add(Line(indent, text))
             }
             else if (path.size - 2 == currentNodeDepth) {
                 predicateTreeLines.add(
-                    Line(path.size - 1, text.replace(Regex("\\{.*}"), "{...}")))
+                    Line(indent, text.replace(Regex("\\{.*}"), "{...}")))
             }
             else if (path.size - 3 == currentNodeDepth) {
-                predicateTreeLines.add(Line(path.size - 1, "..."))
+                predicateTreeLines.add(Line(indent, "..."))
             }
         }
 
@@ -69,7 +66,7 @@ object DebugHudMixinHelper {
                 textRenderer,
                 "${
                     Component.translatableWithFallback(
-                    "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
+                        "trueadaptivemusic.playing_event", "Playing event").string}: ${it.getTriggerId()} " +
                         "(${eventMusic?.getSoundString()})",
                 1,
                 getY(rowOffset++, fontHeight),
@@ -84,7 +81,7 @@ object DebugHudMixinHelper {
                 textRenderer,
                 "${
                     Component.translatableWithFallback(
-                    "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
+                        "trueadaptivemusic.playing_music", "Playing music").string}: ${it.getSoundString()}",
                 1,
                 getY(rowOffset++, fontHeight),
                 CommonColors.WHITE,
@@ -98,7 +95,7 @@ object DebugHudMixinHelper {
                 textRenderer,
                 "${
                     Component.translatableWithFallback(
-                    "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
+                        "trueadaptivemusic.playing_ambience", "Playing ambience").string}: " +
                         it.getSoundString(),
                 1,
                 getY(rowOffset++, fontHeight),
