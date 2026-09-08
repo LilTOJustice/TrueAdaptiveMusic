@@ -67,14 +67,11 @@ class NodeViewWidget(
     private var shouldSave = false
     private var shouldExit = false
     private var lastRestricted = false
+    private val ignoredParameters = setOf("musicWeights", "loopStartPoints")
     private val restrictedParameters: Set<String>
         get() = run {
             val node = selectedNode ?: return emptySet<String>()
             val result = mutableSetOf<String>()
-
-            if (!musicPack.options.persistentNodeMusic) {
-                result += MusicTreeNode.Parameters::ignorePersistence.name
-            }
 
             if (node.parameters.vanillaMusic) {
                 result += listOf(
@@ -335,20 +332,22 @@ class NodeViewWidget(
             "ambienceChoice"
         )
 
-        requiredNodeParams.drop(1).dropLast(1).filter { it.name !in restrictedParameters }.forEach { param ->
-            addWidgetFromRender(
-                {
-                    TAMAPI.makeInputWidget(
-                        screen!!,
-                        nodeParams,
-                        param,
-                        param.name?.let { MusicTreeNode.Parameters.getParamDisplayName(it) },
-                        param.name?.let { MusicTreeNode.Parameters.getParamDescription(it) }
-                    ) { onChange() }
-                },
-                "nodeParams: ${param.name ?: param.index}"
-            )
-        }
+        requiredNodeParams
+            .filter { it.name !in restrictedParameters && it.name !in ignoredParameters }
+            .forEach { param ->
+                addWidgetFromRender(
+                    {
+                        TAMAPI.makeInputWidget(
+                            screen!!,
+                            nodeParams,
+                            param,
+                            param.name?.let { MusicTreeNode.Parameters.getParamDisplayName(it) },
+                            param.name?.let { MusicTreeNode.Parameters.getParamDescription(it) }
+                        ) { onChange() }
+                    },
+                    "nodeParams: ${param.name ?: param.index}"
+                )
+            }
 
         selectedNode?.let { node ->
             if (!node.parameters.loopMusic || "loopStartPoints" in restrictedParameters) {
@@ -384,7 +383,7 @@ class NodeViewWidget(
                     val newWidget = ClickableTextWidget(
                         "${
                             Component.translatableWithFallback(
-                            "trueadaptivemusic.loop_start_points", "Loop Start Points").string}:"
+                                "trueadaptivemusic.loop_start_points", "Loop Start Points").string}:"
                     )
                     newWidget.active = false
                     newWidget.setTooltip(
