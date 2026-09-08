@@ -5,6 +5,7 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusicextensions.client.ExtensionConstants
+import net.minecraft.util.Util.OS
 import java.nio.file.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -51,9 +52,9 @@ object MegaHelper {
     }
 
     private fun getGigaGrabber(): String {
-        return if (TAMClient.isWindows)
-            ExtensionConstants.GIGA_GRABBER_WINDOWS_PATH.invariantSeparatorsPathString
-        else
-            ExtensionConstants.GIGA_GRABBER_PATH.invariantSeparatorsPathString
+        return when(TAMClient.platform) {
+            OS.WINDOWS -> ExtensionConstants.GIGA_GRABBER_WINDOWS_PATH.invariantSeparatorsPathString
+            else -> ExtensionConstants.GIGA_GRABBER_PATH.invariantSeparatorsPathString
+        }
     }
 }
