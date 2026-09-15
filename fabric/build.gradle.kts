@@ -40,6 +40,7 @@ repositories {
     maven("https://cursemaven.com") {
         name = "CurseMaven"
     }
+    mavenCentral()
 }
 
 val apiFileId = "8630527"
@@ -49,6 +50,9 @@ dependencies {
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
     implementation("org.reflections:reflections:0.10.2")
+    implementation("org.javassist:javassist:3.33.0-GA")
+    include("org.reflections:reflections:0.10.2")
+    include("org.javassist:javassist:3.33.0-GA")
 
     api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
     api("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
