@@ -5,7 +5,7 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusicextensions.client.ExtensionConstants
-import net.minecraft.util.Util.OS
+import net.minecraft.Util.OS
 import java.nio.file.Path
 import kotlin.io.path.invariantSeparatorsPathString
 

@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
-import net.minecraft.util.Util
+import net.minecraft.Util
 
 object DebugHudMixinHelper {
     private const val INDENT = 10
@@ -126,6 +126,7 @@ object DebugHudMixinHelper {
         return row * (fontHeight + 2) + 1
     }
 
-    private data class Line(val indent: Int, val text: String, val color: Int = CommonColors.WHITE, val selected: Boolean = false)
+    private data class Line(
+        val indent: Int, val text: String, val color: Int = CommonColors.WHITE, val selected: Boolean = false)
 }
 
