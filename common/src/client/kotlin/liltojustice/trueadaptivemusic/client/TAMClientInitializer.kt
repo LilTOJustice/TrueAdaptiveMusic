@@ -494,7 +494,8 @@ object TAMClientInitializer {
                     alreadySelected =
                         (outArgs[arg.index] as? List<*>)?.filterIsInstance<ScreenPredicate.ScreenIdentifier>()
                             ?: listOf(),
-                    tooltipText = tooltipText
+                    tooltipText = tooltipText,
+                    customCreator = { ScreenPredicate.ScreenIdentifier(it) }
                 )
             }
         )
