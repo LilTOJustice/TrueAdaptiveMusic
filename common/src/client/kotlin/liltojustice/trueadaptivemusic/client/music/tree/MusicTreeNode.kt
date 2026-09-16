@@ -80,7 +80,7 @@ class MusicTreeNode private constructor(
 
                 return null
             }
-            catch (e: Exception) {
+            catch (e: Throwable) {
                 Logger.logError("Testing predicates threw an exception.\nError: $e", true)
 
                 return null
