@@ -24,7 +24,7 @@ class TextInputWidget(
         widget
     }
     private val fieldWidget = EditBox(
-        font,
+        textRenderer,
         0,
         0,
         Int.MAX_VALUE,

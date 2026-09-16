@@ -19,9 +19,10 @@ import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.TrueAdaptiveMusicException
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
+import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
-import net.minecraft.util.Util
-import net.minecraft.util.Util.OS
+import net.minecraft.Util
+import net.minecraft.Util.OS
 import java.io.IOException
 import java.nio.file.Path
 import kotlin.coroutines.EmptyCoroutineContext
