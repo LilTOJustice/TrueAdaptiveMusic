@@ -6,7 +6,7 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusicextensions.client.browser.BrowsableMusicPackDownloader
 import liltojustice.trueadaptivemusicextensions.client.browser.CurlHelper
 import liltojustice.trueadaptivemusicextensions.client.browser.MegaHelper
-import net.minecraft.util.Util.OS
+import net.minecraft.Util.OS
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists

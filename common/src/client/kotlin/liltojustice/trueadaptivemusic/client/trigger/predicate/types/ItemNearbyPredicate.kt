@@ -35,7 +35,7 @@ object ItemNearbyPredicate: StaticPredicateType<ItemNearbyPredicate.Arguments>(
         val level = minecraft.level ?: return false
         if (arguments.includeInventory &&
             playerEntity.inventory.contains { invItem ->
-                arguments.items.any { it.matches(invItem.typeHolder()) } }) {
+                arguments.items.any { it.matches(invItem.itemHolder) } }) {
             return true
         }
 
@@ -44,7 +44,7 @@ object ItemNearbyPredicate: StaticPredicateType<ItemNearbyPredicate.Arguments>(
                 level.entitiesForRendering()
                     .filterIsInstance<ItemEntity>()
                     .filter { entity ->
-                        arguments.items.any { entityId -> entityId.matches(entity.item.typeHolder()) }
+                        arguments.items.any { entityId -> entityId.matches(entity.item.itemHolder) }
                     }
             }
             else {
