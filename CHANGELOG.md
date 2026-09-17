@@ -25,8 +25,6 @@
 - Removed the 32-character limit in textboxes.
 - Fixed wither combat detection.
 - Fixed a crash on certain systems when typing an illegal filename character (e.g. ':').
-- Forge 1.20.1 - Fixed crash on startup for dedicated servers.
-- Forge 1.20.1 - Fixed crash from advancement event.
 - Fixed platform handling, Mac OS support for FFmpeg/Giga grabber coming soon.
 
 Next up, [2.10](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/22) with a bunch more community-requested features!
