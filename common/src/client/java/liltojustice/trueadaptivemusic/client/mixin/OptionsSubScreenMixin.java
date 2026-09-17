@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
+import liltojustice.trueadaptivemusic.client.TAMClient;
 import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -14,6 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OptionsSubScreenMixin {
     @Inject(method = "init()V", at = @At("TAIL"))
     protected void init(CallbackInfo ci) {
+        if (TAMClient.INSTANCE.getOptions().getDisableTrueAdaptiveMusicButton()) {
+            return;
+        }
+
         OptionsSubScreen gameOptionsScreen = (OptionsSubScreen)(Object)this;
         if (!(gameOptionsScreen instanceof SoundOptionsScreen thisObject)) {
             return;
