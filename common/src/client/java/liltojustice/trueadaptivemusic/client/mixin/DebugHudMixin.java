@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import liltojustice.trueadaptivemusic.Logger;
 import liltojustice.trueadaptivemusic.client.javasucks.DebugHudMixinHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
@@ -21,6 +22,11 @@ public class DebugHudMixin {
             CallbackInfo ci,
             @Local(name = "graphics") GuiGraphicsExtractor graphics
     ) {
-        DebugHudMixinHelper.render(graphics);
+        try {
+            DebugHudMixinHelper.render(graphics);
+        }
+        catch (Exception e) {
+            Logger.INSTANCE.logError(e.getMessage(), false);
+        }
     }
 }

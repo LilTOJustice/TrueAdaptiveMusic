@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.boss.wither.WitherBoss
 import net.minecraft.world.entity.monster.ElderGuardian
 import net.minecraft.world.entity.monster.Guardian
 import net.minecraft.world.entity.monster.Monster
@@ -157,7 +158,8 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
                         (entity as? ElderGuardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true ||
                         entity is Phantom ||
                         (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
-                        entity is Warden
+                        entity is Warden ||
+                        entity is WitherBoss
                 )
     }
 
