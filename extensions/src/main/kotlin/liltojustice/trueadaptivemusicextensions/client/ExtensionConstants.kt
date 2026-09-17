@@ -10,13 +10,19 @@ import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
 object ExtensionConstants {
-    const val FFMPEG_WINDOWS_RESOURCE = "assets/trueadaptivemusicextensions/ffmpeg/ffmpeg.exe"
-    const val FFPROBE_WINDOWS_RESOURCE = "assets/trueadaptivemusicextensions/ffmpeg/ffprobe.exe"
-    const val LIBWINPTHREAD_WINDOWS_RESOURCE = "assets/trueadaptivemusicextensions/ffmpeg/libwinpthread-1.dll"
-    const val GIGA_GRABBER_WINDOWS_RESOURCE = "assets/trueadaptivemusicextensions/gigagrabber/giga_grabber.exe"
-    const val FFMPEG_RESOURCE = "assets/trueadaptivemusicextensions/ffmpeg/ffmpeg"
-    const val FFPROBE_RESOURCE = "assets/trueadaptivemusicextensions/ffmpeg/ffprobe"
-    const val GIGA_GRABBER_RESOURCE = "assets/trueadaptivemusicextensions/gigagrabber/giga_grabber.exe"
+    private const val EXTENSIONS_ROOT = "assets/trueadaptivemusicextensions"
+    private const val FFMPEG_ROOT = "$EXTENSIONS_ROOT/ffmpeg"
+    private const val GIGA_GRABBER_ROOT = "$EXTENSIONS_ROOT/gigagrabber"
+    const val FFMPEG_WINDOWS_RESOURCE = "$FFMPEG_ROOT/ffmpeg.exe"
+    const val FFPROBE_WINDOWS_RESOURCE = "$FFMPEG_ROOT/ffprobe.exe"
+    const val LIBWINPTHREAD_WINDOWS_RESOURCE = "$FFMPEG_ROOT/libwinpthread-1.dll"
+    const val GIGA_GRABBER_WINDOWS_RESOURCE = "$GIGA_GRABBER_ROOT/giga_grabber.exe"
+    const val FFMPEG_LINUX_RESOURCE = "$FFMPEG_ROOT/ffmpeg_linux"
+    const val FFPROBE_LINUX_RESOURCE = "$FFMPEG_ROOT/ffprobe_linux"
+    const val GIGA_GRABBER_LINUX_RESOURCE = "$GIGA_GRABBER_ROOT/giga_grabber_linux"
+    const val FFMPEG_MAC_RESOURCE= "$FFMPEG_ROOT/ffmpeg_mac"
+    const val FFPROBE_MAC_RESOURCE = "$FFMPEG_ROOT/ffprobe_mac"
+    const val GIGA_GRABBER_MAC_RESOURCE = "$GIGA_GRABBER_ROOT/giga_grabber_mac"
     val POSIX_PERMISSIONS: FileAttribute<Set<PosixFilePermission>> = PosixFilePermissions.asFileAttribute(
         PosixFilePermissions.fromString("rwxrwxrwx"))
     val GIGA_GRABBER_DIR = Path(OPTIONS_DIR.invariantSeparatorsPathString, "giga_grabber_binaries")
@@ -27,7 +33,7 @@ object ExtensionConstants {
     val LIBWINPTHREAD_WINDOWS_PATH = Path(
         FFMPEG_DIR.invariantSeparatorsPathString, "libwinpthread-1.dll")
     val GIGA_GRABBER_WINDOWS_PATH = Path(
-        GIGA_GRABBER_DIR.invariantSeparatorsPathString, "giga_grabber.exe")
+        GIGA_GRABBER_DIR.invariantSeparatorsPathString, "giga_grabber_linux.exe")
     val GIGA_GRABBER_PATH = Path(
-        GIGA_GRABBER_DIR.invariantSeparatorsPathString, "giga_grabber")
+        GIGA_GRABBER_DIR.invariantSeparatorsPathString, "giga_grabber_linux")
 }
