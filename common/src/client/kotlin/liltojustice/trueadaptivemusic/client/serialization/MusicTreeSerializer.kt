@@ -73,6 +73,7 @@ object MusicTreeSerializer {
         override fun deserialize(
             json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): MusicTreeNode.Parameters {
             val result = MusicTreeNode.Parameters.jsonDecode(json.asJsonObject)
+            result.title = result.title ?: ""
             result.loopStartPoints = result.loopStartPoints ?: mapOf()
             result.musicWeights = result.musicWeights ?: mapOf()
 

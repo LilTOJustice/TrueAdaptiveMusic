@@ -92,11 +92,15 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-var apiFileId = "8518047"
+var apiFileId = "8630555"
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:' + forge_kotlin_version
     api 'curse.maven:trueadaptivemusicapi-1514598:' + apiFileId
     jarJar 'curse.maven:trueadaptivemusicapi-1514598:' + apiFileId
+    implementation 'org.reflections:reflections:0.10.2'
+    implementation 'org.javassist:javassist:3.33.0-GA'
+    jarJar 'org.reflections:reflections:0.10.2'
+    jarJar 'org.javassist:javassist:3.33.0-GA'
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

@@ -100,7 +100,7 @@ jobs:
           changelog-file: "${{env.CHANGELOG_FILE}}"
           java: "${{env.JAVA_VERSION}}"
           dependencies: |
-            kotlinforforge(required)
+            kotlin-for-forge(required)
 
       # CurseForge
       - name: Build (CurseForge)
@@ -139,5 +139,5 @@ jobs:
           changelog-file: "${{env.CHANGELOG_FILE}}"
           java: "${{env.JAVA_VERSION}}"
           dependencies: |
-            kotlinforforge(required)
+            kotlin-for-forge(required)
 
