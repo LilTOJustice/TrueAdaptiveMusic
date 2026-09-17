@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
+import liltojustice.trueadaptivemusic.Logger;
 import liltojustice.trueadaptivemusic.client.javasucks.DebugHudMixinHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
@@ -13,6 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class DebugHudMixin {
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     public void render(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        DebugHudMixinHelper.render(graphics);
+        try {
+            DebugHudMixinHelper.render(graphics);
+        }
+        catch (Exception e) {
+            Logger.INSTANCE.logError(e.getMessage(), false);
+        }
     }
 }
