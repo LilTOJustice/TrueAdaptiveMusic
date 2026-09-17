@@ -27,7 +27,14 @@ class TextInputWidget(
         widget
     }
     private val fieldWidget = EditBox(
-        textRenderer, 0, 0, Int.MAX_VALUE, HEIGHT, Component.literal(placeholder))
+        textRenderer,
+        0,
+        0,
+        Int.MAX_VALUE,
+        HEIGHT,
+        Component.literal(placeholder)
+    ).also { it.setMaxLength(MAX_INPUT) }
+
     var text: String
         get() { return fieldWidget.value }
         set(value) {
@@ -87,5 +94,6 @@ class TextInputWidget(
     companion object {
         private const val HEIGHT = 10
         private const val PADDING = 5
+        private const val MAX_INPUT = 1000
     }
 }

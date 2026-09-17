@@ -103,13 +103,13 @@ abstract class TAMSoundInstance(
                         AMBIENT_LUFS + TAMClient.options.ambienceLoudnessBoost.value.toInt()
                     else
                         MUSIC_LUFS + TAMClient.options.musicLoudnessBoost.value.toInt()
-                    return TruncatedAudioStream(
-                        FFmpegAudioStream(
-                            inputStreamGetter(),
-                            FFmpeg.getFileAudioFormat(inputStreamGetter()),
-                            loudnessUnits
-                        )
-                    )
+
+                    inputStreamGetter().use { audioFormatStream ->
+                        return FFmpeg.getFileAudioFormat(audioFormatStream)?.let {
+                            TruncatedAudioStream(
+                                FFmpegAudioStream(inputStreamGetter(), it, loudnessUnits))
+                        } ?: TruncatedAudioStream(JOrbisAudioStream(inputStreamGetter()))
+                    }
                 }
                 catch (_: Exception) {
                     return TruncatedAudioStream(JOrbisAudioStream(inputStreamGetter()))
