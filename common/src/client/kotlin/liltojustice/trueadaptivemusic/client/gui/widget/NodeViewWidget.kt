@@ -355,7 +355,7 @@ class NodeViewWidget(
                 return@let
             }
 
-            val loopStartPointsParam = requiredNodeParams.last()
+            val loopStartPointsParam = requiredNodeParams.dropLast(1).last()
             if (node.parameters.parallelMusic) {
                 addWidgetFromRender(
                     {
