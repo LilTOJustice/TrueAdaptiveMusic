@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import com.mojang.blaze3d.Blaze3D
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.EventViewWidget
@@ -19,7 +20,6 @@ import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.util.CommonColors
-import net.minecraft.util.Util
 
 class EditPackScreen(
     private val parent: Screen,
@@ -89,7 +89,7 @@ class EditPackScreen(
         closeButtonWidget = Button.Builder(CLOSE_BUTTON_TEXT) { onClose() }.build()
 
         openPackDirectory = Button.Builder(OPEN_PACK_TEXT) {
-            Util.getPlatform().openUri(musicPack.packPath.toUri())
+            Blaze3D.openUri(musicPack.packPath.toUri())
         }.build()
 
         optionsButtonWidget = Button.Builder(OPTIONS_BUTTON_TEXT) {

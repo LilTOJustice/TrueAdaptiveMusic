@@ -25,7 +25,7 @@ public class SoundManagerMixin {
         }
 
         if (SoundManagerMixinHelper.shouldIgnore(instance)) {
-            instance.resolve(thisObject);
+            instance.getOrResolve(thisObject);
             cir.setReturnValue(SoundEngine.PlayResult.STARTED);
         }
     }

@@ -3,6 +3,7 @@ package liltojustice.trueadaptivemusic
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.Identifier
+import java.net.URI
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -42,7 +43,7 @@ object Constants {
     const val ICON_FILENAME = "icon.png"
     const val ASSETS_DIRNAME = "assets"
     const val PREDICATES_DIRNAME = "predicates"
-    const val WIKI_LINK = "https://liltojustice.github.io/TrueAdaptiveMusic/"
-    const val DISCORD_JOIN_URL = "https://discord.gg/v64K4hNdXu"
-    const val TAM_MODRINTH_URL = "https://modrinth.com/project/true-adaptive-music"
+    val WIKI_LINK: URI = URI.create("https://liltojustice.github.io/TrueAdaptiveMusic/")
+    val DISCORD_JOIN_URL: URI = URI.create("https://discord.gg/v64K4hNdXu")
+    val TAM_MODRINTH_URL: URI = URI.create("https://modrinth.com/project/true-adaptive-music")
 }

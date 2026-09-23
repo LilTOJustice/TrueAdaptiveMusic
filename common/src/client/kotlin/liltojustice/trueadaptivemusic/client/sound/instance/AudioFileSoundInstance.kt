@@ -3,6 +3,8 @@ package liltojustice.trueadaptivemusic.client.sound.instance
 import liltojustice.trueadaptivemusic.client.sound.file.SoundFile
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.sounds.AudioStream
+import net.minecraft.client.sounds.SoundManager
+import net.minecraft.client.sounds.WeighedSoundEvents
 
 class AudioFileSoundInstance(
     playableSound: PlayableSound,
@@ -20,5 +22,13 @@ class AudioFileSoundInstance(
 
     override fun getSoundString(): String {
         return fileName
+    }
+
+    override fun getOrResolve(soundManager: SoundManager): WeighedSoundEvents? {
+        return null
+    }
+
+    override fun getSoundEvent(): WeighedSoundEvents? {
+        return null
     }
 }

@@ -23,7 +23,8 @@ class StructureProcessor: Processor() {
             .map { structure ->
                 val sectionPos = player.lastSectionPos
                 structureCache.getOrPut(sectionPos to structure) {
-                    val starts = structureManager.startsForStructure(sectionPos, structure)
+                    val starts = structureManager.startsForStructure(
+                        sectionPos.x, sectionPos.z, structure)
                     val bounds = starts.takeIf { it.isNotEmpty() }?.let {
                         starts.maxOf { it.boundingBox.minY() } to starts.minOf { it.boundingBox.maxY() }
                     }

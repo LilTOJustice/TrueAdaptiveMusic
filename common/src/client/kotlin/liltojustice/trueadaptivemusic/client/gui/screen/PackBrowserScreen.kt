@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import com.mojang.blaze3d.Blaze3D
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import liltojustice.trueadaptivemusic.Constants
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.CommonColors
-import net.minecraft.util.Util
 import java.util.Date
 
 class PackBrowserScreen(private val parent: Screen): Screen(
@@ -30,7 +30,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
 
     override fun init() {
         openMusicPacksButton = Button.Builder(OPEN_MUSIC_PACKS_TEXT) {
-            Util.getPlatform().openUri(Constants.MUSIC_PACK_DIR.toUri())
+            Blaze3D.openUri(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = font.width(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width - 1
@@ -52,7 +52,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
-                        Util.getPlatform().openUri(Constants.DISCORD_JOIN_URL)
+                        Blaze3D.openUri(Constants.DISCORD_JOIN_URL)
                     }
 
                     minecraft.gui.setScreen(this)

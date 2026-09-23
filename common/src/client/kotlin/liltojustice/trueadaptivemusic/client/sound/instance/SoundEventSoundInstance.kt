@@ -6,6 +6,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.client.resources.sounds.Sound
 import net.minecraft.client.sounds.AudioStream
 import net.minecraft.client.sounds.SoundManager
+import net.minecraft.client.sounds.WeighedSoundEvents
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundEvent
@@ -32,7 +33,7 @@ class SoundEventSoundInstance(
     private var sound: Sound? = null
 
     init {
-        instance.resolve(soundManager)?.getSound(random)
+        instance.getOrResolve(soundManager)?.getSound(random)
         sound = instance.sound?.takeIf { it != SoundManager.EMPTY_SOUND }
     }
 
@@ -49,8 +50,16 @@ class SoundEventSoundInstance(
         } ?: "Missing Sound"
     }
 
+    override fun getOrResolve(soundManager: SoundManager): WeighedSoundEvents? {
+        return null
+    }
+
     override fun getSound(): Sound? {
         return sound
+    }
+
+    override fun getSoundEvent(): WeighedSoundEvents? {
+        return null
     }
 
     companion object {
