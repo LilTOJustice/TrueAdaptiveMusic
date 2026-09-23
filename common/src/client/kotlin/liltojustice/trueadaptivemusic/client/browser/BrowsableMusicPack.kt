@@ -20,7 +20,7 @@ data class BrowsableMusicPack(
     fun getFilePath(): Path {
         return Path(
             Constants.MUSIC_PACK_DIR.invariantSeparatorsPathString,
-            name.replace(fileNameRegex, "") + (version?.let { "-${it}" } ?: "") + ".zip"
+            "$name${(version?.let { "-${it}" } ?: "")}.zip".replace(fileNameRegex, "")
         )
     }
 
