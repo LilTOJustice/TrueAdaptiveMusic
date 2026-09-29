@@ -12,23 +12,12 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory
-import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
-import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
 
 
 @Mod("trueadaptivemusic")
 @EventBusSubscriber
 object TrueAdaptiveMusic {
-    init {
-        runForDist(
-            clientTarget = {
-                MOD_BUS.addListener(::onClientSetup)
-            }, serverTarget = {
-                MOD_BUS.addListener(::onServerSetup)
-            }
-        )
-    }
-
+    @SubscribeEvent
     private fun onClientSetup(@Suppress("UNUSED") event: FMLClientSetupEvent) {
         TAMClientInitializer.onInitializeClient(
             NeoforgeClientNetworkingInterface,
@@ -43,6 +32,7 @@ object TrueAdaptiveMusic {
         TAMMainInitializer.onInitialize(NeoforgeServerNetworkingInterface)
     }
 
+    @SubscribeEvent
     private fun onServerSetup(@Suppress("UNUSED") event: FMLDedicatedServerSetupEvent) {
     }
 }
