@@ -30,7 +30,7 @@ abstract class TAMSoundInstance(
         return Identifier.fromNamespaceAndPath("", "")
     }
 
-    override fun resolve(soundManager: SoundManager): WeighedSoundEvents? {
+    override fun getOrResolve(soundManager: SoundManager): WeighedSoundEvents? {
         return null
     }
 

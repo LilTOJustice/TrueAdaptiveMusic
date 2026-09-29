@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import com.mojang.blaze3d.Blaze3D
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.gui.widget.PackListWidget
@@ -10,7 +11,6 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
-import net.minecraft.util.Util
 import java.nio.file.Path
 import kotlin.io.path.*
 
@@ -37,7 +37,7 @@ class MainScreen(private val parent: Screen): Screen(
         createNewPackButton.y = 1
 
         openMusicPacksButton = Button.Builder(OPEN_MUSIC_PACKS_TEXT) {
-            Util.getPlatform().openUri(Constants.MUSIC_PACK_DIR.toUri())
+            Blaze3D.openUri(Constants.MUSIC_PACK_DIR.toUri())
         }.build()
         openMusicPacksButton.width = font.width(OPEN_MUSIC_PACKS_TEXT) + 10
         openMusicPacksButton.x = width - openMusicPacksButton.width - 1
@@ -77,7 +77,7 @@ class MainScreen(private val parent: Screen): Screen(
         refreshButton.x = 1
 
         wikiButton = Button.builder(WIKI_TEXT)
-        { _: Button? -> Util.getPlatform().openUri(Constants.WIKI_LINK) }.build()
+        { _: Button? -> Blaze3D.openUri(Constants.WIKI_LINK) }.build()
         wikiButton.y = openMusicPacksButton.y + openMusicPacksButton.height + 4
         wikiButton.width = font.width(WIKI_TEXT) + 10
         wikiButton.x = width - wikiButton.width - 1
@@ -93,7 +93,7 @@ class MainScreen(private val parent: Screen): Screen(
             ConfirmLinkScreen(
                 { confirmed ->
                     if (confirmed) {
-                        Util.getPlatform().openUri(Constants.DISCORD_JOIN_URL)
+                        Blaze3D.openUri(Constants.DISCORD_JOIN_URL)
                     }
 
                     minecraft.gui.setScreen(this)

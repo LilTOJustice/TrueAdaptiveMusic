@@ -43,7 +43,7 @@ repositories {
     mavenCentral()
 }
 
-val apiFileId = "8630527"
+val apiFileId = "9006055"
 dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("fabric_loader_version")}")

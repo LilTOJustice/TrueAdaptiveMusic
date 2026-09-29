@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.gui.screen
 
+import com.mojang.blaze3d.Blaze3D
 import liltojustice.trueadaptivemusic.Constants
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
@@ -9,7 +10,6 @@ import net.minecraft.network.chat.CommonComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.util.CommonColors
-import net.minecraft.util.Util
 import kotlin.io.path.*
 
 class ExtensionsSuggestionScreen(private val parent: Screen)
@@ -22,7 +22,7 @@ class ExtensionsSuggestionScreen(private val parent: Screen)
         val yesButtonWidget = SpriteIconButton.builder(
             CommonComponents.GUI_YES,
             {
-                Util.getPlatform().openUri(Constants.TAM_MODRINTH_URL)
+                Blaze3D.openUri(Constants.TAM_MODRINTH_URL)
                 minecraft.gui.setScreen(parent)
             },
             false
