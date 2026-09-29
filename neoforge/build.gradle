@@ -91,7 +91,7 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-var apiFileId = "8630528"
+var apiFileId = "9006056"
 dependencies {
     implementation 'dev.nyon:KotlinLangForge:2.14.1-k2.4.20-3.1+neoforge'
     api 'curse.maven:trueadaptivemusicapi-1514598:' + apiFileId

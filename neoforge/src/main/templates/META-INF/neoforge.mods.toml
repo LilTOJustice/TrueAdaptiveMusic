@@ -8,7 +8,7 @@ modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
 displayURL = "${mod_home}"
-logoFile = "${mod_icon}"
+iconFile = "${mod_icon}"
 authors = "${mod_authors}"
 description = "${mod_description}"
 
