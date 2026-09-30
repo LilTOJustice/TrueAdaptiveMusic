@@ -2,6 +2,7 @@
 
 ---
 ## Fixes
+- Fixed crash caused by PrioritySoundEvents not being serialized properly across all modloaders.
 
 ## Known Issues
 - Screen predicate UI does not work with NeoForge/Forge yet due to issues with the NeoForge/Forge classloaders
