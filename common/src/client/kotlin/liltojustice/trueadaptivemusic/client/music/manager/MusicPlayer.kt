@@ -8,6 +8,7 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.Minecraft
+import java.io.Closeable
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -234,7 +235,7 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         private const val CLAMP_TICKS = 20
     }
 
-    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int, val allowPause: Boolean) {
+    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int, val allowPause: Boolean): Closeable {
         var currentSound: PlayableSound? = null
             private set
         var currentSoundInstance: TAMSoundInstance? = null
@@ -274,8 +275,18 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         }
 
         fun resetSounds() {
+            close()
             currentSound = null
             currentSoundInstance = null
+        }
+
+        override fun close() {
+            delayTimerTask?.let {
+                it.cancel()
+                it.run()
+            }
+
+            delayTimer.cancel()
         }
     }
 }
