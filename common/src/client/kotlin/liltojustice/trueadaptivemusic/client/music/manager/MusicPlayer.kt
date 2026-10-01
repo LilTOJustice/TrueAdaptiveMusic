@@ -8,9 +8,10 @@ import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.sound.engine.SoundSystem
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import net.minecraft.client.Minecraft
-import java.io.Closeable
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.schedule
 import kotlin.math.min
 
@@ -235,7 +236,8 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         private const val CLAMP_TICKS = 20
     }
 
-    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int, val allowPause: Boolean): Closeable {
+    @OptIn(ExperimentalAtomicApi::class)
+    private class Track(val isAmbient: Boolean, val crossFadeTicks: Int, val allowPause: Boolean) {
         var currentSound: PlayableSound? = null
             private set
         var currentSoundInstance: TAMSoundInstance? = null
@@ -243,7 +245,7 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         var clampedVolume: Float = 1F
         var desiredVolume: Float = 1F
 
-        private val delayTimer = Timer()
+        private val delayTimer = Timer("TAM Track Timer - ${timerId.fetchAndAdd(1)}", true)
         private var delayTimerTask: TimerTask? = null
 
         fun startDelay(delayMillis: Long, onFinishDelay: (Track) -> Unit) {
@@ -275,18 +277,12 @@ internal class MusicPlayer(private val minecraft: Minecraft) {
         }
 
         fun resetSounds() {
-            close()
             currentSound = null
             currentSoundInstance = null
         }
 
-        override fun close() {
-            delayTimerTask?.let {
-                it.cancel()
-                it.run()
-            }
-
-            delayTimer.cancel()
+        companion object {
+            private val timerId = AtomicInt(0)
         }
     }
 }
