@@ -4,6 +4,7 @@
 ## Fixes
 - Fixed crash caused by PrioritySoundEvents not being serialized properly across all modloaders
 - Fixed game not closing immediately due to leaked timer objects, causing it to wait and eventually force close from the jvm watchdog
+- Added back the common "c" tags
 
 ## Known Issues
 - Screen predicate UI does not work with NeoForge/Forge yet due to issues with the NeoForge/Forge classloaders
