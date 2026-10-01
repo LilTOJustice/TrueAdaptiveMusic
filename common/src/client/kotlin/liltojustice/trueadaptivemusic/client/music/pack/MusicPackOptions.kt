@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import liltojustice.trueadaptivemusic.ReflectionHelper
+import liltojustice.trueadaptivemusic.client.serialization.addIdentifierSupport
 import liltojustice.trueadaptivemusic.text.StringExtensions.prettify
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.identifier.MusicSoundEventIdentifier
@@ -47,6 +48,7 @@ data class MusicPackOptions(
         private val json = GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapterFactory(ListAdapterFactory)
+            .addIdentifierSupport()
             .create()
 
         fun jsonDecode(string: String): MusicPackOptions {
