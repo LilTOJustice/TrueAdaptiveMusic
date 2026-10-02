@@ -18,6 +18,8 @@ import net.minecraft.world.entity.monster.warden.Warden
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
 import java.util.*
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.schedule
 import kotlin.math.PI
 import kotlin.math.abs
@@ -56,8 +58,10 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         val minimumCount: NInt = NInt()
     ): TriggerArguments()
 
+    @OptIn(ExperimentalAtomicApi::class)
     class State(private val arguments: Arguments): TriggerState() {
-        val aggroTimer: Timer = Timer()
+        val aggroTimer: Timer = Timer(
+            "TAM Combat aggro timer - ${timerId.fetchAndAdd(1)}", true)
         var aggroTimerTask: TimerTask? = null
         var isAggro: Boolean = false
 
@@ -136,6 +140,10 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
                         it.any { mobEntity -> mobEntity.matches(entity) }
                 }
                 ?: true
+        }
+
+        companion object {
+            private val timerId = AtomicInt(0)
         }
     }
 
