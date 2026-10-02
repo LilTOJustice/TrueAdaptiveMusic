@@ -22,6 +22,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredic
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BlockNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CanSeeSkyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CustomPredicate
@@ -154,6 +155,7 @@ object TAMClientInitializer {
         TAMAPI.registerPredicateType(ItemPredicate)
         TAMAPI.registerPredicateType(ItemNearbyPredicate)
         TAMAPI.registerPredicateType(ScreenPredicate)
+        TAMAPI.registerPredicateType(CanSeeSkyPredicate)
     }
 
     private fun registerEventTypes() {
