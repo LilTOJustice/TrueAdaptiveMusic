@@ -43,7 +43,6 @@ repositories {
     mavenCentral()
 }
 
-val apiFileId = "8630543"
 dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings(loom.officialMojangMappings())
@@ -56,8 +55,8 @@ dependencies {
     include("org.javassist:javassist:3.33.0-GA")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    modApi("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
-    include("curse.maven:trueadaptivemusicapi-1514598:$apiFileId")
+    modApi("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
+    include("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
 }
 
 tasks.processResources {
