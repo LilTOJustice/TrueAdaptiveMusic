@@ -4,23 +4,23 @@ import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceLocation
 
-object IdentifierTypeAdapter: TypeAdapter<Identifier>() {
-    override fun write(writer: JsonWriter, id: Identifier) {
+object IdentifierTypeAdapter: TypeAdapter<ResourceLocation>() {
+    override fun write(writer: JsonWriter, id: ResourceLocation) {
         writer.beginObject()
         writer.name("namespace").value(id.namespace)
         writer.name("path").value(id.path)
         writer.endObject()
     }
 
-    override fun read(reader: JsonReader): Identifier {
+    override fun read(reader: JsonReader): ResourceLocation {
         reader.beginObject()
 
         if (!reader.hasNext()) {
             reader.endObject()
 
-            return Identifier.fromNamespaceAndPath("null", "null")
+            return ResourceLocation("null", "null")
         }
 
         reader.nextName()
@@ -35,6 +35,6 @@ object IdentifierTypeAdapter: TypeAdapter<Identifier>() {
 
         reader.endObject()
 
-        return Identifier.fromNamespaceAndPath(namespace, path)
+        return ResourceLocation(namespace, path)
     }
 }
