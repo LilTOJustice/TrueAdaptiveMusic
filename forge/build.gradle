@@ -111,13 +111,12 @@ repositories {
     }
 }
 
-var apiFileId = "8630578"
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation 'thedarkcolour:kotlinforforge:' + forge_kotlin_version
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:' + apiFileId)
-    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[' + apiFileId + ']'
+    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:' + forge_tam_api_id)
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[' + forge_tam_api_id + ']'
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.javassist:javassist:3.33.0-GA'
     jarJar 'org.reflections:reflections:[0.10.2]'

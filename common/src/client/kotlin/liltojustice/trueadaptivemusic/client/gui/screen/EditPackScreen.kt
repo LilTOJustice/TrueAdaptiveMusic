@@ -64,6 +64,17 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         }
     }
 
+    override fun mouseReleased(d: Double, e: Double, i: Int): Boolean {
+        var any = false
+        children().forEach {
+            if (it.mouseReleased(d, e, i)) {
+                any = true
+            }
+        }
+
+        return any
+    }
+
     override fun init() {
         try {
             initPack()
