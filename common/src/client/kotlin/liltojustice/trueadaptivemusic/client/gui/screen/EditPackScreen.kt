@@ -48,10 +48,10 @@ class EditPackScreen(private val parent: Screen, private val musicPack: MusicPac
         minecraft?.setScreen(ExportPackScreen(musicPack, parent))
     }
 
-    override fun mouseReleased(event: MouseButtonEvent): Boolean {
+    override fun mouseReleased(d: Double, e: Double, i: Int): Boolean {
         var any = false
         children().forEach {
-            if (it.mouseReleased(event)) {
+            if (it.mouseReleased(d, e, i)) {
                 any = true
             }
         }
