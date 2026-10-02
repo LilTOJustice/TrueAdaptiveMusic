@@ -54,8 +54,8 @@ dependencies {
     include("org.reflections:reflections:0.10.2")
     include("org.javassist:javassist:3.33.0-GA")
 
-    api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
+    modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
+    modApi("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
     include("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
 }
 
