@@ -19,10 +19,12 @@ object OnAdvancementGetEvent
                     "If none are selected, any advancement will trigger the music.")
 
     override fun validate(arguments: Arguments, input: Input): Boolean {
-        return arguments.advancements.isEmpty() || arguments.advancements.any { it.matches(input.advancement) }
+        val advancements = arguments.advancements ?: return true
+
+        return advancements.isEmpty() || advancements.any { it.matches(input.advancement) }
     }
 
-    data class Arguments(val advancements: List<AdvancementIdentifier>): TriggerArguments()
+    data class Arguments(val advancements: List<AdvancementIdentifier>?): TriggerArguments()
 
     data class Input(val advancement: AdvancementHolder): EventInput()
 }

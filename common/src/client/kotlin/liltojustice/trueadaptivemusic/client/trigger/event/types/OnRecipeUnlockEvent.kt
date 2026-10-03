@@ -17,10 +17,12 @@ object OnRecipeUnlockEvent
         arguments: Arguments,
         input: Input
     ): Boolean {
-        return arguments.items.isEmpty() || arguments.items.any { item -> item.matches(input.unlockedItem) }
+        val items = arguments.items ?: return true
+
+        return items.isEmpty() || items.any { item -> item.matches(input.unlockedItem) }
     }
 
-    data class Arguments(val items: List<ItemIdentifier>): TriggerArguments()
+    data class Arguments(val items: List<ItemIdentifier>?): TriggerArguments()
 
     data class Input(val unlockedItem: Holder<Item>): EventInput()
 }
