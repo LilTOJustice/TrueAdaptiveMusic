@@ -64,13 +64,14 @@ class EventViewWidget(
             ?: requiredEventParams.map { null }.toMutableList()
         if (event != null) {
             if (event.type !is ErrorEvent) {
-                setSelectedEventTypeName(event.type.typeName)
+                setSelectedEventTypeName(event.type.typeName, true)
                 eventArgs = (MusicTrigger.getTriggerArgs(event.arguments).map { arg -> arg.value }).toMutableList()
             }
 
             selectedMusicPaths = event.music.map { sound -> sound.getSoundName() }.toMutableList()
         }
         else {
+            eventTypeNameOptions.firstOrNull()?.let { setSelectedEventTypeName(it, true) }
             selectedMusicPaths = mutableListOf()
         }
         clearWidgetsFromRender { false }
@@ -255,8 +256,8 @@ class EventViewWidget(
         )
     }
 
-    private fun setSelectedEventTypeName(typeName: String) {
-        if (selectedEventTypeName == typeName) {
+    private fun setSelectedEventTypeName(typeName: String, forceInit: Boolean = false) {
+        if (!forceInit && selectedEventTypeName == typeName) {
             return
         }
 

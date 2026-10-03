@@ -16,7 +16,8 @@
     "event.OnNightStartMixin",
     "event.OnPauseMixin",
     "event.OnToastMixin",
-    "event.OnWakeUpEventMixin"
+    "event.OnWakeUpEventMixin",
+    "event.OnRecipeUnlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1
