@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -204,6 +205,7 @@ object TAMClient {
             while (true) {
                 try {
                     tick()
+                    TAMClientCache.tick()
                 }
                 catch (e: Exception) {
                     Logger.logError("TAM Processor thread encountered an error:\n${e.stackTraceToString()}")

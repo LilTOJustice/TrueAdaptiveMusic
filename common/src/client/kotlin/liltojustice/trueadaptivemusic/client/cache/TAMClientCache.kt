@@ -1,7 +1,11 @@
-package liltojustice.trueadaptivemusic.client
+package liltojustice.trueadaptivemusic.client.cache
 
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.cache.ticker.types.LastNonRiverBiomeCacheTicker
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.core.Holder
+import net.minecraft.world.level.biome.Biome
 import org.reflections.Reflections
 import org.reflections.scanners.Scanners
 
@@ -22,6 +26,22 @@ object TAMClientCache {
         }
     }
 
+    val lastNonRiverBiome: Holder<Biome>?
+        get() = lastNonRiverBiomeCacheTicker.getValue()
+
+    private var initialized = false
+    private var lastNonRiverBiomeCacheTicker = LastNonRiverBiomeCacheTicker()
+
     fun init() {
+        if (initialized) {
+            return
+        }
+
+        initialized = true
+    }
+
+    fun tick() {
+        val minecraft = Minecraft.getInstance()
+        lastNonRiverBiomeCacheTicker.tick(minecraft)
     }
 }
