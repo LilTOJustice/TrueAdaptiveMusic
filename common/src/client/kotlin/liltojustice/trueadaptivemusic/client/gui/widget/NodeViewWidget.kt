@@ -8,11 +8,12 @@ import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
+import liltojustice.trueadaptivemusic.client.music.tree.MusicWeightedList
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundFile
 import liltojustice.trueadaptivemusic.client.trigger.event.ErrorEvent
-import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.PDouble
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.widget.EmptyClickableWidget
 import liltojustice.trueadaptivemusicapi.widget.WidgetArg
@@ -274,24 +275,25 @@ class NodeViewWidget(
             soundNames.forEach { soundName ->
                 addWidgetFromRender(
                     {
-                        val outArg = mutableListOf(node.parameters.musicWeights[soundName] as Any?)
+                        val outArg = mutableListOf(
+                            node.parameters.musicWeights[soundName] ?: PDouble(1.0) as Any?)
                         TAMAPI.makeInputWidget(
                             screen!!,
                             outArg,
-                            WidgetArg(typeOf<NInt>(), "musicWeights", 0),
+                            WidgetArg(typeOf<PDouble>(), "musicWeights", 0),
                             Component.literal(soundName),
                             null
                         ) {
-                            val copy = mutableMapOf<String, NInt>()
-                            soundNames.forEach { copy[it] = NInt() }
-                            node.parameters.musicWeights.entries.forEach { entry ->
-                                if (entry.key in copy) {
-                                    copy[entry.key] = entry.value
+                            val copy = mutableMapOf<String, PDouble>()
+                            soundNames.forEach { copy[it] = PDouble(1.0) }
+                            node.parameters.musicWeights.weights.forEach { weight ->
+                                if (weight.key in copy) {
+                                    copy[weight.key] = weight.value
                                 }
                             }
 
-                            copy[soundName] = outArg[0] as NInt
-                            nodeParams[musicWeightsParam.index] = copy.toMap()
+                            copy[soundName] = outArg[0] as PDouble
+                            nodeParams[musicWeightsParam.index] = MusicWeightedList(copy.toMap())
                             onChange()
                         }
                     },

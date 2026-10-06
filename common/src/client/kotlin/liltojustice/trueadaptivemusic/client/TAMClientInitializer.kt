@@ -65,6 +65,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.client.util.LUFBoost
 import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.PDouble
 import liltojustice.trueadaptivemusic.client.util.TimeOfDay
 import liltojustice.trueadaptivemusic.client.util.toNIntOrNull
 import liltojustice.trueadaptivemusic.network.ClientNetworkInterface
@@ -279,6 +280,61 @@ object TAMClientInitializer {
                     }
 
                     outArgs[arg.index] = value
+                    onChange()
+                    ""
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+            tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+
+            result
+        }
+
+        TAMAPI.registerInputWidget(
+            typeOf<PDouble>()
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
+                prompt,
+                { _, text ->
+                    if (text.isBlank()) {
+                        return@TextInputWidget "0"
+                    }
+
+                    if (text.endsWith('-')) {
+                        return@TextInputWidget text.dropLast(1)
+                    }
+
+                    if (text.endsWith(".")) {
+                        if (text.count { it == '.' } > 1) {
+                            return@TextInputWidget text.dropLast(1)
+                        }
+
+                        val newText = "${text.dropLastWhile { it == '.' }}."
+                        newText.dropLast(1).toDoubleOrNull()?.let {
+                            outArgs[arg.index] = PDouble(it)
+                            onChange()
+                        }
+
+                        return@TextInputWidget newText
+                    }
+
+                    if (!text.contains('.') && text.startsWith('0') && text.length > 1) {
+                        return@TextInputWidget text.dropWhile { it == '0' }
+                    }
+
+                    if (!text.contains('.')) {
+                        text.toDoubleOrNull()?.let {
+                            outArgs[arg.index] = PDouble(it)
+                            onChange()
+                        }
+
+                        return@TextInputWidget text
+                    }
+
+                    val value = text.toDoubleOrNull()
+                        ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "1"
+
+                    outArgs[arg.index] = PDouble(value)
                     onChange()
                     ""
                 },

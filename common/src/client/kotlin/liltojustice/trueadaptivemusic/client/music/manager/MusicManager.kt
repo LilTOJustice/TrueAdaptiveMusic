@@ -4,12 +4,12 @@ import liltojustice.trueadaptivemusic.client.TAMClient
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPackOptions
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
+import liltojustice.trueadaptivemusic.client.music.tree.MusicWeightedList
 import liltojustice.trueadaptivemusic.client.sound.instance.TAMSoundInstance
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnEnterNodeEvent
-import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EmptyEventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.input.EventInput
 import liltojustice.trueadaptivemusicapi.trigger.event.type.EventTypeBase
@@ -43,7 +43,7 @@ class MusicManager(private val minecraft: Minecraft) {
     private var mainTrack = MAIN_TRACK_1
     private var ambienceTrack = AMBIENCE_TRACK_1
     private val parallelTracks = mutableMapOf<PlayableSound, String>()
-    private var musicPool = mutableSetOf<PlayableSound>()
+    private var musicPool = mutableMapOf<String, PlayableSound>()
     private var ambiencePool = mutableSetOf<PlayableSound>()
     private var vanillaSoundEvent: PlayableSoundEvent? = null
     private var compatibilityMode = false
@@ -400,17 +400,14 @@ class MusicManager(private val minecraft: Minecraft) {
         }
     }
 
-    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: Map<String, NInt>): PlayableSound? {
+    private fun getPseudoRandomMusic(musicToPlay: List<PlayableSound>, weights: MusicWeightedList): PlayableSound? {
         if (musicPool.isEmpty()) {
-            musicPool = musicToPlay.toMutableSet()
+            musicPool = musicToPlay.associateBy { it.getSoundName() }.toMutableMap()
         }
 
-        val weightedMusicPool = musicPool.flatMap {
-            List(max(weights[it.getSoundName()]?.toInt() ?: 1, 1)) { _ -> it }
-        }
-
-        val randomSound = weightedMusicPool.randomOrNull() ?: return null
-        musicPool.remove(randomSound)
+        val randomSoundName = weights.filter(musicPool.keys).getWeightedRandomOrNull() ?: return null
+        val randomSound = musicPool[randomSoundName]
+        musicPool.remove(randomSoundName)
 
         return randomSound
     }
