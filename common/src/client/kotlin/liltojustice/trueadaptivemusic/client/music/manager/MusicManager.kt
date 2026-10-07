@@ -405,7 +405,8 @@ class MusicManager(private val minecraft: Minecraft) {
             musicPool = musicToPlay.associateBy { it.getSoundName() }.toMutableMap()
         }
 
-        val randomSoundName = weights.filter(musicPool.keys).getWeightedRandomOrNull() ?: return null
+        val randomSoundName = weights.filter(musicPool.keys, true).getWeightedRandomOrNull()
+            ?: return null
         val randomSound = musicPool[randomSoundName]
         musicPool.remove(randomSoundName)
 

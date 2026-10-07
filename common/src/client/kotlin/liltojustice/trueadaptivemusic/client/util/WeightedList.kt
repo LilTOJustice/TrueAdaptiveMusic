@@ -2,15 +2,24 @@ package liltojustice.trueadaptivemusic.client.util
 
 import kotlin.random.Random
 
-class WeightedList<T>(val weights: Map<T, PDouble> = emptyMap()) {
+class WeightedList<T>(weights: Map<T, PDouble> = emptyMap(), val defaultWeight: PDouble = PDouble(1.0)) {
+    val weights = weights.withDefault { defaultWeight }
     val total = weights.values.sumOf { it.toDouble() }
 
-    fun filter(keySet: Set<T>): WeightedList<T> {
-        return filter { keySet.contains(it) }
+    fun filter(keySet: Set<T>, union: Boolean): WeightedList<T> {
+        return if (union) {
+            val newWeights = weights.toMutableMap()
+            keySet.forEach { newWeights.putIfAbsent(it, defaultWeight) }
+
+            WeightedList(newWeights)
+        }
+        else {
+           filter { keySet.contains(it) }
+        }
     }
 
     fun filter(filter: (T) -> Boolean): WeightedList<T> {
-        return WeightedList(weights.filter { kv -> filter(kv.key) })
+        return WeightedList(weights.filter { kv -> filter(kv.key) }, defaultWeight)
     }
 
     fun getWeightedRandomOrNull(): T? {
