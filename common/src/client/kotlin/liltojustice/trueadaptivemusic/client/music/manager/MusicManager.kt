@@ -30,6 +30,8 @@ class MusicManager(private val minecraft: Minecraft) {
     val currentEventMusic: TAMSoundInstance?
         get() = musicPlayer.getPlayingInstance(EVENT_TRACK)
 
+    private val currentVanillaSounds
+        get() = minecraft.soundManager.soundEngine.instanceToChannel.keys.map { it.identifier }.toSet()
     private val musicPlayer = MusicPlayer(minecraft)
     private var currentNodeId: String = ""
     private var oldNodeId: String = ""
@@ -141,8 +143,9 @@ class MusicManager(private val minecraft: Minecraft) {
 
         val isPaused = isPaused(minecraft)
         val shouldStop = compatibilityMode ||
-                packOptions.prioritySoundEvents.any { it.id == vanillaSoundEvent?.getId() } ||
-                shouldStopMain(minecraft, musicPlayer, musicToPlay, persistNodeMusic)
+                packOptions.prioritySoundEvents.any {
+                    it.id == vanillaSoundEvent?.getId() || it.id in currentVanillaSounds
+                } || shouldStopMain(minecraft, musicPlayer, musicToPlay, persistNodeMusic)
 
         musicPlayer.clampTrackVolume(
             EVENT_TRACK,
