@@ -29,6 +29,8 @@ object TAMClientCache {
     val lastNonRiverBiome: Holder<Biome>?
         get() = lastNonRiverBiomeCacheTicker.getValue()
 
+    val playerCombatantTracker = PlayerCombatTracker()
+
     private var initialized = false
     private var lastNonRiverBiomeCacheTicker = LastNonRiverBiomeCacheTicker()
 

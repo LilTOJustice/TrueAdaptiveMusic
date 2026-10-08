@@ -15,9 +15,10 @@
     "event.OnJoinWorldEventMixin",
     "event.OnNightStartMixin",
     "event.OnPauseMixin",
+    "event.OnRecipeUnlockMixin",
     "event.OnToastMixin",
     "event.OnWakeUpEventMixin",
-    "event.OnRecipeUnlockMixin"
+    "PlayerCombatMixin"
   ],
   "injectors": {
     "defaultRequire": 1

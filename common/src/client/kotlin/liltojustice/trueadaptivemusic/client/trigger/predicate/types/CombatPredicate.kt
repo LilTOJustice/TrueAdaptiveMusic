@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
 import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
@@ -32,6 +33,8 @@ import kotlin.reflect.typeOf
 object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.State>(
     "combat", typeOf<Arguments>()
 ) {
+    private const val MAX_PLAYER_COMBAT_TICKS = 20 * 10
+
     override val tickRate: Int
         get() = super.tickRate * 10
     override val argDescriptions: Map<String, String>
@@ -172,7 +175,19 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
     }
 
     private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
-        return player.team != null && otherPlayer.team != null && !player.isAlliedTo(otherPlayer)
+        val otherPlayerName = otherPlayer.name.string
+        val otherPlayerState = TAMClientCache.playerCombatantTracker[otherPlayerName]
+            ?.takeIf {
+                it.getTicksSince(player.tickCount) < MAX_PLAYER_COMBAT_TICKS
+            }
+            ?: run {
+                TAMClientCache.playerCombatantTracker.remove(otherPlayerName)
+
+                null
+            }
+
+        return (otherPlayerState != null && otherPlayerState.attackee && otherPlayerState.attacker)
+                || (player.team != null && otherPlayer.team != null && !player.isAlliedTo(otherPlayer))
     }
 
     private fun closeEnough(displacement: Vec3, attackerSize: Vec3): Boolean
