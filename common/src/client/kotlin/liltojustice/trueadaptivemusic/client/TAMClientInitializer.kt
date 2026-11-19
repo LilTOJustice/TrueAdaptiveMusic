@@ -1,6 +1,5 @@
 package liltojustice.trueadaptivemusic.client
 
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
@@ -8,7 +7,6 @@ import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
 import liltojustice.trueadaptivemusic.client.extensions.Extensions
-import liltojustice.trueadaptivemusic.client.extensions.SuggestedPack
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
@@ -88,12 +86,9 @@ import java.nio.file.Files
 import kotlin.collections.map
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
-import kotlin.io.path.readText
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -656,20 +651,11 @@ object TAMClientInitializer {
 
     private fun trySuggestedPackHandling() {
         val extensions = TAMClient.extensions ?: return
-        val suggestedPack = try {
-            Constants.SUGGESTED_PACK_PATH
-                .takeIf { it.exists() && it.isRegularFile() }
-                ?.readText()
-                ?.let { Gson().fromJson(it, SuggestedPack::class.java) }
-                ?: return
-        }
-        catch (t: Throwable) {
-            Logger.logWarning("Failed to read suggested pack path: ${t.message}")
-            return
-        }
+        val suggestedPack = TAMClient.getSuggestedPack() ?: return
+        TAMClient.setSuggestedPack(suggestedPack)
 
         if (Constants.MUSIC_PACK_DIR.listDirectoryEntries()
-            .all { it.name.contains(suggestedPack.name) && it.name.contains(suggestedPack.version) }) {
+            .any { it.name.contains(suggestedPack.name) && it.name.contains(suggestedPack.version) }) {
             return
         }
 
@@ -678,7 +664,10 @@ object TAMClientInitializer {
                 val pack = extensions
                     .packFetcher(true)
                     ?.packs
-                    ?.firstOrNull { it.name == suggestedPack.name && it.version == suggestedPack.version }
+                    ?.firstOrNull {
+                        it.name == suggestedPack.name &&
+                                it.version?.let { version -> version == suggestedPack.version } ?: true
+                    }
                     ?: return@launch
                 extensions.packDownloader(pack, Reference(0F))
                 TAMClient.musicPack = MusicPack.fromFile(pack.getFilePath())
