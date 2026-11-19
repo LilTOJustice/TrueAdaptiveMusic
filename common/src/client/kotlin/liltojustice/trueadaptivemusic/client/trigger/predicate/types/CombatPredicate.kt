@@ -9,7 +9,6 @@ import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.boss.wither.WitherBoss
 import net.minecraft.world.entity.monster.ElderGuardian
 import net.minecraft.world.entity.monster.Guardian
@@ -182,15 +181,13 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
                 entity.boundingBox.ysize,
                 entity.boundingBox.zsize
             )
-        ) && isAggressive(entity, playerEntity)
-    }
-
-    private fun isAggressive(entity: Entity, playerEntity: Player): Boolean {
-        return ((entity as? Mob)?.isAggressive ?: false) || handleEntity(entity, playerEntity)
+        ) && handleEntity(entity, playerEntity)
     }
 
     private fun handleEntity(entity: Entity, playerEntity: Player): Boolean {
-        return entityAggressionHandlers[entity::class.starProjectedType]?.invoke(entity, playerEntity) ?: false
+        return entityAggressionHandlers[entity::class.starProjectedType]
+            ?.invoke(entity, playerEntity)
+            ?: (entity is Monster)
     }
 
     private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
