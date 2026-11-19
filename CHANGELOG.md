@@ -28,7 +28,7 @@
   - Play music based on whether there is a clear path from you to the sky above
   - Option to ignore water blocks
 
-Next up, [2.10](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/22) with a bunch more community-requested features!
+Next up, [2.11](https://github.com/LilTOJustice/TrueAdaptiveMusic/milestone/23)
 
 Please also reach out if you would like support to be added for a new language. I am still working on finishing Russian support :)
 
