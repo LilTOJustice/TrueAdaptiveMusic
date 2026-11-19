@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
 import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
+import liltojustice.trueadaptivemusic.client.extensions.Extensions
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack

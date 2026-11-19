@@ -1,12 +1,20 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
 import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
+import liltojustice.trueadaptivemusic.client.extensions.Extensions
+import liltojustice.trueadaptivemusic.client.extensions.SuggestedPack
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
@@ -78,10 +86,14 @@ import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
 import java.nio.file.Files
 import kotlin.collections.map
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
+import kotlin.io.path.readText
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
@@ -102,6 +114,7 @@ object TAMClientInitializer {
         TAMClient.injectModReflectionInterface(clientModReflectionInterface)
         TAMClientNetworking.init(clientNetworkInterface)
         tryRegisterExtensions()
+        trySuggestedPackHandling()
     }
 
     private fun initDirectories() {
@@ -641,12 +654,40 @@ object TAMClientInitializer {
             ?.let { TAMClient.addExtensions(it) }
     }
 
-    private val DYNAMIC_REGISTRY_TEXT =
-        Component.translatableWithFallback(
-            "trueadaptivemusic.dynamic_registry_warning",
-            "No options available to add due to a dynamic registry requirement. Try joining a " +
-                    "singleplayer world first."
-        )
+    private fun trySuggestedPackHandling() {
+        val extensions = TAMClient.extensions ?: return
+        val suggestedPack = try {
+            Constants.SUGGESTED_PACK_PATH
+                .takeIf { it.exists() && it.isRegularFile() }
+                ?.readText()
+                ?.let { Gson().fromJson(it, SuggestedPack::class.java) }
+                ?: return
+        }
+        catch (t: Throwable) {
+            Logger.logWarning("Failed to read suggested pack path: ${t.message}")
+            return
+        }
+
+        if (Constants.MUSIC_PACK_DIR.listDirectoryEntries()
+            .all { it.name.contains(suggestedPack.name) && it.name.contains(suggestedPack.version) }) {
+            return
+        }
+
+        suggestedPackDownloadCoroutineScope.launch {
+            try {
+                val pack = extensions
+                    .packFetcher(true)
+                    ?.packs
+                    ?.firstOrNull { it.name == suggestedPack.name && it.version == suggestedPack.version }
+                    ?: return@launch
+                extensions.packDownloader(pack, Reference(0F))
+                TAMClient.musicPack = MusicPack.fromFile(pack.getFilePath())
+            }
+            catch (t: Throwable) {
+                Logger.logError("Failed to download suggested pack '${suggestedPack.name}': ${t.message}")
+            }
+        }
+    }
 
     private fun isEnumList(type: KType): Boolean {
         return type.isSubtypeOf(typeOf<List<*>>())
@@ -676,4 +717,13 @@ object TAMClientInitializer {
             else -> enumString.prettify()
         }
     }
+
+    private val DYNAMIC_REGISTRY_TEXT =
+        Component.translatableWithFallback(
+            "trueadaptivemusic.dynamic_registry_warning",
+            "No options available to add due to a dynamic registry requirement. Try joining a " +
+                    "singleplayer world first."
+        )
+
+    private val suggestedPackDownloadCoroutineScope = CoroutineScope(EmptyCoroutineContext)
 }
