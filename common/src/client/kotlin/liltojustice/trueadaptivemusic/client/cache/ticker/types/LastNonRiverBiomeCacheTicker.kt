@@ -15,7 +15,7 @@ class LastNonRiverBiomeCacheTicker: CacheTicker<Holder<Biome>?>() {
         val player = minecraft.player ?: return
         val biome = player.level().getBiome(player.blockPosition())
 
-        if (biome.unwrapKey().getOrNull()?.identifier()?.path?.contains("river") ?: false) {
+        if (biome.unwrapKey().getOrNull()?.location()?.path?.contains("river") ?: false) {
             return
         }
 
