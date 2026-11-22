@@ -31,7 +31,7 @@ class MusicManager(private val minecraft: Minecraft) {
         get() = musicPlayer.getPlayingInstance(EVENT_TRACK)
 
     private val currentVanillaSounds
-        get() = minecraft.soundManager.soundEngine.instanceToChannel.keys.map { it.identifier }.toSet()
+        get() = minecraft.soundManager.soundEngine.instanceToChannel.keys.map { it.location }.toSet()
     private val musicPlayer = MusicPlayer(minecraft)
     private var currentNodeId: String = ""
     private var oldNodeId: String = ""
