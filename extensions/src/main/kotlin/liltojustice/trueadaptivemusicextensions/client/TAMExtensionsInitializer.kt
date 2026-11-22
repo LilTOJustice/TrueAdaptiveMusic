@@ -1,8 +1,8 @@
 package liltojustice.trueadaptivemusicextensions.client
 
 import liltojustice.trueadaptivemusic.Constants
-import liltojustice.trueadaptivemusic.client.Extensions
 import liltojustice.trueadaptivemusic.client.TAMClient
+import liltojustice.trueadaptivemusic.client.extensions.Extensions
 import liltojustice.trueadaptivemusicextensions.client.browser.BrowsableMusicPackDownloader
 import liltojustice.trueadaptivemusicextensions.client.browser.CurlHelper
 import liltojustice.trueadaptivemusicextensions.client.browser.MegaHelper
