@@ -21,3 +21,5 @@ accessible method com/mojang/blaze3d/audio/OpenAlUtil checkALError (Ljava/lang/S
 accessible method com/mojang/blaze3d/audio/SoundBuffer getAlBuffer ()Ljava/util/OptionalInt;
 extendable method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
 accessible field net/minecraft/server/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/world/entity/Entity fluidInteraction Lnet/minecraft/world/entity/EntityFluidInteraction;
+accessible field net/minecraft/client/gui/components/toasts/AdvancementToast advancement Lnet/minecraft/advancements/AdvancementHolder;

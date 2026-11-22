@@ -153,7 +153,9 @@ class PackBrowserListWidget(
     private fun initEntries() {
         val entries = packManifest?.packs?.map { Entry(it) }
         entries?.forEach { addEntry(it) }
-        setSelected(entries?.firstOrNull())
+        val first = entries?.firstOrNull()
+        setSelected(first)
+        first?.let { onSelectPack(it.musicPack) }
     }
 
     private fun renderSelectedPack(context: GuiGraphics?, musicPack: BrowsableMusicPack) {
