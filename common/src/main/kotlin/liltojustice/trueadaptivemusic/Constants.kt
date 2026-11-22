@@ -16,6 +16,7 @@ object Constants {
     val OPTIONS_DIR = Path("config", TRUE_ADAPTIVE_MUSIC)
     val FFMPEG_DIR = Path(OPTIONS_DIR.invariantSeparatorsPathString, "ffmpeg_binaries")
     val OPTIONS_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "trueadaptivemusic.json")
+    val SUGGESTED_PACK_PATH = Path(OPTIONS_DIR.invariantSeparatorsPathString, "suggestedpack.json")
     val FFMPEG_WINDOWS_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffmpeg.exe")
     val FFPROBE_WINDOWS_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffprobe.exe")
     val FFMPEG_PATH = Path(FFMPEG_DIR.invariantSeparatorsPathString, "ffmpeg")

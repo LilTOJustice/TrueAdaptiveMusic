@@ -1,11 +1,18 @@
 package liltojustice.trueadaptivemusic.client
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
+import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.Reference
+import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
+import liltojustice.trueadaptivemusic.client.extensions.Extensions
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.CheckboxWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.DropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.MultiSelectDropdownWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.SliderWidget
 import liltojustice.trueadaptivemusic.client.gui.widget.utility.TextInputWidget
+import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.network.TAMClientNetworking
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnAdvancementGetEvent
 import liltojustice.trueadaptivemusic.client.trigger.event.types.OnBossDefeatEvent
@@ -22,6 +29,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BiomePredic
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BlockNearbyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossHealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.BossPredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CanSeeSkyPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CombatPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CreditsScreenPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.CustomPredicate
@@ -33,6 +41,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FirstDayPre
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FishingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.FlyingPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.GameModePredicate
+import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HasAdvancementPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HealthPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HeightPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.HungerPredicate
@@ -62,6 +71,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.types.TitleScreen
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.WeatherPredicate
 import liltojustice.trueadaptivemusic.client.util.LUFBoost
 import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.PDouble
 import liltojustice.trueadaptivemusic.client.util.TimeOfDay
 import liltojustice.trueadaptivemusic.client.util.toNIntOrNull
 import liltojustice.trueadaptivemusic.network.ClientNetworkInterface
@@ -74,6 +84,7 @@ import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.network.chat.Component
 import java.nio.file.Files
 import kotlin.collections.map
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.listDirectoryEntries
@@ -98,6 +109,7 @@ object TAMClientInitializer {
         TAMClient.injectModReflectionInterface(clientModReflectionInterface)
         TAMClientNetworking.init(clientNetworkInterface)
         tryRegisterExtensions()
+        trySuggestedPackHandling()
     }
 
     private fun initDirectories() {
@@ -154,6 +166,8 @@ object TAMClientInitializer {
         TAMAPI.registerPredicateType(ItemPredicate)
         TAMAPI.registerPredicateType(ItemNearbyPredicate)
         TAMAPI.registerPredicateType(ScreenPredicate)
+        TAMAPI.registerPredicateType(CanSeeSkyPredicate)
+        TAMAPI.registerPredicateType(HasAdvancementPredicate)
     }
 
     private fun registerEventTypes() {
@@ -274,6 +288,61 @@ object TAMClientInitializer {
                     }
 
                     outArgs[arg.index] = value
+                    onChange()
+                    ""
+                },
+                outArgs[arg.index]?.toString() ?: ""
+            )
+            tooltipText?.let { result.setTooltip(Tooltip.create(it)) }
+
+            result
+        }
+
+        TAMAPI.registerInputWidget(
+            typeOf<PDouble>()
+        ) { prompt, _, outArgs, arg, tooltipText, onChange ->
+            val result = TextInputWidget(
+                prompt,
+                { _, text ->
+                    if (text.isBlank()) {
+                        return@TextInputWidget "0"
+                    }
+
+                    if (text.endsWith('-')) {
+                        return@TextInputWidget text.dropLast(1)
+                    }
+
+                    if (text.endsWith(".")) {
+                        if (text.count { it == '.' } > 1) {
+                            return@TextInputWidget text.dropLast(1)
+                        }
+
+                        val newText = "${text.dropLastWhile { it == '.' }}."
+                        newText.dropLast(1).toDoubleOrNull()?.let {
+                            outArgs[arg.index] = PDouble(it)
+                            onChange()
+                        }
+
+                        return@TextInputWidget newText
+                    }
+
+                    if (!text.contains('.') && text.startsWith('0') && text.length > 1) {
+                        return@TextInputWidget text.dropWhile { it == '0' }
+                    }
+
+                    if (!text.contains('.')) {
+                        text.toDoubleOrNull()?.let {
+                            outArgs[arg.index] = PDouble(it)
+                            onChange()
+                        }
+
+                        return@TextInputWidget text
+                    }
+
+                    val value = text.toDoubleOrNull()
+                        ?: return@TextInputWidget outArgs[arg.index]?.toString() ?: "1"
+
+                    outArgs[arg.index] = PDouble(value)
                     onChange()
                     ""
                 },
@@ -580,12 +649,34 @@ object TAMClientInitializer {
             ?.let { TAMClient.addExtensions(it) }
     }
 
-    private val DYNAMIC_REGISTRY_TEXT =
-        Component.translatableWithFallback(
-            "trueadaptivemusic.dynamic_registry_warning",
-            "No options available to add due to a dynamic registry requirement. Try joining a " +
-                    "singleplayer world first."
-        )
+    private fun trySuggestedPackHandling() {
+        val extensions = TAMClient.extensions ?: return
+        val suggestedPack = TAMClient.getSuggestedPack() ?: return
+        TAMClient.setSuggestedPack(suggestedPack)
+
+        if (Constants.MUSIC_PACK_DIR.listDirectoryEntries()
+            .any { it.name.contains(suggestedPack.name) && it.name.contains(suggestedPack.version) }) {
+            return
+        }
+
+        suggestedPackDownloadCoroutineScope.launch {
+            try {
+                val pack = extensions
+                    .packFetcher(true)
+                    ?.packs
+                    ?.firstOrNull {
+                        it.name == suggestedPack.name &&
+                                it.version?.let { version -> version == suggestedPack.version } ?: true
+                    }
+                    ?: return@launch
+                extensions.packDownloader(pack, Reference(0F))
+                TAMClient.musicPack = MusicPack.fromFile(pack.getFilePath())
+            }
+            catch (t: Throwable) {
+                Logger.logError("Failed to download suggested pack '${suggestedPack.name}': ${t.message}")
+            }
+        }
+    }
 
     private fun isEnumList(type: KType): Boolean {
         return type.isSubtypeOf(typeOf<List<*>>())
@@ -615,4 +706,13 @@ object TAMClientInitializer {
             else -> enumString.prettify()
         }
     }
+
+    private val DYNAMIC_REGISTRY_TEXT =
+        Component.translatableWithFallback(
+            "trueadaptivemusic.dynamic_registry_warning",
+            "No options available to add due to a dynamic registry requirement. Try joining a " +
+                    "singleplayer world first."
+        )
+
+    private val suggestedPackDownloadCoroutineScope = CoroutineScope(EmptyCoroutineContext)
 }
