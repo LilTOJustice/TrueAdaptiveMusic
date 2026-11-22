@@ -1,11 +1,17 @@
 package liltojustice.trueadaptivemusic.client
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.Logger
+import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
+import liltojustice.trueadaptivemusic.client.extensions.Extensions
+import liltojustice.trueadaptivemusic.client.extensions.SuggestedPack
+import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
@@ -29,7 +35,10 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.time.Duration.Companion.milliseconds
 
 object TAMClient {
@@ -204,6 +213,7 @@ object TAMClient {
             while (true) {
                 try {
                     tick()
+                    TAMClientCache.tick()
                 }
                 catch (e: Exception) {
                     Logger.logError("TAM Processor thread encountered an error:\n${e.stackTraceToString()}")
@@ -246,5 +256,24 @@ object TAMClient {
             OS.OSX -> Constants.FFPROBE_PATH
             else -> null
         }
+    }
+
+    fun getSuggestedPack(): SuggestedPack? {
+        return try {
+            Constants.SUGGESTED_PACK_PATH
+                .takeIf { it.exists() && it.isRegularFile() }
+                ?.readText()
+                ?.let { Gson().fromJson(it, SuggestedPack::class.java) }
+        }
+        catch (t: Throwable) {
+            Logger.logWarning("Failed to read suggested pack path: ${t.message}")
+
+            null
+        }
+    }
+
+    fun setSuggestedPack(newSuggestedPack: SuggestedPack) {
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        Constants.SUGGESTED_PACK_PATH.writeText(gson.toJson(newSuggestedPack))
     }
 }
