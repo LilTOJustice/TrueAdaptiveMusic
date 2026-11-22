@@ -13,7 +13,6 @@ import liltojustice.trueadaptivemusic.client.extensions.Extensions
 import liltojustice.trueadaptivemusic.client.extensions.SuggestedPack
 import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
-import liltojustice.trueadaptivemusic.client.music.manager.MusicManager
 import liltojustice.trueadaptivemusic.client.music.pack.MusicPack
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
