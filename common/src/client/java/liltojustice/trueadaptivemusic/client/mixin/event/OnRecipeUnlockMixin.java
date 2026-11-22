@@ -13,7 +13,7 @@ public class OnRecipeUnlockMixin {
     public void addItem(ItemStack craftingStation, ItemStack unlockedItem, CallbackInfo ci) {
         TAMAPI.INSTANCE.invokeEvent(
                 OnRecipeUnlockEvent.INSTANCE,
-                new OnRecipeUnlockEvent.Input(unlockedItem.typeHolder())
+                new OnRecipeUnlockEvent.Input(unlockedItem.getItemHolder())
         );
     }
 }
