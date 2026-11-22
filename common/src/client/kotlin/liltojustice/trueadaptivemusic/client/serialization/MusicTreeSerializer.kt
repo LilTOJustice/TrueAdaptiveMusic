@@ -10,12 +10,15 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTree
 import liltojustice.trueadaptivemusic.client.music.tree.MusicTreeNode
+import liltojustice.trueadaptivemusic.client.music.tree.MusicWeightedList
+import liltojustice.trueadaptivemusic.client.music.tree.MusicWeightedListTypeAdapter
 import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.util.NInt
+import liltojustice.trueadaptivemusic.client.util.WeightedList
 import java.lang.reflect.Type
 
 object MusicTreeSerializer {
@@ -53,6 +56,7 @@ object MusicTreeSerializer {
                 MusicTreeNode.Parameters::class.java,
                 MusicTreeNodeParametersDeserializer
             )
+            .registerTypeHierarchyAdapter(MusicWeightedList::class.java, MusicWeightedListTypeAdapter)
             .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
             .addSerializationExclusionStrategy(MusicTreeNodeDeserializationStrategy)
             .create()
@@ -75,7 +79,7 @@ object MusicTreeSerializer {
             val result = MusicTreeNode.Parameters.jsonDecode(json.asJsonObject)
             result.title = result.title ?: ""
             result.loopStartPoints = result.loopStartPoints ?: mapOf()
-            result.musicWeights = result.musicWeights ?: mapOf()
+            result.musicWeights = result.musicWeights ?: WeightedList()
 
             return result
         }
