@@ -20,6 +20,8 @@
   - You can now use floating-point (decimal) numbers in the music weights parameter
 - Priority sound events now apply to every sound source
   - Enhances compatibility with other music-playing mods
+- TAM API 1.4.0 - Maven Support
+  - TAM API has migrated off of mod platforms to maven. Bridge mod makers will need to update their maven sources to the new maven repo!
 
 ## New Predicates
 - Has Advancement
