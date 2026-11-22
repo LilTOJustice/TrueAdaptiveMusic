@@ -1,6 +1,7 @@
 package liltojustice.trueadaptivemusic.client.mixin;
 
 import liltojustice.trueadaptivemusic.client.TAMClient;
+import liltojustice.trueadaptivemusic.Constants;
 import liltojustice.trueadaptivemusic.client.TrueAdaptiveMusicOptionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -25,7 +26,7 @@ public class OptionsSubScreenMixin {
         }
 
         var trueAdaptiveMusicButton = new OptionInstance<>(
-                "trueadaptivemusic",
+                Constants.TRUE_ADAPTIVE_MUSIC,
                 OptionInstance.noTooltip(),
                 (optionText, object) -> optionText,
                 new TrueAdaptiveMusicOptionCallback<>(Minecraft.getInstance()),
