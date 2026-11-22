@@ -99,7 +99,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         minecraft!!.setScreen(parent)
     }
 
-    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, a: Float) {
         setSuggestedPackButton.visible = selectedPack != null
         setSuggestedPackButton.active = suggestedPack != selectedPack
         if (this.packListWidget.refreshTime != refreshTime) {
