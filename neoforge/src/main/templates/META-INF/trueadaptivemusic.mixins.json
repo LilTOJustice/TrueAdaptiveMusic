@@ -15,10 +15,15 @@
     "event.OnJoinWorldEventMixin",
     "event.OnNightStartMixin",
     "event.OnPauseMixin",
+    "event.OnRecipeUnlockMixin",
     "event.OnToastMixin",
-    "event.OnWakeUpEventMixin"
+    "event.OnWakeUpEventMixin",
+    "PlayerCombatMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "ServerScoreboardMixin"
+  ]
 }

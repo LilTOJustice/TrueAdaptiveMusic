@@ -26,5 +26,13 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies."${mod_id}"]]
+modId = "trueadaptivemusicapi"
+type = "incompatible"
+versionRange = "(,1.4.0)"
+ordering = "NONE"
+side = "BOTH"
+reason = "Please remove the True Adaptive Music API mod. It is now included with the base mod."
+
 [[mixins]]
 config="META-INF/trueadaptivemusic.mixins.json"
