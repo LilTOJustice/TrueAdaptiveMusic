@@ -90,7 +90,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
         fun test(minecraft: Minecraft): Boolean {
             val playerEntity = minecraft.player ?: return false
-            if (playerEntity.gameMode() in safeModes) {
+            if (playerEntity.connection?.getPlayerInfo(minecraft.player?.uuid ?: return false)?.gameMode in safeModes) {
                 return false
             }
 
