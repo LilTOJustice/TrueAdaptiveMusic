@@ -24,3 +24,6 @@ accessible method com/mojang/blaze3d/audio/SoundBuffer getAlBuffer ()Ljava/util/
 accessible field net/minecraft/server/ServerScoreboard server Lnet/minecraft/server/MinecraftServer;
 extendable method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
 accessible method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+accessible field net/minecraft/client/gui/components/toasts/AdvancementToast advancement Lnet/minecraft/advancements/AdvancementHolder;
+accessible field net/minecraft/client/gui/components/toasts/RecipeToast recipeItems Ljava/util/List;
+accessible class net/minecraft/client/gui/components/toasts/RecipeToast$Entry
