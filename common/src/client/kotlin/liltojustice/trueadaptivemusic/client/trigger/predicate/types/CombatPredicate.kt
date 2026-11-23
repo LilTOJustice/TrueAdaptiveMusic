@@ -1,5 +1,6 @@
 package liltojustice.trueadaptivemusic.client.trigger.predicate.types
 
+import liltojustice.trueadaptivemusic.client.cache.TAMClientCache
 import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusicapi.identifier.EntityIdentifier
 import liltojustice.trueadaptivemusicapi.trigger.arguments.TriggerArguments
@@ -8,7 +9,6 @@ import liltojustice.trueadaptivemusicapi.trigger.state.TriggerState
 import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.boss.wither.WitherBoss
 import net.minecraft.world.entity.monster.ElderGuardian
 import net.minecraft.world.entity.monster.Guardian
@@ -16,6 +16,7 @@ import net.minecraft.world.entity.monster.Monster
 import net.minecraft.world.entity.monster.Phantom
 import net.minecraft.world.entity.monster.warden.Warden
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec3
 import java.util.*
 import kotlin.concurrent.atomics.AtomicInt
@@ -27,11 +28,33 @@ import kotlin.math.acos
 import kotlin.math.atan
 import kotlin.math.cbrt
 import kotlin.math.tan
+import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
 
 object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate.State>(
     "combat", typeOf<Arguments>()
 ) {
+    private const val MAX_PLAYER_COMBAT_TICKS = 20 * 10
+    private const val AGGRO_TIMER_SECONDS = 6L
+    private const val DEG_PER_RAD = 180.0 / PI
+    private val safeModes = listOf(GameType.CREATIVE, GameType.SPECTATOR)
+    private val baseAxialDistance = Vec3(20.0, 20.0, 20.0)
+    private val entityAggressionHandlers = mapOf<KType, EntityAggressionHandler>(
+        typeOf<Guardian>() to { entity, playerEntity ->
+            (entity as? Guardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true
+        },
+        typeOf<ElderGuardian>() to { entity, playerEntity ->
+            (entity as? ElderGuardian)?.let { it.activeAttackTarget?.id == playerEntity.id } == true
+        },
+        typeOf<Phantom>() to { _, _ -> true },
+        typeOf<Player>() to { entity, playerEntity ->
+            (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true
+        },
+        typeOf<Warden>() to { _, _ -> true },
+        typeOf<WitherBoss>() to { _, _ -> true }
+    )
+
     override val tickRate: Int
         get() = super.tickRate * 10
     override val argDescriptions: Map<String, String>
@@ -67,6 +90,10 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
         fun test(minecraft: Minecraft): Boolean {
             val playerEntity = minecraft.player ?: return false
+            if (playerEntity.gameMode() in safeModes) {
+                return false
+            }
+
             val level = minecraft.level ?: return false
             val verticalFov = minecraft.options.fov().get().toDouble() / DEG_PER_RAD
             val horizontalFov = 2 * atan(tan(verticalFov / 2) * minecraft.window.screenWidth / minecraft.window.screenHeight)
@@ -147,35 +174,37 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
         }
     }
 
-    private val baseAxialDistance = Vec3(20.0, 20.0, 20.0)
-    private const val AGGRO_TIMER_SECONDS = 4L
-    private const val DEG_PER_RAD = 180.0 / PI
-
     private fun isValidAttacker(entity: LivingEntity, playerEntity: Player, displacement: Vec3): Boolean {
-        val closeEnough = closeEnough(
+        return closeEnough(
             displacement,
             Vec3(entity.boundingBox.xsize,
                 entity.boundingBox.ysize,
                 entity.boundingBox.zsize
             )
-        )
-
-        return closeEnough && (
-                (entity as? Mob)?.isAggressive == true ||
-                        (entity as? Guardian)?.let { it.target?.id == playerEntity.id } == true ||
-                        (entity as? ElderGuardian)?.let { it.target?.id == playerEntity.id } == true ||
-                        entity is Phantom ||
-                        (entity as? Player)?.let { isEnemyPlayer(playerEntity, it) } == true ||
-                        entity is Warden ||
-                        entity is WitherBoss
-                )
+        ) && handleEntity(entity, playerEntity)
     }
 
-        private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
-            return player.team != null &&
-                    otherPlayer.team != null &&
-                    !player.isAlliedTo(otherPlayer)
-        }
+    private fun handleEntity(entity: Entity, playerEntity: Player): Boolean {
+        return entityAggressionHandlers[entity::class.starProjectedType]
+            ?.invoke(entity, playerEntity)
+            ?: (entity is Monster)
+    }
+
+    private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
+        val otherPlayerName = otherPlayer.name.string
+        val otherPlayerState = TAMClientCache.playerCombatantTracker[otherPlayerName]
+            ?.takeIf {
+                it.getTicksSince(player.tickCount) < MAX_PLAYER_COMBAT_TICKS
+            }
+            ?: run {
+                TAMClientCache.playerCombatantTracker.remove(otherPlayerName)
+
+                null
+            }
+
+        return (otherPlayerState != null && otherPlayerState.attackee && otherPlayerState.attacker)
+                || (player.team != null && otherPlayer.team != null && !player.isAlliedTo(otherPlayer))
+    }
 
     private fun closeEnough(displacement: Vec3, attackerSize: Vec3): Boolean
     {
@@ -189,4 +218,6 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
                 && axialDistance.y < scaledAttackerMinDistance.y
                 && axialDistance.z < scaledAttackerMinDistance.z
     }
+
+    private typealias EntityAggressionHandler = (entity: Entity, playerEntity: Player) -> Boolean
 }
