@@ -8,7 +8,7 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'org.jetbrains.kotlin.jvm' version '2.3.20'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
@@ -116,7 +116,9 @@ dependencies {
     implementation "thedarkcolour:kotlinforforge:${forge_kotlin_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     api "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}"
-    jarJar "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:[${tam_api_version}]"
+    jarJar("io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:[${tam_api_version}]") {
+        transitive = false
+    }
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.javassist:javassist:3.33.0-GA'
     jarJar 'org.reflections:reflections:[0.10.2]'

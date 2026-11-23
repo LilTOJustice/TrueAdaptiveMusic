@@ -26,8 +26,6 @@ ordering = "NONE"
 
 [[dependencies."${mod_id}"]]
 modId = "trueadaptivemusicapi"
-type = "incompatible"
-versionRange = "(,1.4.0)"
+mandatory = true
+versionRange = "[1.4.0,)"
 ordering = "NONE"
-side = "BOTH"
-reason = "Please remove the True Adaptive Music API mod. It is now included with the base mod."

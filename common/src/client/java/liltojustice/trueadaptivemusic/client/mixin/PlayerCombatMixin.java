@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public class PlayerCombatMixin {
-    @Inject(method = "hurtOrSimulate", at = @At("HEAD"))
+    @Inject(method = "hurt", at = @At("HEAD"))
     public void hurtClient(DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
         var attackee = (Entity)(Object)this;
         var attackerEntity = source.getEntity();
