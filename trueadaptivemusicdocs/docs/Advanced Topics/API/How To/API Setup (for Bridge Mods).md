@@ -11,11 +11,11 @@ First, make a new mod (or open up your existing mod project if you are the mod o
 Once your environment is loaded, you'll want to get either the gradle reference for the True Adaptive Music API mod, which can be added to your build file dependencies with the below snippet.
 
 ```kt
-// For unofficial mappings (<26.1)
-modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-MODLOADER_HERE:TAM_API_VERSION_HERE+MC_TARGET_HERE")
+// For unofficial mappings on fabric (<26.1)
+modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-MODLOADER_HERE-MC_TARGET_HERE:TAM_API_VERSION_HERE")
 
-// For official mappings (>=26.1)
-api("io.github.liltojustice:TrueAdaptiveMusicAPI-MODLOADER_HERE:TAM_API_VERSION_HERE+MC_TARGET_HERE")
+// For official mappings/forge (>=26.1)
+api("io.github.liltojustice:TrueAdaptiveMusicAPI-MODLOADER_HERE-MC_TARGET_HERE:TAM_API_VERSION_HERE")
 ```
 
 Replace `MODLOADER_HERE` with the modloader you're developing on. Can be `fabric`, `forge`, or `neoforge` with the same version compatibility as the base True Adaptive Music mod.
