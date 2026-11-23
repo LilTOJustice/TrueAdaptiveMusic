@@ -14,6 +14,7 @@ import liltojustice.trueadaptivemusic.client.trigger.predicate.MusicPredicate
 import liltojustice.trueadaptivemusic.client.trigger.predicate.types.RootPredicate
 import liltojustice.trueadaptivemusic.client.util.NInt
 import liltojustice.trueadaptivemusic.client.util.TimeOfDay
+import liltojustice.trueadaptivemusic.client.util.WeightedList
 import liltojustice.trueadaptivemusic.text.translatableWithFallbackOrNull
 import liltojustice.trueadaptivemusicapi.TAMAPI
 import liltojustice.trueadaptivemusicapi.trigger.arguments.EmptyTriggerArguments
@@ -154,7 +155,8 @@ class MusicTreeNode private constructor(
         return MusicTreeNode(
             music,
             ambience,
-            predicates.map { TAMClient.musicPredicateFactory.fromArgs(it.type, it.arguments) }.toMutableList(),
+            predicates
+                .map { TAMClient.musicPredicateFactory.fromArgs(it.type, it.arguments) }.toMutableList(),
             events.map { TAMClient.musicEventFactory.makeCopy(it) },
             parameters.copy(),
             if (withChildren)
@@ -244,7 +246,7 @@ class MusicTreeNode private constructor(
     )
 
     data class Parameters(
-        var musicWeights: Map<String, NInt> = mapOf(),
+        var musicWeights: MusicWeightedList = WeightedList(),
         var vanillaMusic: Boolean = false,
         var compatibilityMode: Boolean = false,
         var disableFading: Boolean = false,
@@ -319,6 +321,7 @@ class MusicTreeNode private constructor(
             private val json = GsonBuilder()
                 .registerTypeAdapter(NInt::class.java, NInt.NIntTypeAdapter)
                 .registerTypeAdapter(TimeOfDay::class.java, TimeOfDay.TimeOfDayTypeAdapter)
+                .registerTypeHierarchyAdapter(MusicWeightedList::class.java, MusicWeightedListTypeAdapter)
                 .setPrettyPrinting()
                 .create()
 
