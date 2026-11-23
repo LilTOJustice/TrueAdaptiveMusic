@@ -40,6 +40,7 @@ repositories {
     maven("https://cursemaven.com") {
         name = "CurseMaven"
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -51,8 +52,8 @@ dependencies {
     modImplementation("org.reflections:reflections:0.10.2")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    modApi("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
-    include("curse.maven:trueadaptivemusicapi-1514598:${project.property("fabric_tam_api_id")}")
+    modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
+    include("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
 }
 
 tasks.processResources {

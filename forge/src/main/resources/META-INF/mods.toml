@@ -23,3 +23,9 @@ modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
+
+[[dependencies."${mod_id}"]]
+modId = "trueadaptivemusicapi"
+mandatory = true
+versionRange = "[1.4.0,)"
+ordering = "NONE"
