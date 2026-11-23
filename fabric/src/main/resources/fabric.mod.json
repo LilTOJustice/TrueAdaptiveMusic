@@ -30,6 +30,9 @@
       "environment": "client"
     }
   ],
+  "conflicts": {
+    "trueadaptivemusicapi": "<1.4.0"
+  },
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
