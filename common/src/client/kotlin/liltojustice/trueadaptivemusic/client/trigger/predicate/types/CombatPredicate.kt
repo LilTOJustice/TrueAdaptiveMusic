@@ -90,7 +90,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
 
         fun test(minecraft: Minecraft): Boolean {
             val playerEntity = minecraft.player ?: return false
-            if (playerEntity.gameMode() in safeModes) {
+            if (minecraft.connection?.getPlayerInfo(minecraft.player?.uuid ?: return false)?.gameMode in safeModes) {
                 return false
             }
 
@@ -113,7 +113,7 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
             for (validEntities in entityGroups) {
                 for (livingEntity: LivingEntity in validEntities) {
                     if (processEntity(
-                            livingEntity, playerEntity, verticalAngle, horizontalAngle, verticalFov, horizontalFov)) {
+                            livingEntity, playerEntity, verticalAngle.toFloat(), horizontalAngle.toFloat(), verticalFov, horizontalFov)) {
                         count++
                     }
                 }

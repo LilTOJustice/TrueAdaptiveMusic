@@ -115,10 +115,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation "thedarkcolour:kotlinforforge:${forge_kotlin_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    //api "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}"
-    //jarJar("io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}")
-    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:[9024217]')
-    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[9024217]'
+    api "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}"
+    jarJar "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:[${tam_api_version}]"
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.javassist:javassist:3.33.0-GA'
     jarJar 'org.reflections:reflections:[0.10.2]'

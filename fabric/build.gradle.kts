@@ -51,8 +51,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
     modImplementation("org.reflections:reflections:0.10.2")
 
-    api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
+    modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
+    modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
     include("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
 }
 

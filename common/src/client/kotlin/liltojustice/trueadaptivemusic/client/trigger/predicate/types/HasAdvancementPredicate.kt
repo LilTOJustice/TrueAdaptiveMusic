@@ -22,7 +22,7 @@ object HasAdvancementPredicate: StaticPredicateType<HasAdvancementPredicate.Argu
         val minecraft = Minecraft.getInstance()
         val playerEntity = minecraft.player ?: return false
         val predicate = { advancement: AdvancementIdentifier ->
-            playerEntity.connection.advancements.get(advancement.id) != null
+            playerEntity.connection.advancements.advancements.get(advancement.id) != null
         }
 
         return when(arguments.qualifier) {
