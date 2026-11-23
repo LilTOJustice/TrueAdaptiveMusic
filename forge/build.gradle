@@ -8,10 +8,9 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.jetbrains.kotlin.jvm' version '2.3.20'
     id 'org.spongepowered.mixin' version '0.7.+'
-    id 'com.gradleup.shadow' version '9.2.2'
 }
 
 var isCurseForge = is_curseforge == "true"
@@ -106,14 +105,20 @@ repositories {
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
         content { includeGroup "thedarkcolour" }
     }
+    maven {
+        name = "CurseMaven"
+        url ="https://cursemaven.com"
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation "thedarkcolour:kotlinforforge:${forge_kotlin_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation fg.deobf("io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}")
-    shadow("io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}")
+    //api "io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}"
+    //jarJar("io.github.liltojustice:TrueAdaptiveMusicAPI-forge-${tam_api_mc_target}:${tam_api_version}")
+    api fg.deobf('curse.maven:trueadaptivemusicapi-1514598:[9044200]')
+    jarJar 'curse.maven:trueadaptivemusicapi-1514598:[9044200]'
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'org.javassist:javassist:3.33.0-GA'
     jarJar 'org.reflections:reflections:[0.10.2]'
