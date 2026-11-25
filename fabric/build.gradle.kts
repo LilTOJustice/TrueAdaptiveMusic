@@ -54,8 +54,8 @@ dependencies {
     include("org.reflections:reflections:0.10.2")
     include("org.javassist:javassist:3.33.0-GA")
 
-    api("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    api("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
+    modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
+    modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
     include("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
 }
 
