@@ -20,6 +20,7 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.CommonColors
 import java.util.Date
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.name
 
 class PackBrowserScreen(private val parent: Screen): Screen(
     Component.translatableWithFallback(
@@ -77,7 +78,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         setSuggestedPackButton = Button.builder(SET_SUGGESTED_PACK_TEXT)
         { _: Button? ->
             selectedPack?.let {
-                SuggestedPack(it.name, it.version ?: "").let { newSuggestedPack ->
+                SuggestedPack(it.getFilePath().name).let { newSuggestedPack ->
                     suggestedPack = newSuggestedPack
                     TAMClient.setSuggestedPack(newSuggestedPack)
                 }
