@@ -78,7 +78,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         setSuggestedPackButton = Button.builder(SET_SUGGESTED_PACK_TEXT)
         { _: Button? ->
             selectedPack?.let {
-                SuggestedPack(it.getFilePath().name, false).let { newSuggestedPack ->
+                SuggestedPack(it.getFilePath().name).let { newSuggestedPack ->
                     suggestedPack = newSuggestedPack
                     TAMClient.setSuggestedPack(newSuggestedPack)
                 }
