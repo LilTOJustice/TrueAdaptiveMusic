@@ -187,7 +187,8 @@ object CombatPredicate: PredicateType<CombatPredicate.Arguments, CombatPredicate
     private fun handleEntity(entity: Entity, playerEntity: Player): Boolean {
         return entityAggressionHandlers[entity::class.starProjectedType]
             ?.invoke(entity, playerEntity)
-            ?: (entity is Monster)
+            ?: (entity as? Monster)?.isAggressive
+            ?: false
     }
 
     private fun isEnemyPlayer(player: Player, otherPlayer: Player): Boolean {
