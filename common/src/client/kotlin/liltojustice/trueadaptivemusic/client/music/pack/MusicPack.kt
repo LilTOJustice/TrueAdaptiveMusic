@@ -300,7 +300,7 @@ class MusicPack private constructor(
         val usedExtensions = getPackAssetNames()
             .mapNotNull { name -> Path(name).extension.takeIf { it.isNotBlank() } }
             .toSet()
-        if (usedExtensions.any { !TAMClient.allowedFileTypes.contains(it) }) {
+        if (usedExtensions.any { !TAMClient.allowedFileTypes.contains(it) && it != "DS_Store" }) {
             validation.addWarning(
                 Component.translatableWithFallback(
                     "trueadaptivemusic.filetype_warning",
