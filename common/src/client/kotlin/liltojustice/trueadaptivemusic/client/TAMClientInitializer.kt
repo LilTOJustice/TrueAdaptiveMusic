@@ -654,21 +654,14 @@ object TAMClientInitializer {
         val suggestedPack = TAMClient.getSuggestedPack() ?: return
         TAMClient.setSuggestedPack(suggestedPack)
 
-        if (Constants.MUSIC_PACK_DIR.listDirectoryEntries()
-            .any { it.name.contains(suggestedPack.name) && it.name.contains(suggestedPack.version) }) {
+        if (Constants.MUSIC_PACK_DIR.listDirectoryEntries().any { it.name == suggestedPack.name }) {
             return
         }
 
         suggestedPackDownloadCoroutineScope.launch {
             try {
                 val pack = extensions
-                    .packFetcher(true)
-                    ?.packs
-                    ?.firstOrNull {
-                        it.name == suggestedPack.name &&
-                                it.version?.let { version -> version == suggestedPack.version } ?: true
-                    }
-                    ?: return@launch
+                    .packFetcher(true)?.packs?.firstOrNull { it == suggestedPack } ?: return@launch
                 extensions.packDownloader(pack, Reference(0F))
                 TAMClient.musicPack = MusicPack.fromFile(pack.getFilePath())
             }
