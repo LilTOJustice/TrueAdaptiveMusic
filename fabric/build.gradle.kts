@@ -55,8 +55,8 @@ dependencies {
     include("org.javassist:javassist:3.33.0-GA")
 
     modApi("com.terraformersmc:modmenu:${project.property("modMenu_version")}")
-    modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric:${project.property("tam_api_version")}+${project.property("tam_api_mc_target")}")
-    include("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric:${project.property("tam_api_version")}+${project.property("tam_api_mc_target")}")
+    modApi("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
+    include("io.github.liltojustice:TrueAdaptiveMusicAPI-fabric-${project.property("tam_api_mc_target")}:${project.property("tam_api_version")}")
 }
 
 tasks.processResources {
