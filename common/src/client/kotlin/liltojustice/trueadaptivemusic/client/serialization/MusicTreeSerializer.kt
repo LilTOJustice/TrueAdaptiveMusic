@@ -33,7 +33,7 @@ object MusicTreeSerializer {
             json.getAsJsonPrimitive("version").asInt
         val toDeserialize = LegacyMusicTreeJsonConverter.convert(json, serializationVersion)
         val tree = getGson(soundLibrary).fromJson(toDeserialize, MusicTree::class.java)
-        tree.initializeParents()
+        tree.initialize(soundLibrary)
 
         return tree
     }
