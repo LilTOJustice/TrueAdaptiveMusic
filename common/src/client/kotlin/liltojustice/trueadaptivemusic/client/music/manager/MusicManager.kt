@@ -132,7 +132,6 @@ class MusicManager(private val minecraft: Minecraft) {
         val persistNodeMusic = (packOptions.persistentNodeMusic xor
                 (parameters.ignorePersistence || lastNodeParameters?.ignorePersistence == true)) && !loopMusic
 
-
         lastTickNodeParameters = parameters
 
         if (!compatibilityMode && lastCompatibilityMode) {
