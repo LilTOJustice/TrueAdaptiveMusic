@@ -4,11 +4,13 @@ import com.google.gson.JsonObject
 import liltojustice.trueadaptivemusic.Constants
 import liltojustice.trueadaptivemusic.client.Serialize
 import liltojustice.trueadaptivemusic.client.gui.extensions.getTriggerId
+import liltojustice.trueadaptivemusic.client.music.pack.MusicLoadException
 import liltojustice.trueadaptivemusic.client.serialization.MusicTreeSerializer
 import liltojustice.trueadaptivemusic.client.serialization.legacy.LegacyMusicTreeJsonConverter
 import liltojustice.trueadaptivemusic.client.sound.SoundLibrary
 import liltojustice.trueadaptivemusic.client.trigger.event.MusicEvent
 import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSound
+import liltojustice.trueadaptivemusic.client.sound.playable.PlayableSoundDirectory
 import kotlin.collections.plus
 import kotlin.collections.toList
 
@@ -20,11 +22,19 @@ class MusicTree {
     @Serialize
     private val root = MusicTreeNode.makeRoot()
 
+    private var initialized = false
+
+    private lateinit var soundLibrary: SoundLibrary
+
     fun toJson(): JsonObject {
         return MusicTreeSerializer.serialize(this)
     }
 
     fun getMusicToPlay(): Result {
+        if (!initialized) {
+            throw MusicLoadException("Music tree not initialized!")
+        }
+
         val result = root.getSatisfiedNode()
             ?: return Result(
                 Constants.ROOT_PREDICATE_NAME,
@@ -55,15 +65,18 @@ class MusicTree {
         return Result(
             result.path.joinToString(PATH_SEPARATOR),
             result.node.parameters,
-            result.music,
+            result.music.flatMap {
+                if (it is PlayableSoundDirectory) it.getInteriorSounds(soundLibrary) else listOf(it) },
             result.ambience,
             result.events.values.toList(),
             parallelMusic,
         )
     }
 
-    fun initializeParents() {
+    fun initialize(soundLibrary: SoundLibrary) {
         root.initializeParents()
+        this.soundLibrary = soundLibrary
+        initialized = true
     }
 
     fun traverse(preorderVisitor: NodeVisitor? = null, postorderVisitor: NodeVisitor? = null) {

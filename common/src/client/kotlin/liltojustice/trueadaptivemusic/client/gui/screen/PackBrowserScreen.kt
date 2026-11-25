@@ -20,6 +20,7 @@ import net.minecraft.util.CommonColors
 import net.minecraft.util.Util
 import java.util.Date
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.name
 
 class PackBrowserScreen(private val parent: Screen): Screen(
     Component.translatableWithFallback("trueadaptivemusic.music_pack_browser", "Music Pack Browser")) {
@@ -76,7 +77,7 @@ class PackBrowserScreen(private val parent: Screen): Screen(
         setSuggestedPackButton = Button.builder(SET_SUGGESTED_PACK_TEXT)
         { _: Button? ->
             selectedPack?.let {
-                SuggestedPack(it.name, it.version ?: "").let { newSuggestedPack ->
+                SuggestedPack(it.getFilePath().name).let { newSuggestedPack ->
                     suggestedPack = newSuggestedPack
                     TAMClient.setSuggestedPack(newSuggestedPack)
                 }
